@@ -1,0 +1,110 @@
+{
+  "session_id": "session_20251209_052547",
+  "profile": "strong",
+  "language": "python",
+  "timestamp": "2025-12-09T05:25:47.477359",
+  "questions": [
+    {
+      "question_id": "q1",
+      "question_text": "True or False: In Python, lists are mutable and tuples are immutable. Explain your answer and provide examples.",
+      "question_type": "true_false_with_explanation",
+      "topic": "python_fundamentals",
+      "responses": [
+        {
+          "type": "initial",
+          "response": "True. The key concepts here are mutable, immutable, list. From my experience, this is crucial for writing clean, maintainable code. I can provide specific examples if helpful.",
+          "score": 87.32
+        },
+        {
+          "type": "followup",
+          "followup_number": 1,
+          "followup_question": "You mentioned immutability is important for clean code. Can you explain a scenario where using a tuple instead of a list would specifically help prevent a bug or make your code easier to reason about?",
+          "response": "True. The key concepts here are mutable, immutable, list. This is a fundamental concept that I've applied in several projects. The important thing to understand is the behavior and edge cases.",
+          "score": 87.98
+        },
+        {
+          "type": "followup",
+          "followup_number": 2,
+          "followup_question": "You mentioned understanding the behavior and edge cases of mutability and immutability. Can you give me an example of a situation where using a tuple instead of a list would be particularly beneficial, and *why* that immutability is important in that scenario?",
+          "response": "True. The key concepts here are mutable, immutable, list. This is a fundamental concept that I've applied in several projects. The important thing to understand is the behavior and edge cases.",
+          "score": 87.98
+        }
+      ]
+    },
+    {
+      "question_id": "q2",
+      "question_text": "Can you use a for loop to iterate over a dictionary in Python? Yes or No. If yes, explain how. If no, explain why not.",
+      "question_type": "yes_no_with_explanation",
+      "topic": "python_control_flow",
+      "responses": [
+        {
+          "type": "initial",
+          "response": "Yes. The key concepts here are for loop, dictionary, iterate. From my experience, this is crucial for writing clean, maintainable code. I can provide specific examples if helpful.",
+          "score": 85.56
+        },
+        {
+          "type": "followup",
+          "followup_number": 1,
+          "followup_question": "You mentioned iterating over a dictionary with a for loop. When you do that, what exactly are you iterating over by default – is it the values, the keys, or something else?",
+          "response": "Yes. The key concepts here are for loop, dictionary, iterate. I've worked extensively with this in production systems and understand the underlying principles well.",
+          "score": 82.98
+        },
+        {
+          "type": "followup",
+          "followup_number": 2,
+          "followup_question": "You mentioned iterating over a dictionary with a for loop. When you do that, what exactly are you iterating over by default – what does the loop variable represent in that case?",
+          "response": "Yes. The key concepts here are for loop, dictionary, iterate. I've worked extensively with this in production systems and understand the underlying principles well.",
+          "score": 82.98
+        }
+      ]
+    },
+    {
+      "question_id": "q3",
+      "question_text": "Which of the following statements about Python decorators are correct? (Select all that apply)\nA) Decorators are functions that modify other functions\nB) Decorators can only be applied to functions\nC) The @ symbol is syntactic sugar for decorator application\nD) Decorators must return a function\n\nExplain why you selected your answer(s).",
+      "question_type": "multiple_choice_with_explanation",
+      "topic": "python_advanced",
+      "responses": [
+        {
+          "type": "initial",
+          "response": "A, C, D. The key concepts here are decorator, function, modify. From my experience, this is crucial for writing clean, maintainable code. I can provide specific examples if helpful.",
+          "score": 87.46
+        },
+        {
+          "type": "followup",
+          "followup_number": 1,
+          "followup_question": "You mentioned decorators help with writing clean, maintainable code. Python decorators rely heavily on what’s often called “syntactic sugar.” Could you explain what that means in the context of decorators, and how it simplifies things compared to how decorators are actually implemented under the hood?",
+          "response": "A, C, D. The key concepts here are decorator, function, modify. This is a fundamental concept that I've applied in several projects. The important thing to understand is the behavior and edge cases.",
+          "score": 88.05
+        },
+        {
+          "type": "followup",
+          "followup_number": 2,
+          "followup_question": "You mentioned understanding the behavior and edge cases of decorators is important. Decorators often involve a bit of syntactic sugar – can you explain what that means in the context of how Python handles decorators, and why it’s useful?",
+          "response": "A, C, D. The key concepts here are decorator, function, modify. This is a fundamental concept that I've applied in several projects. The important thing to understand is the behavior and edge cases.",
+          "score": 88.05
+        }
+      ]
+    }
+  ],
+  "summary_stats": {
+    "total_responses": 9,
+    "average_score": 86.48444444444445,
+    "score_trend": [
+      87.32,
+      87.98,
+      87.98,
+      85.56,
+      82.98,
+      82.98,
+      87.46,
+      88.05,
+      88.05
+    ],
+    "min_score": 82.98,
+    "max_score": 88.05
+  },
+  "final_summary": {
+    "session_id": "session_20251209_052547",
+    "completed": true
+  }
+}

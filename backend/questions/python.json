@@ -1,0 +1,143 @@
+{
+  "questions": [
+    {
+      "id": "q1",
+      "type": "true_false_with_explanation",
+      "text": "True or False: In Python, lists are mutable and tuples are immutable. Explain your answer and provide examples.",
+      "topic": "python_fundamentals",
+      "difficulty": "medium",
+      "deterministic_answer": {
+        "type": "boolean",
+        "correct_value": true,
+        "weight": 0.65
+      },
+      "expected_keywords": ["mutable", "immutable", "list", "tuple", "modification"],
+      "evaluation_rubric": {
+        "factual_correctness": {
+          "weight": 0.65,
+          "criteria": "True/False answer must be correct (binary: 0 or 100)"
+        },
+        "completeness": {
+          "weight": 0.15,
+          "criteria": "Should mention both lists and tuples, explain mutability concept"
+        },
+        "technical_accuracy": {
+          "weight": 0.10,
+          "criteria": "Technical details about mutability must be accurate"
+        },
+        "depth": {
+          "weight": 0.05,
+          "criteria": "Should provide examples demonstrating the concept"
+        },
+        "clarity": {
+          "weight": 0.05,
+          "criteria": "Explanation should be clear and well-structured"
+        }
+      }
+    },
+    {
+      "id": "q2",
+      "type": "yes_no_with_explanation",
+      "text": "Can you use a for loop to iterate over a dictionary in Python? Yes or No. If yes, explain how. If no, explain why not.",
+      "topic": "python_control_flow",
+      "difficulty": "easy",
+      "deterministic_answer": {
+        "type": "boolean",
+        "correct_value": true,
+        "weight": 0.65
+      },
+      "expected_keywords": ["for loop", "dictionary", "iterate", "keys", "values", "items"],
+      "evaluation_rubric": {
+        "factual_correctness": {
+          "weight": 0.65,
+          "criteria": "Yes/No must be correct"
+        },
+        "completeness": {
+          "weight": 0.15,
+          "criteria": "Should explain iteration methods"
+        },
+        "technical_accuracy": {
+          "weight": 0.10,
+          "criteria": "Technical explanation must be accurate"
+        },
+        "depth": {
+          "weight": 0.05,
+          "criteria": "Should mention keys(), values(), items()"
+        },
+        "clarity": {
+          "weight": 0.05,
+          "criteria": "Clear explanation"
+        }
+      }
+    },
+    {
+      "id": "q3",
+      "type": "multiple_choice_with_explanation",
+      "text": "Which of the following statements about Python decorators are correct? (Select all that apply)\nA) Decorators are functions that modify other functions\nB) Decorators can only be applied to functions\nC) The @ symbol is syntactic sugar for decorator application\nD) Decorators must return a function\n\nExplain why you selected your answer(s).",
+      "topic": "python_advanced",
+      "difficulty": "hard",
+      "deterministic_answer": {
+        "type": "multiple_choice",
+        "correct_options": ["A", "C", "D"],
+        "weight": 0.70
+      },
+      "expected_keywords": ["decorator", "function", "modify", "syntactic sugar", "@ symbol", "wrapper"],
+      "evaluation_rubric": {
+        "factual_correctness": {
+          "weight": 0.70,
+          "criteria": "Calculate: (correct_selected - incorrect_selected) / total_correct * 100. All correct options must be selected, no incorrect ones."
+        },
+        "completeness": {
+          "weight": 0.12,
+          "criteria": "Should explain each selected option"
+        },
+        "technical_accuracy": {
+          "weight": 0.10,
+          "criteria": "Technical details about decorators must be accurate"
+        },
+        "depth": {
+          "weight": 0.05,
+          "criteria": "Should explain why B is incorrect"
+        },
+        "clarity": {
+          "weight": 0.03,
+          "criteria": "Clear explanation"
+        }
+      }
+    },
+    {
+      "id": "q4",
+      "type": "open_ended",
+      "text": "Explain the difference between shallow copy and deep copy in Python. Provide examples.",
+      "topic": "python_memory_management",
+      "difficulty": "medium",
+      "deterministic_answer": {
+        "type": "concept_check",
+        "required_concepts": ["shallow copy", "deep copy", "reference", "nested objects"],
+        "weight": 0.30
+      },
+      "expected_keywords": ["copy", "shallow", "deep", "reference", "nested", "copy.copy", "copy.deepcopy"],
+      "evaluation_rubric": {
+        "completeness": {
+          "weight": 0.30,
+          "criteria": "Must explain both shallow and deep copy"
+        },
+        "technical_accuracy": {
+          "weight": 0.30,
+          "criteria": "Technical explanation must be accurate"
+        },
+        "depth": {
+          "weight": 0.20,
+          "criteria": "Should provide examples, explain nested object behavior"
+        },
+        "clarity": {
+          "weight": 0.20,
+          "criteria": "Clear, well-structured explanation"
+        }
+      }
+    }
+  ],
+  "topics": ["python_fundamentals", "python_control_flow", "python_advanced", "python_memory_management"],
+  "difficulty_levels": ["easy", "medium", "hard"]
+}
+

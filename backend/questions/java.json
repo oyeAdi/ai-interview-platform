@@ -1,0 +1,143 @@
+{
+  "questions": [
+    {
+      "id": "j1",
+      "type": "true_false_with_explanation",
+      "text": "True or False: In Java, String objects are immutable. Explain your answer and provide examples.",
+      "topic": "java_fundamentals",
+      "difficulty": "medium",
+      "deterministic_answer": {
+        "type": "boolean",
+        "correct_value": true,
+        "weight": 0.65
+      },
+      "expected_keywords": ["immutable", "String", "StringBuilder", "StringBuffer", "modification"],
+      "evaluation_rubric": {
+        "factual_correctness": {
+          "weight": 0.65,
+          "criteria": "True/False answer must be correct (binary: 0 or 100)"
+        },
+        "completeness": {
+          "weight": 0.15,
+          "criteria": "Should explain immutability and mention alternatives like StringBuilder"
+        },
+        "technical_accuracy": {
+          "weight": 0.10,
+          "criteria": "Technical details about String immutability must be accurate"
+        },
+        "depth": {
+          "weight": 0.05,
+          "criteria": "Should provide examples demonstrating the concept"
+        },
+        "clarity": {
+          "weight": 0.05,
+          "criteria": "Explanation should be clear and well-structured"
+        }
+      }
+    },
+    {
+      "id": "j2",
+      "type": "yes_no_with_explanation",
+      "text": "Can you use a for-each loop to iterate over a HashMap in Java? Yes or No. If yes, explain how. If no, explain why not.",
+      "topic": "java_control_flow",
+      "difficulty": "easy",
+      "deterministic_answer": {
+        "type": "boolean",
+        "correct_value": true,
+        "weight": 0.65
+      },
+      "expected_keywords": ["for-each", "HashMap", "entrySet", "keySet", "values", "iterate"],
+      "evaluation_rubric": {
+        "factual_correctness": {
+          "weight": 0.65,
+          "criteria": "Yes/No must be correct"
+        },
+        "completeness": {
+          "weight": 0.15,
+          "criteria": "Should explain iteration methods"
+        },
+        "technical_accuracy": {
+          "weight": 0.10,
+          "criteria": "Technical explanation must be accurate"
+        },
+        "depth": {
+          "weight": 0.05,
+          "criteria": "Should mention entrySet(), keySet(), values()"
+        },
+        "clarity": {
+          "weight": 0.05,
+          "criteria": "Clear explanation"
+        }
+      }
+    },
+    {
+      "id": "j3",
+      "type": "multiple_choice_with_explanation",
+      "text": "Which of the following statements about Java interfaces are correct? (Select all that apply)\nA) Interfaces can contain method implementations in Java 8+\nB) Interfaces can have instance variables\nC) A class can implement multiple interfaces\nD) Interfaces can be instantiated directly\n\nExplain why you selected your answer(s).",
+      "topic": "java_advanced",
+      "difficulty": "hard",
+      "deterministic_answer": {
+        "type": "multiple_choice",
+        "correct_options": ["A", "C"],
+        "weight": 0.70
+      },
+      "expected_keywords": ["interface", "default method", "static method", "implement", "multiple inheritance"],
+      "evaluation_rubric": {
+        "factual_correctness": {
+          "weight": 0.70,
+          "criteria": "Calculate: (correct_selected - incorrect_selected) / total_correct * 100. All correct options must be selected, no incorrect ones."
+        },
+        "completeness": {
+          "weight": 0.12,
+          "criteria": "Should explain each selected option"
+        },
+        "technical_accuracy": {
+          "weight": 0.10,
+          "criteria": "Technical details about interfaces must be accurate"
+        },
+        "depth": {
+          "weight": 0.05,
+          "criteria": "Should explain why B and D are incorrect"
+        },
+        "clarity": {
+          "weight": 0.03,
+          "criteria": "Clear explanation"
+        }
+      }
+    },
+    {
+      "id": "j4",
+      "type": "open_ended",
+      "text": "Explain the difference between checked and unchecked exceptions in Java. Provide examples.",
+      "topic": "java_exceptions",
+      "difficulty": "medium",
+      "deterministic_answer": {
+        "type": "concept_check",
+        "required_concepts": ["checked exception", "unchecked exception", "compile-time", "runtime", "throws"],
+        "weight": 0.30
+      },
+      "expected_keywords": ["exception", "checked", "unchecked", "RuntimeException", "IOException", "try-catch", "throws"],
+      "evaluation_rubric": {
+        "completeness": {
+          "weight": 0.30,
+          "criteria": "Must explain both checked and unchecked exceptions"
+        },
+        "technical_accuracy": {
+          "weight": 0.30,
+          "criteria": "Technical explanation must be accurate"
+        },
+        "depth": {
+          "weight": 0.20,
+          "criteria": "Should provide examples, explain when to use each"
+        },
+        "clarity": {
+          "weight": 0.20,
+          "criteria": "Clear, well-structured explanation"
+        }
+      }
+    }
+  ],
+  "topics": ["java_fundamentals", "java_control_flow", "java_advanced", "java_exceptions"],
+  "difficulty_levels": ["easy", "medium", "hard"]
+}
+

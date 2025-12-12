@@ -1,0 +1,110 @@
+{
+  "session_id": "session_20251209_052719",
+  "profile": "improving",
+  "language": "python",
+  "timestamp": "2025-12-09T05:27:19.909164",
+  "questions": [
+    {
+      "question_id": "q3",
+      "question_text": "Which of the following statements about Python decorators are correct? (Select all that apply)\nA) Decorators are functions that modify other functions\nB) Decorators can only be applied to functions\nC) The @ symbol is syntactic sugar for decorator application\nD) Decorators must return a function\n\nExplain why you selected your answer(s).",
+      "question_type": "multiple_choice_with_explanation",
+      "topic": "python_advanced",
+      "responses": [
+        {
+          "type": "initial",
+          "response": "I would say A... but I'm not entirely confident.",
+          "score": 25.42
+        },
+        {
+          "type": "followup",
+          "followup_number": 1,
+          "followup_question": "You mentioned decorators modify other functions – can you elaborate on *how* they do that, perhaps by describing what a decorator actually *is* under the hood?",
+          "response": "I think I understand better now. It relates to decorator. Am I on the right track?",
+          "score": 7.54
+        },
+        {
+          "type": "followup",
+          "followup_number": 2,
+          "followup_question": "You mentioned decorators modify other functions – could you explain what “function” means in the context of decorators? Are we talking about any callable, or is it more specific than that?",
+          "response": "After thinking about it, A, C, D are correct. I understand better now.",
+          "score": 73.35
+        }
+      ]
+    },
+    {
+      "question_id": "q2",
+      "question_text": "Can you use a for loop to iterate over a dictionary in Python? Yes or No. If yes, explain how. If no, explain why not.",
+      "question_type": "yes_no_with_explanation",
+      "topic": "python_control_flow",
+      "responses": [
+        {
+          "type": "initial",
+          "response": "False. Actually, let me think about this more...",
+          "score": 2.61
+        },
+        {
+          "type": "followup",
+          "followup_number": 1,
+          "followup_question": "You started to rethink your answer – what specifically made you hesitate, and what were you considering when you said you needed to think about it more?",
+          "response": "Actually, I realize the answer is True. for loop, dictionary makes this clear now.",
+          "score": 76.71
+        },
+        {
+          "type": "followup",
+          "followup_number": 2,
+          "followup_question": "When you say “iterate over a dictionary with a for loop”, what exactly is being iterated over – is it the keys, the values, or something else? Can you show me how you’d access those different parts within the loop?",
+          "response": "Actually, I realize the answer is True. for loop, dictionary makes this clear now.",
+          "score": 76.71
+        }
+      ]
+    },
+    {
+      "question_id": "q1",
+      "question_text": "True or False: In Python, lists are mutable and tuples are immutable. Explain your answer and provide examples.",
+      "question_type": "true_false_with_explanation",
+      "topic": "python_fundamentals",
+      "responses": [
+        {
+          "type": "initial",
+          "response": "False. Actually, let me think about this more...",
+          "score": 2.61
+        },
+        {
+          "type": "followup",
+          "followup_number": 1,
+          "followup_question": "You started to hesitate there – can you explain what it *means* for a data type to be mutable, and how that relates to whether you can change a list or a tuple after you’ve created it?",
+          "response": "Actually, I realize the answer is True. mutable, immutable makes this clear now.",
+          "score": 77.93
+        },
+        {
+          "type": "followup",
+          "followup_number": 2,
+          "followup_question": "You said mutable and immutable makes the answer clear now – can you elaborate on what “mutable” actually *means* when we’re talking about a list in Python, and how that differs from how a tuple behaves?",
+          "response": "Actually, I realize the answer is True. mutable, immutable makes this clear now.",
+          "score": 77.93
+        }
+      ]
+    }
+  ],
+  "summary_stats": {
+    "total_responses": 9,
+    "average_score": 46.75666666666667,
+    "score_trend": [
+      25.42,
+      7.54,
+      73.35,
+      2.61,
+      76.71,
+      76.71,
+      2.61,
+      77.93,
+      77.93
+    ],
+    "min_score": 2.61,
+    "max_score": 77.93
+  },
+  "final_summary": {
+    "session_id": "session_20251209_052719",
+    "completed": true
+  }
+}

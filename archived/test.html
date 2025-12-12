@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Space Navigation - Journey Through the Cosmos</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            font-family: 'Arial', sans-serif;
+            cursor: none;
+        }
+
+        #gameCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: radial-gradient(ellipse at bottom, #1B2735 0%, #090A0F 100%);
+            z-index: 1;
+        }
+
+        .ui-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .hud {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: white;
+            font-size: 24px;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.8), 0 0 20px rgba(0, 150, 255, 0.6);
+            z-index: 11;
+        }
+
+        .galaxy-counter {
+            font-size: 32px;
+            font-weight: bold;
+            color: #00D4FF;
+            text-shadow: 0 0 15px rgba(0, 212, 255, 0.9), 0 0 30px rgba(0, 212, 255, 0.5);
+        }
+
+        .distance {
+            font-size: 18px;
+            margin-top: 10px;
+            color: #FFD700;
+        }
+
+        .speed {
+            font-size: 18px;
+            margin-top: 5px;
+            color: #FF6B6B;
+        }
+
+        .start-screen, .game-over-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            color: white;
+            text-align: center;
+        }
+
+        .start-screen h1, .game-over-screen h1 {
+            font-size: 48px;
+            margin-bottom: 20px;
+            text-shadow: 0 0 20px rgba(0, 212, 255, 0.8), 0 0 40px rgba(0, 212, 255, 0.4);
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        .start-screen p, .game-over-screen p {
+            font-size: 20px;
+            margin-bottom: 30px;
+            color: #ccc;
+        }
+
+        .start-button, .restart-button {
+            padding: 15px 40px;
+            font-size: 20px;
+            background: linear-gradient(45deg, #00D4FF, #0099CC);
+            border: none;
+            border-radius: 30px;
+            color: white;
+            cursor: pointer;
+            pointer-events: auto;
+            text-transform: uppercase;
+            font-weight: bold;
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.5);
+            transition: all 0.3s ease;
+        }
+
+        .start-button:hover, .restart-button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 30px rgba(0, 212, 255, 0.8);
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .instructions {
+            margin-top: 20px;
+            font-size: 16px;
+            color: #888;
+            max-width: 600px;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+        }
+
+        .earth {
+            position: absolute;
+            bottom: -100px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, #4A90E2, #1E3A5F);
+            box-shadow: 0 0 50px rgba(74, 144, 226, 0.6), inset -20px -20px 50px rgba(0, 0, 0, 0.5);
+            z-index: 5;
+            transition: transform 0.1s ease;
+        }
+
+        .player {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: radial-gradient(circle, #FFD700, #FFA500);
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.8), 0 0 40px rgba(255, 215, 0, 0.4);
+            z-index: 20;
+            pointer-events: none;
+            transition: transform 0.1s ease;
+        }
+
+        .player::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 15px;
+            height: 15px;
+            background: white;
+            border-radius: 50%;
+            opacity: 0.8;
+        }
+
+        .debris {
+            position: absolute;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #666, #333);
+            box-shadow: 0 0 10px rgba(255, 0, 0, 0.5), inset -5px -5px 10px rgba(0, 0, 0, 0.8);
+            z-index: 15;
+        }
+
+        .galaxy {
+            position: absolute;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(138, 43, 226, 0.6), rgba(75, 0, 130, 0.3));
+            box-shadow: 0 0 30px rgba(138, 43, 226, 0.8), 0 0 60px rgba(138, 43, 226, 0.4);
+            z-index: 8;
+            animation: galaxyGlow 3s ease-in-out infinite;
+        }
+
+        @keyframes galaxyGlow {
+            0%, 100% {
+                opacity: 0.6;
+                transform: scale(1);
+            }
+            50% {
+                opacity: 1;
+                transform: scale(1.1);
+            }
+        }
+
+        .star {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: white;
+            border-radius: 50%;
+            box-shadow: 0 0 4px white;
+        }
+
+        .explosion {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: radial-gradient(circle, #FF6B6B, #FF0000, transparent);
+            animation: explode 0.5s ease-out forwards;
+            z-index: 25;
+        }
+
+        @keyframes explode {
+            0% {
+                transform: scale(0);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(3);
+                opacity: 0;
+            }
+        }
+
+        .trail {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: radial-gradient(circle, rgba(255, 215, 0, 0.8), transparent);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 19;
+        }
+    </style>
+</head>
+
+<body>
+    <canvas id="gameCanvas"></canvas>
+    
+    <div class="ui-overlay">
+        <div class="hud">
+            <div class="galaxy-counter">Galaxies: <span id="galaxyCount">0</span></div>
+            <div class="distance">Distance: <span id="distance">0</span> light-years</div>
+            <div class="speed">Speed: <span id="speed">0</span> km/s</div>
+        </div>
+    </div>
+
+    <div class="start-screen" id="startScreen">
+        <h1>🚀 Space Navigation</h1>
+        <p>Navigate through space debris and explore the cosmos!</p>
+        <p>Move your mouse to control your spacecraft</p>
+        <button class="start-button" onclick="startGame()">Launch from Earth</button>
+        <div class="instructions">
+            <p>• Avoid the red space debris</p>
+            <p>• Pass through purple galaxies to increase your score</p>
+            <p>• Travel as far as possible!</p>
+        </div>
+    </div>
+
+    <div class="game-over-screen hidden" id="gameOverScreen">
+        <h1>Mission Failed</h1>
+        <p>You traveled <span id="finalDistance">0</span> light-years</p>
+        <p>You passed <span id="finalGalaxies">0</span> galaxies</p>
+        <button class="restart-button" onclick="restartGame()">Try Again</button>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const startScreen = document.getElementById('startScreen');
+        const gameOverScreen = document.getElementById('gameOverScreen');
+
+        // Set canvas size
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        // Game state
+        let gameState = {
+            isPlaying: false,
+            isGameOver: false,
+            playerX: 0,
+            playerY: 0,
+            scrollY: 0,
+            galaxies: 0,
+            distance: 0,
+            speed: 0,
+            debris: [],
+            galaxiesList: [],
+            stars: [],
+            trails: [],
+            lastDebrisSpawn: 0,
+            lastGalaxySpawn: 0,
+            earthY: 0,
+            gameStartTime: 0
+        };
+
+        // Initialize stars
+        function initStars() {
+            gameState.stars = [];
+            for (let i = 0; i < 200; i++) {
+                gameState.stars.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    size: Math.random() * 2 + 1,
+                    brightness: Math.random()
+                });
+            }
+        }
+
+        // Create debris
+        function createDebris() {
+            const size = Math.random() * 30 + 15;
+            return {
+                x: Math.random() * canvas.width,
+                y: -size,
+                size: size,
+                speed: Math.random() * 3 + 2 + gameState.speed * 0.1
+            };
+        }
+
+        // Create galaxy
+        function createGalaxy() {
+            const size = Math.random() * 80 + 60;
+            return {
+                x: Math.random() * canvas.width,
+                y: -size,
+                size: size,
+                speed: Math.random() * 2 + 1 + gameState.speed * 0.1,
+                passed: false
+            };
+        }
+
+        // Check collision
+        function checkCollision(px, py, obj) {
+            const dx = px - obj.x;
+            const dy = py - obj.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            return distance < (15 + obj.size / 2);
+        }
+
+        // Create explosion
+        function createExplosion(x, y) {
+            const explosion = document.createElement('div');
+            explosion.className = 'explosion';
+            explosion.style.left = (x - 25) + 'px';
+            explosion.style.top = (y - 25) + 'px';
+            document.body.appendChild(explosion);
+            setTimeout(() => explosion.remove(), 500);
+        }
+
+        // Draw Earth
+        function drawEarth() {
+            const earthY = canvas.height - 100 - gameState.scrollY;
+            if (earthY > -200 && earthY < canvas.height + 200) {
+                ctx.save();
+                ctx.beginPath();
+                ctx.arc(canvas.width / 2, earthY, 100, 0, Math.PI * 2);
+                const gradient = ctx.createRadialGradient(
+                    canvas.width / 2 - 30, earthY - 30, 0,
+                    canvas.width / 2, earthY, 100
+                );
+                gradient.addColorStop(0, '#4A90E2');
+                gradient.addColorStop(1, '#1E3A5F');
+                ctx.fillStyle = gradient;
+                ctx.fill();
+                ctx.shadowBlur = 30;
+                ctx.shadowColor = 'rgba(74, 144, 226, 0.6)';
+                ctx.fill();
+                ctx.restore();
+            }
+        }
+
+        // Draw stars
+        function drawStars() {
+            ctx.fillStyle = 'white';
+            gameState.stars.forEach(star => {
+                const y = (star.y - gameState.scrollY * 0.5) % canvas.height;
+                if (y < 0) star.y += canvas.height;
+                ctx.globalAlpha = star.brightness;
+                ctx.beginPath();
+                ctx.arc(star.x, y, star.size, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.shadowBlur = 4;
+                ctx.shadowColor = 'white';
+                ctx.fill();
+            });
+            ctx.globalAlpha = 1;
+            ctx.shadowBlur = 0;
+        }
+
+        // Draw player
+        function drawPlayer() {
+            ctx.save();
+            ctx.beginPath();
+            ctx.arc(gameState.playerX, gameState.playerY, 15, 0, Math.PI * 2);
+            const gradient = ctx.createRadialGradient(
+                gameState.playerX, gameState.playerY, 0,
+                gameState.playerX, gameState.playerY, 15
+            );
+            gradient.addColorStop(0, '#FFD700');
+            gradient.addColorStop(1, '#FFA500');
+            ctx.fillStyle = gradient;
+            ctx.fill();
+            ctx.shadowBlur = 20;
+            ctx.shadowColor = 'rgba(255, 215, 0, 0.8)';
+            ctx.fill();
+            
+            // Inner glow
+            ctx.beginPath();
+            ctx.arc(gameState.playerX, gameState.playerY, 7, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+            ctx.fill();
+            ctx.restore();
+        }
+
+        // Draw debris
+        function drawDebris() {
+            gameState.debris.forEach(debris => {
+                ctx.save();
+                ctx.beginPath();
+                ctx.arc(debris.x, debris.y, debris.size / 2, 0, Math.PI * 2);
+                const gradient = ctx.createLinearGradient(
+                    debris.x - debris.size / 2, debris.y - debris.size / 2,
+                    debris.x + debris.size / 2, debris.y + debris.size / 2
+                );
+                gradient.addColorStop(0, '#666');
+                gradient.addColorStop(1, '#333');
+                ctx.fillStyle = gradient;
+                ctx.fill();
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = 'rgba(255, 0, 0, 0.5)';
+                ctx.fill();
+                ctx.restore();
+            });
+        }
+
+        // Draw galaxies
+        function drawGalaxies() {
+            gameState.galaxiesList.forEach(galaxy => {
+                ctx.save();
+                ctx.beginPath();
+                ctx.arc(galaxy.x, galaxy.y, galaxy.size / 2, 0, Math.PI * 2);
+                const gradient = ctx.createRadialGradient(
+                    galaxy.x, galaxy.y, 0,
+                    galaxy.x, galaxy.y, galaxy.size / 2
+                );
+                gradient.addColorStop(0, 'rgba(138, 43, 226, 0.8)');
+                gradient.addColorStop(0.5, 'rgba(75, 0, 130, 0.5)');
+                gradient.addColorStop(1, 'rgba(75, 0, 130, 0.2)');
+                ctx.fillStyle = gradient;
+                ctx.fill();
+                ctx.shadowBlur = 30;
+                ctx.shadowColor = 'rgba(138, 43, 226, 0.8)';
+                ctx.fill();
+                ctx.restore();
+            });
+        }
+
+        // Game loop
+        function gameLoop() {
+            if (!gameState.isPlaying || gameState.isGameOver) return;
+
+            // Clear canvas
+            ctx.fillStyle = '#090A0F';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Draw stars
+            drawStars();
+
+            // Update scroll
+            gameState.scrollY += gameState.speed;
+            gameState.distance = Math.floor(gameState.scrollY / 10);
+            gameState.speed = Math.min(5 + gameState.distance / 100, 15);
+
+            // Draw Earth
+            drawEarth();
+
+            // Spawn debris
+            if (Date.now() - gameState.lastDebrisSpawn > 800 - gameState.distance * 0.5) {
+                gameState.debris.push(createDebris());
+                gameState.lastDebrisSpawn = Date.now();
+            }
+
+            // Spawn galaxies
+            if (Date.now() - gameState.lastGalaxySpawn > 3000) {
+                gameState.galaxiesList.push(createGalaxy());
+                gameState.lastGalaxySpawn = Date.now();
+            }
+
+            // Update debris
+            gameState.debris = gameState.debris.filter(debris => {
+                debris.y += debris.speed;
+                
+                // Check collision
+                if (checkCollision(gameState.playerX, gameState.playerY, debris)) {
+                    createExplosion(gameState.playerX, gameState.playerY);
+                    gameOver();
+                    return false;
+                }
+                
+                return debris.y < canvas.height + 100;
+            });
+
+            // Update galaxies
+            gameState.galaxiesList = gameState.galaxiesList.filter(galaxy => {
+                galaxy.y += galaxy.speed;
+                
+                // Check if passed through
+                if (!galaxy.passed && 
+                    gameState.playerY < galaxy.y + galaxy.size / 2 &&
+                    gameState.playerY > galaxy.y - galaxy.size / 2 &&
+                    Math.abs(gameState.playerX - galaxy.x) < galaxy.size / 2) {
+                    galaxy.passed = true;
+                    gameState.galaxies++;
+                    document.getElementById('galaxyCount').textContent = gameState.galaxies;
+                }
+                
+                return galaxy.y < canvas.height + 100;
+            });
+
+            // Draw galaxies
+            drawGalaxies();
+
+            // Draw debris
+            drawDebris();
+
+            // Draw player
+            drawPlayer();
+
+            // Update UI
+            document.getElementById('distance').textContent = gameState.distance;
+            document.getElementById('speed').textContent = Math.floor(gameState.speed * 100);
+
+            requestAnimationFrame(gameLoop);
+        }
+
+        // Mouse movement
+        document.addEventListener('mousemove', (e) => {
+            if (gameState.isPlaying && !gameState.isGameOver) {
+                gameState.playerX = e.clientX;
+                gameState.playerY = e.clientY;
+            }
+        });
+
+        // Start game
+        function startGame() {
+            startScreen.classList.add('hidden');
+            gameState.isPlaying = true;
+            gameState.isGameOver = false;
+            gameState.playerX = canvas.width / 2;
+            gameState.playerY = canvas.height - 150;
+            gameState.scrollY = 0;
+            gameState.galaxies = 0;
+            gameState.distance = 0;
+            gameState.speed = 2;
+            gameState.debris = [];
+            gameState.galaxiesList = [];
+            gameState.lastDebrisSpawn = Date.now();
+            gameState.lastGalaxySpawn = Date.now();
+            gameState.gameStartTime = Date.now();
+            
+            initStars();
+            gameLoop();
+        }
+
+        // Game over
+        function gameOver() {
+            gameState.isGameOver = true;
+            gameState.isPlaying = false;
+            document.getElementById('finalDistance').textContent = gameState.distance;
+            document.getElementById('finalGalaxies').textContent = gameState.galaxies;
+            setTimeout(() => {
+                gameOverScreen.classList.remove('hidden');
+            }, 1000);
+        }
+
+        // Restart game
+        function restartGame() {
+            gameOverScreen.classList.add('hidden');
+            startGame();
+        }
+
+        // Initialize
+        initStars();
+    </script>
+</body>
+
+</html>

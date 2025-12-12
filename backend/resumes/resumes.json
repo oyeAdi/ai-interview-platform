@@ -1,0 +1,27 @@
+{
+  "resumes": [
+    {
+      "id": "resume1",
+      "name": "John Smith - Python Developer",
+      "text": "John Smith\nSenior Python Developer\nEmail: john.smith@email.com | Phone: +1-234-567-8900\n\nPROFESSIONAL SUMMARY\nExperienced Python developer with 6 years of expertise in building scalable web applications. Strong background in Python fundamentals, data structures, and advanced concepts including decorators, generators, and memory management. Proficient in Django and Flask frameworks.\n\nTECHNICAL SKILLS\n- Python (Advanced)\n- Django, Flask\n- RESTful APIs\n- PostgreSQL, MySQL\n- Docker, AWS\n- Git, CI/CD\n\nEXPERIENCE\nSenior Python Developer | Tech Solutions Inc. | 2020 - Present\n- Developed and maintained Python-based web applications using Django\n- Implemented RESTful APIs and microservices architecture\n- Optimized database queries and improved application performance\n- Worked with decorators, generators, and advanced Python features\n\nPython Developer | StartupXYZ | 2018 - 2020\n- Built web applications using Flask framework\n- Implemented data processing pipelines\n- Collaborated on memory management and optimization projects\n\nEDUCATION\nBachelor of Science in Computer Science | University ABC | 2018",
+      "language": "python",
+      "matches_jd": ["jd1"]
+    },
+    {
+      "id": "resume2",
+      "name": "Sarah Johnson - Java Engineer",
+      "text": "Sarah Johnson\nJava Backend Engineer\nEmail: sarah.johnson@email.com | Phone: +1-234-567-8901\n\nPROFESSIONAL SUMMARY\nJava backend engineer with 5 years of experience in enterprise application development. Expertise in Java fundamentals, Spring framework, and building scalable backend systems. Strong understanding of object-oriented programming, exception handling, and Java collections.\n\nTECHNICAL SKILLS\n- Java (Advanced)\n- Spring Boot, Spring Framework\n- Hibernate, JPA\n- MySQL, PostgreSQL\n- Microservices Architecture\n- Docker, Kubernetes\n\nEXPERIENCE\nJava Backend Engineer | Enterprise Solutions | 2019 - Present\n- Developed RESTful APIs using Spring Boot\n- Implemented microservices architecture\n- Worked with Java collections, multithreading, and concurrency\n- Designed and optimized database schemas\n\nJunior Java Developer | TechCorp | 2017 - 2019\n- Built Java applications using Spring Framework\n- Implemented exception handling and error management\n- Worked with design patterns and best practices\n\nEDUCATION\nBachelor of Science in Software Engineering | University XYZ | 2017",
+      "language": "java",
+      "matches_jd": ["jd2"]
+    },
+    {
+      "id": "resume3",
+      "name": "Michael Chen - Full Stack Developer",
+      "text": "Michael Chen\nFull Stack Developer\nEmail: michael.chen@email.com | Phone: +1-234-567-8902\n\nPROFESSIONAL SUMMARY\nFull stack developer with expertise in Python backend and modern frontend technologies. 4 years of experience building end-to-end web applications. Strong knowledge of Python web frameworks, REST APIs, and React.\n\nTECHNICAL SKILLS\n- Python, Django, Flask\n- JavaScript, React, Vue.js\n- RESTful APIs\n- PostgreSQL, MongoDB\n- Docker, AWS\n- Git, Agile\n\nEXPERIENCE\nFull Stack Developer | Digital Innovations | 2020 - Present\n- Developed full stack applications using Python (Django) and React\n- Built and maintained RESTful APIs\n- Implemented responsive frontend interfaces\n- Deployed applications on cloud platforms\n\nSoftware Developer | WebStart | 2018 - 2020\n- Built web applications using Python and JavaScript\n- Worked on both backend and frontend development\n- Collaborated on database design and API development\n\nEDUCATION\nBachelor of Science in Computer Science | Tech University | 2018",
+      "language": "python",
+      "matches_jd": ["jd1"]
+    }
+  ]
+}
+
+
