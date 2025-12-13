@@ -272,7 +272,7 @@ export default function CandidateView({ sessionId, language }: CandidateViewProp
               </h2>
               {isFollowup && (
                 <p className="text-sm text-[#00E5FF] mt-1">
-                  Follow-up {followupNumber} of {progress.max_followups}
+                  Follow-up Question
                 </p>
               )}
             </div>
@@ -308,17 +308,12 @@ export default function CandidateView({ sessionId, language }: CandidateViewProp
                     i + 1
                   )}
                 </div>
-                {/* Follow-up dots */}
-                <div className="flex gap-1 mt-2">
-                  {Array.from({ length: progress.max_followups }).map((_, j) => (
-                    <div key={j} className={`w-1.5 h-1.5 transition-all ${
-                      i < progress.rounds_completed 
-                        ? 'bg-[#00E5FF]' 
-                        : i === progress.rounds_completed && j < progress.current_followup 
-                          ? 'bg-[#00E5FF]' 
-                          : 'bg-[#2A2A2A]'
-                    }`} />
-                  ))}
+                {/* Simple completion indicator - no follow-up counts for candidates */}
+                <div className="w-full h-1 bg-[#2A2A2A] mt-2">
+                  <div className={`h-full bg-[#00E5FF] transition-all ${
+                    i < progress.rounds_completed ? 'w-full' : 
+                    i === progress.rounds_completed ? 'w-1/2 animate-pulse' : 'w-0'
+                  }`} />
                 </div>
               </div>
             ))}
@@ -334,7 +329,7 @@ export default function CandidateView({ sessionId, language }: CandidateViewProp
                   ? 'bg-purple-500/20 text-purple-400' 
                   : 'bg-[#00E5FF]/20 text-[#00E5FF]'
               }`}>
-                {isFollowup ? `Follow-up ${followupNumber}` : `Question ${questionNumber}`}
+                {isFollowup ? 'Follow-up Question' : `Question ${questionNumber}`}
               </span>
               {questionType && (
                 <span className="text-xs text-gray-500 capitalize">{questionType.replace(/_/g, ' ')}</span>

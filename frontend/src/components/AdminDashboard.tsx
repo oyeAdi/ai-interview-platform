@@ -34,7 +34,9 @@ export default function AdminDashboard({ sessionId, language }: AdminDashboardPr
     total_rounds: 3, 
     percentage: 0, 
     current_followup: 0,
-    max_followups: 2 
+    max_followups: 10,  // Updated from 2 to 10
+    followup_stop_reason: null as string | null,
+    followup_confidence: 0
   })
   const [connectionStatus, setConnectionStatus] = useState<'connecting' | 'connected' | 'disconnected'>('connecting')
   const [responseHistory, setResponseHistory] = useState<any[]>([])
@@ -307,17 +309,31 @@ export default function AdminDashboard({ sessionId, language }: AdminDashboardPr
                     i + 1
                   )}
                 </div>
-                {/* Follow-up dots (2 per question) */}
-                <div className="flex gap-1 mt-2">
-                  {Array.from({ length: progress.max_followups || 2 }).map((_, j) => (
-                    <div key={j} className={`w-2 h-2 rounded-full transition-all ${
-                      i < progress.rounds_completed 
-                        ? 'bg-[#39FF14]' 
-                        : i === progress.rounds_completed && j < progress.current_followup 
+                {/* Follow-up progress bar (shows count out of max 10) */}
+                <div className="mt-2">
+                  <div className="w-full h-1.5 bg-gray-700 rounded-full overflow-hidden">
+                    <div 
+                      className={`h-full transition-all ${
+                        i < progress.rounds_completed 
                           ? 'bg-[#39FF14]' 
-                          : 'bg-gray-700'
-                    }`} />
-                  ))}
+                          : i === progress.rounds_completed 
+                            ? 'bg-[#00E5FF]' 
+                            : 'bg-gray-600'
+                      }`}
+                      style={{ 
+                        width: i < progress.rounds_completed 
+                          ? '100%' 
+                          : i === progress.rounds_completed 
+                            ? `${(progress.current_followup / (progress.max_followups || 10)) * 100}%`
+                            : '0%'
+                      }}
+                    />
+                  </div>
+                  {i === progress.rounds_completed && progress.current_followup > 0 && (
+                    <div className="text-[10px] text-gray-400 mt-0.5">
+                      Follow-up {progress.current_followup}/{progress.max_followups || 10}
+                    </div>
+                  )}
                 </div>
               </div>
             ))}
@@ -328,10 +344,39 @@ export default function AdminDashboard({ sessionId, language }: AdminDashboardPr
         <div className="bg-[#141414] rounded-2xl border border-gray-800/50 overflow-hidden">
           <div className="bg-[#39FF14]/5 px-5 py-3 border-b border-gray-800/50 flex items-center justify-between">
             <h3 className="text-sm font-semibold text-[#39FF14]">Candidate View</h3>
-            <span className="px-2 py-1 bg-[#39FF14]/20 text-[#39FF14] text-xs font-mono rounded-full font-bold">
-              {getQuestionLabel()}
-            </span>
+            <div className="flex items-center gap-2">
+              <span className="px-2 py-1 bg-[#39FF14]/20 text-[#39FF14] text-xs font-mono rounded-full font-bold">
+                {getQuestionLabel()}
+              </span>
+              {/* Follow-up counter (Admin only) */}
+              {currentQuestion?.isFollowup && (
+                <span className="px-2 py-1 bg-purple-500/20 text-purple-400 text-xs font-mono rounded-full">
+                  F{progress.current_followup}/{progress.max_followups}
+                </span>
+              )}
+            </div>
           </div>
+          
+          {/* Follow-up Decision Metrics (Admin only) */}
+          {progress.followup_stop_reason && (
+            <div className="mx-5 mt-3 px-3 py-2 bg-gray-800/50 border border-gray-700/50">
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-gray-400">AI Decision:</span>
+                <span className={`font-medium ${
+                  progress.followup_stop_reason === 'sufficient_skill' ? 'text-green-400' :
+                  progress.followup_stop_reason === 'no_knowledge' ? 'text-red-400' :
+                  progress.followup_stop_reason === 'partial_continue' ? 'text-yellow-400' :
+                  'text-gray-400'
+                }`}>
+                  {progress.followup_stop_reason?.replace(/_/g, ' ')}
+                </span>
+                <span className="text-gray-500">
+                  ({Math.round((progress.followup_confidence || 0) * 100)}% conf)
+                </span>
+              </div>
+            </div>
+          )}
+          
           <div className="p-5 space-y-4">
             {/* Question */}
             <div>

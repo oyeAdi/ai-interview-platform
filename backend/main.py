@@ -71,6 +71,49 @@ QUESTION_BANK_FILE = os.path.join(MODELS_DIR, "question_bank.json")
 WIKI_FILE = os.path.join(MODELS_DIR, "wiki.json")
 SESSIONS_FILE = os.path.join(MODELS_DIR, "interview_sessions.json")
 RESULTS_FILE = os.path.join(MODELS_DIR, "interview_results.json")
+CANDIDATE_RESULTS_DIR = os.path.join(os.path.dirname(__file__), "candidate_results")
+
+# Schema version for candidate result files
+RESULT_SCHEMA_VERSION = "1.0"
+
+def get_candidate_filename(name: str) -> str:
+    """Sanitize candidate name for use as filename"""
+    # Replace spaces with underscores, remove special characters
+    import re
+    sanitized = re.sub(r'[^\w\s-]', '', name.lower())
+    sanitized = re.sub(r'[-\s]+', '_', sanitized)
+    return f"{sanitized}_result.json"
+
+def save_candidate_result(candidate_name: str, candidate_id: str, result: dict):
+    """Save result to per-candidate file, merging with existing data"""
+    # Ensure directory exists
+    os.makedirs(CANDIDATE_RESULTS_DIR, exist_ok=True)
+    
+    filename = get_candidate_filename(candidate_name)
+    filepath = os.path.join(CANDIDATE_RESULTS_DIR, filename)
+    
+    # Load existing data or create new
+    if os.path.exists(filepath):
+        with open(filepath, 'r', encoding='utf-8') as f:
+            candidate_data = json.load(f)
+    else:
+        candidate_data = {
+            "schema_version": RESULT_SCHEMA_VERSION,
+            "candidate": {
+                "id": candidate_id,
+                "name": candidate_name
+            },
+            "interviews": []
+        }
+    
+    # Add new interview result
+    candidate_data["interviews"].append(result)
+    
+    # Save updated file
+    with open(filepath, 'w', encoding='utf-8') as f:
+        json.dump(candidate_data, f, indent=2, ensure_ascii=False)
+    
+    return filepath
 
 # CORS middleware
 app.add_middleware(
@@ -890,8 +933,9 @@ async def websocket_endpoint(websocket: WebSocket, view: str = "candidate"):
                     await message_handler.send_progress(controller.get_progress())
                 # Normal mode: send follow-up directly
                 elif result.get("followup"):
-                    await message_handler.send_followup(result["followup"])
-                    await message_handler.send_progress(controller.get_progress())
+                    progress = controller.get_progress()
+                    await message_handler.send_followup(result["followup"], progress)
+                    await message_handler.send_progress(progress)
                 else:
                     # No more follow-ups, complete round
                     controller.complete_round()
@@ -1805,6 +1849,16 @@ async def end_interview(session_id: str, request: EndInterviewRequest):
             # Generate AI feedback for this question
             ai_feedback = generate_question_feedback(question_text, candidate_answer, evaluation)
             
+            # Extract followup responses
+            followup_responses = [r for r in responses[1:] if r.get("response_type") == "followup"]
+            followup_count = len(followup_responses)
+            
+            # Get stop reason from last response if available
+            last_response = responses[-1] if responses else {}
+            followup_stop_reason = q_data.get("followup_stop_reason", 
+                "max_reached" if followup_count >= 10 else "completed")
+            followup_confidence = q_data.get("followup_confidence", 1.0)
+            
             question_results.append({
                 "question_id": q_data.get("question_id", ""),
                 "question_text": question_text,
@@ -1816,13 +1870,16 @@ async def end_interview(session_id: str, request: EndInterviewRequest):
                     "combined_score": overall_score
                 },
                 "ai_feedback": ai_feedback,
+                "followup_count": followup_count,
+                "followup_stop_reason": followup_stop_reason,
+                "followup_confidence": followup_confidence,
                 "followups": [
                     {
                         "question": r.get("followup_question", ""),
                         "answer": r.get("candidate_response", ""),
                         "score": r.get("evaluation", {}).get("overall_score", 0)
                     }
-                    for r in responses[1:] if r.get("response_type") == "followup"
+                    for r in followup_responses
                 ]
             })
     
@@ -1863,6 +1920,17 @@ async def end_interview(session_id: str, request: EndInterviewRequest):
             "topics_covered": list(topics_covered)
         },
         "question_results": question_results,
+        "followup_metrics": {
+            "total_followups_asked": sum(q.get("followup_count", 0) for q in question_results),
+            "per_question": {
+                f"q{i+1}": {
+                    "count": q.get("followup_count", 0),
+                    "stopped_reason": q.get("followup_stop_reason", "completed"),
+                    "confidence": q.get("followup_confidence", 1.0)
+                }
+                for i, q in enumerate(question_results)
+            }
+        },
         "admin_feedback": {
             "overall_notes": "",
             "question_notes": {},
@@ -1877,12 +1945,17 @@ async def end_interview(session_id: str, request: EndInterviewRequest):
         }
     }
     
-    # Save result
+    # Save result to main results file
     results_data = load_json_file(RESULTS_FILE)
     if "results" not in results_data:
         results_data["results"] = {}
     results_data["results"][result_id] = result
     save_json_file(RESULTS_FILE, results_data)
+    
+    # Also save to per-candidate file
+    candidate_name = session.get("candidate_name", "Unknown")
+    candidate_id = session.get("candidate_id", "")
+    save_candidate_result(candidate_name, candidate_id, result)
     
     return {
         "status": "completed",

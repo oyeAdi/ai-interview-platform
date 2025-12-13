@@ -1,6 +1,6 @@
 """Gemini API client for LLM operations"""
 import google.generativeai as genai
-from typing import Dict, Optional
+from typing import Dict, Optional, List
 from backend.config import Config
 
 class GeminiClient:
@@ -125,25 +125,38 @@ Respond with ONLY one word: either "Java" or "Python".
             expert_examples_section = ""
         
         # Build a concise prompt with expert examples for few-shot learning
-        prompt = f"""Generate a natural follow-up question for a technical interview.
+        # TONE: Natural, friendly, professional with light sugar-coating
+        prompt = f"""You are a friendly, professional technical interviewer conducting a conversational technical assessment.
+
+Generate a natural follow-up question based on what the candidate just said.
 
 Question: {question.get("text", "")[:200]}
-Response: {response[:300]}
+Candidate's Response: {response[:400]}
 Score: {evaluation.get("overall_score", 0)}/100
 
-Focus: {strategy_intent[:150]}
+Focus area: {strategy_intent[:150]}
 
-Rules:
-- Generate ONLY a natural question (like a real interviewer)
-- DO NOT include "Ask about", "Explore", or meta-instructions
-- Be specific and reference what the candidate said
+CRITICAL RULES for tone and naturalness:
+1. Start with a brief, warm acknowledgment of what the candidate said (e.g., "That's a great point about...", "I see what you mean...", "Interesting approach!")
+2. Use conversational, encouraging language - never cold or robotic
+3. Reference something SPECIFIC from their answer to show you're listening
+4. Naturally transition into probing deeper on a related point
+5. Maintain a professional yet supportive tone
+
 {expert_examples_section}
-Default Examples (if no expert examples above):
-- "Can you walk me through a specific example where you've used this?"
-- "What would happen if you modified the dictionary while iterating?"
-- "How does this compare to using list comprehensions?"
+GOOD Examples (natural, conversational, references their answer):
+- "That's a great point about using generators! I'm curious - how would you handle a scenario where the data doesn't fit in memory?"
+- "I appreciate you walking through that. When you mentioned using a dictionary, what would happen if you needed to modify it while iterating?"
+- "Interesting approach with the try-except block! What other edge cases might we need to consider there?"
+- "I like how you structured that. Can you tell me more about how you'd test this in a production environment?"
 
-Generate ONLY the question text, nothing else.
+BAD Examples (avoid these - too cold, generic, or robotic):
+- "Explain more about X."
+- "What about error handling?"
+- "Tell me about performance."
+- "Can you elaborate?"
+
+Generate ONLY the follow-up question (including the warm acknowledgment). Nothing else.
 """
         
         try:
@@ -258,25 +271,179 @@ Generate ONLY the question text, nothing else.
             else:
                 return "Can you elaborate on that with a specific example?"
     
+    def should_continue_followup(
+        self,
+        question: str,
+        response: str,
+        evaluation: Dict,
+        followup_count: int,
+        experience_level: str = "mid"
+    ) -> Dict:
+        """
+        Determine if the AI should continue asking follow-up questions.
+        
+        Returns:
+        {
+            "continue": True/False,
+            "reason": "sufficient_skill" | "no_knowledge" | "partial_continue" | "max_reached",
+            "confidence": 0.0-1.0
+        }
+        """
+        # Quick check: max reached
+        if followup_count >= 10:
+            return {"continue": False, "reason": "max_reached", "confidence": 1.0}
+        
+        # Get score from evaluation
+        overall_score = evaluation.get("overall_score", 50)
+        
+        # Build prompt for AI decision
+        prompt = f"""You are assessing a technical interview candidate's response.
+
+Question: {question[:200]}
+Candidate's Response: {response[:500]}
+Current Score: {overall_score}/100
+Experience Level Expected: {experience_level}
+Follow-ups Asked So Far: {followup_count}
+
+Analyze if we should continue with more follow-up questions.
+
+STOP CONDITIONS (respond "STOP"):
+1. Candidate demonstrates strong, comprehensive understanding (score >= 80 and response shows depth)
+2. Candidate explicitly says "I don't know" or similar
+3. Response is incoherent or clearly shows no understanding of the topic
+4. Candidate keeps repeating the same answer without new information
+
+CONTINUE CONDITIONS (respond "CONTINUE"):
+1. Candidate shows partial understanding but could be probed deeper
+2. Response indicates "I've read about it" or similar surface knowledge
+3. Good answer but missing key details relevant to the role
+4. Candidate seems nervous but knowledgeable - needs more probing
+
+Based on the response, decide: STOP or CONTINUE?
+
+Format your response as:
+DECISION: [STOP or CONTINUE]
+REASON: [one of: sufficient_skill, no_knowledge, incoherent, repetitive, partial_understanding, surface_knowledge, needs_probing]
+CONFIDENCE: [0.0 to 1.0]
+"""
+
+        try:
+            response_obj = self.model.generate_content(
+                prompt,
+                generation_config=genai.types.GenerationConfig(
+                    max_output_tokens=100,
+                    temperature=0.2  # Low temperature for consistent decisions
+                )
+            )
+            
+            # Extract text
+            response_text = ""
+            if hasattr(response_obj, 'candidates') and response_obj.candidates:
+                candidate = response_obj.candidates[0]
+                if hasattr(candidate, 'content') and hasattr(candidate.content, 'parts'):
+                    parts = candidate.content.parts
+                    if parts:
+                        response_text = ''.join([part.text for part in parts if hasattr(part, 'text')]).strip()
+            
+            if not response_text and hasattr(response_obj, 'text'):
+                response_text = response_obj.text.strip()
+            
+            # Parse response
+            decision = "CONTINUE"
+            reason = "partial_understanding"
+            confidence = 0.7
+            
+            for line in response_text.split('\n'):
+                line_upper = line.upper()
+                if 'DECISION:' in line_upper:
+                    if 'STOP' in line_upper:
+                        decision = "STOP"
+                    else:
+                        decision = "CONTINUE"
+                elif 'REASON:' in line.upper():
+                    reason_text = line.split(':', 1)[-1].strip().lower()
+                    # Map to standard reasons
+                    if 'sufficient' in reason_text or 'strong' in reason_text:
+                        reason = "sufficient_skill"
+                    elif 'no_knowledge' in reason_text or "don't know" in reason_text:
+                        reason = "no_knowledge"
+                    elif 'incoherent' in reason_text:
+                        reason = "no_knowledge"
+                    elif 'repetitive' in reason_text:
+                        reason = "no_knowledge"
+                    elif 'partial' in reason_text or 'surface' in reason_text:
+                        reason = "partial_continue"
+                    else:
+                        reason = reason_text.replace(' ', '_')
+                elif 'CONFIDENCE:' in line.upper():
+                    try:
+                        conf_text = line.split(':', 1)[-1].strip()
+                        confidence = float(conf_text)
+                        confidence = max(0.0, min(1.0, confidence))
+                    except:
+                        confidence = 0.7
+            
+            # Map decision to continue boolean
+            should_continue = decision == "CONTINUE"
+            
+            # If stopping, set appropriate reason
+            if not should_continue and reason == "partial_continue":
+                reason = "sufficient_skill"  # Default stop reason
+            
+            return {
+                "continue": should_continue,
+                "reason": reason,
+                "confidence": confidence
+            }
+            
+        except Exception as e:
+            print(f"Error in should_continue_followup: {e}")
+            # Fallback: use score-based decision
+            if overall_score >= 85:
+                return {"continue": False, "reason": "sufficient_skill", "confidence": 0.7}
+            elif overall_score < 25:
+                return {"continue": False, "reason": "no_knowledge", "confidence": 0.6}
+            else:
+                return {"continue": True, "reason": "partial_continue", "confidence": 0.5}
+
     def generate_transition(self, context: Dict) -> str:
-        """Generate natural transition message between questions"""
+        """Generate natural, warm transition message between questions"""
         summaries = context.get("interview_context", {}).get("round_summaries", [])
         if not summaries:
-            return "Let me ask you another question."
+            return "That's great! Let's move on to another topic I'd like to discuss with you."
         
         last_summary = summaries[-1]
         topic = last_summary.get("topic", "")
         score = last_summary.get("final_score", 0)
         
-        prompt = f"""Generate a brief, natural transition message for moving to the next interview question.
+        # Determine tone based on performance
+        if score >= 75:
+            tone_hint = "positive and encouraging"
+        elif score >= 50:
+            tone_hint = "supportive and neutral"
+        else:
+            tone_hint = "encouraging but moving forward"
+        
+        prompt = f"""Generate a brief, warm transition message for moving to the next interview question.
 
-Previous topic: {topic}
-Previous performance: Score of {score}
+Previous topic discussed: {topic}
+Tone to use: {tone_hint}
 
 Generate a 1-2 sentence transition that:
-- Acknowledges the previous response appropriately
-- Naturally introduces the next question
-- Maintains a professional, conversational tone
+1. Starts with a brief, warm acknowledgment (e.g., "Great insights!", "I appreciate you explaining that", "That's helpful context")
+2. Smoothly transitions to the next topic
+3. Sounds like a friendly human interviewer, not a robot
+4. Avoids generic phrases like "Let's move on" or "Next question"
+
+GOOD examples:
+- "I really appreciate you walking me through that. Let me shift gears a bit and ask about something else."
+- "That's a great perspective! There's another area I'm curious about."
+- "Thanks for that detailed explanation. I'd love to explore a different topic with you."
+
+BAD examples (avoid these):
+- "Moving on to the next question."
+- "Let's discuss something else."
+- "Now I will ask about..."
 
 Respond with ONLY the transition message, nothing else.
 """

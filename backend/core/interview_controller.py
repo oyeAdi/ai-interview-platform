@@ -32,7 +32,11 @@ class InterviewController:
         self.current_question: Optional[Dict] = None
         self.current_followup_count = 0
         self.total_questions = Config.DEFAULT_QUESTIONS
-        self.followups_per_question = Config.FOLLOWUPS_PER_QUESTION
+        self.max_followups_per_question = Config.MAX_FOLLOWUPS_PER_QUESTION
+        
+        # Dynamic follow-up tracking
+        self.followup_stop_reason: Optional[str] = None  # sufficient_skill, no_knowledge, max_reached
+        self.followup_confidence: float = 0.0
         
         # Expert mode: store pending followup awaiting approval
         self.pending_followup: Optional[Dict] = None
@@ -45,8 +49,19 @@ class InterviewController:
         self.first_question_generated: bool = False
     
     def start_interview(self) -> Dict:
-        """Start the interview"""
-        greeting = "Hello! I'll be conducting your interview today. Let's begin."
+        """Start the interview with a warm, natural greeting"""
+        import random
+        
+        # Varied, natural greetings to avoid robotic feel
+        greetings = [
+            "Hi there! Thanks for joining today. I'm really looking forward to our conversation. Let's get started!",
+            "Hello! Great to have you here. I'm excited to learn more about your experience. Let's dive in!",
+            "Hi! Thanks for taking the time to chat with me today. I've had a chance to review your background and I have some interesting questions for you.",
+            "Hello and welcome! I appreciate you being here. Let's have a good conversation about your experience and skills.",
+            "Hi! It's nice to meet you. I'm looking forward to discussing your background. Shall we begin?"
+        ]
+        
+        greeting = random.choice(greetings)
         return {
             "type": "greeting",
             "message": greeting
@@ -225,7 +240,8 @@ Generate ONLY the question text, nothing else. Keep it friendly and approachable
         followup = None
         should_generate_followup = response_type == "initial" or (
             response_type == "followup" and 
-            self.current_followup_count < self.followups_per_question
+            self.current_followup_count < self.max_followups_per_question and
+            self.followup_stop_reason is None  # AI hasn't decided to stop yet
         )
         
         if should_generate_followup:
@@ -299,9 +315,31 @@ Generate ONLY the question text, nothing else. Keep it friendly and approachable
         }
     
     def _generate_followup(self, response: str, evaluation: Dict, strategy) -> Optional[Dict]:
-        """Generate follow-up question using strategy and LLM"""
-        if self.current_followup_count >= self.followups_per_question:
+        """Generate follow-up question using strategy and LLM with dynamic stopping"""
+        # Check if max reached
+        if self.current_followup_count >= self.max_followups_per_question:
+            self.followup_stop_reason = "max_reached"
+            self.followup_confidence = 1.0
             return None
+        
+        # Check if AI has decided to stop
+        if self.followup_stop_reason is not None:
+            return None
+        
+        # Use AI to determine if we should continue (only after first follow-up)
+        if self.current_followup_count > 0:
+            should_continue = self.gemini_client.should_continue_followup(
+                question=self.current_question.get("text", ""),
+                response=response,
+                evaluation=evaluation,
+                followup_count=self.current_followup_count,
+                experience_level=self.data_model.get("experience_level", "mid") if self.data_model else "mid"
+            )
+            
+            if not should_continue.get("continue", True):
+                self.followup_stop_reason = should_continue.get("reason", "sufficient_skill")
+                self.followup_confidence = should_continue.get("confidence", 0.8)
+                return None
         
         self.current_followup_count += 1
         self.context_manager.update_followup_number(self.current_followup_count)
@@ -489,6 +527,8 @@ Generate ONLY the question text, nothing else. Keep it friendly and approachable
         # Reset for next question
         self.current_question = None
         self.current_followup_count = 0
+        self.followup_stop_reason = None
+        self.followup_confidence = 0.0
     
     def is_interview_complete(self) -> bool:
         """Check if interview is complete"""
@@ -506,7 +546,9 @@ Generate ONLY the question text, nothing else. Keep it friendly and approachable
             "percentage": round(percentage, 1),
             "current_round": self.context_manager.context["interview_context"]["current_round"],
             "current_followup": self.current_followup_count,
-            "max_followups": self.followups_per_question
+            "max_followups": self.max_followups_per_question,
+            "followup_stop_reason": self.followup_stop_reason,
+            "followup_confidence": self.followup_confidence
         }
     
     def finalize_interview(self):

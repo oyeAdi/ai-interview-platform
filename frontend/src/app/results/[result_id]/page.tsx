@@ -27,6 +27,9 @@ interface QuestionResult {
     strengths: string[]
     weaknesses: string[]
   }
+  followup_count?: number
+  followup_stop_reason?: string
+  followup_confidence?: number
   followups: Array<{
     question: string
     answer: string
@@ -51,6 +54,14 @@ interface InterviewResult {
     topics_covered: string[]
   }
   question_results: QuestionResult[]
+  followup_metrics?: {
+    total_followups_asked: number
+    per_question: Record<string, {
+      count: number
+      stopped_reason: string
+      confidence: number
+    }>
+  }
   admin_feedback: {
     overall_notes: string
     question_notes: Record<string, string>
@@ -328,6 +339,39 @@ export default function ResultsPage() {
               ))}
             </div>
           )}
+          
+          {/* Follow-up Analysis Summary */}
+          {result.followup_metrics && (
+            <div className="mt-6 p-4 bg-purple-500/5 border border-purple-500/20">
+              <h3 className="text-sm font-medium text-purple-400 mb-3">Follow-up Analysis</h3>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="text-center">
+                  <p className="text-2xl font-light text-purple-400">
+                    {result.followup_metrics.total_followups_asked}
+                  </p>
+                  <p className="text-xs text-gray-500">Total Follow-ups</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-2xl font-light text-green-400">
+                    {Object.values(result.followup_metrics.per_question).filter(q => q.stopped_reason === 'sufficient_skill').length}
+                  </p>
+                  <p className="text-xs text-gray-500">Sufficient Skill</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-2xl font-light text-red-400">
+                    {Object.values(result.followup_metrics.per_question).filter(q => q.stopped_reason === 'no_knowledge').length}
+                  </p>
+                  <p className="text-xs text-gray-500">No Knowledge</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-2xl font-light text-yellow-400">
+                    {Object.values(result.followup_metrics.per_question).filter(q => q.stopped_reason === 'max_reached').length}
+                  </p>
+                  <p className="text-xs text-gray-500">Max Reached</p>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Question-by-Question Analysis */}
@@ -432,10 +476,38 @@ export default function ResultsPage() {
                       </div>
                     </div>
 
-                    {/* Follow-ups */}
+                    {/* Follow-ups with Analysis */}
                     {q.followups.length > 0 && (
                       <div className="p-4 border-t border-gray-200 dark:border-[#2A2A2A]">
-                        <p className="text-xs text-gray-500 uppercase tracking-wider mb-3">Follow-up Questions</p>
+                        <div className="flex items-center justify-between mb-3">
+                          <p className="text-xs text-gray-500 uppercase tracking-wider">Follow-up Questions</p>
+                          {/* Follow-up Analysis Badge */}
+                          {q.followup_count !== undefined && (
+                            <div className="flex items-center gap-2">
+                              <span className="px-2 py-0.5 bg-purple-500/20 text-purple-400 text-xs">
+                                {q.followup_count} follow-ups
+                              </span>
+                              {q.followup_stop_reason && (
+                                <span className={`px-2 py-0.5 text-xs ${
+                                  q.followup_stop_reason === 'sufficient_skill' 
+                                    ? 'bg-green-500/20 text-green-400' 
+                                    : q.followup_stop_reason === 'no_knowledge'
+                                      ? 'bg-red-500/20 text-red-400'
+                                      : q.followup_stop_reason === 'max_reached'
+                                        ? 'bg-yellow-500/20 text-yellow-400'
+                                        : 'bg-gray-500/20 text-gray-400'
+                                }`}>
+                                  {q.followup_stop_reason.replace(/_/g, ' ')}
+                                </span>
+                              )}
+                              {q.followup_confidence !== undefined && (
+                                <span className="text-xs text-gray-500">
+                                  ({Math.round(q.followup_confidence * 100)}% conf)
+                                </span>
+                              )}
+                            </div>
+                          )}
+                        </div>
                         <div className="space-y-3">
                           {q.followups.map((f, i) => (
                             <div key={i} className="pl-4 border-l-2 border-[#00E5FF]/30">

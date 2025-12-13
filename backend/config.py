@@ -11,7 +11,11 @@ class Config:
     
     # Interview settings
     DEFAULT_QUESTIONS: int = int(os.getenv("DEFAULT_QUESTIONS", "3"))
-    FOLLOWUPS_PER_QUESTION: int = int(os.getenv("FOLLOWUPS_PER_QUESTION", "2"))
+    # Max follow-ups per question - AI decides dynamically when to stop (up to this limit)
+    MAX_FOLLOWUPS_PER_QUESTION: int = int(os.getenv("MAX_FOLLOWUPS_PER_QUESTION", "10"))
+    
+    # Candidate results directory
+    CANDIDATE_RESULTS_DIR: str = os.path.join(BASE_DIR, "backend", "candidate_results")
     
     # File paths
     BASE_DIR: str = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
