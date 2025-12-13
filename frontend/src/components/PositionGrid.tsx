@@ -101,7 +101,7 @@ export default function PositionGrid({
     setPage(1)
   }, [search, filters])
 
-  // Fetch candidate counts for positions
+  // Fetch candidate counts for positions (only count matched candidates)
   useEffect(() => {
     const fetchCandidateCounts = async () => {
       const counts: Record<string, number> = {}
@@ -109,7 +109,9 @@ export default function PositionGrid({
         try {
           const res = await fetch(`http://localhost:8000/api/positions/${position.id}/candidates`)
           const data = await res.json()
-          counts[position.id] = data.candidates?.length || 0
+          // Only count candidates with match_score > 0
+          const matchedCount = data.candidates?.filter((c: { match_score: number }) => c.match_score > 0).length || 0
+          counts[position.id] = matchedCount
         } catch {
           counts[position.id] = 0
         }

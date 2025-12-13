@@ -61,6 +61,7 @@ export default function AddPositionModal({
   const [availableSkills, setAvailableSkills] = useState<string[]>([])
   const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null)
   const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
   const [saveAsTemplate, setSaveAsTemplate] = useState(false)
   const [templateName, setTemplateName] = useState('')
@@ -83,9 +84,14 @@ export default function AddPositionModal({
     if (!isOpen) return
     
     setLoading(true)
+    setLoadError(null)
     fetch('http://localhost:8000/api/templates')
-      .then(res => res.json())
+      .then(res => {
+        if (!res.ok) throw new Error(`Failed to load templates: ${res.status}`)
+        return res.json()
+      })
       .then(data => {
+        console.log('Templates loaded:', data)
         setTemplates(data.templates || [])
         setCategories(data.categories || [])
         setAvailableSkills(data.available_skills || [])
@@ -93,6 +99,7 @@ export default function AddPositionModal({
       })
       .catch(err => {
         console.error('Error loading templates:', err)
+        setLoadError(err.message || 'Failed to load templates')
         setLoading(false)
       })
   }, [isOpen])
@@ -236,6 +243,26 @@ export default function AddPositionModal({
               {loading ? (
                 <div className="flex items-center justify-center py-12">
                   <div className="w-6 h-6 border-2 border-[#00E5FF]/30 border-t-[#00E5FF] animate-spin"></div>
+                </div>
+              ) : loadError ? (
+                <div className="py-8 text-center">
+                  <p className="text-red-500 text-sm mb-4">{loadError}</p>
+                  <button
+                    onClick={handleSkipTemplate}
+                    className="text-sm text-[#00E5FF] hover:underline"
+                  >
+                    Create from scratch instead →
+                  </button>
+                </div>
+              ) : templates.length === 0 ? (
+                <div className="py-8 text-center">
+                  <p className="text-gray-500 text-sm mb-4">No templates available yet.</p>
+                  <button
+                    onClick={handleSkipTemplate}
+                    className="text-sm text-[#00E5FF] hover:underline"
+                  >
+                    Create from scratch →
+                  </button>
                 </div>
               ) : (
                 <>
