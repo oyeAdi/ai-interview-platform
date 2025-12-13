@@ -8,13 +8,13 @@ import json
 import os
 import uuid
 from datetime import datetime, timedelta
-from backend.config import Config
-from backend.websocket.connection_manager import ConnectionManager
-from backend.websocket.message_handler import MessageHandler
-from backend.llm.jd_resume_analyzer import JDResumeAnalyzer
-from backend.core.interview_controller import InterviewController
-from backend.utils.file_parser import FileParser
-from backend.utils.logger import Logger
+from config import Config
+from websocket.connection_manager import ConnectionManager
+from websocket.message_handler import MessageHandler
+from llm.jd_resume_analyzer import JDResumeAnalyzer
+from core.interview_controller import InterviewController
+from utils.file_parser import FileParser
+from utils.logger import Logger
 
 app = FastAPI(title="AI Interviewer API")
 
@@ -803,7 +803,7 @@ async def websocket_endpoint(websocket: WebSocket, view: str = "candidate"):
                                         # If follow-ups are incomplete, restore current question
                                         if followup_num < Config.FOLLOWUPS_PER_QUESTION:
                                             # Find question in question bank
-                                            from backend.core.question_manager import QuestionManager
+                                            from core.question_manager import QuestionManager
                                             qm = QuestionManager(language)
                                             all_questions = qm.load_questions()
                                             for q in all_questions:
@@ -820,7 +820,7 @@ async def websocket_endpoint(websocket: WebSocket, view: str = "candidate"):
                                                     break
                                     else:
                                         # Question was asked but not answered yet
-                                        from backend.core.question_manager import QuestionManager
+                                        from core.question_manager import QuestionManager
                                         qm = QuestionManager(language)
                                         all_questions = qm.load_questions()
                                         for q in all_questions:
@@ -1001,7 +1001,7 @@ async def get_log(session_id: str):
 @app.post("/api/generate-narrative")
 async def generate_narrative(log_data: dict):
     """Generate an LLM-powered narrative summary of the interview progress"""
-    from backend.llm.gemini_client import GeminiClient
+    from llm.gemini_client import GeminiClient
     
     try:
         gemini = GeminiClient()
@@ -1534,7 +1534,7 @@ Frontend (Next.js):
 @app.post("/api/wiki/ask")
 async def ask_wiki(request: WikiAskRequest):
     """Ask a question - returns cached answer or generates new one (Admin only)"""
-    from backend.llm.gemini_client import GeminiClient
+    from llm.gemini_client import GeminiClient
     
     wiki_data = load_json_file(WIKI_FILE)
     
@@ -1700,7 +1700,7 @@ class ReindexRequest(BaseModel):
 @app.post("/api/wiki/reindex")
 async def reindex_wiki(request: ReindexRequest):
     """Manually trigger wiki reindexing (Admin only)"""
-    from backend.wiki_indexer import run_indexer
+    from wiki_indexer import run_indexer
     
     try:
         categories = [request.category] if request.category else None
@@ -1730,7 +1730,7 @@ class AdminFeedbackRequest(BaseModel):
 def generate_question_feedback(question_text: str, candidate_answer: str, scores: dict) -> dict:
     """Generate AI feedback for a single question response"""
     try:
-        from backend.llm.gemini_client import GeminiClient
+        from llm.gemini_client import GeminiClient
         gemini = GeminiClient()
         
         overall_score = scores.get("overall_score", 0)
@@ -1810,7 +1810,7 @@ async def end_interview(session_id: str, request: EndInterviewRequest):
     save_json_file(SESSIONS_FILE, sessions)
     
     # Get interview data from logger
-    from backend.utils.logger import Logger
+    from utils.logger import Logger
     logger = Logger()
     log_data = logger.get_session_log(session_id)
     
@@ -2128,8 +2128,8 @@ class AdminReviewRequest(BaseModel):
 @app.post("/api/code/submit")
 async def submit_code(request: CodeSubmissionRequest):
     """Submit code for evaluation"""
-    from backend.evaluation.code_evaluator import evaluate_code_submission
-    from backend.llm.gemini_client import GeminiClient
+    from evaluation.code_evaluator import evaluate_code_submission
+    from llm.gemini_client import GeminiClient
     
     # Load question from bank
     question_bank = load_json_file(QUESTION_BANK_FILE)
