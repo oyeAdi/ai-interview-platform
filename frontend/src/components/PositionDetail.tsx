@@ -70,13 +70,11 @@ export default function PositionDetail({
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [candidateCount, setCandidateCount] = useState(0)
 
-  // Edit form state
   const [editTitle, setEditTitle] = useState('')
   const [editStatus, setEditStatus] = useState('open')
   const [editJdText, setEditJdText] = useState('')
   const [editDataModel, setEditDataModel] = useState<DataModel | null>(null)
 
-  // Load position data
   useEffect(() => {
     if (!positionId) return
 
@@ -160,15 +158,15 @@ export default function PositionDetail({
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-20">
-        <div className="w-6 h-6 border-2 border-[#00E5FF]/30 border-t-[#00E5FF] rounded-full animate-spin"></div>
+      <div className="flex items-center justify-center py-16">
+        <div className="w-5 h-5 border-2 border-[#00E5FF]/30 border-t-[#00E5FF] rounded-full animate-spin"></div>
       </div>
     )
   }
 
   if (!position || !editDataModel) {
     return (
-      <div className="p-6 text-center text-gray-500">
+      <div className="p-5 text-center text-gray-500 text-sm">
         Position not found
       </div>
     )
@@ -176,7 +174,7 @@ export default function PositionDetail({
 
   return (
     <div className="flex flex-col h-full">
-      <div className="flex-1 p-6 space-y-6 overflow-y-auto">
+      <div className="flex-1 p-5 space-y-4 overflow-y-auto">
         {/* Title & Status */}
         <div>
           {isEditing ? (
@@ -184,137 +182,129 @@ export default function PositionDetail({
               type="text"
               value={editTitle}
               onChange={(e) => setEditTitle(e.target.value)}
-              className="w-full text-xl font-medium bg-transparent border-b-2 border-[#00E5FF] text-black dark:text-white focus:outline-none pb-1 mb-3"
+              className="w-full text-lg font-medium bg-transparent border-b border-[#00E5FF] text-black dark:text-white focus:outline-none pb-1 mb-2"
               autoFocus
             />
           ) : (
-            <h3 className="text-xl font-medium text-black dark:text-white mb-2">
+            <h3 className="text-lg font-medium text-black dark:text-white mb-1.5">
               {position.title}
             </h3>
           )}
           
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             {isEditing ? (
               <select
                 value={editStatus}
                 onChange={(e) => setEditStatus(e.target.value)}
-                className="appearance-none bg-white dark:bg-black border border-gray-200 dark:border-[#2A2A2A] px-3 py-1.5 text-sm text-black dark:text-white focus:outline-none focus:border-[#00E5FF]"
+                className="appearance-none bg-white dark:bg-black border border-gray-200 dark:border-[#2A2A2A] px-2 py-1 text-xs text-black dark:text-white focus:outline-none focus:border-[#00E5FF]"
               >
                 {STATUS_OPTIONS.map(s => (
-                  <option key={s} value={s} className="capitalize">{s.replace('_', ' ')}</option>
+                  <option key={s} value={s}>{s.replace('_', ' ')}</option>
                 ))}
               </select>
             ) : (
-              <span className={`text-xs px-2 py-1 uppercase font-medium ${statusColors[position.status] || 'bg-gray-100 text-gray-500'}`}>
+              <span className={`text-[10px] px-1.5 py-0.5 uppercase font-medium ${statusColors[position.status] || 'bg-gray-100 text-gray-500'}`}>
                 {position.status.replace('_', ' ')}
               </span>
             )}
-            <span className={`text-xs px-2 py-1 uppercase font-medium ${experienceLevelColors[position.data_model.experience_level] || 'bg-gray-100 text-gray-500'}`}>
+            <span className={`text-[10px] px-1.5 py-0.5 uppercase font-medium ${experienceLevelColors[position.data_model.experience_level] || 'bg-gray-100 text-gray-500'}`}>
               {position.data_model.experience_level}
             </span>
           </div>
           
-          <p className="text-sm text-gray-500 mt-2">
+          <p className="text-[10px] text-gray-500 mt-1.5">
             Created: {new Date(position.created_at).toLocaleDateString()}
           </p>
         </div>
 
         {/* Quick Stats */}
-        <div className="grid grid-cols-3 gap-3">
-          <div className="p-3 bg-gray-100 dark:bg-[#1A1A1A] text-center">
+        <div className="grid grid-cols-3 gap-2">
+          <div className="p-2 bg-gray-100 dark:bg-[#1A1A1A] text-center">
             {isEditing ? (
               <select
                 value={editDataModel.duration_minutes}
                 onChange={(e) => setEditDataModel({ ...editDataModel, duration_minutes: parseInt(e.target.value) })}
-                className="w-full text-center appearance-none bg-transparent text-xl font-bold text-gray-700 dark:text-gray-300 focus:outline-none"
+                className="w-full text-center appearance-none bg-transparent text-lg font-bold text-gray-600 dark:text-gray-400 focus:outline-none"
               >
                 {DURATION_OPTIONS.map(d => (
                   <option key={d} value={d}>{d}</option>
                 ))}
               </select>
             ) : (
-              <div className="text-xl font-bold text-gray-700 dark:text-gray-300">{position.data_model.duration_minutes}</div>
+              <div className="text-lg font-bold text-gray-600 dark:text-gray-400">{position.data_model.duration_minutes}</div>
             )}
-            <div className="text-xs text-gray-500">Minutes</div>
+            <div className="text-[9px] text-gray-400">Min</div>
           </div>
-          <div className="p-3 bg-[#00E5FF]/10 text-center">
-            <div className="text-xl font-bold text-[#00E5FF]">{candidateCount}</div>
-            <div className="text-xs text-[#00E5FF]/70">Candidates</div>
+          <div className="p-2 bg-[#00E5FF]/10 text-center">
+            <div className="text-lg font-bold text-[#00E5FF]">{candidateCount}</div>
+            <div className="text-[9px] text-[#00E5FF]/70">Matches</div>
           </div>
-          <div className="p-3 bg-gray-100 dark:bg-[#1A1A1A] text-center">
-            <div className="text-xl font-bold text-gray-700 dark:text-gray-300">{position.data_model.required_skills.length}</div>
-            <div className="text-xs text-gray-500">Skills</div>
+          <div className="p-2 bg-gray-100 dark:bg-[#1A1A1A] text-center">
+            <div className="text-lg font-bold text-gray-600 dark:text-gray-400">{position.data_model.required_skills.length}</div>
+            <div className="text-[9px] text-gray-400">Skills</div>
           </div>
         </div>
 
-        {/* Interview Settings */}
+        {/* Edit Settings */}
         {isEditing && (
-          <div className="space-y-4">
-            <label className="block text-xs text-gray-500 uppercase tracking-wide">
-              Interview Settings
-            </label>
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="block text-xs text-gray-400 mb-1">Experience Level</label>
-                <select
-                  value={editDataModel.experience_level}
-                  onChange={(e) => setEditDataModel({ ...editDataModel, experience_level: e.target.value })}
-                  className="w-full appearance-none bg-white dark:bg-black border border-gray-200 dark:border-[#2A2A2A] px-3 py-2 text-sm text-black dark:text-white focus:outline-none focus:border-[#00E5FF] capitalize"
-                >
-                  {EXPERIENCE_LEVELS.map(l => (
-                    <option key={l} value={l} className="capitalize">{l}</option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="block text-xs text-gray-400 mb-1">Expectations</label>
-                <select
-                  value={editDataModel.expectations}
-                  onChange={(e) => setEditDataModel({ ...editDataModel, expectations: e.target.value })}
-                  className="w-full appearance-none bg-white dark:bg-black border border-gray-200 dark:border-[#2A2A2A] px-3 py-2 text-sm text-black dark:text-white focus:outline-none focus:border-[#00E5FF] capitalize"
-                >
-                  {EXPECTATION_LEVELS.map(l => (
-                    <option key={l} value={l} className="capitalize">{l}</option>
-                  ))}
-                </select>
-              </div>
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+              <label className="block text-[10px] text-gray-400 mb-1">Level</label>
+              <select
+                value={editDataModel.experience_level}
+                onChange={(e) => setEditDataModel({ ...editDataModel, experience_level: e.target.value })}
+                className="w-full appearance-none bg-white dark:bg-black border border-gray-200 dark:border-[#2A2A2A] px-2 py-1.5 text-xs text-black dark:text-white capitalize"
+              >
+                {EXPERIENCE_LEVELS.map(l => (
+                  <option key={l} value={l}>{l}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-[10px] text-gray-400 mb-1">Expectations</label>
+              <select
+                value={editDataModel.expectations}
+                onChange={(e) => setEditDataModel({ ...editDataModel, expectations: e.target.value })}
+                className="w-full appearance-none bg-white dark:bg-black border border-gray-200 dark:border-[#2A2A2A] px-2 py-1.5 text-xs text-black dark:text-white capitalize"
+              >
+                {EXPECTATION_LEVELS.map(l => (
+                  <option key={l} value={l}>{l}</option>
+                ))}
+              </select>
             </div>
           </div>
         )}
 
         {/* Skills */}
         <div>
-          <label className="block text-xs text-gray-500 uppercase tracking-wide mb-3">
+          <label className="block text-[10px] text-gray-500 uppercase tracking-wider mb-2">
             Required Skills
           </label>
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-1.5">
             {position.data_model.required_skills.map((skill, i) => (
-              <div
+              <span
                 key={i}
-                className="px-3 py-1.5 bg-gray-100 dark:bg-[#1A1A1A] text-sm"
+                className="px-2 py-1 bg-gray-100 dark:bg-[#1A1A1A] text-xs text-gray-600 dark:text-gray-400 capitalize"
               >
-                <span className="text-gray-700 dark:text-gray-300 capitalize">{skill.skill.replace('_', ' ')}</span>
-                <span className="text-gray-400 ml-1 text-xs">({skill.proficiency})</span>
-              </div>
+                {skill.skill.replace('_', ' ')}
+              </span>
             ))}
           </div>
         </div>
 
         {/* Interview Flow */}
         <div>
-          <label className="block text-xs text-gray-500 uppercase tracking-wide mb-3">
+          <label className="block text-[10px] text-gray-500 uppercase tracking-wider mb-2">
             Interview Flow
           </label>
-          <div className="flex items-center gap-2 flex-wrap">
+          <div className="flex items-center gap-1.5 flex-wrap">
             {position.data_model.interview_flow.map((step, i) => (
-              <div key={i} className="flex items-center gap-2">
-                <span className="px-3 py-1.5 bg-[#00E5FF]/10 text-[#00E5FF] text-sm capitalize">
+              <div key={i} className="flex items-center gap-1">
+                <span className="px-2 py-1 bg-[#00E5FF]/10 text-[#00E5FF] text-[10px] capitalize">
                   {step.replace('_', ' ')}
                 </span>
                 {i < position.data_model.interview_flow.length - 1 && (
-                  <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-                  </svg>
+                  <span className="text-gray-400 text-xs">→</span>
                 )}
               </div>
             ))}
@@ -323,124 +313,103 @@ export default function PositionDetail({
 
         {/* Question Distribution */}
         <div>
-          <label className="block text-xs text-gray-500 uppercase tracking-wide mb-3">
-            Question Distribution
+          <label className="block text-[10px] text-gray-500 uppercase tracking-wider mb-2">
+            Difficulty Split
           </label>
-          <div className="space-y-2">
-            <div className="flex items-center gap-3">
-              <span className="w-16 text-xs text-gray-500">Easy</span>
-              <div className="flex-1 h-2 bg-gray-200 dark:bg-[#1A1A1A]">
-                <div className="h-full bg-green-500" style={{ width: `${position.data_model.question_distribution.easy * 100}%` }} />
-              </div>
-              <span className="w-10 text-xs text-gray-500 text-right">{Math.round(position.data_model.question_distribution.easy * 100)}%</span>
-            </div>
-            <div className="flex items-center gap-3">
-              <span className="w-16 text-xs text-gray-500">Medium</span>
-              <div className="flex-1 h-2 bg-gray-200 dark:bg-[#1A1A1A]">
-                <div className="h-full bg-amber-500" style={{ width: `${position.data_model.question_distribution.medium * 100}%` }} />
-              </div>
-              <span className="w-10 text-xs text-gray-500 text-right">{Math.round(position.data_model.question_distribution.medium * 100)}%</span>
-            </div>
-            <div className="flex items-center gap-3">
-              <span className="w-16 text-xs text-gray-500">Hard</span>
-              <div className="flex-1 h-2 bg-gray-200 dark:bg-[#1A1A1A]">
-                <div className="h-full bg-red-500" style={{ width: `${position.data_model.question_distribution.hard * 100}%` }} />
-              </div>
-              <span className="w-10 text-xs text-gray-500 text-right">{Math.round(position.data_model.question_distribution.hard * 100)}%</span>
-            </div>
+          <div className="flex items-center gap-1 h-3">
+            <div className="bg-green-500 h-full" style={{ width: `${position.data_model.question_distribution.easy * 100}%` }} title={`Easy: ${Math.round(position.data_model.question_distribution.easy * 100)}%`} />
+            <div className="bg-amber-500 h-full" style={{ width: `${position.data_model.question_distribution.medium * 100}%` }} title={`Medium: ${Math.round(position.data_model.question_distribution.medium * 100)}%`} />
+            <div className="bg-red-500 h-full" style={{ width: `${position.data_model.question_distribution.hard * 100}%` }} title={`Hard: ${Math.round(position.data_model.question_distribution.hard * 100)}%`} />
+          </div>
+          <div className="flex justify-between text-[9px] text-gray-400 mt-1">
+            <span>Easy {Math.round(position.data_model.question_distribution.easy * 100)}%</span>
+            <span>Med {Math.round(position.data_model.question_distribution.medium * 100)}%</span>
+            <span>Hard {Math.round(position.data_model.question_distribution.hard * 100)}%</span>
           </div>
         </div>
 
         {/* Job Description */}
         <div>
-          <label className="block text-xs text-gray-500 uppercase tracking-wide mb-2">
+          <label className="block text-[10px] text-gray-500 uppercase tracking-wider mb-1.5">
             Job Description
           </label>
           {isEditing ? (
             <textarea
               value={editJdText}
               onChange={(e) => setEditJdText(e.target.value)}
-              rows={5}
-              className="w-full bg-white dark:bg-black border border-gray-200 dark:border-[#2A2A2A] px-4 py-3 text-sm text-black dark:text-white focus:outline-none focus:border-[#00E5FF] resize-none"
+              rows={4}
+              className="w-full bg-white dark:bg-black border border-gray-200 dark:border-[#2A2A2A] px-3 py-2 text-xs text-black dark:text-white focus:outline-none focus:border-[#00E5FF] resize-none"
               placeholder="Job description..."
             />
           ) : (
-            <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
-              {position.jd_text || <span className="text-gray-400 italic">No job description</span>}
+            <p className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed line-clamp-4">
+              {position.jd_text || <span className="italic text-gray-400">No description</span>}
             </p>
           )}
         </div>
       </div>
 
-      {/* Footer Actions */}
-      <div className="p-6 border-t border-gray-200 dark:border-[#2A2A2A] bg-gray-50 dark:bg-[#0A0A0A]">
+      {/* Footer */}
+      <div className="p-4 border-t border-gray-200 dark:border-[#2A2A2A] bg-gray-50 dark:bg-[#111]">
         {isEditing ? (
-          <div className="flex gap-3">
+          <div className="flex gap-2">
             <button
               onClick={handleCancel}
-              className="flex-1 py-3 text-sm text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 border border-gray-200 dark:border-[#2A2A2A] transition-colors"
+              className="flex-1 py-2 text-xs text-gray-500 border border-gray-200 dark:border-[#2A2A2A]"
             >
               Cancel
             </button>
             <button
               onClick={handleSave}
               disabled={saving || !editTitle.trim()}
-              className="flex-1 py-3 text-sm bg-[#00E5FF] text-black font-medium hover:bg-[#00E5FF]/90 disabled:opacity-40 transition-colors flex items-center justify-center gap-2"
+              className="flex-1 py-2 text-xs bg-[#00E5FF] text-black font-medium disabled:opacity-40 flex items-center justify-center gap-1"
             >
               {saving ? (
-                <>
-                  <div className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin"></div>
-                  Saving...
-                </>
+                <div className="w-3 h-3 border-2 border-black border-t-transparent rounded-full animate-spin"></div>
               ) : (
-                'Save Changes'
+                'Save'
               )}
             </button>
           </div>
         ) : showDeleteConfirm ? (
-          <div className="space-y-3">
-            <p className="text-sm text-gray-600 dark:text-gray-400 text-center">
-              Are you sure you want to delete this position?
-            </p>
-            <div className="flex gap-3">
+          <div className="space-y-2">
+            <p className="text-xs text-gray-500 text-center">Delete this position?</p>
+            <div className="flex gap-2">
               <button
                 onClick={() => setShowDeleteConfirm(false)}
-                className="flex-1 py-3 text-sm text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 border border-gray-200 dark:border-[#2A2A2A] transition-colors"
+                className="flex-1 py-2 text-xs text-gray-500 border border-gray-200 dark:border-[#2A2A2A]"
               >
                 Cancel
               </button>
               <button
                 onClick={handleDelete}
                 disabled={deleting}
-                className="flex-1 py-3 text-sm bg-red-500 text-white font-medium hover:bg-red-600 disabled:opacity-40 transition-colors flex items-center justify-center gap-2"
+                className="flex-1 py-2 text-xs bg-red-500 text-white font-medium disabled:opacity-40 flex items-center justify-center gap-1"
               >
                 {deleting ? (
-                  <>
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                    Deleting...
-                  </>
+                  <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                 ) : (
-                  'Yes, Delete'
+                  'Delete'
                 )}
               </button>
             </div>
           </div>
         ) : (
-          <div className="flex gap-3">
+          <div className="flex gap-2">
             <button
               onClick={() => setIsEditing(true)}
-              className="flex-1 py-3 text-sm text-[#00E5FF] border border-[#00E5FF] hover:bg-[#00E5FF]/10 transition-colors flex items-center justify-center gap-2"
+              className="flex-1 py-2 text-xs text-[#00E5FF] border border-[#00E5FF] hover:bg-[#00E5FF]/10 flex items-center justify-center gap-1"
             >
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125" />
               </svg>
               Edit
             </button>
             <button
               onClick={() => setShowDeleteConfirm(true)}
-              className="flex-1 py-3 text-sm text-red-500 border border-red-500/30 hover:bg-red-500/10 transition-colors flex items-center justify-center gap-2"
+              className="flex-1 py-2 text-xs text-red-500 border border-red-500/30 hover:bg-red-500/10 flex items-center justify-center gap-1"
             >
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
               </svg>
               Delete
@@ -451,4 +420,3 @@ export default function PositionDetail({
     </div>
   )
 }
-
