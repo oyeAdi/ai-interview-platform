@@ -120,10 +120,10 @@ export default function AccountGrid({
   const LOAD_MORE_COUNT = 4
   const [visibleCount, setVisibleCount] = useState(INITIAL_DISPLAY)
   
-  // Reset visible count when search changes
+  // Reset visible count when search or accounts change
   useEffect(() => {
     setVisibleCount(INITIAL_DISPLAY)
-  }, [search])
+  }, [search, accounts.length])
   
   const displayedAccounts = filteredAccounts.slice(0, visibleCount)
   const hasMore = filteredAccounts.length > visibleCount
