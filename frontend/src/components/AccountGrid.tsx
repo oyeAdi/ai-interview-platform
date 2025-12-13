@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import SearchBar from './SearchBar'
 import AccountCard from './AccountCard'
 
@@ -43,7 +43,6 @@ export default function AccountGrid({
   loading = false
 }: AccountGridProps) {
   const [search, setSearch] = useState('')
-  const [showAll, setShowAll] = useState(false)
   const [hasOpenOnly, setHasOpenOnly] = useState(false)
   const [sortBy, setSortBy] = useState('recent')
 
@@ -116,10 +115,19 @@ export default function AccountGrid({
     return result
   }, [accountsWithCounts, search, hasOpenOnly, sortBy])
 
-  // Limit display for initial view
-  const INITIAL_DISPLAY = 10
-  const displayedAccounts = showAll ? filteredAccounts : filteredAccounts.slice(0, INITIAL_DISPLAY)
-  const hasMore = filteredAccounts.length > INITIAL_DISPLAY
+  // Limit display - start with 4, load 4 more each time
+  const INITIAL_DISPLAY = 4
+  const LOAD_MORE_COUNT = 4
+  const [visibleCount, setVisibleCount] = useState(INITIAL_DISPLAY)
+  
+  // Reset visible count when search changes
+  useEffect(() => {
+    setVisibleCount(INITIAL_DISPLAY)
+  }, [search])
+  
+  const displayedAccounts = filteredAccounts.slice(0, visibleCount)
+  const hasMore = filteredAccounts.length > visibleCount
+  const remainingCount = filteredAccounts.length - visibleCount
 
   if (loading) {
     return (
@@ -164,7 +172,7 @@ export default function AccountGrid({
         {/* Has Open Positions Toggle */}
         <button
           type="button"
-          onClick={() => { setHasOpenOnly(!hasOpenOnly); setShowAll(false) }}
+          onClick={() => { setHasOpenOnly(!hasOpenOnly); setVisibleCount(INITIAL_DISPLAY) }}
           className={`px-3 py-1.5 text-xs transition-colors flex items-center gap-1.5 ${
             hasOpenOnly
               ? 'bg-[#00E5FF] text-black'
@@ -181,7 +189,7 @@ export default function AccountGrid({
         <div className="relative">
           <select
             value={sortBy}
-            onChange={(e) => { setSortBy(e.target.value); setShowAll(false) }}
+            onChange={(e) => { setSortBy(e.target.value); setVisibleCount(INITIAL_DISPLAY) }}
             className={`appearance-none px-3 py-1.5 pr-7 text-xs cursor-pointer transition-colors ${
               sortBy !== 'recent'
                 ? 'bg-[#00E5FF] text-black'
@@ -201,7 +209,7 @@ export default function AccountGrid({
         {hasActiveFilters && (
           <button
             type="button"
-            onClick={() => { setHasOpenOnly(false); setSortBy('recent'); setShowAll(false) }}
+            onClick={() => { setHasOpenOnly(false); setSortBy('recent'); setVisibleCount(INITIAL_DISPLAY) }}
             className="px-2 py-1.5 text-xs text-gray-500 hover:text-[#00E5FF] transition-colors"
           >
             Clear all
@@ -249,25 +257,14 @@ export default function AccountGrid({
           </div>
 
           {/* Show More Button */}
-          {hasMore && !showAll && (
-            <div className="text-center">
+          {hasMore && (
+            <div className="text-center pt-2">
               <button
                 type="button"
-                onClick={() => setShowAll(true)}
-                className="text-sm text-gray-500 hover:text-[#00E5FF] transition-colors"
+                onClick={() => setVisibleCount(prev => prev + LOAD_MORE_COUNT)}
+                className="text-sm text-[#00E5FF] hover:underline transition-colors"
               >
-                Show {filteredAccounts.length - INITIAL_DISPLAY} more accounts ↓
-              </button>
-            </div>
-          )}
-          {showAll && hasMore && (
-            <div className="text-center">
-              <button
-                type="button"
-                onClick={() => setShowAll(false)}
-                className="text-sm text-gray-500 hover:text-[#00E5FF] transition-colors"
-              >
-                Show less ↑
+                Show more ({remainingCount} remaining) ↓
               </button>
             </div>
           )}

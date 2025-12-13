@@ -77,7 +77,8 @@ const FILTERS = [
   }
 ]
 
-const ITEMS_PER_PAGE = 12
+const INITIAL_DISPLAY = 8
+const LOAD_MORE_COUNT = 4
 
 export default function PositionGrid({
   positions,
@@ -93,12 +94,12 @@ export default function PositionGrid({
     level: [],
     sort: ['recent']
   })
-  const [page, setPage] = useState(1)
+  const [visibleCount, setVisibleCount] = useState(INITIAL_DISPLAY)
   const [candidateCounts, setCandidateCounts] = useState<Record<string, number>>({})
 
-  // Reset page when filters change
+  // Reset visible count when filters/search change
   useEffect(() => {
-    setPage(1)
+    setVisibleCount(INITIAL_DISPLAY)
   }, [search, filters])
 
   // Fetch candidate counts for positions (only count matched candidates)
@@ -178,12 +179,10 @@ export default function PositionGrid({
     return result
   }, [positions, search, filters])
 
-  // Pagination
-  const totalPages = Math.ceil(filteredPositions.length / ITEMS_PER_PAGE)
-  const paginatedPositions = filteredPositions.slice(
-    (page - 1) * ITEMS_PER_PAGE,
-    page * ITEMS_PER_PAGE
-  )
+  // Limit display - start with 8, load 4 more each time
+  const displayedPositions = filteredPositions.slice(0, visibleCount)
+  const hasMore = filteredPositions.length > visibleCount
+  const remainingCount = filteredPositions.length - visibleCount
 
   if (loading) {
     return (
@@ -262,7 +261,7 @@ export default function PositionGrid({
       ) : (
         <>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-            {paginatedPositions.map(position => (
+            {displayedPositions.map(position => (
               <PositionCard
                 key={position.id}
                 position={position}
@@ -273,53 +272,15 @@ export default function PositionGrid({
             ))}
           </div>
 
-          {/* Pagination */}
-          {totalPages > 1 && (
-            <div className="flex items-center justify-center gap-2 pt-4">
+          {/* Show More Button */}
+          {hasMore && (
+            <div className="text-center pt-2">
               <button
                 type="button"
-                onClick={() => setPage(p => Math.max(1, p - 1))}
-                disabled={page === 1}
-                className="p-2 text-gray-500 hover:text-[#00E5FF] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                onClick={() => setVisibleCount(prev => prev + LOAD_MORE_COUNT)}
+                className="text-sm text-[#00E5FF] hover:underline transition-colors"
               >
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-                </svg>
-              </button>
-              
-              <div className="flex items-center gap-1">
-                {Array.from({ length: totalPages }, (_, i) => i + 1)
-                  .filter(p => p === 1 || p === totalPages || Math.abs(p - page) <= 1)
-                  .map((p, idx, arr) => (
-                    <span key={p}>
-                      {idx > 0 && arr[idx - 1] !== p - 1 && (
-                        <span className="px-2 text-gray-400">...</span>
-                      )}
-                      <button
-                        type="button"
-                        onClick={() => setPage(p)}
-                        className={`w-8 h-8 text-sm transition-colors ${
-                          page === p
-                            ? 'bg-[#00E5FF] text-black font-medium'
-                            : 'text-gray-500 hover:text-[#00E5FF]'
-                        }`}
-                      >
-                        {p}
-                      </button>
-                    </span>
-                  ))
-                }
-              </div>
-              
-              <button
-                type="button"
-                onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-                disabled={page === totalPages}
-                className="p-2 text-gray-500 hover:text-[#00E5FF] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-              >
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-                </svg>
+                Show more ({remainingCount} remaining) ↓
               </button>
             </div>
           )}
