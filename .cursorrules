@@ -117,6 +117,38 @@ Before committing:
 - [ ] Test loading states
 - [ ] Test error handling
 
+## Build Verification Before Push
+
+**CRITICAL: Always verify builds before pushing to remote**
+
+Before pushing any changes:
+1. **Frontend Build Check:**
+   ```bash
+   cd frontend && npm run build
+   ```
+   - Must complete without TypeScript errors
+   - Must complete without build errors
+   - Verify all pages compile successfully
+
+2. **Backend Syntax Check:**
+   ```bash
+   cd backend && python -m py_compile main.py
+   ```
+   - Must have no syntax errors
+   - Check for import errors
+
+3. **Local Testing:**
+   - Start backend: `cd backend && python main.py`
+   - Start frontend: `cd frontend && npm run dev`
+   - Verify basic functionality works locally
+
+4. **Only after successful builds:**
+   - Commit changes
+   - Push to remote (GitHub/GitLab)
+   - Monitor Render deployment logs
+
+**NEVER push code that fails local build checks.**
+
 ---
 
 ## Quick References
