@@ -11,7 +11,8 @@ import CandidateSelector from '@/components/CandidateSelector'
 import FileUpload from '@/components/FileUpload'
 import AddPositionModal from '@/components/AddPositionModal'
 import AddAccountModal from '@/components/AddAccountModal'
-import DetailSidebar from '@/components/DetailSidebar'
+import AccountDetail from '@/components/AccountDetail'
+import PositionDetail from '@/components/PositionDetail'
 
 interface Account {
   id: string
@@ -233,20 +234,38 @@ export default function DashboardPage() {
   const selectedAccountData = accounts.find(a => a.id === selectedAccount)
   const selectedPositionData = accountPositions.find(p => p.id === selectedPosition)
 
-  // Sidebar handlers
+  // Sidebar handlers - with toggle support
   const handleAccountSelect = (accountId: string) => {
+    // Toggle: if clicking same account, deselect it
+    if (selectedAccount === accountId && sidebarType === 'account') {
+      setSidebarType(null)
+      setSidebarId(null)
+      return
+    }
     setSelectedAccount(accountId)
     setSidebarType('account')
     setSidebarId(accountId)
   }
 
   const handlePositionSelect = (positionId: string) => {
+    // Toggle: if clicking same position, deselect it
+    if (selectedPosition === positionId && sidebarType === 'position') {
+      setSelectedPosition('')
+      setSidebarType(null)
+      setSidebarId(null)
+      return
+    }
     setSelectedPosition(positionId)
     setSidebarType('position')
     setSidebarId(positionId)
   }
 
   const handleSidebarClose = () => {
+    setSidebarType(null)
+    setSidebarId(null)
+  }
+  
+  const handleHideSidebar = () => {
     setSidebarType(null)
     setSidebarId(null)
   }
@@ -266,61 +285,118 @@ export default function DashboardPage() {
     }
   }
 
-  const sidebarOpen = sidebarType !== null && sidebarId !== null
+  const showAccountPanel = sidebarType === 'account' && sidebarId
+  const showPositionPanel = sidebarType === 'position' && sidebarId
 
   return (
     <div className="min-h-screen flex flex-col bg-white dark:bg-black transition-colors duration-200">
       <Header showQuickStart={true} />
       
-      {/* Main wrapper with sidebar space */}
-      <div className="flex-1 flex">
-        {/* Main content - shrinks when sidebar open */}
-        <main className={`flex-1 transition-all duration-300 ${sidebarOpen ? 'mr-[380px]' : ''}`}>
-          {/* Hero Section */}
-          <section className="border-b border-gray-200 dark:border-[#2A2A2A]">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-              <h1 className="text-3xl md:text-4xl font-light text-black dark:text-white leading-tight mb-3">
-                Interview
-                <span className="font-normal"> Dashboard</span>
-              </h1>
-              <p className="text-base text-gray-600 dark:text-gray-400 max-w-2xl font-light">
-                Configure and launch AI-powered interviews for your candidates.
-              </p>
-            </div>
-          </section>
+      <main className="flex-1">
+        {/* Hero Section */}
+        <section className="border-b border-gray-200 dark:border-[#2A2A2A]">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            <h1 className="text-3xl md:text-4xl font-light text-black dark:text-white leading-tight mb-3">
+              Interview
+              <span className="font-normal"> Dashboard</span>
+            </h1>
+            <p className="text-base text-gray-600 dark:text-gray-400 max-w-2xl font-light">
+              Configure and launch AI-powered interviews for your candidates.
+            </p>
+          </div>
+        </section>
 
-          {/* Main Content */}
-          <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Main Content */}
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="space-y-12">
-            {/* Accounts Section */}
+            {/* Accounts Section with Inline Panel */}
             <div>
               <h2 className="text-xs font-medium text-[#00E5FF] uppercase tracking-[0.2em] mb-6">
                 Accounts ({accounts.length})
               </h2>
-              <AccountGrid
-                accounts={accounts}
-                positions={allPositions}
-                selectedAccount={selectedAccount}
-                onSelectAccount={handleAccountSelect}
-                onAddAccount={() => setShowAddAccount(true)}
-                loading={loading}
-              />
+              <div className="flex gap-4">
+                {/* Account Grid */}
+                <div className={`transition-all duration-300 ${showAccountPanel ? 'flex-1' : 'w-full'}`}>
+                  <AccountGrid
+                    accounts={accounts}
+                    positions={allPositions}
+                    selectedAccount={selectedAccount}
+                    onSelectAccount={handleAccountSelect}
+                    onAddAccount={() => setShowAddAccount(true)}
+                    loading={loading}
+                  />
+                </div>
+                
+                {/* Inline Account Detail Panel */}
+                {showAccountPanel && (
+                  <div className="w-[340px] flex-shrink-0 bg-white dark:bg-[#0A0A0A] border border-gray-200 dark:border-[#2A2A2A] animate-slide-in-right">
+                    <AccountDetail
+                      accountId={sidebarId}
+                      onUpdate={handleSidebarUpdate}
+                      onDelete={handleSidebarDelete}
+                      onClose={handleSidebarClose}
+                      onAddPosition={() => setShowAddPosition(true)}
+                    />
+                    {/* Hide Button */}
+                    <div className="p-3 border-t border-gray-200 dark:border-[#2A2A2A]">
+                      <button
+                        onClick={handleHideSidebar}
+                        className="w-full py-2 text-xs text-gray-500 hover:text-[#00E5FF] flex items-center justify-center gap-2 transition-colors"
+                      >
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                        </svg>
+                        Hide Panel
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
 
-            {/* Positions Section */}
+            {/* Positions Section with Inline Panel */}
             {selectedAccount && (
               <div>
                 <h2 className="text-xs font-medium text-[#00E5FF] uppercase tracking-[0.2em] mb-6">
                   Positions {selectedAccountData && `for ${selectedAccountData.name}`}
                 </h2>
-                <PositionGrid
-                  positions={accountPositions}
-                  selectedPosition={selectedPosition}
-                  onSelectPosition={handlePositionSelect}
-                  onAddPosition={() => setShowAddPosition(true)}
-                  accountName={selectedAccountData?.name}
-                  loading={positionsLoading}
-                />
+                <div className="flex gap-4">
+                  {/* Position Grid */}
+                  <div className={`transition-all duration-300 ${showPositionPanel ? 'flex-1' : 'w-full'}`}>
+                    <PositionGrid
+                      positions={accountPositions}
+                      selectedPosition={selectedPosition}
+                      onSelectPosition={handlePositionSelect}
+                      onAddPosition={() => setShowAddPosition(true)}
+                      accountName={selectedAccountData?.name}
+                      loading={positionsLoading}
+                    />
+                  </div>
+                  
+                  {/* Inline Position Detail Panel */}
+                  {showPositionPanel && (
+                    <div className="w-[340px] flex-shrink-0 bg-white dark:bg-[#0A0A0A] border border-gray-200 dark:border-[#2A2A2A] animate-slide-in-right">
+                      <PositionDetail
+                        positionId={sidebarId}
+                        onUpdate={handleSidebarUpdate}
+                        onDelete={handleSidebarDelete}
+                        onClose={handleSidebarClose}
+                      />
+                      {/* Hide Button */}
+                      <div className="p-3 border-t border-gray-200 dark:border-[#2A2A2A]">
+                        <button
+                          onClick={handleHideSidebar}
+                          className="w-full py-2 text-xs text-gray-500 hover:text-[#00E5FF] flex items-center justify-center gap-2 transition-colors"
+                        >
+                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                          </svg>
+                          Hide Panel
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
             )}
 
@@ -435,17 +511,6 @@ export default function DashboardPage() {
         
         <Footer />
       </main>
-
-        {/* Detail Sidebar - Fixed position, pushes content */}
-        <DetailSidebar
-          type={sidebarType}
-          selectedId={sidebarId}
-          onClose={handleSidebarClose}
-          onUpdate={handleSidebarUpdate}
-          onDelete={handleSidebarDelete}
-          onAddPosition={() => setShowAddPosition(true)}
-        />
-      </div>
 
       {/* Add Position Modal */}
       <AddPositionModal
