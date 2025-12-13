@@ -54,8 +54,14 @@ def load_json_file(filepath: str) -> dict:
     """Load JSON file with error handling"""
     if not os.path.exists(filepath):
         return {}
-    with open(filepath, 'r', encoding='utf-8') as f:
-        return json.load(f)
+    try:
+        with open(filepath, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+            # Ensure we return a dict, not None
+            return data if isinstance(data, dict) else {}
+    except (json.JSONDecodeError, IOError) as e:
+        print(f"Error loading {filepath}: {e}")
+        return {}
 
 def save_json_file(filepath: str, data: dict):
     """Save data to JSON file"""
@@ -123,6 +129,53 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+def initialize_data_files():
+    """Initialize all required JSON files with proper structure if they don't exist.
+    
+    NOTE: On Render, the filesystem is ephemeral. Data written during runtime will be lost
+    on restart. For production, consider migrating to a database (PostgreSQL, MongoDB, etc.)
+    """
+    # Ensure directories exist
+    os.makedirs(MODELS_DIR, exist_ok=True)
+    os.makedirs(CANDIDATE_RESULTS_DIR, exist_ok=True)
+    os.makedirs(Config.JDS_DIR, exist_ok=True)
+    os.makedirs(Config.RESUMES_DIR, exist_ok=True)
+    os.makedirs(Config.LOGS_DIR, exist_ok=True)
+    
+    # Initialize files with default structure if they don't exist
+    # Note: Files from the repo should already exist, but we ensure they're initialized
+    files_to_init = {
+        ORGANIZATIONS_FILE: {"organizations": []},
+        ACCOUNTS_FILE: {"accounts": []},
+        POSITIONS_FILE: {"positions": [], "experience_levels": ["junior", "mid", "senior", "lead"], "expectation_levels": ["basic", "medium", "high"], "status_options": ["open", "closed", "on_hold"]},
+        QUESTION_BANK_FILE: {"questions": []},
+        WIKI_FILE: {"entries": [], "categories": []},
+        SESSIONS_FILE: {"sessions": []},
+        RESULTS_FILE: {"results": []},
+        os.path.join(Config.JDS_DIR, "jds.json"): {"jds": []},
+        os.path.join(Config.RESUMES_DIR, "resumes.json"): {"resumes": []},
+    }
+    
+    for filepath, default_data in files_to_init.items():
+        if not os.path.exists(filepath):
+            # Create with default structure
+            save_json_file(filepath, default_data)
+            print(f"⚠️  Initialized {filepath} with default structure (file was missing)")
+        else:
+            # Verify file is valid JSON and has expected structure
+            try:
+                data = load_json_file(filepath)
+                # If file exists but is empty or invalid, reinitialize
+                if not data or not isinstance(data, dict):
+                    save_json_file(filepath, default_data)
+                    print(f"⚠️  Reinitialized {filepath} (file was empty or invalid)")
+            except Exception as e:
+                print(f"⚠️  Error reading {filepath}: {e}, reinitializing...")
+                save_json_file(filepath, default_data)
+
+# Initialize data files on startup
+initialize_data_files()
 
 # Global managers
 connection_manager = ConnectionManager()
