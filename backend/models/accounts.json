@@ -31,8 +31,38 @@
       "logo": "/logos/expedia.svg",
       "description": "Online travel shopping company",
       "positions": ["exp_fullstack"]
+    },
+    {
+      "id": "google",
+      "name": "Google",
+      "org_id": "epam",
+      "logo": "/logos/google.svg",
+      "description": "Global technology and search company",
+      "positions": ["google_swe3", "google_ml_engineer", "google_frontend"]
+    },
+    {
+      "id": "microsoft",
+      "name": "Microsoft",
+      "org_id": "epam",
+      "logo": "/logos/microsoft.svg",
+      "description": "Enterprise software and cloud services",
+      "positions": ["msft_azure_dev", "msft_dotnet_lead"]
+    },
+    {
+      "id": "meta",
+      "name": "Meta",
+      "org_id": "epam",
+      "logo": "/logos/meta.svg",
+      "description": "Social media and metaverse technology",
+      "positions": ["meta_react_engineer", "meta_infra"]
+    },
+    {
+      "id": "spotify",
+      "name": "Spotify",
+      "org_id": "epam",
+      "logo": "/logos/spotify.svg",
+      "description": "Music streaming platform",
+      "positions": ["spotify_backend", "spotify_data"]
     }
   ]
 }
-
-

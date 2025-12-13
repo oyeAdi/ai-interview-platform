@@ -239,17 +239,41 @@ async def create_account(account: AccountCreate):
     
     return {"status": "created", "account": new_account}
 
-@app.delete("/api/accounts/{account_id}")
-async def delete_account(account_id: str):
-    """Delete an account (only if it has no positions)"""
+class AccountUpdate(BaseModel):
+    name: Optional[str] = None
+    description: Optional[str] = None
+
+@app.put("/api/accounts/{account_id}")
+async def update_account(account_id: str, account_update: AccountUpdate):
+    """Update an account's details"""
     data = load_json_file(ACCOUNTS_FILE)
     
     for i, acc in enumerate(data.get("accounts", [])):
         if acc["id"] == account_id:
-            # Check if account has positions
-            if acc.get("positions") and len(acc["positions"]) > 0:
-                raise HTTPException(status_code=400, detail="Cannot delete account with existing positions")
+            if account_update.name is not None:
+                acc["name"] = account_update.name
+            if account_update.description is not None:
+                acc["description"] = account_update.description
             
+            data["accounts"][i] = acc
+            save_json_file(ACCOUNTS_FILE, data)
+            return {"status": "updated", "account": acc}
+    
+    raise HTTPException(status_code=404, detail="Account not found")
+
+@app.delete("/api/accounts/{account_id}")
+async def delete_account(account_id: str):
+    """Delete an account and all its positions"""
+    # First delete all positions for this account
+    positions_data = load_json_file(POSITIONS_FILE)
+    positions_data["positions"] = [p for p in positions_data.get("positions", []) if p.get("account_id") != account_id]
+    save_json_file(POSITIONS_FILE, positions_data)
+    
+    # Then delete the account
+    data = load_json_file(ACCOUNTS_FILE)
+    
+    for i, acc in enumerate(data.get("accounts", [])):
+        if acc["id"] == account_id:
             data["accounts"].pop(i)
             save_json_file(ACCOUNTS_FILE, data)
             return {"status": "deleted", "account_id": account_id}

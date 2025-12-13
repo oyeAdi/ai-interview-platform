@@ -11,6 +11,7 @@ import CandidateSelector from '@/components/CandidateSelector'
 import FileUpload from '@/components/FileUpload'
 import AddPositionModal from '@/components/AddPositionModal'
 import AddAccountModal from '@/components/AddAccountModal'
+import DetailSidebar from '@/components/DetailSidebar'
 
 interface Account {
   id: string
@@ -68,6 +69,10 @@ export default function DashboardPage() {
   const [dataModel, setDataModel] = useState<DataModel | null>(null)
   const [showAddPosition, setShowAddPosition] = useState(false)
   const [showAddAccount, setShowAddAccount] = useState(false)
+  
+  // Sidebar state
+  const [sidebarType, setSidebarType] = useState<'account' | 'position' | null>(null)
+  const [sidebarId, setSidebarId] = useState<string | null>(null)
 
   // Load accounts and all positions on mount
   useEffect(() => {
@@ -228,6 +233,39 @@ export default function DashboardPage() {
   const selectedAccountData = accounts.find(a => a.id === selectedAccount)
   const selectedPositionData = accountPositions.find(p => p.id === selectedPosition)
 
+  // Sidebar handlers
+  const handleAccountSelect = (accountId: string) => {
+    setSelectedAccount(accountId)
+    setSidebarType('account')
+    setSidebarId(accountId)
+  }
+
+  const handlePositionSelect = (positionId: string) => {
+    setSelectedPosition(positionId)
+    setSidebarType('position')
+    setSidebarId(positionId)
+  }
+
+  const handleSidebarClose = () => {
+    setSidebarType(null)
+    setSidebarId(null)
+  }
+
+  const handleSidebarUpdate = () => {
+    refreshAccounts()
+    refreshPositions()
+  }
+
+  const handleSidebarDelete = () => {
+    if (sidebarType === 'account') {
+      setSelectedAccount('')
+      refreshAccounts()
+    } else if (sidebarType === 'position') {
+      setSelectedPosition('')
+      refreshPositions()
+    }
+  }
+
   return (
     <div className="min-h-screen flex flex-col bg-white dark:bg-black transition-colors duration-200">
       <Header showQuickStart={true} />
@@ -258,7 +296,7 @@ export default function DashboardPage() {
                 accounts={accounts}
                 positions={allPositions}
                 selectedAccount={selectedAccount}
-                onSelectAccount={setSelectedAccount}
+                onSelectAccount={handleAccountSelect}
                 onAddAccount={() => setShowAddAccount(true)}
                 loading={loading}
               />
@@ -273,7 +311,7 @@ export default function DashboardPage() {
                 <PositionGrid
                   positions={accountPositions}
                   selectedPosition={selectedPosition}
-                  onSelectPosition={setSelectedPosition}
+                  onSelectPosition={handlePositionSelect}
                   onAddPosition={() => setShowAddPosition(true)}
                   accountName={selectedAccountData?.name}
                   loading={positionsLoading}
@@ -417,6 +455,15 @@ export default function DashboardPage() {
               }
             })
         }}
+      />
+
+      {/* Detail Sidebar */}
+      <DetailSidebar
+        type={sidebarType}
+        selectedId={sidebarId}
+        onClose={handleSidebarClose}
+        onUpdate={handleSidebarUpdate}
+        onDelete={handleSidebarDelete}
       />
     </div>
   )
