@@ -5,7 +5,7 @@ import LiveScores from './LiveScores'
 import StrategyVisualization from './StrategyVisualization'
 import LogViewer from './LogViewer'
 import TimeMetrics from './TimeMetrics'
-import { wsUrl } from '@/config/api'
+import { wsUrl, apiUrl } from '@/config/api'
 
 interface AdminDashboardProps {
   sessionId: string
@@ -53,6 +53,7 @@ export default function AdminDashboard({ sessionId, language }: AdminDashboardPr
   const [currentQuestionStart, setCurrentQuestionStart] = useState<number | null>(null)
   const [isAnswering, setIsAnswering] = useState(false)
   const [activeTab, setActiveTab] = useState<'evaluation' | 'timing'>('evaluation')
+  const [isEnded, setIsEnded] = useState(false)
   const wsRef = useRef<WebSocket | null>(null)
 
   useEffect(() => {
@@ -71,6 +72,11 @@ export default function AdminDashboard({ sessionId, language }: AdminDashboardPr
         setConnectionStatus('connected')
         websocket.send(JSON.stringify({
           type: 'start_interview',
+          session_id: sessionId
+        }))
+        // Request log to restore state (in case of back navigation/refresh)
+        websocket.send(JSON.stringify({
+          type: 'get_log',
           session_id: sessionId
         }))
       }
@@ -118,11 +124,49 @@ export default function AdminDashboard({ sessionId, language }: AdminDashboardPr
             setStrategy(message.data)
           } else if (message.type === 'log_update') {
             setLogData(message.data)
+
+            // Restore state from log if history is empty (initial load/restore)
+            if (responseHistory.length === 0 && message.data?.interview_sessions) {
+              const session = message.data.interview_sessions.find((s: any) => s.session_id === sessionId)
+              if (session && session.rounds) {
+                const restoredHistory: any[] = []
+                const restoredTimings: ResponseTiming[] = []
+
+                session.rounds.forEach((round: any) => {
+                  (round.responses || []).forEach((resp: any) => {
+                    restoredHistory.push({
+                      time: new Date(resp.timestamp).toLocaleTimeString(),
+                      score: resp.evaluation?.overall_score || 0,
+                      type: resp.type || 'initial'
+                    })
+
+                    // Approximate timing reconstruction since we don't log start times explicitly in all versions
+                    if (resp.evaluation) {
+                      restoredTimings.push({
+                        questionId: round.question_id || `q${round.round_number}`,
+                        questionNumber: round.round_number,
+                        isFollowup: resp.type === 'followup',
+                        followupNumber: 0, // Simplified
+                        startTime: new Date(resp.timestamp).getTime() - 60000, // Dummy duration
+                        endTime: new Date(resp.timestamp).getTime(),
+                        score: resp.evaluation.overall_score ?? resp.evaluation.score ?? 0
+                      })
+                    }
+                  })
+                })
+
+                if (restoredHistory.length > 0) {
+                  console.log('Restored history from log:', restoredHistory.length)
+                  setResponseHistory(restoredHistory)
+                  setResponseTimings(restoredTimings)
+                }
+              }
+            }
           } else if (message.type === 'progress') {
             setProgress(prev => ({ ...prev, ...message.data }))
           } else if (message.type === 'question') {
-            // NEW main question - use round_number from backend
-            const qNum = message.data?.round_number || (progress.rounds_completed + 1)
+            // NEW main question - use question_number from backend (fallback to round_number)
+            const qNum = message.data?.question_number || message.data?.round_number || (progress.rounds_completed + 1)
             const questionId = message.data?.question_id || `q${qNum}`
             setCurrentQuestion({
               text: message.data?.text || message.text,
@@ -175,6 +219,13 @@ export default function AdminDashboard({ sessionId, language }: AdminDashboardPr
           } else if (message.type === 'response') {
             setLastSubmittedAnswer(message.data?.text || '')
             setCandidateTyping('')
+          } else if (message.type === 'session_end') {
+            setIsEnded(true)
+            setIsAnswering(false)
+            setConnectionStatus('disconnected')
+            if (wsRef.current) {
+              wsRef.current.close()
+            }
           }
         } catch (error) {
           console.error('Error parsing WebSocket message:', error)
@@ -216,17 +267,35 @@ export default function AdminDashboard({ sessionId, language }: AdminDashboardPr
   const avgScore = responseHistory.length > 0
     ? Math.round(responseHistory.reduce((a, b) => a + b.score, 0) / responseHistory.length)
     : 0
-  const totalResponses = responseHistory.length
+  // Count only main question responses (not followups)
+  const totalResponses = responseHistory.filter(r => r.type !== 'followup').length
 
-  // Get question label (e.g., "Q1", "Q1-a", "Q1-b")
+  // Get question label - always show Q number (e.g., "Q1", "Q2") even for followups
   const getQuestionLabel = () => {
     if (!currentQuestion) return 'Q?'
-    const qNum = currentQuestion.questionNumber || currentQuestionNum
-    if (currentQuestion.isFollowup) {
-      const letter = String.fromCharCode(96 + (currentQuestion.followupNumber || 1))
-      return `Q${qNum}-${letter}`
-    }
+    const qNum = currentQuestion.questionNumber || 1
     return `Q${qNum}`
+  }
+
+  const handleEndInterview = async () => {
+    if (!sessionId) return
+    if (!window.confirm('Are you sure you want to END this interview? This will finish the session for the candidate immediately.')) return
+
+    try {
+      const response = await fetch(apiUrl(`api/interview/${sessionId}/end`), {
+        method: 'POST',
+      })
+      if (response.ok) {
+        setIsEnded(true)
+        setIsAnswering(false)
+      } else {
+        console.error('Failed to end interview')
+        alert('Failed to end interview')
+      }
+    } catch (error) {
+      console.error('Error ending interview:', error)
+      alert('Error ending interview')
+    }
   }
 
   return (
@@ -248,12 +317,12 @@ export default function AdminDashboard({ sessionId, language }: AdminDashboardPr
               </div>
               {/* Connection Status */}
               <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium ${connectionStatus === 'connected' ? 'bg-[#39FF14]/10 text-[#39FF14]' :
-                  connectionStatus === 'connecting' ? 'bg-yellow-500/10 text-yellow-400' :
-                    'bg-red-500/10 text-red-400'
+                connectionStatus === 'connecting' ? 'bg-yellow-500/10 text-yellow-400' :
+                  'bg-red-500/10 text-red-400'
                 }`}>
                 <span className={`w-2 h-2 rounded-full ${connectionStatus === 'connected' ? 'bg-[#39FF14] animate-pulse' :
-                    connectionStatus === 'connecting' ? 'bg-yellow-400 animate-pulse' :
-                      'bg-red-400'
+                  connectionStatus === 'connecting' ? 'bg-yellow-400 animate-pulse' :
+                    'bg-red-400'
                   }`}></span>
                 {connectionStatus === 'connected' ? 'Live' : connectionStatus === 'connecting' ? 'Connecting...' : 'Disconnected'}
               </div>
@@ -264,7 +333,7 @@ export default function AdminDashboard({ sessionId, language }: AdminDashboardPr
               <div className="flex items-center gap-6">
                 <div className="text-center">
                   <p className="text-2xl font-bold text-white">
-                    {currentQuestionNum}<span className="text-gray-600">/{progress.total_rounds}</span>
+                    {currentQuestion?.questionNumber || 1}<span className="text-gray-600">/{progress.total_rounds}</span>
                   </p>
                   <p className="text-xs text-gray-500">Question</p>
                 </div>
@@ -277,14 +346,18 @@ export default function AdminDashboard({ sessionId, language }: AdminDashboardPr
                   <p className="text-xs text-gray-500">Responses</p>
                 </div>
               </div>
-              <a
-                href={`/interview?view=candidate&session_id=${sessionId}&lang=${language}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="px-4 py-2 bg-[#39FF14] hover:bg-[#7FFF5C] text-black font-semibold rounded-lg transition-colors"
-              >
-                Open Candidate View
-              </a>
+              {!isEnded ? (
+                <button
+                  onClick={handleEndInterview}
+                  className="px-4 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-500 border border-red-500/50 font-semibold rounded-lg transition-colors mr-3"
+                >
+                  End Interview
+                </button>
+              ) : (
+                <span className="px-4 py-2 bg-gray-800 text-gray-400 font-semibold rounded-lg border border-gray-700 select-none mr-3">
+                  Test Over!
+                </span>
+              )}
             </div>
           </div>
         </div>
@@ -308,11 +381,11 @@ export default function AdminDashboard({ sessionId, language }: AdminDashboardPr
           <div className="flex justify-between">
             {Array.from({ length: progress.total_rounds }).map((_, i) => (
               <div key={i} className="flex flex-col items-center">
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-all ${i < progress.rounds_completed
-                    ? 'bg-[#39FF14] text-black'
-                    : i === progress.rounds_completed
-                      ? 'bg-[#39FF14]/20 text-[#39FF14] ring-2 ring-[#39FF14]'
-                      : 'bg-gray-800 text-gray-500'
+                <div className={`w-8 h-8 rounded-md flex items-center justify-center text-sm font-bold transition-all ${i < progress.rounds_completed
+                  ? 'bg-[#39FF14] text-black'
+                  : i === progress.rounds_completed
+                    ? 'bg-[#39FF14]/20 text-[#39FF14] ring-2 ring-[#39FF14]'
+                    : 'bg-gray-800 text-gray-500'
                   }`}>
                   {i < progress.rounds_completed ? (
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
@@ -327,10 +400,10 @@ export default function AdminDashboard({ sessionId, language }: AdminDashboardPr
                   <div className="w-full h-1.5 bg-gray-700 rounded-full overflow-hidden">
                     <div
                       className={`h-full transition-all ${i < progress.rounds_completed
-                          ? 'bg-[#39FF14]'
-                          : i === progress.rounds_completed
-                            ? 'bg-[#00E5FF]'
-                            : 'bg-gray-600'
+                        ? 'bg-[#39FF14]'
+                        : i === progress.rounds_completed
+                          ? 'bg-[#00E5FF]'
+                          : 'bg-gray-600'
                         }`}
                       style={{
                         width: i < progress.rounds_completed
@@ -353,72 +426,89 @@ export default function AdminDashboard({ sessionId, language }: AdminDashboardPr
         </div>
 
         {/* Q&A Panel - Full Width */}
-        <div className="bg-[#141414] rounded-2xl border border-gray-800/50 overflow-hidden">
-          <div className="bg-[#39FF14]/5 px-5 py-3 border-b border-gray-800/50 flex items-center justify-between">
-            <h3 className="text-sm font-semibold text-[#39FF14]">Candidate View</h3>
-            <div className="flex items-center gap-2">
-              <span className="px-2 py-1 bg-[#39FF14]/20 text-[#39FF14] text-xs font-mono rounded-full font-bold">
-                {getQuestionLabel()}
-              </span>
-              {/* Follow-up counter (Admin only) */}
-              {currentQuestion?.isFollowup && (
-                <span className="px-2 py-1 bg-purple-500/20 text-purple-400 text-xs font-mono rounded-full">
-                  F{progress.current_followup}/{progress.max_followups}
-                </span>
-              )}
+        {isEnded ? (
+          <div className="bg-[#141414] rounded-2xl border border-gray-800/50 overflow-hidden p-12 text-center animate-in fade-in duration-500">
+            <div className="w-20 h-20 bg-[#39FF14]/10 rounded-full flex items-center justify-center mx-auto mb-6">
+              <svg className="w-10 h-10 text-[#39FF14]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
             </div>
+            <h2 className="text-3xl font-bold text-white mb-3">Test Completed</h2>
+            <p className="text-gray-400 text-lg max-w-md mx-auto">
+              The interview session has concluded. System is processing final results and generating the summary report.
+            </p>
           </div>
-
-          {/* Follow-up Decision Metrics (Admin only) */}
-          {progress.followup_stop_reason && (
-            <div className="mx-5 mt-3 px-3 py-2 bg-gray-800/50 border border-gray-700/50">
-              <div className="flex items-center justify-between text-xs">
-                <span className="text-gray-400">AI Decision:</span>
-                <span className={`font-medium ${progress.followup_stop_reason === 'sufficient_skill' ? 'text-green-400' :
-                    progress.followup_stop_reason === 'no_knowledge' ? 'text-red-400' :
-                      progress.followup_stop_reason === 'partial_continue' ? 'text-yellow-400' :
-                        'text-gray-400'
-                  }`}>
-                  {progress.followup_stop_reason?.replace(/_/g, ' ')}
+        ) : (
+          <div className="bg-[#141414] rounded-2xl border border-gray-800/50 overflow-hidden">
+            <div className="bg-[#39FF14]/5 px-5 py-3 border-b border-gray-800/50 flex items-center justify-between">
+              <h3 className="text-sm font-semibold text-[#39FF14]">Candidate View</h3>
+              <div className="flex items-center gap-2">
+                <span className="px-2 py-1 bg-[#39FF14]/20 text-[#39FF14] text-xs font-mono rounded-full font-bold">
+                  {getQuestionLabel()}
                 </span>
-                <span className="text-gray-500">
-                  ({Math.round((progress.followup_confidence || 0) * 100)}% conf)
-                </span>
-              </div>
-            </div>
-          )}
-
-          <div className="p-5 space-y-4">
-            {/* Question */}
-            <div>
-              <p className="text-xs text-gray-500 mb-2 uppercase tracking-wide">Question</p>
-              <p className="text-white text-lg">
-                {currentQuestion?.text || <span className="text-gray-500 italic">Waiting for question...</span>}
-              </p>
-            </div>
-            {/* Candidate Answer */}
-            <div>
-              <div className="flex items-center gap-2 mb-2">
-                <p className="text-xs text-gray-500 uppercase tracking-wide">Candidate Answer</p>
-                {candidateTyping && (
-                  <span className="flex items-center gap-1 text-xs text-[#39FF14]">
-                    <span className="w-1.5 h-1.5 bg-[#39FF14] rounded-full animate-pulse"></span>
-                    Typing...
+                {/* Follow-up counter (Admin only) */}
+                {currentQuestion?.isFollowup && (
+                  <span className="px-2 py-1 bg-purple-500/20 text-purple-400 text-xs font-mono rounded-full">
+                    F{progress.current_followup}/{progress.max_followups}
                   </span>
                 )}
               </div>
-              <div className="bg-[#0D0D0D] rounded-xl p-4 min-h-[60px] border border-gray-800/50">
-                {candidateTyping ? (
-                  <p className="text-gray-300">{candidateTyping}<span className="text-[#39FF14] animate-pulse">|</span></p>
-                ) : lastSubmittedAnswer ? (
-                  <p className="text-white">{lastSubmittedAnswer}</p>
-                ) : (
-                  <p className="text-gray-600 italic">Waiting for candidate response...</p>
-                )}
+            </div>
+
+            {/* Follow-up Decision Metrics (Admin only) */}
+            {progress.followup_stop_reason && (
+              <div className="mx-5 mt-3 px-3 py-2 bg-gray-800/50 border border-gray-700/50">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-gray-400">AI Decision:</span>
+                  <span className={`font-medium ${progress.followup_stop_reason === 'sufficient_skill' ? 'text-green-400' :
+                    progress.followup_stop_reason === 'no_knowledge' ? 'text-red-400' :
+                      progress.followup_stop_reason === 'partial_continue' ? 'text-yellow-400' :
+                        'text-gray-400'
+                    }`}>
+                    {progress.followup_stop_reason?.replace(/_/g, ' ')}
+                  </span>
+                  <span className="text-gray-500">
+                    ({Math.round((progress.followup_confidence || 0) * 100)}% conf)
+                  </span>
+                </div>
+              </div>
+            )}
+
+            <div className="p-5 space-y-4">
+              {/* Question */}
+              <div>
+                <p className="text-xs text-gray-500 mb-2 uppercase tracking-wide">Question</p>
+                <p className="text-white text-lg">
+                  {currentQuestion?.text || <span className="text-gray-500 italic">Waiting for question...</span>}
+                </p>
+              </div>
+              {/* Candidate Answer */}
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <p className="text-xs text-gray-500 uppercase tracking-wide">Candidate Answer</p>
+                  {candidateTyping && (
+                    <span className="flex items-center gap-1 text-xs text-[#39FF14]">
+                      <span className="w-1.5 h-1.5 bg-[#39FF14] rounded-full animate-pulse"></span>
+                      Typing...
+                    </span>
+                  )}
+                </div>
+                <div className="bg-[#0D0D0D] rounded-xl p-4 min-h-[150px] max-h-[400px] overflow-y-auto border border-gray-800/50 font-mono text-sm whitespace-pre-wrap">
+                  {candidateTyping ? (
+                    <div className="text-gray-300">
+                      {candidateTyping}
+                      <span className="text-[#39FF14] animate-pulse inline-block w-2 h-4 bg-[#39FF14] ml-1 align-middle"></span>
+                    </div>
+                  ) : lastSubmittedAnswer ? (
+                    <div className="text-white">{lastSubmittedAnswer}</div>
+                  ) : (
+                    <p className="text-gray-600 italic font-sans">Waiting for candidate response...</p>
+                  )}
+                </div>
               </div>
             </div>
           </div>
-        </div>
+        )}
 
         {/* Two Column Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
@@ -476,8 +566,8 @@ export default function AdminDashboard({ sessionId, language }: AdminDashboardPr
                 <button
                   onClick={() => setActiveTab('evaluation')}
                   className={`flex-1 px-5 py-3 text-sm font-semibold transition-colors ${activeTab === 'evaluation'
-                      ? 'bg-[#39FF14]/5 text-[#39FF14] border-b-2 border-[#39FF14]'
-                      : 'text-gray-500 hover:text-gray-300'
+                    ? 'bg-[#39FF14]/5 text-[#39FF14] border-b-2 border-[#39FF14]'
+                    : 'text-gray-500 hover:text-gray-300'
                     }`}
                 >
                   <div className="flex items-center justify-center gap-2">
@@ -490,8 +580,8 @@ export default function AdminDashboard({ sessionId, language }: AdminDashboardPr
                 <button
                   onClick={() => setActiveTab('timing')}
                   className={`flex-1 px-5 py-3 text-sm font-semibold transition-colors ${activeTab === 'timing'
-                      ? 'bg-[#39FF14]/5 text-[#39FF14] border-b-2 border-[#39FF14]'
-                      : 'text-gray-500 hover:text-gray-300'
+                    ? 'bg-[#39FF14]/5 text-[#39FF14] border-b-2 border-[#39FF14]'
+                    : 'text-gray-500 hover:text-gray-300'
                     }`}
                 >
                   <div className="flex items-center justify-center gap-2">

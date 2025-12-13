@@ -9,11 +9,17 @@ import FileUpload from '@/components/FileUpload'
 import JDSelector from '@/components/JDSelector'
 import ResumeSelector from '@/components/ResumeSelector'
 
+interface CategoryConfig {
+  enabled: boolean
+  count: number
+  difficulty: 'easy' | 'medium' | 'hard'
+}
+
 interface QuestionCategories {
-  coding: { enabled: boolean; count: number }
-  conceptual: { enabled: boolean; count: number }
-  system_design: { enabled: boolean; count: number }
-  problem_solving: { enabled: boolean; count: number }
+  coding: CategoryConfig
+  conceptual: CategoryConfig
+  system_design: CategoryConfig
+  problem_solving: CategoryConfig
 }
 
 interface InterviewPreset {
@@ -21,7 +27,6 @@ interface InterviewPreset {
   name: string
   description: string
   icon: string
-  duration: number
   categories: QuestionCategories
 }
 
@@ -29,40 +34,37 @@ const INTERVIEW_PRESETS: InterviewPreset[] = [
   {
     id: 'coding_challenge',
     name: 'Coding Challenge',
-    description: 'Coding questions only (algorithms, DS)',
+    description: 'Focus on coding skills',
     icon: '💻',
-    duration: 30,
     categories: {
-      coding: { enabled: true, count: 3 },
-      conceptual: { enabled: false, count: 0 },
-      system_design: { enabled: false, count: 0 },
-      problem_solving: { enabled: false, count: 0 }
+      coding: { enabled: true, count: 1, difficulty: 'medium' },
+      conceptual: { enabled: true, count: 1, difficulty: 'medium' },
+      system_design: { enabled: true, count: 1, difficulty: 'medium' },
+      problem_solving: { enabled: true, count: 1, difficulty: 'medium' }
     }
   },
   {
     id: 'full_technical',
     name: 'Full Technical',
-    description: 'All question types balanced',
+    description: 'Balanced assessment',
     icon: '📋',
-    duration: 60,
     categories: {
-      coding: { enabled: true, count: 2 },
-      conceptual: { enabled: true, count: 2 },
-      system_design: { enabled: true, count: 1 },
-      problem_solving: { enabled: true, count: 1 }
+      coding: { enabled: true, count: 1, difficulty: 'medium' },
+      conceptual: { enabled: true, count: 1, difficulty: 'medium' },
+      system_design: { enabled: true, count: 1, difficulty: 'medium' },
+      problem_solving: { enabled: true, count: 1, difficulty: 'medium' }
     }
   },
   {
     id: 'system_design',
     name: 'System Design',
-    description: 'Architecture & design focus',
+    description: 'Architecture focus',
     icon: '🏗️',
-    duration: 45,
     categories: {
-      coding: { enabled: false, count: 0 },
-      conceptual: { enabled: true, count: 1 },
-      system_design: { enabled: true, count: 3 },
-      problem_solving: { enabled: true, count: 1 }
+      coding: { enabled: true, count: 1, difficulty: 'medium' },
+      conceptual: { enabled: true, count: 1, difficulty: 'medium' },
+      system_design: { enabled: true, count: 1, difficulty: 'medium' },
+      problem_solving: { enabled: true, count: 1, difficulty: 'medium' }
     }
   },
   {
@@ -70,12 +72,11 @@ const INTERVIEW_PRESETS: InterviewPreset[] = [
     name: 'Conceptual Deep Dive',
     description: 'Theory and fundamentals',
     icon: '📚',
-    duration: 45,
     categories: {
-      coding: { enabled: false, count: 0 },
-      conceptual: { enabled: true, count: 4 },
-      system_design: { enabled: false, count: 0 },
-      problem_solving: { enabled: true, count: 2 }
+      coding: { enabled: true, count: 1, difficulty: 'medium' },
+      conceptual: { enabled: true, count: 1, difficulty: 'medium' },
+      system_design: { enabled: true, count: 1, difficulty: 'medium' },
+      problem_solving: { enabled: true, count: 1, difficulty: 'medium' }
     }
   }
 ]
@@ -91,7 +92,32 @@ export default function QuickStartPage() {
   const [loading, setLoading] = useState(false)
   const [jds, setJds] = useState<any[]>([])
   const [resumes, setResumes] = useState<any[]>([])
-  const [selectedPreset, setSelectedPreset] = useState<string>('full_technical')
+  const [selectedCategories, setSelectedCategories] = useState<Record<string, boolean>>({
+    coding: true,
+    conceptual: true,
+    system_design: true,
+    problem_solving: true
+  })
+  const [categoryDifficulties, setCategoryDifficulties] = useState<Record<string, 'easy' | 'medium' | 'hard'>>({
+    coding: 'medium',
+    conceptual: 'medium',
+    system_design: 'medium',
+    problem_solving: 'medium'
+  })
+
+  // Calculate total duration based on selected categories and difficulties
+  const calculateDuration = () => {
+    const difficultyMinutes = { easy: 10, medium: 15, hard: 20 }
+    let total = 0
+
+    Object.entries(selectedCategories).forEach(([category, isSelected]) => {
+      if (isSelected) {
+        const difficulty = categoryDifficulties[category] || 'medium'
+        total += difficultyMinutes[difficulty]
+      }
+    })
+    return total
+  }
 
   // Load JDs and Resumes on mount
   useEffect(() => {
@@ -99,7 +125,7 @@ export default function QuickStartPage() {
       .then(res => res.json())
       .then(data => setJds(data.jds || []))
       .catch(err => console.error('Error loading JDs:', err))
-    
+
     fetch(apiUrl('api/resumes'))
       .then(res => res.json())
       .then(data => setResumes(data.resumes || []))
@@ -150,19 +176,19 @@ export default function QuickStartPage() {
 
     try {
       const formData = new FormData()
-      
+
       let finalJdText = jdText
       if (selectedJd) {
         const jd = jds.find(j => j.id === selectedJd)
         if (jd) finalJdText = jd.text
       }
-      
+
       let finalResumeText = resumeText
       if (selectedResume) {
         const resume = resumes.find(r => r.id === selectedResume)
         if (resume) finalResumeText = resume.text
       }
-      
+
       if (finalJdText) formData.append('jd_text', finalJdText)
       if (jdFile) formData.append('jd_file', jdFile)
       if (finalResumeText) formData.append('resume_text', finalResumeText)
@@ -170,12 +196,17 @@ export default function QuickStartPage() {
       if (selectedJd) formData.append('jd_id', selectedJd)
       if (selectedResume) formData.append('resume_id', selectedResume)
       if (expertMode) formData.append('expert_mode', 'true')
-      
-      // Send selected preset's question categories
-      const selectedPresetData = INTERVIEW_PRESETS.find(p => p.id === selectedPreset)
-      if (selectedPresetData) {
-        formData.append('question_categories', JSON.stringify(selectedPresetData.categories))
-      }
+
+      // Send selected categories with difficulties
+      const categoriesWithDifficulty: any = {}
+      Object.entries(selectedCategories).forEach(([category, isSelected]) => {
+        categoriesWithDifficulty[category] = {
+          enabled: isSelected,
+          count: 1,
+          difficulty: categoryDifficulties[category] || 'medium'
+        }
+      })
+      formData.append('question_categories', JSON.stringify(categoriesWithDifficulty))
 
       const response = await fetch(apiUrl('api/analyze-language'), {
         method: 'POST',
@@ -183,15 +214,15 @@ export default function QuickStartPage() {
       })
 
       const data = await response.json()
-      
+
       if (data.session_id) {
         localStorage.setItem('current_session_id', data.session_id)
         localStorage.setItem('current_language', data.language)
         localStorage.setItem('expert_mode', expertMode ? 'true' : 'false')
-        
+
         const candidateUrl = `/interview?view=candidate&session_id=${data.session_id}&lang=${data.language}`
         router.push(candidateUrl)
-        
+
         setTimeout(() => {
           const viewType = expertMode ? 'expert' : 'admin'
           const adminUrl = `${window.location.origin}/interview?view=${viewType}&session_id=${data.session_id}&lang=${data.language}`
@@ -209,7 +240,7 @@ export default function QuickStartPage() {
   return (
     <div className="min-h-screen flex flex-col bg-white dark:bg-black transition-colors duration-200">
       <Header showQuickStart={false} showBackToDashboard={true} />
-      
+
       <main className="flex-1">
         {/* Hero Section */}
         <section className="border-b border-gray-200 dark:border-[#2A2A2A]">
@@ -232,52 +263,87 @@ export default function QuickStartPage() {
           </div>
         </section>
 
-        {/* Interview Type Presets */}
+        {/* Category Selection */}
         <section className="border-b border-gray-200 dark:border-[#2A2A2A]">
           <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
             <h2 className="text-xs font-medium text-epam-cyan uppercase tracking-[0.2em] mb-6">
-              Select Interview Type
+              Select Question Categories
             </h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {INTERVIEW_PRESETS.map((preset) => (
+
+            {/* Category Checkboxes */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+              {[
+                { key: 'coding', icon: '💻', label: 'Coding' },
+                { key: 'conceptual', icon: '📚', label: 'Conceptual' },
+                { key: 'system_design', icon: '🏗️', label: 'System Design' },
+                { key: 'problem_solving', icon: '🧩', label: 'Problem Solving' }
+              ].map((cat) => (
                 <button
-                  key={preset.id}
+                  key={cat.key}
                   type="button"
-                  onClick={() => setSelectedPreset(preset.id)}
-                  className={`p-4 border text-left transition-all duration-200 group
-                             ${selectedPreset === preset.id
-                               ? 'border-epam-cyan bg-epam-cyan/5'
-                               : 'border-gray-200 dark:border-[#2A2A2A] hover:border-epam-cyan/50'
-                             }`}
+                  onClick={() => setSelectedCategories(prev => ({
+                    ...prev,
+                    [cat.key]: !prev[cat.key]
+                  }))}
+                  className={`p-4 border text-left transition-all duration-200
+                             ${selectedCategories[cat.key]
+                      ? 'border-epam-cyan bg-epam-cyan/5'
+                      : 'border-gray-200 dark:border-[#2A2A2A] hover:border-epam-cyan/50'
+                    }`}
                 >
-                  <div className="text-2xl mb-2">{preset.icon}</div>
-                  <div className={`font-medium text-sm mb-1 ${
-                    selectedPreset === preset.id ? 'text-epam-cyan' : 'text-black dark:text-white'
-                  }`}>
-                    {preset.name}
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="text-2xl">{cat.icon}</div>
+                    {selectedCategories[cat.key] && (
+                      <svg className="w-5 h-5 text-epam-cyan" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                      </svg>
+                    )}
                   </div>
-                  <div className="text-xs text-gray-500 mb-2">{preset.description}</div>
-                  <div className="text-xs text-gray-400">{preset.duration} min</div>
+                  <div className={`font-medium text-sm ${selectedCategories[cat.key] ? 'text-epam-cyan' : 'text-black dark:text-white'}`}>
+                    {cat.label}
+                  </div>
+                  <div className="text-xs text-gray-500">1 question</div>
                 </button>
               ))}
             </div>
-            
-            {/* Show selected categories */}
-            {selectedPreset && (
-              <div className="mt-6 p-4 bg-gray-50 dark:bg-[#0A0A0A] border border-gray-100 dark:border-[#1A1A1A]">
-                <div className="flex items-center gap-4 flex-wrap">
-                  <span className="text-xs text-gray-500 uppercase tracking-wide">Questions:</span>
-                  {Object.entries(INTERVIEW_PRESETS.find(p => p.id === selectedPreset)?.categories || {})
-                    .filter(([_, config]) => config.enabled && config.count > 0)
-                    .map(([category, config]) => (
-                      <span key={category} className="px-2 py-1 text-xs bg-epam-cyan/10 text-epam-cyan border border-epam-cyan/20">
-                        {category.replace('_', ' ')} × {config.count}
-                      </span>
-                    ))
-                  }
-                </div>
+
+            {/* Duration and Difficulty Selectors */}
+            <div className="mt-6 space-y-4">
+              <div className="flex items-center justify-between p-4 bg-epam-cyan/5 border border-epam-cyan/20">
+                <span className="text-sm font-medium text-epam-cyan">Total Duration</span>
+                <span className="text-lg font-bold text-epam-cyan">{calculateDuration()} minutes</span>
               </div>
-            )}
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {Object.entries(selectedCategories)
+                  .filter(([_, isSelected]) => isSelected)
+                  .map(([category]) => (
+                    <div key={category} className="p-4 bg-gray-50 dark:bg-[#0A0A0A] border border-gray-100 dark:border-[#1A1A1A]">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm font-medium text-black dark:text-white capitalize">
+                          {category.replace('_', ' ')}
+                        </span>
+                        <span className="text-xs text-gray-500">× 1</span>
+                      </div>
+                      <select
+                        value={categoryDifficulties[category] || 'medium'}
+                        onChange={(e) => setCategoryDifficulties(prev => ({
+                          ...prev,
+                          [category]: e.target.value as 'easy' | 'medium' | 'hard'
+                        }))}
+                        className="w-full appearance-none bg-white dark:bg-black border border-gray-200 dark:border-[#2A2A2A] 
+                                 px-3 py-2 text-sm text-black dark:text-white capitalize
+                                 focus:outline-none focus:border-epam-cyan"
+                      >
+                        <option value="easy">Easy (10 min)</option>
+                        <option value="medium">Medium (15 min)</option>
+                        <option value="hard">Hard (20 min)</option>
+                      </select>
+                    </div>
+                  ))
+                }
+              </div>
+            </div>
           </div>
         </section>
 
@@ -289,14 +355,14 @@ export default function QuickStartPage() {
               <h2 className="text-xs font-medium text-epam-cyan uppercase tracking-[0.2em] mb-6">
                 Job Description
               </h2>
-              
+
               <div className="space-y-4">
                 <JDSelector
                   jds={jds}
                   selectedJd={selectedJd}
                   onSelectJd={setSelectedJd}
                 />
-                
+
                 <FileUpload
                   label="Job Description"
                   text={jdText}
@@ -319,14 +385,14 @@ export default function QuickStartPage() {
               <h2 className="text-xs font-medium text-epam-cyan uppercase tracking-[0.2em] mb-6">
                 Resume
               </h2>
-              
+
               <div className="space-y-4">
                 <ResumeSelector
                   resumes={resumes}
                   selectedResume={selectedResume}
                   onSelectResume={setSelectedResume}
                 />
-                
+
                 <FileUpload
                   label="Resume"
                   text={resumeText}
@@ -367,7 +433,7 @@ export default function QuickStartPage() {
                   </>
                 )}
               </button>
-              
+
               <button
                 onClick={() => handleStartInterview(true)}
                 disabled={loading}
@@ -378,7 +444,7 @@ export default function QuickStartPage() {
                 </svg>
                 Start as Expert
               </button>
-              
+
               <p className="text-xs text-gray-500 dark:text-gray-500 text-center pt-2">
                 Expert mode: Review and approve AI questions before sending
               </p>

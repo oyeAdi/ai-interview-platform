@@ -137,7 +137,12 @@ class InterviewController:
         if not question:
             return None
         
-        self.current_question = question
+        # Store enriched question
+        self.current_question = question.copy()
+        self.current_question["round_number"] = round_num
+        self.current_question["question_number"] = round_num
+        self.current_question["category"] = question.get("category", "unknown")
+        
         self.current_followup_count = 0
         
         # Update context
@@ -147,6 +152,17 @@ class InterviewController:
         # Track question category
         question_category = question.get("category", "unknown")
         
+        # Log the question to log.json
+        self.logger.log_question(
+            self.context_manager.session_id,
+            question["id"],
+            question["text"],
+            question["type"],
+            round_num,
+            question_category,
+            question.get("topic")
+        )
+        
         return {
             "type": "question",
             "question_id": question["id"],
@@ -154,6 +170,7 @@ class InterviewController:
             "question_type": question["type"],
             "topic": question.get("topic"),
             "round_number": round_num,
+            "question_number": round_num,
             "category": question_category
         }
     
@@ -204,9 +221,37 @@ class InterviewController:
             seed_topic = seed_question.get("topic", "") if seed_question else ""
             seed_category = seed_question.get("category", "conceptual") if seed_question else "conceptual"
             
-            prompt = f"""You are a friendly, professional technical interviewer for a {position_title} position ({experience_level} level).
+            required_skills_str = ', '.join(required_skills[:5]) if required_skills else self.language
 
-Your task: Create a personalized first question that combines a technical topic with the candidate's background.
+            if seed_category == 'coding':
+                 prompt = f"""You are a friendly, professional technical interviewer for a {position_title} position ({experience_level} level).
+
+Your task: Personalize the introduction of a CODING CHALLENGE for the REQUIRED SKILLS, keeping the technical coding task intact.
+
+SEED CODING QUESTION (Core task):
+"{seed_text}"
+Topic: {seed_topic}
+Category: {seed_category}
+
+CANDIDATE'S RESUME:
+{self.resume_text[:1500]}
+
+REQUIRED SKILLS (TARGET POSITION): {required_skills_str}
+
+INSTRUCTIONS:
+1. Start with a warm, brief 1-sentence acknowledgment of their background.
+2. **CONTEXTUALIZATION RULE**: You MUST frame the question in the context of the **REQUIRED SKILLS** ({required_skills_str}).
+   - If the resume implies a different language (e.g., Python) but the position is for {self.language} (or {required_skills_str}), you can say "Coming from a Python background, I'd like to see how you handle [Topic] in {self.language}..."
+   - Do NOT ask them to write code in a language NOT listed in Required Skills unless the seed specifically allows it.
+3. Transition immediately to the coding task. 
+4. **CRITICAL**: The output MUST be a request to WRITE CODE. Do NOT change it to a discussion question.
+5. Example: "I see you have experience with [Resume Skill]. For this role, we use [Required Skill], so I'd like you to solve this challenge using [Required Skill]..."
+
+Generate ONLY the personalized question text."""
+            else:
+                 prompt = f"""You are a friendly, professional technical interviewer for a {position_title} position ({experience_level} level).
+
+Your task: Create a personalized first question that tests the **REQUIRED SKILLS**, using the candidate's background as a bridge.
 
 SEED QUESTION (use as structural inspiration):
 "{seed_text}"
@@ -214,22 +259,21 @@ Topic: {seed_topic}
 Category: {seed_category}
 
 CANDIDATE'S RESUME:
-{self.resume_text[:1800]}
+{self.resume_text[:1500]}
 
-REQUIRED SKILLS: {', '.join(required_skills[:5]) if required_skills else self.language}
+REQUIRED SKILLS (TARGET POSITION): {required_skills_str}
 
 INSTRUCTIONS:
-1. Start with a warm, brief acknowledgment (e.g., "I noticed from your resume..." or "I see you've worked with...")
-2. Connect the seed question's topic to something specific from their resume
-3. Make it feel like a natural conversation starter, not a generic question
-4. Adjust complexity for {experience_level} level:
-   - Junior: Direct, fundamental, encouraging
-   - Mid: Practical, hands-on experience focused
-   - Senior/Lead: Probing, decision-focused, architectural
+1. Start with a warm, brief acknowledgment of their resume.
+2. **RELEVANCE RULE**: The question MUST be about the **REQUIRED SKILLS**.
+   - If the candidate's resume focuses on irrelevant skills (e.g., they know React but the job is for Android), do NOT ask deep questions about React. Ask about Android, perhaps asking how their React knowledge translates.
+   - **Do NOT ask questions about skills NOT in the Required Skills list.**
+3. Connect the seed question's topic to their experience, but steer it towards the Target Position's technology.
+4. Adjust complexity for {experience_level} level.
 
 EXAMPLE OUTPUT FORMATS:
-- "I noticed you worked with [tech from resume]. The seed topic is about [topic]. How did you approach [specific aspect] in your [project]?"
-- "I see you've built [feature from resume]. When you were working on that, how did you handle [seed topic concept]?"
+- "I noticed you worked with [Resume Tech]. In this role, we focus on [Required Skill]. How would you compare [Specific Concept] in [Resume Tech] vs [Required Skill]?"
+- "Given your background in [Resume Tech], how would you approach [Seed Question Topic] using [Required Skill]?"
 
 Generate ONLY the personalized question text. Keep it conversational and warm."""
 
@@ -387,6 +431,45 @@ Generate ONLY the personalized question text. Keep it conversational and warm.""
                 experience_level=self.data_model.get("experience_level", "mid") if self.data_model else "mid"
             )
             
+            # Soft Stop Logic: "Opinion by 2" based on SUSTAINED performance
+            # After 2 followups (3 total responses), we have enough data to form an opinion
+            if self.current_followup_count >= 2:
+                # Calculate average score of the current round to ensure consistency
+                current_round_summary = self.context_manager.get_current_round_summary()
+                avg_round_score = 0
+                if current_round_summary and current_round_summary.get("score_trend"):
+                    scores = current_round_summary["score_trend"]
+                    # We are at follow-up #2, which means we have:
+                    # 1 Initial Response + 2 Follow-up Responses = 3 Data Points.
+                    # This provides sufficient basis for an opinion.
+                    avg_round_score = sum(scores) / len(scores)
+                else:
+                    # Fallback to current score if no trend data
+                    avg_round_score = evaluation.get("overall_score", 0)
+
+                # Early Exit (Success) - Sustained High Performance
+                if avg_round_score >= 85:
+                    self.followup_stop_reason = "high_confidence_success"
+                    self.followup_confidence = 0.95
+                    return None
+                
+                # Early Exit (Failure) - Sustained Poor Performance
+                if avg_round_score < 45:
+                    self.followup_stop_reason = "high_confidence_failure"
+                    self.followup_confidence = 0.95
+                    return None
+            
+            # Mercy Kill: Trend Analysis (Drop > 25 points)
+            current_round_summary = self.context_manager.get_current_round_summary()
+            if current_round_summary and len(current_round_summary.get("score_trend", [])) >= 2:
+                recent_scores = current_round_summary["score_trend"][-3:]  # Last 3 scores
+                if len(recent_scores) >= 2:
+                    drop = max(recent_scores) - recent_scores[-1]
+                    if drop > 25:
+                        self.followup_stop_reason = "performance_drop"
+                        self.followup_confidence = 0.9
+                        return None
+
             if not should_continue.get("continue", True):
                 self.followup_stop_reason = should_continue.get("reason", "sufficient_skill")
                 self.followup_confidence = should_continue.get("confidence", 0.8)

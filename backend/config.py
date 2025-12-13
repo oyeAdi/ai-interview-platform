@@ -10,9 +10,10 @@ class Config:
     GEMINI_API_KEY: str = os.getenv("GEMINI_API_KEY", "AIzaSyAhMC13D-v4DcX1pMJ1JvtaZHO7gJOmmI4")
     
     # Interview settings
-    DEFAULT_QUESTIONS: int = int(os.getenv("DEFAULT_QUESTIONS", "3"))
+
     # Max follow-ups per question - AI decides dynamically when to stop (up to this limit)
-    MAX_FOLLOWUPS_PER_QUESTION: int = int(os.getenv("MAX_FOLLOWUPS_PER_QUESTION", "10"))
+    MAX_FOLLOWUPS_PER_QUESTION: int = int(os.getenv("MAX_FOLLOWUPS_PER_QUESTION", "8"))
+    DEFAULT_QUESTIONS: int = int(os.getenv("DEFAULT_QUESTIONS", "5"))
     
     # File paths
     BASE_DIR: str = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))

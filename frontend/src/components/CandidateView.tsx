@@ -4,6 +4,7 @@ import { useEffect, useState, useRef, lazy, Suspense } from 'react'
 import { useRouter } from 'next/navigation'
 import AnswerInput from './AnswerInput'
 import EndInterviewModal from './EndInterviewModal'
+import InterviewCompleteModal from './InterviewCompleteModal'
 import { apiUrl, wsUrl } from '@/config/api'
 
 // Lazy load Monaco editor for better performance
@@ -18,6 +19,7 @@ export default function CandidateView({ sessionId, language }: CandidateViewProp
   const router = useRouter()
   const [ws, setWs] = useState<WebSocket | null>(null)
   const wsRef = useRef<WebSocket | null>(null)
+  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const [currentQuestion, setCurrentQuestion] = useState<string>('')
   const [questionType, setQuestionType] = useState<string>('')
   const [isCodingQuestion, setIsCodingQuestion] = useState(false)
@@ -41,6 +43,28 @@ export default function CandidateView({ sessionId, language }: CandidateViewProp
   // End Interview Modal
   const [showEndModal, setShowEndModal] = useState(false)
   const [isEndingInterview, setIsEndingInterview] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  // Timer (45 minutes)
+  const [timeLeft, setTimeLeft] = useState(45 * 60)
+
+  useEffect(() => {
+    if (sessionEnded) return
+
+    const timer = setInterval(() => {
+      setTimeLeft(prev => prev - 1)
+    }, 1000)
+
+    return () => clearInterval(timer)
+  }, [sessionEnded])
+
+  const formatTime = (seconds: number) => {
+    const start = seconds < 0 ? '-' : ''
+    const absSeconds = Math.abs(seconds)
+    const mins = Math.floor(absSeconds / 60)
+    const secs = absSeconds % 60
+    return `${start}${mins}:${secs.toString().padStart(2, '0')}`
+  }
 
   useEffect(() => {
     if (!sessionId) return
@@ -82,6 +106,35 @@ export default function CandidateView({ sessionId, language }: CandidateViewProp
           const message = JSON.parse(event.data)
           console.log('WebSocket message received:', message.type, message)
 
+          if (message.type === 'configuration') {
+            if (message.duration_minutes) {
+              const totalSeconds = message.duration_minutes * 60
+              let remaining = totalSeconds
+
+              if (message.start_time) {
+                const startTime = new Date(message.start_time).getTime()
+                const now = new Date().getTime()
+                // Convert UTC to local if needed, but timestamps should assume UTC
+                // Actually created_at is saved as datetime.utcnow().isoformat() which is Z
+                // JS new Date() handles Z correctly.
+                // But backend sends isoformat without Z sometimes?
+                // Assuming it's UTC-ish.
+                // Ideally backend sends Z.
+
+                // Correction: backend isoformat might not have Z.
+                // Assuming client and server are loosely synced or just use delta
+                const elapsedSeconds = Math.floor((now - new Date(message.start_time + (message.start_time.endsWith('Z') ? '' : 'Z')).getTime()) / 1000)
+
+                // Safety: if elapsed is negative (clock skew), treat as 0
+                if (elapsedSeconds > 0) {
+                  remaining = totalSeconds - elapsedSeconds
+                }
+              }
+
+              setTimeLeft(Math.max(0, remaining))
+            }
+          }
+
           if (message.type === 'connected') {
             console.log('WebSocket connection confirmed:', message.message)
             // Now send start_interview
@@ -109,6 +162,7 @@ export default function CandidateView({ sessionId, language }: CandidateViewProp
             // Greeting received
             return
           } else if (message.type === 'question') {
+            setIsSubmitting(false)
             const data = message.data || {}
             setCurrentQuestion(data.text || message.text || '')
             setQuestionType(data.question_type || '')
@@ -131,6 +185,7 @@ export default function CandidateView({ sessionId, language }: CandidateViewProp
             setQuestionNumber(roundNum)
             setProgress(prev => ({ ...prev, current_followup: 0 }))
           } else if (message.type === 'followup') {
+            setIsSubmitting(false)
             setCurrentQuestion(message.data?.text || message.text || '')
             setIsFollowup(true)
             const fNum = message.data?.followup_number || 1
@@ -139,6 +194,7 @@ export default function CandidateView({ sessionId, language }: CandidateViewProp
           } else if (message.type === 'progress') {
             setProgress(prev => ({ ...prev, ...message.data }))
           } else if (message.type === 'session_end') {
+            setIsSubmitting(false)
             setSessionEnded(true)
             setTimeout(() => {
               router.push('/thanks')
@@ -160,8 +216,9 @@ export default function CandidateView({ sessionId, language }: CandidateViewProp
   }, [sessionId, router])
 
   const handleSubmitAnswer = (answer: string) => {
-    if (!wsRef.current || wsRef.current.readyState !== WebSocket.OPEN || !answer.trim()) return
+    if (!wsRef.current || wsRef.current.readyState !== WebSocket.OPEN || !answer.trim() || isSubmitting) return
 
+    setIsSubmitting(true)
     const responseType = isFollowup ? 'followup' : 'initial'
     wsRef.current.send(JSON.stringify({
       type: 'response',
@@ -227,21 +284,9 @@ export default function CandidateView({ sessionId, language }: CandidateViewProp
   }
 
   if (sessionEnded) {
-    return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-20 h-20 mx-auto mb-6 flex items-center justify-center border-2 border-[#00E5FF]">
-            <svg className="w-10 h-10 text-[#00E5FF]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-            </svg>
-          </div>
-          <h2 className="text-3xl font-light text-white mb-4">
-            Interview Complete
-          </h2>
-          <p className="text-gray-400">Thank you for your time. Redirecting...</p>
-        </div>
-      </div>
-    )
+    if (sessionEnded) {
+      return <InterviewCompleteModal isOpen={true} />
+    }
   }
 
   return (
@@ -255,6 +300,19 @@ export default function CandidateView({ sessionId, language }: CandidateViewProp
               <span className="text-white font-bold text-xl">&lt;epam&gt;</span>
               <div className="h-6 w-px bg-[#2A2A2A]"></div>
               <span className="text-white font-medium">AI Interview</span>
+
+              {/* Timer */}
+              <div className={`flex items-center gap-2 px-3 py-1 bg-[#1A1A1A] border border-[#2A2A2A] ml-2 ${timeLeft <= 0
+                ? 'text-red-500 border-red-900/50 animate-pulse'
+                : timeLeft < 300
+                  ? 'text-yellow-400 border-yellow-900/30'
+                  : 'text-[#00E5FF]'
+                }`}>
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span className="font-mono font-bold text-sm tracking-widest">{formatTime(timeLeft)}</span>
+              </div>
             </div>
 
             {/* Status & End Button */}
@@ -290,59 +348,7 @@ export default function CandidateView({ sessionId, language }: CandidateViewProp
       {/* Main Content */}
       <main className="max-w-5xl mx-auto px-6 py-8 space-y-6">
         {/* Progress Section */}
-        <div className="border border-[#1A1A1A] p-6">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h2 className="text-lg font-medium text-white">
-                Question {questionNumber} of {progress.total_rounds}
-              </h2>
-              {isFollowup && (
-                <p className="text-sm text-[#00E5FF] mt-1">
-                  Follow-up Question
-                </p>
-              )}
-            </div>
-            <div className="text-right">
-              <span className="text-sm text-gray-500">Complete</span>
-            </div>
-          </div>
 
-          {/* Progress Bar */}
-          <div className="h-1 bg-[#1A1A1A] overflow-hidden">
-            <div
-              className="h-full bg-[#00E5FF] transition-all duration-500 ease-out"
-              style={{ width: `${progress.percentage}%` }}
-            />
-          </div>
-
-          {/* Question Dots */}
-          <div className="flex justify-between mt-6">
-            {Array.from({ length: progress.total_rounds }).map((_, i) => (
-              <div key={i} className="flex flex-col items-center">
-                <div className={`w-10 h-10 flex items-center justify-center text-sm font-medium transition-all ${i < progress.rounds_completed
-                  ? 'bg-[#00E5FF] text-black'
-                  : i === progress.rounds_completed
-                    ? 'border-2 border-[#00E5FF] text-[#00E5FF]'
-                    : 'bg-[#1A1A1A] text-gray-600'
-                  }`}>
-                  {i < progress.rounds_completed ? (
-                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                    </svg>
-                  ) : (
-                    i + 1
-                  )}
-                </div>
-                {/* Simple completion indicator - no follow-up counts for candidates */}
-                <div className="w-full h-1 bg-[#2A2A2A] mt-2">
-                  <div className={`h-full bg-[#00E5FF] transition-all ${i < progress.rounds_completed ? 'w-full' :
-                    i === progress.rounds_completed ? 'w-1/2 animate-pulse' : 'w-0'
-                    }`} />
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
 
         {/* Question Card */}
         <div className="border border-[#1A1A1A] overflow-hidden">
@@ -419,9 +425,34 @@ export default function CandidateView({ sessionId, language }: CandidateViewProp
           )}
 
           <div className="px-6 py-4 border-b border-[#1A1A1A] bg-[#0A0A0A]">
-            <h3 className="text-xs font-medium text-gray-400 uppercase tracking-wider">
-              {answerMode === 'code' ? 'Your Code' : 'Your Answer'}
-            </h3>
+            <div className="flex items-center justify-between">
+              <h3 className="text-xs font-medium text-gray-400 uppercase tracking-wider">
+                {answerMode === 'code' ? 'Your Code' : 'Your Answer'}
+              </h3>
+              {answerMode !== 'code' && (
+                <div className="group relative flex items-center gap-1 cursor-help">
+                  <svg className="w-3.5 h-3.5 text-gray-500 group-hover:text-[#00E5FF] transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <span className="text-[10px] text-gray-500 group-hover:text-[#00E5FF] transition-colors hidden sm:inline">Type faster?</span>
+
+                  {/* Tooltip */}
+                  <div className="absolute bottom-full mb-2 right-0 w-60 p-3 bg-[#1A1A1A] border border-gray-800 rounded-lg shadow-xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
+                    <div className="flex items-start gap-2">
+                      <svg className="w-4 h-4 text-[#00E5FF] mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+                      </svg>
+                      <div>
+                        <p className="text-xs text-gray-200 font-medium mb-1">Use Voice Typing</p>
+                        <p className="text-[10px] text-gray-400 leading-relaxed">
+                          Press <kbd className="px-1 py-0.5 bg-gray-800 rounded border border-gray-700 font-mono text-gray-300">Win</kbd> + <kbd className="px-1 py-0.5 bg-gray-800 rounded border border-gray-700 font-mono text-gray-300">H</kbd> (Windows) or <kbd className="px-1 py-0.5 bg-gray-800 rounded border border-gray-700 font-mono text-gray-300">Fn</kbd> (Mac) to use system dictation.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
 
           <div className="p-6">
@@ -447,7 +478,18 @@ export default function CandidateView({ sessionId, language }: CandidateViewProp
                   <CodeEditor
                     language={codingLanguage}
                     initialCode={starterCode}
-                    onChange={(value) => setCodeAnswer(value || '')}
+                    onChange={(value) => {
+                      const val = value || ''
+                      setCodeAnswer(val)
+
+                      if (typingTimeoutRef.current) {
+                        clearTimeout(typingTimeoutRef.current)
+                      }
+
+                      typingTimeoutRef.current = setTimeout(() => {
+                        handleTyping(val)
+                      }, 500)
+                    }}
                     height="350px"
                   />
                 </Suspense>
@@ -460,7 +502,7 @@ export default function CandidateView({ sessionId, language }: CandidateViewProp
                   <button
                     type="button"
                     onClick={handleSubmitCode}
-                    disabled={!codeAnswer.trim()}
+                    disabled={!codeAnswer.trim() || isSubmitting}
                     className="px-6 py-2.5 bg-[#00E5FF] hover:bg-[#66F2FF] 
                                disabled:bg-[#1A1A1A] disabled:text-gray-600 disabled:cursor-not-allowed 
                                text-black font-medium transition-colors duration-200

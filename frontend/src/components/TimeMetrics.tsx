@@ -43,12 +43,12 @@ export default function TimeMetrics({ timings, currentQuestionStart, isAnswering
     : 0
 
   const totalTime = completedTimings.reduce((acc, t) => acc + (t.endTime! - t.startTime), 0)
-  
+
   // Calculate efficiency score (higher score + faster time = better efficiency)
   const avgScore = completedTimings.length > 0
     ? completedTimings.reduce((acc, t) => acc + (t.score || 0), 0) / completedTimings.length
     : 0
-  
+
   // Efficiency: normalized score adjusted by time (faster = bonus, slower = penalty)
   // Baseline: 2 minutes per response
   const baselineTime = 120000 // 2 minutes in ms
@@ -57,14 +57,14 @@ export default function TimeMetrics({ timings, currentQuestionStart, isAnswering
     : 0
 
   // Current question timer
-  const currentDuration = currentQuestionStart 
-    ? currentTime - currentQuestionStart 
+  const currentDuration = currentQuestionStart
+    ? currentTime - currentQuestionStart
     : 0
 
   return (
     <div className="space-y-4">
       {/* Summary Cards */}
-      <div className="grid grid-cols-4 gap-3">
+      <div className={`grid gap-3 ${efficiencyScore > 0 ? 'grid-cols-4' : 'grid-cols-3'}`}>
         {/* Average Response Time */}
         <div className="bg-surface-secondary dark:bg-surface-dark-tertiary rounded-xl p-3">
           <div className="flex items-center gap-2 mb-1">
@@ -105,22 +105,23 @@ export default function TimeMetrics({ timings, currentQuestionStart, isAnswering
         </div>
 
         {/* Efficiency Score */}
-        <div className="bg-surface-secondary dark:bg-surface-dark-tertiary rounded-xl p-3">
-          <div className="flex items-center gap-2 mb-1">
-            <svg className="w-4 h-4 text-accent-warning" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
-            </svg>
-            <span className="text-xs text-text-tertiary dark:text-text-dark-tertiary">Efficiency</span>
+        {efficiencyScore > 0 && (
+          <div className="bg-surface-secondary dark:bg-surface-dark-tertiary rounded-xl p-3">
+            <div className="flex items-center gap-2 mb-1">
+              <svg className="w-4 h-4 text-accent-warning" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+              </svg>
+              <span className="text-xs text-text-tertiary dark:text-text-dark-tertiary">Efficiency</span>
+            </div>
+            <p className={`text-xl font-bold ${efficiencyScore >= 80 ? 'text-accent-success' :
+              efficiencyScore >= 50 ? 'text-accent-warning' :
+                efficiencyScore > 0 ? 'text-accent-error' :
+                  'text-text-primary dark:text-text-dark-primary'
+              }`}>
+              {efficiencyScore > 0 ? efficiencyScore : '--'}
+            </p>
           </div>
-          <p className={`text-xl font-bold ${
-            efficiencyScore >= 80 ? 'text-accent-success' :
-            efficiencyScore >= 50 ? 'text-accent-warning' :
-            efficiencyScore > 0 ? 'text-accent-error' :
-            'text-text-primary dark:text-text-dark-primary'
-          }`}>
-            {efficiencyScore > 0 ? efficiencyScore : '--'}
-          </p>
-        </div>
+        )}
       </div>
 
       {/* Current Question Timer */}
@@ -156,48 +157,45 @@ export default function TimeMetrics({ timings, currentQuestionStart, isAnswering
               const duration = timing.endTime! - timing.startTime
               const isGood = duration < baselineTime * 0.75
               const isSlow = duration > baselineTime * 1.5
-              
+
               return (
-                <div 
+                <div
                   key={idx}
                   className="flex items-center gap-3 p-3 bg-surface-secondary dark:bg-surface-dark-tertiary rounded-lg"
                 >
                   {/* Question Label */}
                   <div className={`w-12 h-8 rounded-md flex items-center justify-center text-xs font-bold
-                    ${timing.isFollowup 
+                    ${timing.isFollowup
                       ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
                       : 'bg-epam-blue-100 text-epam-blue dark:bg-epam-blue/20'
                     }`}
                   >
                     Q{timing.questionNumber}{timing.isFollowup ? `-${String.fromCharCode(96 + (timing.followupNumber || 1))}` : ''}
                   </div>
-                  
+
                   {/* Time Bar */}
                   <div className="flex-1">
                     <div className="h-2 bg-surface-tertiary dark:bg-surface-dark rounded-full overflow-hidden">
-                      <div 
-                        className={`h-full rounded-full transition-all duration-500 ${
-                          isGood ? 'bg-accent-success' : isSlow ? 'bg-accent-error' : 'bg-accent-warning'
-                        }`}
+                      <div
+                        className={`h-full rounded-full transition-all duration-500 ${isGood ? 'bg-accent-success' : isSlow ? 'bg-accent-error' : 'bg-accent-warning'
+                          }`}
                         style={{ width: `${Math.min(100, (duration / (baselineTime * 2)) * 100)}%` }}
                       />
                     </div>
                   </div>
-                  
+
                   {/* Duration */}
-                  <div className={`text-sm font-mono ${
-                    isGood ? 'text-accent-success' : isSlow ? 'text-accent-error' : 'text-accent-warning'
-                  }`}>
+                  <div className={`text-sm font-mono ${isGood ? 'text-accent-success' : isSlow ? 'text-accent-error' : 'text-accent-warning'
+                    }`}>
                     {formatDuration(duration)}
                   </div>
-                  
+
                   {/* Score */}
                   {timing.score !== undefined && (
-                    <div className={`w-12 text-center text-sm font-bold ${
-                      timing.score >= 75 ? 'text-accent-success' :
+                    <div className={`w-12 text-center text-sm font-bold ${timing.score >= 75 ? 'text-accent-success' :
                       timing.score >= 50 ? 'text-accent-warning' :
-                      'text-accent-error'
-                    }`}>
+                        'text-accent-error'
+                      }`}>
                       {timing.score}
                     </div>
                   )}

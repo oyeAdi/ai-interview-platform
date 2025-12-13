@@ -30,6 +30,7 @@ out/
 # Logs
 backend/logs/*.json
 !backend/logs/.gitkeep
+!backend/logs/server_debug.log
 
 # OS
 .DS_Store

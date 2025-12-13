@@ -25,12 +25,31 @@ class QuestionManager:
                 data = json.load(f)
                 all_questions = data.get("questions", [])
                 # Filter by language if applicable (for coding questions)
-                self.question_bank = [
-                    q for q in all_questions 
-                    if q.get("language", "").lower() == self.language.lower() 
-                    or q.get("category") != "coding"  # Include non-coding questions
-                    or self.language.lower() in [s.lower() for s in q.get("skills", [])]
-                ]
+                # Strict Filter:
+                # 1. If question has explicit 'language', it MUST match self.language
+                # 2. If 'skills' list exists, it MUST contain self.language (for coding/technical)
+                # 3. If neither, it's considered generic/conceptual and allowed (unless it has conflicting language)
+                
+                self.question_bank = []
+                for q in all_questions:
+                    q_lang = q.get("language", "").lower()
+                    q_skills = [s.lower() for s in q.get("skills", [])]
+                    
+                    # Case 1: Explicit language mismatch (e.g. Java question for Python candidate)
+                    if q_lang and q_lang != self.language.lower():
+                        continue
+                        
+                    # Case 2: Explicit skill mismatch (e.g. question requires "Java" skill)
+                    # We only check this if the question is "technical" or "coding"
+                    if self.language.lower() not in q_skills and q_lang == "":
+                        # If it has other specific language skills but not ours, skip it
+                        # e.g. skills=["java", "spring"] vs language="python" -> Skip
+                        # e.g. skills=["system design"] -> Allow
+                        known_languages = ["python", "java", "javascript", "c++", "go", "ruby"]
+                        if any(l in q_skills for l in known_languages):
+                            continue
+                    
+                    self.question_bank.append(q)
                 return
         
         # Fallback to language-specific file
@@ -156,11 +175,30 @@ class QuestionManager:
                 elif experience_level in ["senior", "lead"] and q.get("difficulty") in ["medium", "hard"]:
                     score += 15
             
-            # Match skills
+            # Match skills - CRITICAL prioritization
             q_skills = [s.lower() for s in q.get("skills", [])]
+            skill_match_count = 0
+            has_conflicting_skill = False
+            
+            # Check for skill overlap
             for skill in skills:
                 if skill.lower() in q_skills:
-                    score += 10
+                    skill_match_count += 1
+            
+            # Check for conflict (e.g. question requires Python but we want JS)
+            # This assumes "skills" contains the primary language if strictly defined
+            if skills and q_skills and skill_match_count == 0:
+                # If question has specific skills but none match our required skills, likely a mismatch
+                # (e.g. Question needs "Java", we want "Python")
+                # Unless question skills are generic like "coding", "algorithms"
+                generic_skills = ["coding", "algorithms", "system design", "data structures", "problem solving"]
+                is_purely_generic = all(s in generic_skills for s in q_skills)
+                
+                if not is_purely_generic:
+                    score -= 500 # Strong penalty for language mismatch
+            
+            if skill_match_count > 0:
+                score += 100 * skill_match_count # Massive boost for matching skills
             
             # Avoid already asked questions
             if q["id"] in self.questions_asked:

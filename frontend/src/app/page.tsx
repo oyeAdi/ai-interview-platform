@@ -57,7 +57,7 @@ interface Position {
 
 export default function DashboardPage() {
   const router = useRouter()
-  
+
   // State
   const [accounts, setAccounts] = useState<Account[]>([])
   const [allPositions, setAllPositions] = useState<Position[]>([]) // All positions for account stats
@@ -73,11 +73,11 @@ export default function DashboardPage() {
   const [dataModel, setDataModel] = useState<DataModel | null>(null)
   const [showAddPosition, setShowAddPosition] = useState(false)
   const [showAddAccount, setShowAddAccount] = useState(false)
-  
+
   // Sidebar state
   const [sidebarType, setSidebarType] = useState<'account' | 'position' | null>(null)
   const [sidebarId, setSidebarId] = useState<string | null>(null)
-  
+
   // Interview Links Modal state
   const [showInterviewLinks, setShowInterviewLinks] = useState(false)
   const [interviewSessionData, setInterviewSessionData] = useState<{
@@ -88,7 +88,7 @@ export default function DashboardPage() {
     expires_at?: string
     ttl_minutes?: number
   } | null>(null)
-  
+
   // TTL for interview links
   const [linkTTL, setLinkTTL] = useState(60) // Default 1 hour for easier debugging
 
@@ -180,7 +180,7 @@ export default function DashboardPage() {
       })
 
       const sessionData = await sessionResponse.json()
-      
+
       if (!sessionResponse.ok) {
         throw new Error(sessionData.detail || 'Failed to create session')
       }
@@ -198,7 +198,7 @@ export default function DashboardPage() {
 
       // Get position title for display
       const position = accountPositions.find(p => p.id === selectedPosition)
-      
+
       // Get candidate name
       let candidateName = 'Custom Resume'
       if (selectedCandidate) {
@@ -214,13 +214,13 @@ export default function DashboardPage() {
       // Show the interview links modal
       setInterviewSessionData({
         session_id: sessionData.session_id,
-        position: { 
-          id: selectedPosition, 
-          title: position?.title || 'Unknown Position' 
+        position: {
+          id: selectedPosition,
+          title: position?.title || 'Unknown Position'
         },
-        candidate: { 
-          id: selectedCandidate || 'custom', 
-          name: candidateName 
+        candidate: {
+          id: selectedCandidate || 'custom',
+          name: candidateName
         },
         links: sessionData.links,
         expires_at: sessionData.expires_at,
@@ -238,7 +238,7 @@ export default function DashboardPage() {
 
   const handleDataModelUpdate = async (updatedModel: DataModel) => {
     setDataModel(updatedModel)
-    
+
     if (selectedPosition) {
       try {
         await fetch(apiUrl(`api/positions/${selectedPosition}/config`), {
@@ -315,7 +315,7 @@ export default function DashboardPage() {
     setSidebarType(null)
     setSidebarId(null)
   }
-  
+
   const handleHideSidebar = () => {
     setSidebarType(null)
     setSidebarId(null)
@@ -342,7 +342,7 @@ export default function DashboardPage() {
   return (
     <div className="min-h-screen flex flex-col bg-white dark:bg-black transition-colors duration-200">
       <Header showQuickStart={true} />
-      
+
       <main className="flex-1">
         {/* Hero Section */}
         <section className="border-b border-gray-200 dark:border-[#2A2A2A]">
@@ -377,7 +377,7 @@ export default function DashboardPage() {
                     loading={loading}
                   />
                 </div>
-                
+
                 {/* Inline Account Detail Panel */}
                 {showAccountPanel && (
                   <div className="w-[340px] flex-shrink-0 bg-white dark:bg-[#0A0A0A] border border-gray-200 dark:border-[#2A2A2A] animate-slide-in-right">
@@ -423,7 +423,7 @@ export default function DashboardPage() {
                       loading={positionsLoading}
                     />
                   </div>
-                  
+
                   {/* Inline Position Detail Panel */}
                   {showPositionPanel && (
                     <div className="w-[340px] flex-shrink-0 bg-white dark:bg-[#0A0A0A] border border-gray-200 dark:border-[#2A2A2A] animate-slide-in-right">
@@ -536,11 +536,10 @@ export default function DashboardPage() {
                         <button
                           key={option.value}
                           onClick={() => setLinkTTL(option.value)}
-                          className={`px-3 py-1.5 text-xs font-medium transition-colors ${
-                            linkTTL === option.value
+                          className={`px-3 py-1.5 text-xs font-medium transition-colors ${linkTTL === option.value
                               ? 'bg-[#00E5FF] text-black'
                               : 'bg-white dark:bg-[#1A1A1A] text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-[#2A2A2A] hover:border-[#00E5FF]'
-                          }`}
+                            }`}
                         >
                           {option.label}
                         </button>
@@ -569,7 +568,7 @@ export default function DashboardPage() {
                         </>
                       )}
                     </button>
-                    
+
                     <button
                       onClick={() => handleStartInterview(true)}
                       disabled={startingInterview || !selectedPosition || (!resumeText && !resumeFile && !selectedCandidate)}
@@ -580,7 +579,7 @@ export default function DashboardPage() {
                       </svg>
                       Start as Expert
                     </button>
-                    
+
                     <p className="text-xs text-gray-500 text-center pt-1">
                       Expert mode: Review and approve AI questions
                     </p>
@@ -590,7 +589,7 @@ export default function DashboardPage() {
             )}
           </div>
         </section>
-        
+
         <Footer />
       </main>
 
@@ -604,7 +603,7 @@ export default function DashboardPage() {
       />
 
       {/* Add Account Modal */}
-      <AddAccountModal 
+      <AddAccountModal
         isOpen={showAddAccount}
         onClose={() => setShowAddAccount(false)}
         onAccountCreated={() => {

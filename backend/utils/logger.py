@@ -70,7 +70,7 @@ class Logger:
                 "jd_id": jd_id,
                 "config": {
                     "total_questions": Config.DEFAULT_QUESTIONS,
-                    "followups_per_question": Config.FOLLOWUPS_PER_QUESTION
+                    "followups_per_question": Config.MAX_FOLLOWUPS_PER_QUESTION,
                 },
                 "questions": [],
                 "strategy_performance": {},
@@ -78,6 +78,58 @@ class Logger:
             }
             log_data["interview_sessions"].append(new_session)
             self._save_log(log_data)
+    
+    def log_question(
+        self,
+        session_id: str,
+        question_id: str,
+        question_text: str,
+        question_type: str,
+        round_number: int,
+        category: Optional[str] = None,
+        topic: Optional[str] = None
+    ):
+        """Log the main question when it's first asked"""
+        log_data = self._load_log()
+        session_idx = self._find_session(session_id, log_data)
+        
+        if session_idx is None:
+            self.initialize_session(session_id, "unknown")
+            log_data = self._load_log()
+            session_idx = self._find_session(session_id, log_data)
+        
+        session = log_data["interview_sessions"][session_idx]
+        
+        # Check if question already exists
+        question_entry = None
+        for q in session.get("questions", []):
+            if q.get("question_id") == question_id:
+                question_entry = q
+                break
+        
+        if question_entry is None:
+            # Create new question entry with full details
+            question_entry = {
+                "question_id": question_id,
+                "round_number": round_number,
+                "question_text": question_text,
+                "question_type": question_type,
+                "category": category,
+                "topic": topic,
+                "timestamp": datetime.now().isoformat(),
+                "responses": []
+            }
+            session.setdefault("questions", []).append(question_entry)
+            self._save_log(log_data)
+        else:
+            # Update existing entry if it doesn't have question_text
+            if "question_text" not in question_entry:
+                question_entry["question_text"] = question_text
+                question_entry["question_type"] = question_type
+                question_entry["category"] = category
+                question_entry["topic"] = topic
+                question_entry["timestamp"] = datetime.now().isoformat()
+                self._save_log(log_data)
     
     def log_response(
         self,

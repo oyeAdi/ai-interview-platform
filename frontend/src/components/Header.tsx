@@ -13,7 +13,7 @@ interface HeaderProps {
 export default function Header({ showQuickStart = true, showBackToDashboard = false }: HeaderProps) {
   const pathname = usePathname()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  
+
   return (
     <>
       <header className="sticky top-0 z-50 bg-white dark:bg-black border-b border-gray-200 dark:border-[#2A2A2A] transition-colors duration-200">
@@ -22,7 +22,7 @@ export default function Header({ showQuickStart = true, showBackToDashboard = fa
             {/* Left Side - Hamburger & Logo */}
             <div className="flex items-center gap-6">
               {/* Hamburger Menu - Mobile Only */}
-              <button 
+              <button
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                 className="md:hidden p-2 -ml-2 text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white transition-colors"
                 aria-label="Toggle menu"
@@ -35,7 +35,7 @@ export default function Header({ showQuickStart = true, showBackToDashboard = fa
                   )}
                 </svg>
               </button>
-              
+
               {/* EPAM Logo */}
               <Link href="/" className="flex items-center">
                 <span className="text-xl font-light tracking-tight text-black dark:text-white">
@@ -44,7 +44,7 @@ export default function Header({ showQuickStart = true, showBackToDashboard = fa
                   <span className="text-epam-cyan">&gt;</span>
                 </span>
               </Link>
-              
+
               {/* Theme Toggle */}
               <ThemeToggle />
             </div>
@@ -53,29 +53,27 @@ export default function Header({ showQuickStart = true, showBackToDashboard = fa
             <nav className="hidden md:flex items-center gap-8">
               <Link
                 href="/"
-                className={`text-sm font-normal transition-colors ${
-                  pathname === '/'
+                className={`text-sm font-normal transition-colors ${pathname === '/'
                     ? 'text-black dark:text-white'
                     : 'text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white'
-                }`}
+                  }`}
               >
                 Dashboard
               </Link>
-              
+
               <Link
                 href="/wiki"
-                className={`text-sm font-normal transition-colors flex items-center gap-1.5 ${
-                  pathname === '/wiki'
+                className={`text-sm font-normal transition-colors flex items-center gap-1.5 ${pathname === '/wiki'
                     ? 'text-epam-cyan'
                     : 'text-gray-500 dark:text-gray-400 hover:text-epam-cyan'
-                }`}
+                  }`}
               >
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
                 </svg>
                 Wiki
               </Link>
-              
+
               <Link
                 href="https://www.epam.com/about"
                 target="_blank"
@@ -83,7 +81,7 @@ export default function Header({ showQuickStart = true, showBackToDashboard = fa
               >
                 About
               </Link>
-              
+
               <Link
                 href="https://www.epam.com/careers"
                 target="_blank"
@@ -106,7 +104,7 @@ export default function Header({ showQuickStart = true, showBackToDashboard = fa
                   Back
                 </Link>
               )}
-              
+
               {/* Quick Start Button - Only show if not on quick-start page */}
               {showQuickStart && pathname !== '/quick-start' && (
                 <Link
@@ -116,7 +114,7 @@ export default function Header({ showQuickStart = true, showBackToDashboard = fa
                   QUICK START
                 </Link>
               )}
-              
+
               {/* Global - Static Text */}
               <span className="hidden sm:flex items-center gap-1 text-sm text-gray-500 dark:text-gray-400">
                 Global
@@ -134,35 +132,32 @@ export default function Header({ showQuickStart = true, showBackToDashboard = fa
             <Link
               href="/"
               onClick={() => setMobileMenuOpen(false)}
-              className={`block text-2xl font-light ${
-                pathname === '/' ? 'text-epam-cyan' : 'text-black dark:text-white'
-              }`}
+              className={`block text-2xl font-light ${pathname === '/' ? 'text-epam-cyan' : 'text-black dark:text-white'
+                }`}
             >
               Dashboard
             </Link>
-            
+
             <Link
               href="/wiki"
               onClick={() => setMobileMenuOpen(false)}
-              className={`block text-2xl font-light ${
-                pathname === '/wiki' ? 'text-epam-cyan' : 'text-black dark:text-white'
-              }`}
+              className={`block text-2xl font-light ${pathname === '/wiki' ? 'text-epam-cyan' : 'text-black dark:text-white'
+                }`}
             >
               Wiki
             </Link>
-            
+
             {showQuickStart && (
               <Link
                 href="/quick-start"
                 onClick={() => setMobileMenuOpen(false)}
-                className={`block text-2xl font-light ${
-                  pathname === '/quick-start' ? 'text-epam-cyan' : 'text-black dark:text-white'
-                }`}
+                className={`block text-2xl font-light ${pathname === '/quick-start' ? 'text-epam-cyan' : 'text-black dark:text-white'
+                  }`}
               >
                 Quick Start
               </Link>
             )}
-            
+
             <Link
               href="https://www.epam.com/about"
               target="_blank"
@@ -170,7 +165,7 @@ export default function Header({ showQuickStart = true, showBackToDashboard = fa
             >
               About
             </Link>
-            
+
             <Link
               href="https://www.epam.com/careers"
               target="_blank"
@@ -178,7 +173,7 @@ export default function Header({ showQuickStart = true, showBackToDashboard = fa
             >
               Careers
             </Link>
-            
+
             <div className="pt-6 border-t border-gray-200 dark:border-[#2A2A2A]">
               <span className="text-sm text-gray-500 dark:text-gray-400">
                 Global (EN)

@@ -275,10 +275,32 @@ async def analyze_language(
         session_id = controller.context_manager.session_id
         
         # Parse and set question categories if provided (from quick start)
+        calculated_duration = 45  # Default
         if question_categories:
             try:
                 categories_dict = json.loads(question_categories)
                 controller.question_categories = categories_dict
+                
+                # Calculate total questions and duration based on difficulty
+                total_questions = 0
+                total_duration = 0
+                difficulty_minutes = {'easy': 10, 'medium': 15, 'hard': 20}
+                
+                for cat_name, cfg in categories_dict.items():
+                    if isinstance(cfg, dict) and cfg.get("enabled"):
+                        count = cfg.get("count", 1)
+                        total_questions += count
+                        difficulty = cfg.get("difficulty", "medium")
+                        total_duration += difficulty_minutes.get(difficulty, 15) * count
+                
+                if total_questions > 0:
+                    controller.total_questions = total_questions
+                    print(f"[INFO] Quick start configured with {total_questions} questions")
+                
+                if total_duration > 0:
+                    calculated_duration = total_duration
+                    print(f"[INFO] Quick start duration calculated as {calculated_duration} minutes")
+                    
             except json.JSONDecodeError:
                 print(f"Warning: Invalid question_categories JSON: {question_categories}")
         
@@ -288,6 +310,27 @@ async def analyze_language(
         
         # Store controller
         active_interviews[session_id] = controller
+        
+        # Save session config to persist duration and categories
+        try:
+            sessions_data = load_json_file(SESSIONS_FILE)
+            if "sessions" not in sessions_data:
+                sessions_data["sessions"] = {}
+            
+            sessions_data["sessions"][session_id] = {
+                "session_id": session_id,
+                "created_at": datetime.utcnow().isoformat(),
+                "status": "pending",
+                "jd_id": jd_id,
+                "language": language,
+                "duration_minutes": calculated_duration,
+                "expert_mode": is_expert_mode,
+                "question_categories": controller.question_categories
+            }
+            save_json_file(SESSIONS_FILE, sessions_data)
+            print(f"[INFO] Saved quick start session config: duration={calculated_duration}min")
+        except Exception as save_e:
+            print(f"[WARN] Failed to save session config: {save_e}")
         
         return {
             "language": language,
@@ -821,6 +864,20 @@ async def start_interview_with_position(
         # Attach position data model to controller if available
         if position and position.get("data_model"):
             controller.data_model = position["data_model"]
+            
+            # Configure question categories logic from position data
+            if "question_categories" in controller.data_model:
+                controller.question_categories = controller.data_model["question_categories"]
+                
+                # Calculate total questions based on enabled categories and counts
+                total_q = 0
+                for cat_config in controller.question_categories.values():
+                    if isinstance(cat_config, dict) and cat_config.get("enabled", False):
+                        total_q += cat_config.get("count", 0)
+                
+                if total_q > 0:
+                    controller.total_questions = total_q
+                    print(f"[INFO] Configured interview with {total_q} questions based on position settings")
         
         # Attach resume text for personalized first question
         if resume_content:
@@ -828,6 +885,31 @@ async def start_interview_with_position(
         
         # Store controller
         active_interviews[session_id] = controller
+        
+        # Save session config to file to persist duration
+        try:
+            sessions_data = load_json_file(SESSIONS_FILE)
+            if "sessions" not in sessions_data:
+                sessions_data["sessions"] = {}
+                
+            duration_minutes = 45
+            if position and position.get("data_model"):
+                duration_minutes = position["data_model"].get("duration_minutes", 45)
+            
+            sessions_data["sessions"][session_id] = {
+                "session_id": session_id,
+                "created_at": datetime.utcnow().isoformat(),
+                "status": "pending",
+                "position_id": position_id,
+                "language": language,
+                "duration_minutes": duration_minutes,
+                "expert_mode": is_expert_mode,
+                "question_categories": controller.question_categories
+            }
+            save_json_file(SESSIONS_FILE, sessions_data)
+        except Exception as save_e:
+            print(f"[WARN] Failed to save session config: {save_e}")
+            # Continue - in-memory controller works for now
         
         return {
             "language": language,
@@ -840,6 +922,38 @@ async def start_interview_with_position(
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/interview/{session_id}/end")
+async def end_interview(session_id: str):
+    """End an ongoing interview session"""
+    print(f"[INFO] Request to end session {session_id}")
+    
+    # 1. Update in-memory controller
+    if session_id in active_interviews:
+        controller = active_interviews[session_id]
+        if hasattr(controller, 'context_manager'):
+            controller.context_manager.context["status"] = "completed"
+        
+        # Broadcast end message
+        try:
+            await connection_manager.broadcast({
+                "type": "session_end",
+                "message": "The interview has been concluded."
+            })
+        except Exception as e:
+            print(f"[ERROR] Failed to broadcast end message: {e}")
+            
+    # 2. Update sessions.json
+    try:
+        sessions_data = load_json_file(SESSIONS_FILE)
+        if "sessions" in sessions_data and session_id in sessions_data["sessions"]:
+            sessions_data["sessions"][session_id]["status"] = "completed"
+            sessions_data["sessions"][session_id]["ended_at"] = datetime.utcnow().isoformat()
+            save_json_file(SESSIONS_FILE, sessions_data)
+    except Exception as e:
+        print(f"[ERROR] Failed to update session file: {e}")
+        
+    return {"status": "success", "message": "Interview ended"}
 
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket, view: str = "candidate"):
@@ -888,13 +1002,20 @@ async def websocket_endpoint(websocket: WebSocket, view: str = "candidate"):
                 message_type = data.get("type")
                 
                 print(f"[DEBUG] Received WebSocket message: type={message_type}, data={data}")
+            except WebSocketDisconnect:
+                print(f"[DEBUG] WebSocket disconnected normally during receive")
+                break
+            except RuntimeError as re:
+                if "disconnect message has been received" in str(re):
+                    print(f"[DEBUG] WebSocket connection closed (RuntimeError)")
+                    break
+                print(f"[ERROR] runtime error: {re}")
+                break
             except Exception as receive_error:
                 import traceback
                 print(f"[ERROR] Error receiving WebSocket message: {receive_error}")
                 print(traceback.format_exc())
-                # Don't break - let it continue to handle reconnection
-                # The client will reconnect automatically
-                continue
+                break
             
             if message_type == "start_interview":
                 session_id = data.get("session_id")
@@ -931,6 +1052,16 @@ async def websocket_endpoint(websocket: WebSocket, view: str = "candidate"):
                         if session_info:
                             print(f"[DEBUG] ✓ Found session {session_id} in sessions.json")
                             print(f"[DEBUG] Found session {session_id} in sessions.json: {session_info.get('status', 'unknown')}")
+                            
+                            if session_info.get("status") == "completed" and view == "candidate":
+                                print(f"[INFO] Session {session_id} is already completed. Preventing restart.")
+                                await websocket.send_json({
+                                    "type": "session_end",
+                                    "message": "Interview previously completed."
+                                })
+                                # Skip controller creation and wait for next message (or disconnect?)
+                                # Better to let client handle the end state.
+                                continue
                             # Session exists in sessions.json - this is a new session
                             try:
                                 # Get position to determine language
@@ -963,6 +1094,12 @@ async def websocket_endpoint(websocket: WebSocket, view: str = "candidate"):
                                 # Set question categories and difficulty distribution if present
                                 if session_info.get("question_categories"):
                                     controller.question_categories = session_info["question_categories"]
+                                    # Override default question count with configuration
+                                    total_q = sum(int(count) for count in controller.question_categories.values())
+                                    if total_q > 0:
+                                        controller.total_questions = total_q
+                                        print(f"[DEBUG] Set total_questions to {total_q} from configuration")
+
                                 if session_info.get("difficulty_distribution"):
                                     controller.difficulty_distribution = session_info["difficulty_distribution"]
                                 
@@ -1120,6 +1257,29 @@ async def websocket_endpoint(websocket: WebSocket, view: str = "candidate"):
                     controller.expert_mode = True
                     print(f"Expert mode enabled for session {session_id}")
                 
+                # Send session configuration (duration)
+                # Send session configuration (duration and start time)
+                try:
+                    session_duration = 45 # Default
+                    start_time = datetime.utcnow().isoformat()
+                    
+                    # Re-load sessions to get duration and start time
+                    sessions_data = load_json_file(SESSIONS_FILE)
+                    if sessions_data and "sessions" in sessions_data and session_id in sessions_data["sessions"]:
+                         session_info = sessions_data["sessions"][session_id]
+                         session_duration = session_info.get("duration_minutes", 45)
+                         start_time = session_info.get("created_at", start_time)
+                    
+                    await websocket.send_json({
+                        "type": "configuration",
+                        "duration_minutes": session_duration,
+                        "start_time": start_time
+                    })
+                    print(f"[DEBUG] Sent configuration: duration={session_duration}, start={start_time}")
+                except Exception as config_e:
+                    print(f"[WARN] Failed to send configuration: {config_e}")
+                    # Continue without config (client defaults to 45)
+                
                 # Send greeting
                 try:
                     print(f"[DEBUG] Sending greeting for session {session_id}, view={view}")
@@ -1147,7 +1307,8 @@ async def websocket_endpoint(websocket: WebSocket, view: str = "candidate"):
                                 "text": controller.current_question.get("text"),
                                 "question_type": controller.current_question.get("question_type") or controller.current_question.get("type"),
                                 "topic": controller.current_question.get("topic"),
-                                "round_number": controller.current_question.get("round_number", 1)
+                                "round_number": controller.current_question.get("round_number", 1),
+                                "question_number": controller.current_question.get("question_number", controller.current_question.get("round_number", 1))
                             }
                             await message_handler.send_question(question_data, view)
                         else:
@@ -1203,12 +1364,18 @@ async def websocket_endpoint(websocket: WebSocket, view: str = "candidate"):
                 response_text = data.get("text", "")
                 response_type = data.get("response_type", "initial")
                 
-                print(f"Processing response. Expert mode: {controller.expert_mode}")
+                print(f"\n[WEBSOCKET] Received answer submission")
+                print(f"[WEBSOCKET] Response type: {response_type}")
+                print(f"[WEBSOCKET] Response text: {response_text[:200]}...")
+                print(f"[WEBSOCKET] Expert mode: {controller.expert_mode}")
                 
                 # Process response
                 result = controller.process_response(response_text, response_type)
                 
-                print(f"Response result: pending_approval={result.get('pending_approval')}, has_followup={result.get('followup') is not None}, has_pending={result.get('pending_followup') is not None}")
+                print(f"[WEBSOCKET] Response processed")
+                print(f"[WEBSOCKET] Evaluation score: {result.get('evaluation', {}).get('overall_score', 'N/A')}")
+                print(f"[WEBSOCKET] Pending approval: {result.get('pending_approval')}")
+                print(f"[WEBSOCKET] Has followup: {result.get('followup') is not None}")
                 
                 # Send evaluation (admin/expert only)
                 await message_handler.send_evaluation(result["evaluation"])
@@ -1248,6 +1415,18 @@ async def websocket_endpoint(websocket: WebSocket, view: str = "candidate"):
                     # Check if interview complete
                     if controller.is_interview_complete():
                         final_summary = controller.finalize_interview()
+                        
+                        # Persist completion status to sessions.json
+                        try:
+                            sessions_data = load_json_file(SESSIONS_FILE)
+                            if "sessions" in sessions_data and session_id in sessions_data["sessions"]:
+                                sessions_data["sessions"][session_id]["status"] = "completed"
+                                sessions_data["sessions"][session_id]["ended_at"] = datetime.utcnow().isoformat()
+                                save_json_file(SESSIONS_FILE, sessions_data)
+                                print(f"[DEBUG] Marked session {session_id} as completed in sessions.json")
+                        except Exception as e:
+                            print(f"[ERROR] Failed to update session file on completion: {e}")
+                            
                         await message_handler.send_session_end()
                     else:
                         # Get next question

@@ -33,18 +33,61 @@ class Evaluator:
         Evaluate candidate response deterministically
         Returns detailed evaluation with scores
         """
+        print(f"\n[EVALUATOR] Starting evaluation")
+        print(f"[EVALUATOR] Question: {question.get('text', '')[:100]}...")
+        print(f"[EVALUATOR] Response: {response[:200]}...")
+        
         question_type = question.get("type", "open_ended")
         scorer_class = self.scorers.get(question_type, OpenEndedScoring)
         
         # Get deterministic scores
         scores = scorer_class.score(question, response)
+        print(f"[EVALUATOR] Deterministic scores: {scores}")
         
         # Build evaluation details
         evaluation_details = self._build_evaluation_details(question, response, scores)
         
         # Get LLM evaluation (async-friendly, non-blocking)
         llm_evaluation = self._get_llm_evaluation(question, response, scores)
+        print(f"[EVALUATOR] LLM evaluation result: {llm_evaluation}")
         
+        # Calculate final score with weights (30% Deterministic, 70% LLM)
+        deterministic_score = scores.get("overall_score", 0)
+        llm_score = 0
+        
+        if llm_evaluation and not llm_evaluation.get("is_fallback", False):
+            llm_score = llm_evaluation.get("score", 0)
+            
+            # --- Adaptive Weighting Strategy ---
+            # Instead of hard-clamping, we adjust trust based on the discrepancy.
+            # If Deterministic is much higher than LLM, it suggests keyword stuffing or superficial matching.
+            # As the gap widens, we exponentially trust the LLM more.
+            
+            diff = deterministic_score - llm_score
+            
+            # Default weights (Standard Trust)
+            weight_llm = 0.70
+            weight_det = 0.30
+            
+            if diff > 45: 
+                # Massive Discrepancy (e.g., Det=90, LLM=20)
+                # Almost completely discard keyworder.
+                print(f"[Scoring] Huge gap ({diff}), trusting LLM almost exclusively.")
+                weight_llm = 0.95
+                weight_det = 0.05
+            elif diff > 20:
+                # Moderate Discrepancy (e.g., Det=80, LLM=50)
+                # shift balance heavily to LLM.
+                print(f"[Scoring] Moderate gap ({diff}), reducing Deterministic weight.")
+                weight_llm = 0.85
+                weight_det = 0.15
+            
+            final_score = (deterministic_score * weight_det) + (llm_score * weight_llm)
+            print(f"[EVALUATOR] Final score: {final_score:.1f} (Det: {deterministic_score} x {weight_det}, LLM: {llm_score} x {weight_llm})")
+        else:
+            final_score = deterministic_score
+            print(f"[EVALUATOR] Using deterministic score only: {final_score}")
+
         return {
             "deterministic_scores": {
                 "factual_correctness": scores.get("factual_correctness", 0),
@@ -54,7 +97,7 @@ class Evaluator:
                 "clarity": scores.get("clarity", 0),
                 "keyword_coverage": scores.get("keyword_coverage", 0)
             },
-            "overall_score": scores.get("overall_score", 0),
+            "overall_score": round(final_score, 1),
             "evaluation_details": evaluation_details,
             "llm_evaluation": llm_evaluation
         }

@@ -51,11 +51,11 @@ export default function InterviewLinksModal({ isOpen, onClose, sessionData }: In
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       {/* Backdrop */}
-      <div 
+      <div
         className="absolute inset-0 bg-black/60 backdrop-blur-sm"
         onClick={onClose}
       />
-      
+
       {/* Modal */}
       <div className="relative bg-white dark:bg-[#0A0A0A] border border-gray-200 dark:border-[#2A2A2A] w-full max-w-3xl mx-4 max-h-[90vh] overflow-y-auto">
         {/* Header */}
@@ -94,13 +94,13 @@ export default function InterviewLinksModal({ isOpen, onClose, sessionData }: In
               <div>
                 <span className="text-gray-500">Link Expires:</span>
                 <span className="ml-2 text-orange-500 font-medium">
-                  {sessionData.expires_at 
+                  {sessionData.expires_at
                     ? new Date(sessionData.expires_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
                     : 'N/A'
                   }
                   {sessionData.ttl_minutes && (
                     <span className="text-gray-400 text-xs ml-1">
-                      ({sessionData.ttl_minutes >= 60 
+                      ({sessionData.ttl_minutes >= 60
                         ? `${Math.floor(sessionData.ttl_minutes / 60)}hr${sessionData.ttl_minutes % 60 > 0 ? ` ${sessionData.ttl_minutes % 60}min` : ''}`
                         : `${sessionData.ttl_minutes}min`
                       })
@@ -121,14 +121,14 @@ export default function InterviewLinksModal({ isOpen, onClose, sessionData }: In
                 </svg>
                 <h3 className="text-lg font-medium text-black dark:text-white">Candidate Link</h3>
               </div>
-              
+
               <p className="text-xs text-gray-500 mb-4">
                 Share this link with the candidate. They will see only the interview interface.
               </p>
 
               {/* QR Code */}
               <div className="flex justify-center mb-4 p-4 bg-white rounded">
-                <QRCodeSVG 
+                <QRCodeSVG
                   value={candidateFullUrl}
                   size={140}
                   level="M"
@@ -146,11 +146,10 @@ export default function InterviewLinksModal({ isOpen, onClose, sessionData }: In
               {/* Copy Button */}
               <button
                 onClick={() => copyToClipboard(candidateFullUrl, 'candidate')}
-                className={`w-full py-2.5 text-sm font-medium transition-colors flex items-center justify-center gap-2 ${
-                  copiedCandidate
+                className={`w-full py-2.5 text-sm font-medium transition-colors flex items-center justify-center gap-2 ${copiedCandidate
                     ? 'bg-green-500 text-white'
                     : 'bg-gray-100 dark:bg-[#1A1A1A] text-black dark:text-white hover:bg-gray-200 dark:hover:bg-[#2A2A2A]'
-                }`}
+                  }`}
               >
                 {copiedCandidate ? (
                   <>
@@ -178,14 +177,14 @@ export default function InterviewLinksModal({ isOpen, onClose, sessionData }: In
                 </svg>
                 <h3 className="text-lg font-medium text-black dark:text-white">Admin Link</h3>
               </div>
-              
+
               <p className="text-xs text-gray-500 mb-4">
                 Use this link to join as interviewer. Full access to controls and wiki.
               </p>
 
               {/* QR Code */}
               <div className="flex justify-center mb-4 p-4 bg-white rounded">
-                <QRCodeSVG 
+                <QRCodeSVG
                   value={adminFullUrl}
                   size={140}
                   level="M"
@@ -203,11 +202,10 @@ export default function InterviewLinksModal({ isOpen, onClose, sessionData }: In
               {/* Copy Button */}
               <button
                 onClick={() => copyToClipboard(adminFullUrl, 'admin')}
-                className={`w-full py-2.5 text-sm font-medium transition-colors flex items-center justify-center gap-2 ${
-                  copiedAdmin
+                className={`w-full py-2.5 text-sm font-medium transition-colors flex items-center justify-center gap-2 ${copiedAdmin
                     ? 'bg-green-500 text-white'
                     : 'bg-[#00E5FF]/10 text-[#00E5FF] hover:bg-[#00E5FF]/20 border border-[#00E5FF]/30'
-                }`}
+                  }`}
               >
                 {copiedAdmin ? (
                   <>
@@ -247,6 +245,15 @@ export default function InterviewLinksModal({ isOpen, onClose, sessionData }: In
             className="px-5 py-2.5 text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-black dark:hover:text-white transition-colors"
           >
             Close
+          </button>
+          <button
+            onClick={() => window.open(candidateFullUrl, '_blank')}
+            className="px-5 py-2.5 text-sm font-medium bg-gray-100 dark:bg-gray-800 text-black dark:text-white hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors flex items-center gap-2"
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+            </svg>
+            Open Candidate View
           </button>
           <button
             onClick={openAdminView}
