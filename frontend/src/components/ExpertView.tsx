@@ -9,9 +9,16 @@ interface ExpertViewProps {
   language: string
 }
 
+interface CurrentQuestion {
+  text: string
+  isFollowup: boolean
+  followupNumber?: number
+  questionNumber: number
+}
+
 export default function ExpertView({ sessionId, language }: ExpertViewProps) {
   const [connectionStatus, setConnectionStatus] = useState<'connecting' | 'connected' | 'disconnected'>('connecting')
-  const [currentQuestion, setCurrentQuestion] = useState<any>(null)
+  const [currentQuestion, setCurrentQuestion] = useState<CurrentQuestion | null>(null)
   const [candidateAnswer, setCandidateAnswer] = useState<string>('')
   const [evaluation, setEvaluation] = useState<any>(null)
   const [strategy, setStrategy] = useState<any>(null)
@@ -65,7 +72,7 @@ export default function ExpertView({ sessionId, language }: ExpertViewProps) {
             setCandidateAnswer('')
             setPendingFollowup(null)
           } else if (message.type === 'followup') {
-            setCurrentQuestion(prev => ({ 
+            setCurrentQuestion((prev: CurrentQuestion | null) => ({ 
               text: message.data?.text || message.text, 
               isFollowup: true,
               followupNumber: message.data?.followup_number || 1,
