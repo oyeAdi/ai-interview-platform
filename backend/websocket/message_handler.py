@@ -1,6 +1,6 @@
 """WebSocket message handling and routing"""
 from typing import Dict, Optional
-from backend.websocket.connection_manager import ConnectionManager
+from websocket.connection_manager import ConnectionManager
 
 class MessageHandler:
     """Handles WebSocket message routing"""

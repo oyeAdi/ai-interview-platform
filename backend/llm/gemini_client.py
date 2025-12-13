@@ -2,7 +2,7 @@
 import json
 import google.generativeai as genai
 from typing import Dict, Optional, List
-from backend.config import Config
+from config import Config
 
 class GeminiClient:
     """Client for interacting with Google Gemini API"""
@@ -89,7 +89,7 @@ Respond with ONLY one word: either "Java" or "Python".
         context: Dict
     ) -> str:
         """Generate natural follow-up question using LLM with expert-learned examples"""
-        from backend.utils.logger import Logger
+        from utils.logger import Logger
         
         # Extract strategy guidance text (the actual instruction, not the meta description)
         strategy_instruction = strategy_guidance.get("strategy_guidance", "")

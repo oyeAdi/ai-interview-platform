@@ -1,5 +1,5 @@
 """Depth-focused strategy - deepens understanding of same topic"""
-from backend.strategies.base_strategy import BaseStrategy
+from strategies.base_strategy import BaseStrategy
 from typing import Dict
 
 class DepthFocusedStrategy(BaseStrategy):

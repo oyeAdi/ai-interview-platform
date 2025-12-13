@@ -1,7 +1,7 @@
 """JD and Resume analysis for language detection"""
 from typing import Dict, Optional
-from backend.llm.gemini_client import GeminiClient
-from backend.utils.file_parser import FileParser
+from llm.gemini_client import GeminiClient
+from utils.file_parser import FileParser
 
 class JDResumeAnalyzer:
     """Analyzes JD and Resume to determine required language"""

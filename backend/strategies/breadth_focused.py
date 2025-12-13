@@ -1,5 +1,5 @@
 """Breadth-focused strategy - explores related topics"""
-from backend.strategies.base_strategy import BaseStrategy
+from strategies.base_strategy import BaseStrategy
 from typing import Dict
 
 class BreadthFocusedStrategy(BaseStrategy):

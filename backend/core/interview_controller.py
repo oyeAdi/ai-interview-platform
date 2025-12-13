@@ -1,13 +1,13 @@
 """Main interview orchestrator"""
 from typing import Dict, Optional
 from datetime import datetime
-from backend.core.question_manager import QuestionManager
-from backend.core.context_manager import ContextManager
-from backend.evaluation.evaluator import Evaluator
-from backend.strategies.strategy_factory import StrategyFactory
-from backend.llm.gemini_client import GeminiClient
-from backend.utils.logger import Logger
-from backend.config import Config
+from core.question_manager import QuestionManager
+from core.context_manager import ContextManager
+from evaluation.evaluator import Evaluator
+from strategies.strategy_factory import StrategyFactory
+from llm.gemini_client import GeminiClient
+from utils.logger import Logger
+from config import Config
 
 class InterviewController:
     """Orchestrates the entire interview flow"""

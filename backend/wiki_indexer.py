@@ -270,7 +270,7 @@ def generate_documentation_without_llm(entry_name: str, files: List[str], descri
 def index_with_llm(entry_name: str, files: List[str], description: str, category: str) -> Dict:
     """Generate documentation using LLM"""
     try:
-        from backend.llm.gemini_client import GeminiClient
+        from llm.gemini_client import GeminiClient
         
         # Gather code context from files
         code_context = f"Entry: {entry_name}\nDescription: {description}\n\n"

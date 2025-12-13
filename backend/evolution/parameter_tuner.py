@@ -1,6 +1,6 @@
 """Parameter tuning for strategies based on performance"""
 from typing import Dict, Optional
-from backend.strategies.base_strategy import BaseStrategy
+from strategies.base_strategy import BaseStrategy
 
 class ParameterTuner:
     """Tunes strategy parameters based on performance"""

@@ -1,5 +1,5 @@
 """Challenge strategy - tests understanding with harder questions"""
-from backend.strategies.base_strategy import BaseStrategy
+from strategies.base_strategy import BaseStrategy
 from typing import Dict
 
 class ChallengeStrategy(BaseStrategy):

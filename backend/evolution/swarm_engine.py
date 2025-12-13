@@ -1,8 +1,8 @@
 """SWARM evolutionary engine for strategy evolution"""
 from typing import Dict, List
-from backend.evolution.parameter_tuner import ParameterTuner
-from backend.evolution.performance_analyzer import PerformanceAnalyzer
-from backend.strategies.strategy_factory import StrategyFactory
+from evolution.parameter_tuner import ParameterTuner
+from evolution.performance_analyzer import PerformanceAnalyzer
+from strategies.strategy_factory import StrategyFactory
 
 class SwarmEngine:
     """SWARM evolutionary engine for continuous strategy adaptation"""

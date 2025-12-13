@@ -1,6 +1,6 @@
 """Deterministic evaluation engine with optional LLM assessment"""
 from typing import Dict, Optional
-from backend.evaluation.scoring_algorithms import (
+from evaluation.scoring_algorithms import (
     TrueFalseScoring,
     MultipleChoiceScoring,
     OpenEndedScoring
@@ -22,7 +22,7 @@ class Evaluator:
         """Lazy load LLM client"""
         if self._llm_client is None:
             try:
-                from backend.llm.gemini_client import GeminiClient
+                from llm.gemini_client import GeminiClient
                 self._llm_client = GeminiClient()
             except Exception as e:
                 print(f"Could not initialize LLM client for evaluation: {e}")

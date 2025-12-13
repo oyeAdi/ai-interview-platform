@@ -3,7 +3,7 @@ import json
 import os
 import random
 from typing import Dict, List, Optional
-from backend.config import Config
+from config import Config
 
 # Path to the centralized question bank
 QUESTION_BANK_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), "models", "question_bank.json")

@@ -3,7 +3,7 @@ import json
 import os
 from typing import Dict, Optional
 from datetime import datetime
-from backend.config import Config
+from config import Config
 
 class Logger:
     """Manages continuous logging to log.json"""

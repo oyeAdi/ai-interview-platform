@@ -1,5 +1,5 @@
 """Clarification strategy - asks for details on unclear parts"""
-from backend.strategies.base_strategy import BaseStrategy
+from strategies.base_strategy import BaseStrategy
 from typing import Dict
 
 class ClarificationStrategy(BaseStrategy):

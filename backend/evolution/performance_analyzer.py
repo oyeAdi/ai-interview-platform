@@ -1,6 +1,6 @@
 """Analyze strategy performance from logs"""
 from typing import Dict, List
-from backend.utils.logger import Logger
+from utils.logger import Logger
 
 class PerformanceAnalyzer:
     """Analyzes strategy performance from log data"""

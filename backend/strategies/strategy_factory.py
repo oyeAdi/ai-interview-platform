@@ -1,11 +1,11 @@
 """Strategy factory for creating and selecting strategies"""
 from typing import Dict, Optional, Tuple
-from backend.strategies.base_strategy import BaseStrategy
-from backend.strategies.depth_focused import DepthFocusedStrategy
-from backend.strategies.clarification import ClarificationStrategy
-from backend.strategies.breadth_focused import BreadthFocusedStrategy
-from backend.strategies.challenge import ChallengeStrategy
-from backend.config import Config
+from strategies.base_strategy import BaseStrategy
+from strategies.depth_focused import DepthFocusedStrategy
+from strategies.clarification import ClarificationStrategy
+from strategies.breadth_focused import BreadthFocusedStrategy
+from strategies.challenge import ChallengeStrategy
+from config import Config
 
 class StrategyFactory:
     """Factory for creating and selecting interview strategies"""
