@@ -421,6 +421,432 @@
       "created_at": "2025-12-13T12:21:52.636404",
       "auto_generated": true,
       "indexed_from": "Follow-up Generation"
+    },
+    {
+      "id": "wiki_95b96d0a",
+      "question": "What is the Spring Boot framework?",
+      "answer": "The AI Interview Platform's backend *does not* utilize Spring Boot. It's built using FastAPI, a modern, fast (high-performance), web framework for building APIs with Python 3.7+ based on standard Python type hints. FastAPI handles the core application logic, including receiving requests from the frontend (Next.js), managing interview flow, and interacting with the Large Language Model (LLM) via the `llm/` directory (specifically Gemini integration). The `core/` directory contains the `Interview controller` which orchestrates the interview process, and the `question manager` which handles question retrieval and sequencing.  `evaluation/` houses the logic for assessing candidate responses.  `strategies/` defines how the system determines appropriate follow-up questions. Data persistence is handled through JSON files in the `models/` directory. Essentially, FastAPI acts as the central nervous system, routing requests and coordinating the various components to deliver the interview experience.",
+      "category": "General",
+      "code_refs": [
+        "backend/main.py",
+        "backend/core/",
+        "backend/evaluation/",
+        "backend/strategies/",
+        "backend/llm/",
+        "backend/models/"
+      ],
+      "keywords": [
+        "fastapi",
+        "python",
+        "api",
+        "backend",
+        "interview",
+        "evaluation",
+        "llm",
+        "architecture"
+      ],
+      "created_at": "2025-12-13T12:24:29.309876",
+      "auto_generated": true
+    },
+    {
+      "id": "wiki_d171e695",
+      "question": "How does a candidate matching work? what is the business logic?",
+      "answer": "Candidate matching determines the suitability of candidates for open positions based on a scoring system. The core logic resides in `backend/main.py` within the `calculate_candidate_match_score` function. The process begins with a skill-based comparison. The system evaluates the overlap between skills *required* by the `position` and skills *possessed* by the `candidate`. Importantly, a primary language filter is applied – prioritizing candidates proficient in either Python or Java, as specified by the position. To improve matching accuracy, *partial skill matching* is implemented. This means related skills contribute to the score; for example, proficiency in Django positively impacts the Python skill match. Beyond skills, the system assesses *experience level alignment*. The degree to which a candidate’s experience matches the position’s requirements contributes to the overall score. Finally, these factors (skill match, language filter, partial matches, and experience alignment) are combined to generate a percentage match score between 0 and 100, representing the candidate’s overall suitability for the role. This score is then used to rank and present candidates.",
+      "category": "LLM Integration",
+      "code_refs": [
+        "backend/main.py"
+      ],
+      "keywords": [
+        "candidate matching",
+        "skill matching",
+        "experience alignment",
+        "scoring",
+        "llm",
+        "python",
+        "java",
+        "relevance"
+      ],
+      "created_at": "2025-12-13T12:25:41.739960",
+      "auto_generated": true
+    },
+    {
+      "id": "wiki_e857f821",
+      "question": "How are the skill weights determined for the scoring system?",
+      "answer": "The skill weights used in the scoring system are dynamically determined by a Large Language Model (LLM) during the evaluation process. Specifically, when a job description is provided, the `Evaluator` class leverages the LLM to extract key skills and assign weights to each skill based on its importance as indicated within the job description. This process doesn't involve pre-defined, static weights. Instead, the LLM analyzes the job description text and generates a skill weighting dictionary. This dictionary maps each identified skill to a numerical weight, representing its relative significance for the role. These weights are then applied during keyword coverage and completeness scoring to calculate the overall candidate score. The LLM integration allows for a more tailored and context-aware evaluation, adapting to the specific requirements of each job.",
+      "category": "LLM Integration",
+      "code_refs": [
+        "backend/evaluation/evaluator.py"
+      ],
+      "keywords": [
+        "skill weighting",
+        "llm",
+        "job description",
+        "evaluation",
+        "scoring",
+        "keyword coverage",
+        "completeness",
+        "dynamic weights"
+      ],
+      "created_at": "2025-12-13T12:26:14.774869",
+      "auto_generated": true
+    },
+    {
+      "id": "wiki_8db6fe04",
+      "question": "How does Organization APIs work?",
+      "answer": "REST endpoints for organization management\n\nThis feature is implemented in: backend/main.py",
+      "category": "API Endpoints",
+      "code_refs": [
+        "backend/main.py"
+      ],
+      "keywords": [
+        "organization",
+        "apis",
+        "rest",
+        "endpoints",
+        "for",
+        "organization",
+        "management"
+      ],
+      "created_at": "2025-12-13T12:30:28.869811",
+      "auto_generated": true,
+      "indexed_from": "Organization APIs"
+    },
+    {
+      "id": "wiki_6d94802e",
+      "question": "How does Account CRUD work?",
+      "answer": "Create, Read, Update, Delete operations for accounts\n\nThis feature is implemented in: backend/main.py",
+      "category": "API Endpoints",
+      "code_refs": [
+        "backend/main.py"
+      ],
+      "keywords": [
+        "account",
+        "crud",
+        "create,",
+        "read,",
+        "update,",
+        "delete",
+        "operations"
+      ],
+      "created_at": "2025-12-13T12:30:28.870112",
+      "auto_generated": true,
+      "indexed_from": "Account CRUD"
+    },
+    {
+      "id": "wiki_514e9f75",
+      "question": "How does Position CRUD work?",
+      "answer": "Position management REST endpoints\n\nThis feature is implemented in: backend/main.py",
+      "category": "API Endpoints",
+      "code_refs": [
+        "backend/main.py"
+      ],
+      "keywords": [
+        "position",
+        "crud",
+        "position",
+        "management",
+        "rest",
+        "endpoints"
+      ],
+      "created_at": "2025-12-13T12:30:28.870342",
+      "auto_generated": true,
+      "indexed_from": "Position CRUD"
+    },
+    {
+      "id": "wiki_216bdc13",
+      "question": "How does Interview Session APIs work?",
+      "answer": "Create interview sessions and generate unique links\n\nThis feature is implemented in: backend/main.py",
+      "category": "API Endpoints",
+      "code_refs": [
+        "backend/main.py"
+      ],
+      "keywords": [
+        "interview",
+        "session",
+        "apis",
+        "create",
+        "interview",
+        "sessions",
+        "and",
+        "generate"
+      ],
+      "created_at": "2025-12-13T12:30:28.870555",
+      "auto_generated": true,
+      "indexed_from": "Interview Session APIs"
+    },
+    {
+      "id": "wiki_821130e5",
+      "question": "How does Wiki APIs work?",
+      "answer": "Wiki search, ask, and reindex endpoints\n\nThis feature is implemented in: backend/main.py",
+      "category": "API Endpoints",
+      "code_refs": [
+        "backend/main.py"
+      ],
+      "keywords": [
+        "wiki",
+        "apis",
+        "wiki",
+        "search,",
+        "ask,",
+        "and",
+        "reindex"
+      ],
+      "created_at": "2025-12-13T12:30:28.870769",
+      "auto_generated": true,
+      "indexed_from": "Wiki APIs"
+    },
+    {
+      "id": "wiki_58438c24",
+      "question": "How does Dashboard Page work?",
+      "answer": "Main admin dashboard with accounts and positions\n\nThis feature is implemented in: frontend/src/app/page.tsx",
+      "category": "Frontend Components",
+      "code_refs": [
+        "frontend/src/app/page.tsx"
+      ],
+      "keywords": [
+        "dashboard",
+        "page",
+        "main",
+        "admin",
+        "dashboard",
+        "with",
+        "accounts"
+      ],
+      "created_at": "2025-12-13T12:30:28.870945",
+      "auto_generated": true,
+      "indexed_from": "Dashboard Page"
+    },
+    {
+      "id": "wiki_db0a1798",
+      "question": "How does Interview Page work?",
+      "answer": "Live interview UI for candidates and admins\n\nThis feature is implemented in: frontend/src/app/interview/page.tsx",
+      "category": "Frontend Components",
+      "code_refs": [
+        "frontend/src/app/interview/page.tsx"
+      ],
+      "keywords": [
+        "interview",
+        "page",
+        "live",
+        "interview",
+        "ui",
+        "for",
+        "candidates"
+      ],
+      "created_at": "2025-12-13T12:30:28.871065",
+      "auto_generated": true,
+      "indexed_from": "Interview Page"
+    },
+    {
+      "id": "wiki_338c5ab1",
+      "question": "How does Candidate View work?",
+      "answer": "Candidate-facing interview interface\n\nThis feature is implemented in: frontend/src/components/CandidateView.tsx",
+      "category": "Frontend Components",
+      "code_refs": [
+        "frontend/src/components/CandidateView.tsx"
+      ],
+      "keywords": [
+        "candidate",
+        "view",
+        "candidate-facing",
+        "interview",
+        "interface"
+      ],
+      "created_at": "2025-12-13T12:30:28.871218",
+      "auto_generated": true,
+      "indexed_from": "Candidate View"
+    },
+    {
+      "id": "wiki_12d2237d",
+      "question": "How does Admin Dashboard work?",
+      "answer": "Expert controls and interview monitoring\n\nThis feature is implemented in: frontend/src/components/AdminDashboard.tsx",
+      "category": "Frontend Components",
+      "code_refs": [
+        "frontend/src/components/AdminDashboard.tsx"
+      ],
+      "keywords": [
+        "admin",
+        "dashboard",
+        "expert",
+        "controls",
+        "and",
+        "interview",
+        "monitoring"
+      ],
+      "created_at": "2025-12-13T12:30:28.871371",
+      "auto_generated": true,
+      "indexed_from": "Admin Dashboard"
+    },
+    {
+      "id": "wiki_a2408dd1",
+      "question": "How does Code Editor work?",
+      "answer": "Monaco editor for coding questions\n\nThis feature is implemented in: frontend/src/components/CodeEditor.tsx",
+      "category": "Frontend Components",
+      "code_refs": [
+        "frontend/src/components/CodeEditor.tsx"
+      ],
+      "keywords": [
+        "code",
+        "editor",
+        "monaco",
+        "editor",
+        "for",
+        "coding",
+        "questions"
+      ],
+      "created_at": "2025-12-13T12:30:28.871491",
+      "auto_generated": true,
+      "indexed_from": "Code Editor"
+    },
+    {
+      "id": "wiki_1644adbf",
+      "question": "How does Theme Toggle work?",
+      "answer": "Dark/Light mode switching\n\nThis feature is implemented in: frontend/src/components/ThemeToggle.tsx, frontend/src/contexts/ThemeContext.tsx",
+      "category": "UI/UX Features",
+      "code_refs": [
+        "frontend/src/components/ThemeToggle.tsx",
+        "frontend/src/contexts/ThemeContext.tsx"
+      ],
+      "keywords": [
+        "theme",
+        "toggle",
+        "dark/light",
+        "mode",
+        "switching"
+      ],
+      "created_at": "2025-12-13T12:30:28.871689",
+      "auto_generated": true,
+      "indexed_from": "Theme Toggle"
+    },
+    {
+      "id": "wiki_96f9b0a3",
+      "question": "How does EPAM Branding work?",
+      "answer": "EPAM-inspired color scheme and styling\n\nThis feature is implemented in: frontend/tailwind.config.js, frontend/src/app/globals.css",
+      "category": "UI/UX Features",
+      "code_refs": [
+        "frontend/tailwind.config.js",
+        "frontend/src/app/globals.css"
+      ],
+      "keywords": [
+        "epam",
+        "branding",
+        "epam-inspired",
+        "color",
+        "scheme",
+        "and",
+        "styling"
+      ],
+      "created_at": "2025-12-13T12:30:28.871888",
+      "auto_generated": true,
+      "indexed_from": "EPAM Branding"
+    },
+    {
+      "id": "wiki_df6a288a",
+      "question": "How does Search and Filters work?",
+      "answer": "Reusable search and filter components\n\nThis feature is implemented in: frontend/src/components/SearchBar.tsx, frontend/src/components/FilterChips.tsx",
+      "category": "UI/UX Features",
+      "code_refs": [
+        "frontend/src/components/SearchBar.tsx",
+        "frontend/src/components/FilterChips.tsx"
+      ],
+      "keywords": [
+        "search",
+        "and",
+        "filters",
+        "reusable",
+        "search",
+        "and",
+        "filter",
+        "components"
+      ],
+      "created_at": "2025-12-13T12:30:28.872103",
+      "auto_generated": true,
+      "indexed_from": "Search and Filters"
+    },
+    {
+      "id": "wiki_0f505f2e",
+      "question": "How does Detail Sidebars work?",
+      "answer": "Inline panels for viewing and editing details\n\nThis feature is implemented in: frontend/src/components/AccountDetail.tsx, frontend/src/components/PositionDetail.tsx",
+      "category": "UI/UX Features",
+      "code_refs": [
+        "frontend/src/components/AccountDetail.tsx",
+        "frontend/src/components/PositionDetail.tsx"
+      ],
+      "keywords": [
+        "detail",
+        "sidebars",
+        "inline",
+        "panels",
+        "for",
+        "viewing",
+        "and"
+      ],
+      "created_at": "2025-12-13T12:30:28.872415",
+      "auto_generated": true,
+      "indexed_from": "Detail Sidebars"
+    },
+    {
+      "id": "wiki_35b76350",
+      "question": "How does Interview Logger work?",
+      "answer": "Session logging and transcript storage\n\nThis feature is implemented in: backend/utils/logger.py",
+      "category": "Logging & Analytics",
+      "code_refs": [
+        "backend/utils/logger.py"
+      ],
+      "keywords": [
+        "interview",
+        "logger",
+        "session",
+        "logging",
+        "and",
+        "transcript",
+        "storage"
+      ],
+      "created_at": "2025-12-13T12:30:28.872553",
+      "auto_generated": true,
+      "indexed_from": "Interview Logger"
+    },
+    {
+      "id": "wiki_ead07169",
+      "question": "How does Time Metrics work?",
+      "answer": "Response time tracking and visualization\n\nThis feature is implemented in: frontend/src/components/TimeMetrics.tsx",
+      "category": "Logging & Analytics",
+      "code_refs": [
+        "frontend/src/components/TimeMetrics.tsx"
+      ],
+      "keywords": [
+        "time",
+        "metrics",
+        "response",
+        "time",
+        "tracking",
+        "and",
+        "visualization"
+      ],
+      "created_at": "2025-12-13T12:30:28.872681",
+      "auto_generated": true,
+      "indexed_from": "Time Metrics"
+    },
+    {
+      "id": "wiki_0b665503",
+      "question": "How does Live Scores work?",
+      "answer": "Real-time scoring display during interviews\n\nThis feature is implemented in: frontend/src/components/LiveScores.tsx",
+      "category": "Logging & Analytics",
+      "code_refs": [
+        "frontend/src/components/LiveScores.tsx"
+      ],
+      "keywords": [
+        "live",
+        "scores",
+        "real-time",
+        "scoring",
+        "display",
+        "during",
+        "interviews"
+      ],
+      "created_at": "2025-12-13T12:30:28.872791",
+      "auto_generated": true,
+      "indexed_from": "Live Scores"
     }
   ],
   "categories": [
@@ -438,10 +864,10 @@
     "Logging & Analytics"
   ],
   "metadata": {
-    "last_indexed": "2025-12-13T12:21:52.636407",
-    "total_queries": 0,
+    "last_indexed": "2025-12-13T12:30:28.872793",
+    "total_queries": 3,
     "cache_hits": 0,
-    "llm_calls": 0,
+    "llm_calls": 3,
     "indexer_version": "1.0"
   }
 }

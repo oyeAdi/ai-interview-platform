@@ -126,6 +126,99 @@ WIKI_CATEGORIES = {
             "files": ["backend/llm/gemini_client.py"],
             "description": "AI-generated interview follow-ups"
         }
+    ],
+    "API Endpoints": [
+        {
+            "name": "Organization APIs",
+            "files": ["backend/main.py"],
+            "description": "REST endpoints for organization management"
+        },
+        {
+            "name": "Account CRUD",
+            "files": ["backend/main.py"],
+            "description": "Create, Read, Update, Delete operations for accounts"
+        },
+        {
+            "name": "Position CRUD",
+            "files": ["backend/main.py"],
+            "description": "Position management REST endpoints"
+        },
+        {
+            "name": "Interview Session APIs",
+            "files": ["backend/main.py"],
+            "description": "Create interview sessions and generate unique links"
+        },
+        {
+            "name": "Wiki APIs",
+            "files": ["backend/main.py"],
+            "description": "Wiki search, ask, and reindex endpoints"
+        }
+    ],
+    "Frontend Components": [
+        {
+            "name": "Dashboard Page",
+            "files": ["frontend/src/app/page.tsx"],
+            "description": "Main admin dashboard with accounts and positions"
+        },
+        {
+            "name": "Interview Page",
+            "files": ["frontend/src/app/interview/page.tsx"],
+            "description": "Live interview UI for candidates and admins"
+        },
+        {
+            "name": "Candidate View",
+            "files": ["frontend/src/components/CandidateView.tsx"],
+            "description": "Candidate-facing interview interface"
+        },
+        {
+            "name": "Admin Dashboard",
+            "files": ["frontend/src/components/AdminDashboard.tsx"],
+            "description": "Expert controls and interview monitoring"
+        },
+        {
+            "name": "Code Editor",
+            "files": ["frontend/src/components/CodeEditor.tsx"],
+            "description": "Monaco editor for coding questions"
+        }
+    ],
+    "UI/UX Features": [
+        {
+            "name": "Theme Toggle",
+            "files": ["frontend/src/components/ThemeToggle.tsx", "frontend/src/contexts/ThemeContext.tsx"],
+            "description": "Dark/Light mode switching"
+        },
+        {
+            "name": "EPAM Branding",
+            "files": ["frontend/tailwind.config.js", "frontend/src/app/globals.css"],
+            "description": "EPAM-inspired color scheme and styling"
+        },
+        {
+            "name": "Search and Filters",
+            "files": ["frontend/src/components/SearchBar.tsx", "frontend/src/components/FilterChips.tsx"],
+            "description": "Reusable search and filter components"
+        },
+        {
+            "name": "Detail Sidebars",
+            "files": ["frontend/src/components/AccountDetail.tsx", "frontend/src/components/PositionDetail.tsx"],
+            "description": "Inline panels for viewing and editing details"
+        }
+    ],
+    "Logging & Analytics": [
+        {
+            "name": "Interview Logger",
+            "files": ["backend/utils/logger.py"],
+            "description": "Session logging and transcript storage"
+        },
+        {
+            "name": "Time Metrics",
+            "files": ["frontend/src/components/TimeMetrics.tsx"],
+            "description": "Response time tracking and visualization"
+        },
+        {
+            "name": "Live Scores",
+            "files": ["frontend/src/components/LiveScores.tsx"],
+            "description": "Real-time scoring display during interviews"
+        }
     ]
 }
 
