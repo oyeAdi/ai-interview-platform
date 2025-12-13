@@ -13,6 +13,7 @@ import AddPositionModal from '@/components/AddPositionModal'
 import AddAccountModal from '@/components/AddAccountModal'
 import AccountDetail from '@/components/AccountDetail'
 import PositionDetail from '@/components/PositionDetail'
+import WikiWidget from '@/components/WikiWidget'
 
 interface Account {
   id: string
@@ -525,7 +526,7 @@ export default function DashboardPage() {
       />
 
       {/* Add Account Modal */}
-      <AddAccountModal
+      <AddAccountModal 
         isOpen={showAddAccount}
         onClose={() => setShowAddAccount(false)}
         onAccountCreated={() => {
@@ -540,6 +541,9 @@ export default function DashboardPage() {
             })
         }}
       />
+
+      {/* Wiki Widget - Admin Only (Dashboard is admin-only by design) */}
+      <WikiWidget />
 
     </div>
   )
