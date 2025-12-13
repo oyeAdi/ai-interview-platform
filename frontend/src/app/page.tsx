@@ -15,6 +15,7 @@ import AccountDetail from '@/components/AccountDetail'
 import PositionDetail from '@/components/PositionDetail'
 import WikiWidget from '@/components/WikiWidget'
 import InterviewLinksModal from '@/components/InterviewLinksModal'
+import { apiUrl } from '@/config/api'
 
 interface Account {
   id: string
@@ -94,8 +95,8 @@ export default function DashboardPage() {
   // Load accounts and all positions on mount
   useEffect(() => {
     Promise.all([
-      fetch('http://localhost:8000/api/accounts').then(res => res.json()),
-      fetch('http://localhost:8000/api/positions').then(res => res.json())
+      fetch(apiUrl('api/accounts')).then(res => res.json()),
+      fetch(apiUrl('api/positions')).then(res => res.json())
     ])
       .then(([accountsData, positionsData]) => {
         setAccounts(accountsData.accounts || [])
@@ -115,7 +116,7 @@ export default function DashboardPage() {
   useEffect(() => {
     if (selectedAccount) {
       setPositionsLoading(true)
-      fetch(`http://localhost:8000/api/accounts/${selectedAccount}/positions`)
+      fetch(apiUrl(`api/accounts/${selectedAccount}/positions`))
         .then(res => res.json())
         .then(data => {
           setAccountPositions(data.positions || [])
@@ -168,7 +169,7 @@ export default function DashboardPage() {
 
     try {
       // First create the interview session to get unique links
-      const sessionResponse = await fetch('http://localhost:8000/api/interview/create-session', {
+      const sessionResponse = await fetch(apiUrl('api/interview/create-session'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -202,7 +203,7 @@ export default function DashboardPage() {
       let candidateName = 'Custom Resume'
       if (selectedCandidate) {
         try {
-          const candidateRes = await fetch(`http://localhost:8000/api/resumes/${selectedCandidate}`)
+          const candidateRes = await fetch(apiUrl(`api/resumes/${selectedCandidate}`))
           const candidateData = await candidateRes.json()
           candidateName = candidateData.name || candidateName
         } catch (e) {
@@ -240,7 +241,7 @@ export default function DashboardPage() {
     
     if (selectedPosition) {
       try {
-        await fetch(`http://localhost:8000/api/positions/${selectedPosition}/config`, {
+        await fetch(apiUrl(`api/positions/${selectedPosition}/config`), {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(updatedModel)
@@ -253,14 +254,14 @@ export default function DashboardPage() {
 
   const refreshPositions = () => {
     if (selectedAccount) {
-      fetch(`http://localhost:8000/api/accounts/${selectedAccount}/positions`)
+      fetch(apiUrl(`api/accounts/${selectedAccount}/positions`))
         .then(res => res.json())
         .then(data => {
           setAccountPositions(data.positions || [])
         })
     }
     // Also refresh all positions for account stats
-    fetch('http://localhost:8000/api/positions')
+    fetch(apiUrl('api/positions'))
       .then(res => res.json())
       .then(data => {
         setAllPositions(data.positions || [])
@@ -268,7 +269,7 @@ export default function DashboardPage() {
   }
 
   const refreshAccounts = () => {
-    fetch('http://localhost:8000/api/accounts')
+    fetch(apiUrl('api/accounts'))
       .then(res => res.json())
       .then(data => {
         setAccounts(data.accounts || [])
@@ -609,7 +610,7 @@ export default function DashboardPage() {
         onAccountCreated={() => {
           refreshAccounts()
           // Select the newly created account
-          fetch('http://localhost:8000/api/accounts')
+          fetch(apiUrl('api/accounts'))
             .then(res => res.json())
             .then(data => {
               if (data.accounts && data.accounts.length > 0) {
