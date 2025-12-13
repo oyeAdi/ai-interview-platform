@@ -68,6 +68,8 @@ ORGANIZATIONS_FILE = os.path.join(MODELS_DIR, "organizations.json")
 ACCOUNTS_FILE = os.path.join(MODELS_DIR, "accounts.json")
 POSITIONS_FILE = os.path.join(MODELS_DIR, "positions.json")
 QUESTION_BANK_FILE = os.path.join(MODELS_DIR, "question_bank.json")
+WIKI_FILE = os.path.join(MODELS_DIR, "wiki.json")
+SESSIONS_FILE = os.path.join(MODELS_DIR, "interview_sessions.json")
 
 # CORS middleware
 app.add_middleware(
@@ -1124,6 +1126,344 @@ async def get_pending_followup(session_id: str):
         return {"pending": False}
     
     return {"pending": True, "data": pending}
+
+# ==================== Interview Session Links ====================
+
+def generate_interview_links(session_id: str, position_id: str, candidate_id: str) -> dict:
+    """Generate unique links for candidate and admin views"""
+    candidate_token = str(uuid.uuid4())
+    admin_token = str(uuid.uuid4())
+    
+    session_data = {
+        "session_id": session_id,
+        "position_id": position_id,
+        "candidate_id": candidate_id,
+        "candidate_token": candidate_token,
+        "admin_token": admin_token,
+        "created_at": datetime.now().isoformat(),
+        "status": "pending"  # pending, active, completed
+    }
+    
+    # Load existing sessions
+    sessions = load_json_file(SESSIONS_FILE)
+    if "sessions" not in sessions:
+        sessions["sessions"] = {}
+    
+    sessions["sessions"][session_id] = session_data
+    save_json_file(SESSIONS_FILE, sessions)
+    
+    return {
+        "session_id": session_id,
+        "candidate_link": f"/interview/{session_id}?token={candidate_token}&view=candidate",
+        "admin_link": f"/interview/{session_id}?token={admin_token}&view=admin",
+        "candidate_token": candidate_token,
+        "admin_token": admin_token
+    }
+
+@app.post("/api/interview/create-session")
+async def create_interview_session(
+    position_id: str = Body(...),
+    candidate_id: str = Body(...)
+):
+    """Create interview session and generate unique links for candidate and admin"""
+    # Validate position exists
+    positions_data = load_json_file(POSITIONS_FILE)
+    position = next((p for p in positions_data.get("positions", []) if p["id"] == position_id), None)
+    if not position:
+        raise HTTPException(status_code=404, detail="Position not found")
+    
+    # Validate candidate exists
+    resumes_data = load_json_file(RESUMES_FILE)
+    candidate = next((r for r in resumes_data.get("resumes", []) if r["id"] == candidate_id), None)
+    if not candidate:
+        raise HTTPException(status_code=404, detail="Candidate not found")
+    
+    # Generate session ID and links
+    session_id = str(uuid.uuid4())[:8]
+    links = generate_interview_links(session_id, position_id, candidate_id)
+    
+    return {
+        "status": "created",
+        "session_id": session_id,
+        "position": {"id": position_id, "title": position.get("title")},
+        "candidate": {"id": candidate_id, "name": candidate.get("name")},
+        "links": {
+            "candidate": links["candidate_link"],
+            "admin": links["admin_link"]
+        }
+    }
+
+@app.get("/api/interview/validate-token")
+async def validate_interview_token(session_id: str, token: str):
+    """Validate interview token and return view type (candidate/admin)"""
+    sessions = load_json_file(SESSIONS_FILE)
+    session = sessions.get("sessions", {}).get(session_id)
+    
+    if not session:
+        raise HTTPException(status_code=404, detail="Session not found")
+    
+    if token == session.get("candidate_token"):
+        return {"valid": True, "view": "candidate", "session_id": session_id}
+    elif token == session.get("admin_token"):
+        return {"valid": True, "view": "admin", "session_id": session_id}
+    else:
+        raise HTTPException(status_code=403, detail="Invalid token")
+
+@app.get("/api/interview/session/{session_id}")
+async def get_interview_session(session_id: str, token: str):
+    """Get interview session details (requires valid token)"""
+    sessions = load_json_file(SESSIONS_FILE)
+    session = sessions.get("sessions", {}).get(session_id)
+    
+    if not session:
+        raise HTTPException(status_code=404, detail="Session not found")
+    
+    # Validate token
+    is_admin = token == session.get("admin_token")
+    is_candidate = token == session.get("candidate_token")
+    
+    if not is_admin and not is_candidate:
+        raise HTTPException(status_code=403, detail="Invalid token")
+    
+    # Get position and candidate details
+    positions_data = load_json_file(POSITIONS_FILE)
+    position = next((p for p in positions_data.get("positions", []) if p["id"] == session["position_id"]), None)
+    
+    resumes_data = load_json_file(RESUMES_FILE)
+    candidate = next((r for r in resumes_data.get("resumes", []) if r["id"] == session["candidate_id"]), None)
+    
+    response = {
+        "session_id": session_id,
+        "status": session.get("status"),
+        "view": "admin" if is_admin else "candidate",
+        "position": {"id": session["position_id"], "title": position.get("title") if position else "Unknown"},
+        "created_at": session.get("created_at")
+    }
+    
+    # Admin gets more details
+    if is_admin:
+        response["candidate"] = {
+            "id": session["candidate_id"],
+            "name": candidate.get("name") if candidate else "Unknown",
+            "experience_level": candidate.get("experience_level") if candidate else "Unknown"
+        }
+        response["links"] = {
+            "candidate": f"/interview/{session_id}?token={session['candidate_token']}&view=candidate",
+            "admin": f"/interview/{session_id}?token={session['admin_token']}&view=admin"
+        }
+    
+    return response
+
+# ==================== Wiki APIs (Admin Only) ====================
+
+class WikiAskRequest(BaseModel):
+    question: str
+    category: Optional[str] = None
+
+class WikiEntry(BaseModel):
+    id: str
+    question: str
+    answer: str
+    category: str
+    code_refs: List[str] = []
+    keywords: List[str] = []
+    created_at: str
+    auto_generated: bool = True
+
+def calculate_similarity(text1: str, text2: str) -> float:
+    """Simple keyword-based similarity (will be replaced with embeddings)"""
+    words1 = set(text1.lower().split())
+    words2 = set(text2.lower().split())
+    if not words1 or not words2:
+        return 0.0
+    intersection = words1 & words2
+    union = words1 | words2
+    return len(intersection) / len(union)
+
+def search_wiki_cache(question: str, wiki_data: dict, threshold: float = 0.5) -> Optional[dict]:
+    """Search wiki cache for similar questions"""
+    best_match = None
+    best_score = 0.0
+    
+    for entry in wiki_data.get("entries", []):
+        # Check question similarity
+        q_score = calculate_similarity(question, entry.get("question", ""))
+        # Check keyword match
+        k_score = sum(1 for kw in entry.get("keywords", []) if kw.lower() in question.lower()) / max(len(entry.get("keywords", [])), 1)
+        
+        score = (q_score * 0.7) + (k_score * 0.3)
+        
+        if score > best_score and score >= threshold:
+            best_score = score
+            best_match = entry
+    
+    return best_match
+
+@app.get("/api/wiki/categories")
+async def get_wiki_categories():
+    """Get all wiki categories with entry counts (Admin only)"""
+    wiki_data = load_json_file(WIKI_FILE)
+    categories = wiki_data.get("categories", [])
+    entries = wiki_data.get("entries", [])
+    
+    # Count entries per category
+    category_counts = {}
+    for cat in categories:
+        category_counts[cat] = len([e for e in entries if e.get("category") == cat])
+    
+    return {
+        "categories": [
+            {"name": cat, "entry_count": category_counts.get(cat, 0)}
+            for cat in categories
+        ],
+        "total_entries": len(entries),
+        "metadata": wiki_data.get("metadata", {})
+    }
+
+@app.get("/api/wiki/search")
+async def search_wiki(q: str, category: Optional[str] = None):
+    """Search wiki entries (Admin only)"""
+    wiki_data = load_json_file(WIKI_FILE)
+    entries = wiki_data.get("entries", [])
+    
+    # Filter by category if provided
+    if category:
+        entries = [e for e in entries if e.get("category") == category]
+    
+    # Search by question text and keywords
+    results = []
+    for entry in entries:
+        score = calculate_similarity(q, entry.get("question", ""))
+        keyword_match = any(kw.lower() in q.lower() for kw in entry.get("keywords", []))
+        
+        if score > 0.2 or keyword_match:
+            results.append({
+                **entry,
+                "relevance_score": score + (0.2 if keyword_match else 0)
+            })
+    
+    # Sort by relevance
+    results.sort(key=lambda x: x.get("relevance_score", 0), reverse=True)
+    
+    return {"results": results[:10], "total": len(results)}
+
+@app.post("/api/wiki/ask")
+async def ask_wiki(request: WikiAskRequest):
+    """Ask a question - returns cached answer or generates new one (Admin only)"""
+    wiki_data = load_json_file(WIKI_FILE)
+    
+    # Update query count
+    if "metadata" not in wiki_data:
+        wiki_data["metadata"] = {}
+    wiki_data["metadata"]["total_queries"] = wiki_data["metadata"].get("total_queries", 0) + 1
+    
+    # Search cache first
+    cached = search_wiki_cache(request.question, wiki_data, threshold=0.6)
+    
+    if cached:
+        # Cache hit!
+        wiki_data["metadata"]["cache_hits"] = wiki_data["metadata"].get("cache_hits", 0) + 1
+        save_json_file(WIKI_FILE, wiki_data)
+        
+        return {
+            "source": "cache",
+            "answer": cached.get("answer"),
+            "question": cached.get("question"),
+            "category": cached.get("category"),
+            "code_refs": cached.get("code_refs", []),
+            "followup_suggestion": "Would you like to see the code architecture for this?"
+        }
+    
+    # Cache miss - need to generate with LLM
+    wiki_data["metadata"]["llm_calls"] = wiki_data["metadata"].get("llm_calls", 0) + 1
+    
+    # For now, return a placeholder (LLM integration in next phase)
+    # In Phase 2, this will call Gemini to generate the answer
+    placeholder_answer = f"I don't have a cached answer for: '{request.question}'. This will be answered by AI in the next phase."
+    
+    # Create new entry (will be populated by LLM in Phase 2)
+    new_entry = {
+        "id": f"wiki_{uuid.uuid4().hex[:8]}",
+        "question": request.question,
+        "answer": placeholder_answer,
+        "category": request.category or "General",
+        "code_refs": [],
+        "keywords": request.question.lower().split()[:5],
+        "created_at": datetime.now().isoformat(),
+        "auto_generated": True,
+        "needs_llm": True  # Flag for Phase 2
+    }
+    
+    if "entries" not in wiki_data:
+        wiki_data["entries"] = []
+    wiki_data["entries"].append(new_entry)
+    save_json_file(WIKI_FILE, wiki_data)
+    
+    return {
+        "source": "pending_llm",
+        "answer": placeholder_answer,
+        "question": request.question,
+        "category": new_entry["category"],
+        "code_refs": [],
+        "followup_suggestion": None
+    }
+
+@app.get("/api/wiki/entries")
+async def get_wiki_entries(category: Optional[str] = None, limit: int = 20):
+    """Get wiki entries, optionally filtered by category (Admin only)"""
+    wiki_data = load_json_file(WIKI_FILE)
+    entries = wiki_data.get("entries", [])
+    
+    if category:
+        entries = [e for e in entries if e.get("category") == category]
+    
+    # Sort by created_at descending
+    entries.sort(key=lambda x: x.get("created_at", ""), reverse=True)
+    
+    return {"entries": entries[:limit], "total": len(entries)}
+
+@app.get("/api/wiki/entry/{entry_id}")
+async def get_wiki_entry(entry_id: str):
+    """Get a specific wiki entry (Admin only)"""
+    wiki_data = load_json_file(WIKI_FILE)
+    
+    for entry in wiki_data.get("entries", []):
+        if entry.get("id") == entry_id:
+            return entry
+    
+    raise HTTPException(status_code=404, detail="Entry not found")
+
+@app.delete("/api/wiki/entry/{entry_id}")
+async def delete_wiki_entry(entry_id: str):
+    """Delete a wiki entry (Admin only)"""
+    wiki_data = load_json_file(WIKI_FILE)
+    
+    entries = wiki_data.get("entries", [])
+    wiki_data["entries"] = [e for e in entries if e.get("id") != entry_id]
+    
+    if len(wiki_data["entries"]) == len(entries):
+        raise HTTPException(status_code=404, detail="Entry not found")
+    
+    save_json_file(WIKI_FILE, wiki_data)
+    return {"status": "deleted", "entry_id": entry_id}
+
+@app.get("/api/wiki/stats")
+async def get_wiki_stats():
+    """Get wiki usage statistics (Admin only)"""
+    wiki_data = load_json_file(WIKI_FILE)
+    metadata = wiki_data.get("metadata", {})
+    
+    return {
+        "total_entries": len(wiki_data.get("entries", [])),
+        "total_queries": metadata.get("total_queries", 0),
+        "cache_hits": metadata.get("cache_hits", 0),
+        "llm_calls": metadata.get("llm_calls", 0),
+        "cache_hit_rate": round(
+            metadata.get("cache_hits", 0) / max(metadata.get("total_queries", 1), 1) * 100, 1
+        ),
+        "last_indexed": metadata.get("last_indexed"),
+        "categories": len(wiki_data.get("categories", []))
+    }
 
 if __name__ == "__main__":
     import uvicorn
