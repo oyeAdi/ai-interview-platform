@@ -14,6 +14,7 @@ import AddAccountModal from '@/components/AddAccountModal'
 import AccountDetail from '@/components/AccountDetail'
 import PositionDetail from '@/components/PositionDetail'
 import WikiWidget from '@/components/WikiWidget'
+import InterviewLinksModal from '@/components/InterviewLinksModal'
 
 interface Account {
   id: string
@@ -75,6 +76,15 @@ export default function DashboardPage() {
   // Sidebar state
   const [sidebarType, setSidebarType] = useState<'account' | 'position' | null>(null)
   const [sidebarId, setSidebarId] = useState<string | null>(null)
+  
+  // Interview Links Modal state
+  const [showInterviewLinks, setShowInterviewLinks] = useState(false)
+  const [interviewSessionData, setInterviewSessionData] = useState<{
+    session_id: string
+    position: { id: string; title: string }
+    candidate: { id: string; name: string }
+    links: { candidate: string; admin: string }
+  } | null>(null)
 
   // Load accounts and all positions on mount
   useEffect(() => {
@@ -152,38 +162,66 @@ export default function DashboardPage() {
     setStartingInterview(true)
 
     try {
-      const formData = new FormData()
-      formData.append('position_id', selectedPosition)
-      
-      if (resumeText) formData.append('resume_text', resumeText)
-      if (resumeFile) formData.append('resume_file', resumeFile)
-      if (selectedCandidate) formData.append('resume_id', selectedCandidate)
-      if (expertMode) formData.append('expert_mode', 'true')
-
-      const response = await fetch('http://localhost:8000/api/interview/start', {
+      // First create the interview session to get unique links
+      const sessionResponse = await fetch('http://localhost:8000/api/interview/create-session', {
         method: 'POST',
-        body: formData,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          position_id: selectedPosition,
+          candidate_id: selectedCandidate || 'custom'
+        })
       })
 
-      const data = await response.json()
+      const sessionData = await sessionResponse.json()
       
-      if (data.session_id) {
-        localStorage.setItem('current_session_id', data.session_id)
-        localStorage.setItem('current_language', data.language)
-        localStorage.setItem('expert_mode', expertMode ? 'true' : 'false')
-        
-        const candidateUrl = `/interview?view=candidate&session_id=${data.session_id}&lang=${data.language}`
-        router.push(candidateUrl)
-        
-        setTimeout(() => {
-          const viewType = expertMode ? 'expert' : 'admin'
-          const adminUrl = `${window.location.origin}/interview?view=${viewType}&session_id=${data.session_id}&lang=${data.language}`
-          window.open(adminUrl, '_blank', 'noopener,noreferrer')
-        }, 1000)
+      if (!sessionResponse.ok) {
+        throw new Error(sessionData.detail || 'Failed to create session')
       }
+
+      // Store session info for the interview
+      localStorage.setItem('current_session_id', sessionData.session_id)
+      localStorage.setItem('expert_mode', expertMode ? 'true' : 'false')
+      localStorage.setItem('position_id', selectedPosition)
+      if (selectedCandidate) {
+        localStorage.setItem('candidate_id', selectedCandidate)
+      }
+      if (resumeText) {
+        localStorage.setItem('resume_text', resumeText)
+      }
+
+      // Get position title for display
+      const position = accountPositions.find(p => p.id === selectedPosition)
+      
+      // Get candidate name
+      let candidateName = 'Custom Resume'
+      if (selectedCandidate) {
+        try {
+          const candidateRes = await fetch(`http://localhost:8000/api/resumes/${selectedCandidate}`)
+          const candidateData = await candidateRes.json()
+          candidateName = candidateData.name || candidateName
+        } catch (e) {
+          console.error('Failed to fetch candidate name:', e)
+        }
+      }
+
+      // Show the interview links modal
+      setInterviewSessionData({
+        session_id: sessionData.session_id,
+        position: { 
+          id: selectedPosition, 
+          title: position?.title || 'Unknown Position' 
+        },
+        candidate: { 
+          id: selectedCandidate || 'custom', 
+          name: candidateName 
+        },
+        links: sessionData.links
+      })
+      setShowInterviewLinks(true)
+
     } catch (error) {
-      console.error('Error starting interview:', error)
-      alert('Failed to start interview. Please try again.')
+      console.error('Error creating interview session:', error)
+      alert('Failed to create interview session. Please try again.')
     } finally {
       setStartingInterview(false)
     }
@@ -540,6 +578,13 @@ export default function DashboardPage() {
               }
             })
         }}
+      />
+
+      {/* Interview Links Modal */}
+      <InterviewLinksModal
+        isOpen={showInterviewLinks}
+        onClose={() => setShowInterviewLinks(false)}
+        sessionData={interviewSessionData}
       />
 
       {/* Wiki Widget - Admin Only (Dashboard is admin-only by design) */}

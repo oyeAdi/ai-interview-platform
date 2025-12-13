@@ -847,6 +847,77 @@
       "created_at": "2025-12-13T12:30:28.872791",
       "auto_generated": true,
       "indexed_from": "Live Scores"
+    },
+    {
+      "id": "wiki_fee3cfb5",
+      "question": "How does a candidate matching flow working?",
+      "answer": "The candidate matching flow begins when a position is opened. The system then identifies potentially suitable candidates and calculates a `match score` for each. This score, determined by the `calculate_candidate_match_score` function in `backend/main.py`, considers several factors: skill overlap between the position requirements and the candidate's skills (including partial matching, like recognizing Django as a Python skill), alignment of experience levels, and a primary language filter (Python or Java). The resulting match score (a percentage between 0-100) is used to rank candidates. While the `InterviewController` in `backend/core/interview_controller.py` primarily *manages* the interview process itself (handling WebSocket communication, question delivery, and evaluation), it relies on this pre-calculated match score to determine which candidates are presented for interviews. The `InterviewController` doesn’t directly perform the matching; it *uses* the results of the matching process to orchestrate the interview flow.",
+      "category": "General",
+      "code_refs": [
+        "backend/main.py",
+        "backend/core/interview_controller.py"
+      ],
+      "keywords": [
+        "candidate matching",
+        "skill matching",
+        "interview flow",
+        "scoring",
+        "ranking",
+        "websocket",
+        "experience level",
+        "primary language"
+      ],
+      "created_at": "2025-12-13T12:32:06.747126",
+      "auto_generated": true
+    },
+    {
+      "id": "wiki_ea5a709b",
+      "question": "I Would like to see the code architecture for this.",
+      "answer": "The AI Interview Platform’s business logic centers around orchestrating interviews from start to finish. It begins with user/position management handled on the frontend (Dashboard). When an interview is initiated, the backend's `core/` directory takes over. The `Interview controller` manages the interview state and flow, while the `Question manager` dynamically selects questions based on the interview stage and candidate responses. The platform leverages a strategy pattern for follow-up questions, implemented in `strategies/`. After a candidate responds, the `evaluation/` module assesses the answer, utilizing the Gemini LLM integration within `llm/` for AI-powered scoring and feedback. This evaluation informs the next question selection via the chosen strategy. Interview data, including questions and responses, is persisted using JSON storage in `models/`. The frontend's `Interview` component displays the interview interface for both candidates and administrators, consuming data via REST APIs and WebSockets defined in `main.py`. Essentially, the backend controls the interview *process*, while the frontend handles the *presentation* and user interaction.",
+      "category": "General",
+      "code_refs": [
+        "backend/main.py",
+        "backend/core/interview_controller.py",
+        "backend/core/question_manager.py",
+        "backend/evaluation/response_evaluation.py",
+        "backend/strategies/",
+        "backend/llm/gemini_integration.py",
+        "backend/models/",
+        "frontend/Interview"
+      ],
+      "keywords": [
+        "interview",
+        "question",
+        "evaluation",
+        "strategy",
+        "backend",
+        "frontend",
+        "api",
+        "llm"
+      ],
+      "created_at": "2025-12-13T12:33:42.872840",
+      "auto_generated": true
+    },
+    {
+      "id": "wiki_ffcaf3b0",
+      "question": "Please share the candidate architecture ",
+      "answer": "The candidate architecture centers around a scoring system to determine how well a candidate fits a given position. The core logic resides in `backend/main.py`, specifically within the `calculate_candidate_match_score` function. This function takes a `position` and a `candidate` as input and returns a match score between 0 and 100. The matching process begins with a primary language filter, prioritizing candidates proficient in languages specified by the position (currently Python or Java). Following this, a partial skill matching mechanism is applied. This allows for broader matches – for example, a candidate skilled in Django is considered a partial match for Python positions. Experience level alignment is then assessed, contributing to the overall score. The function combines these factors – skill match, language fit, and experience – to generate a percentage-based match score. This score represents the overall suitability of the candidate for the role. The system doesn't currently support weighting of these factors; all contribute equally to the final score.",
+      "category": "General",
+      "code_refs": [
+        "backend/main.py"
+      ],
+      "keywords": [
+        "candidate matching",
+        "skill matching",
+        "scoring",
+        "experience",
+        "language filter",
+        "partial match",
+        "algorithm",
+        "suitability"
+      ],
+      "created_at": "2025-12-13T12:34:55.861734",
+      "auto_generated": true
     }
   ],
   "categories": [
@@ -865,9 +936,9 @@
   ],
   "metadata": {
     "last_indexed": "2025-12-13T12:30:28.872793",
-    "total_queries": 3,
-    "cache_hits": 0,
-    "llm_calls": 3,
+    "total_queries": 7,
+    "cache_hits": 1,
+    "llm_calls": 6,
     "indexer_version": "1.0"
   }
 }
