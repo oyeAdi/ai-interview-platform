@@ -60,3 +60,6 @@ class FileParser:
             return f"[Error parsing DOCX: {str(e)}]"
 
 
+
+
+

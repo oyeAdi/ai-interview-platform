@@ -1,0 +1,13 @@
+{
+  "organizations": [
+    {
+      "id": "epam",
+      "name": "EPAM Systems",
+      "logo": "/logos/epam.svg",
+      "description": "Global provider of digital platform engineering and software development services",
+      "accounts": ["uber", "servicenow", "amazon", "expedia"]
+    }
+  ]
+}
+
+

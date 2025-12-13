@@ -2,61 +2,128 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import FileUpload from '@/components/FileUpload'
-import JDSelector from '@/components/JDSelector'
+import Header from '@/components/Header'
+import Footer from '@/components/Footer'
+import AccountSelector from '@/components/AccountSelector'
+import PositionCard from '@/components/PositionCard'
+import DataModelPanel from '@/components/DataModelPanel'
 import ResumeSelector from '@/components/ResumeSelector'
+import FileUpload from '@/components/FileUpload'
 
-export default function LandingPage() {
+interface Account {
+  id: string
+  name: string
+  org_id: string
+  logo?: string
+  description?: string
+  positions?: string[]
+}
+
+interface Skill {
+  skill: string
+  proficiency: string
+  weight: number
+}
+
+interface DataModel {
+  duration_minutes: number
+  experience_level: string
+  expectations: string
+  required_skills: Skill[]
+  interview_flow: string[]
+  question_distribution: {
+    easy: number
+    medium: number
+    hard: number
+  }
+}
+
+interface Position {
+  id: string
+  title: string
+  account_id: string
+  status: string
+  created_at: string
+  data_model: DataModel
+  jd_text?: string
+}
+
+export default function DashboardPage() {
   const router = useRouter()
-  const [jdText, setJdText] = useState('')
-  const [resumeText, setResumeText] = useState('')
-  const [jdFile, setJdFile] = useState<File | null>(null)
-  const [resumeFile, setResumeFile] = useState<File | null>(null)
-  const [selectedJd, setSelectedJd] = useState<string>('')
-  const [selectedResume, setSelectedResume] = useState<string>('')
-  const [loading, setLoading] = useState(false)
-  const [jds, setJds] = useState<any[]>([])
+  
+  // State
+  const [accounts, setAccounts] = useState<Account[]>([])
+  const [positions, setPositions] = useState<Position[]>([])
   const [resumes, setResumes] = useState<any[]>([])
+  const [selectedAccount, setSelectedAccount] = useState('')
+  const [selectedPosition, setSelectedPosition] = useState('')
+  const [selectedResume, setSelectedResume] = useState('')
+  const [resumeText, setResumeText] = useState('')
+  const [resumeFile, setResumeFile] = useState<File | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [startingInterview, setStartingInterview] = useState(false)
+  const [dataModel, setDataModel] = useState<DataModel | null>(null)
 
-  // Load JDs and Resumes on mount
+  // Load accounts on mount
   useEffect(() => {
-    fetch('http://localhost:8000/api/jds')
-      .then(res => res.json())
-      .then(data => setJds(data.jds || []))
-      .catch(err => console.error('Error loading JDs:', err))
-    
-    fetch('http://localhost:8000/api/resumes')
-      .then(res => res.json())
-      .then(data => setResumes(data.resumes || []))
-      .catch(err => console.error('Error loading Resumes:', err))
+    Promise.all([
+      fetch('http://localhost:8000/api/accounts').then(res => res.json()),
+      fetch('http://localhost:8000/api/resumes').then(res => res.json())
+    ])
+      .then(([accountsData, resumesData]) => {
+        setAccounts(accountsData.accounts || [])
+        setResumes(resumesData.resumes || [])
+        if (accountsData.accounts?.length > 0) {
+          setSelectedAccount(accountsData.accounts[0].id)
+        }
+        setLoading(false)
+      })
+      .catch(err => {
+        console.error('Error loading data:', err)
+        setLoading(false)
+      })
   }, [])
 
-  // Update JD textarea when JD is selected
+  // Load positions when account changes
   useEffect(() => {
-    if (selectedJd) {
-      const jd = jds.find(j => j.id === selectedJd)
-      if (jd) {
-        setJdText(jd.text)
-        setJdFile(null) // Clear file when JD is selected
+    if (selectedAccount) {
+      setLoading(true)
+      fetch(`http://localhost:8000/api/accounts/${selectedAccount}/positions?status=open`)
+        .then(res => res.json())
+        .then(data => {
+          setPositions(data.positions || [])
+          setSelectedPosition('')
+          setDataModel(null)
+          setLoading(false)
+        })
+        .catch(err => {
+          console.error('Error loading positions:', err)
+          setLoading(false)
+        })
+    }
+  }, [selectedAccount])
+
+  // Update data model when position changes
+  useEffect(() => {
+    if (selectedPosition) {
+      const position = positions.find(p => p.id === selectedPosition)
+      if (position?.data_model) {
+        setDataModel(position.data_model)
       }
     } else {
-      // Clear textarea if selection is cleared
-      if (!jdFile) {
-        setJdText('')
-      }
+      setDataModel(null)
     }
-  }, [selectedJd, jds])
+  }, [selectedPosition, positions])
 
-  // Update Resume textarea when Resume is selected
+  // Update resume text when resume is selected
   useEffect(() => {
     if (selectedResume) {
       const resume = resumes.find(r => r.id === selectedResume)
       if (resume) {
         setResumeText(resume.text)
-        setResumeFile(null) // Clear file when Resume is selected
+        setResumeFile(null)
       }
     } else {
-      // Clear textarea if selection is cleared
       if (!resumeFile) {
         setResumeText('')
       }
@@ -64,8 +131,8 @@ export default function LandingPage() {
   }, [selectedResume, resumes])
 
   const handleStartInterview = async (expertMode: boolean = false) => {
-    if (!jdText && !jdFile && !selectedJd) {
-      alert('Please provide a job description')
+    if (!selectedPosition) {
+      alert('Please select a position')
       return
     }
     if (!resumeText && !resumeFile && !selectedResume) {
@@ -73,36 +140,18 @@ export default function LandingPage() {
       return
     }
 
-    setLoading(true)
+    setStartingInterview(true)
 
     try {
       const formData = new FormData()
+      formData.append('position_id', selectedPosition)
       
-      // Use selected JD text if available
-      let finalJdText = jdText
-      if (selectedJd) {
-        const jd = jds.find(j => j.id === selectedJd)
-        if (jd) finalJdText = jd.text
-      }
-      
-      // Use selected Resume text if available
-      let finalResumeText = resumeText
-      if (selectedResume) {
-        const resume = resumes.find(r => r.id === selectedResume)
-        if (resume) finalResumeText = resume.text
-      }
-      
-      if (finalJdText) formData.append('jd_text', finalJdText)
-      if (jdFile) formData.append('jd_file', jdFile)
-      if (finalResumeText) formData.append('resume_text', finalResumeText)
+      if (resumeText) formData.append('resume_text', resumeText)
       if (resumeFile) formData.append('resume_file', resumeFile)
-      if (selectedJd) formData.append('jd_id', selectedJd)
       if (selectedResume) formData.append('resume_id', selectedResume)
-      
-      // Add expert mode flag
       if (expertMode) formData.append('expert_mode', 'true')
 
-      const response = await fetch('http://localhost:8000/api/analyze-language', {
+      const response = await fetch('http://localhost:8000/api/interview/start', {
         method: 'POST',
         body: formData,
       })
@@ -110,16 +159,13 @@ export default function LandingPage() {
       const data = await response.json()
       
       if (data.session_id) {
-        // Store session info for easy access
         localStorage.setItem('current_session_id', data.session_id)
         localStorage.setItem('current_language', data.language)
         localStorage.setItem('expert_mode', expertMode ? 'true' : 'false')
         
-        // Navigate to candidate view
         const candidateUrl = `/interview?view=candidate&session_id=${data.session_id}&lang=${data.language}`
         router.push(candidateUrl)
         
-        // Automatically open admin/expert view in new tab after a short delay
         setTimeout(() => {
           const viewType = expertMode ? 'expert' : 'admin'
           const adminUrl = `${window.location.origin}/interview?view=${viewType}&session_id=${data.session_id}&lang=${data.language}`
@@ -130,114 +176,208 @@ export default function LandingPage() {
       console.error('Error starting interview:', error)
       alert('Failed to start interview. Please try again.')
     } finally {
-      setLoading(false)
+      setStartingInterview(false)
     }
   }
 
+  const handleDataModelUpdate = async (updatedModel: DataModel) => {
+    setDataModel(updatedModel)
+    
+    if (selectedPosition) {
+      try {
+        await fetch(`http://localhost:8000/api/positions/${selectedPosition}/config`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(updatedModel)
+        })
+      } catch (err) {
+        console.error('Error saving data model:', err)
+      }
+    }
+  }
+
+  const selectedPositionData = positions.find(p => p.id === selectedPosition)
+
   return (
-    <div className="min-h-screen bg-dark-black flex items-center justify-center p-8">
-      <div className="max-w-5xl w-full space-y-8">
-        <div className="text-center">
-          <h1 className="text-5xl font-bold text-primary-orange mb-4">
-            AI Interviewer
-          </h1>
-          <p className="text-gray-300 text-lg">
-            Upload your job description and resume to begin
-          </p>
-        </div>
-
-        <div className="bg-dark-black-light rounded-lg p-8 space-y-6 border border-gray-800">
-          {/* Side-by-side layout for JD and Resume */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Job Description Section - Left */}
-            <div className="space-y-4">
-              <h2 className="text-xl font-semibold text-primary-orange">Job Description</h2>
-              <JDSelector
-                jds={jds}
-                selectedJd={selectedJd}
-                onSelectJd={setSelectedJd}
-              />
-              <FileUpload
-                label="Job Description"
-                text={jdText}
-                onTextChange={(text) => {
-                  setJdText(text)
-                  if (text && selectedJd) {
-                    // Clear selection if user manually edits
-                    setSelectedJd('')
-                  }
-                }}
-                file={jdFile}
-                onFileChange={(file) => {
-                  setJdFile(file)
-                  if (file && selectedJd) {
-                    // Clear selection if user uploads file
-                    setSelectedJd('')
-                  }
-                }}
-                disabled={!!selectedJd}
-              />
-            </div>
-
-            {/* Resume Section - Right */}
-            <div className="space-y-4">
-              <h2 className="text-xl font-semibold text-primary-orange">Resume</h2>
-              <ResumeSelector
-                resumes={resumes}
-                selectedResume={selectedResume}
-                onSelectResume={setSelectedResume}
-              />
-              <FileUpload
-                label="Resume"
-                text={resumeText}
-                onTextChange={(text) => {
-                  setResumeText(text)
-                  if (text && selectedResume) {
-                    // Clear selection if user manually edits
-                    setSelectedResume('')
-                  }
-                }}
-                file={resumeFile}
-                onFileChange={(file) => {
-                  setResumeFile(file)
-                  if (file && selectedResume) {
-                    // Clear selection if user uploads file
-                    setSelectedResume('')
-                  }
-                }}
-                disabled={!!selectedResume}
-              />
-            </div>
-          </div>
-
-          {/* Start Interview Buttons - Bottom */}
-          <div className="pt-4 border-t border-gray-700 space-y-3">
-            <button
-              onClick={() => handleStartInterview(false)}
-              disabled={loading}
-              className="w-full bg-primary-orange hover:bg-primary-orange-light text-white font-semibold py-4 px-8 rounded-lg transition-all transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none text-lg shadow-lg shadow-primary-orange/20"
-            >
-              {loading ? 'Starting Interview...' : 'Start Interview'}
-            </button>
-            
-            {/* Expert Mode Link */}
-            <button
-              onClick={() => handleStartInterview(true)}
-              disabled={loading}
-              className="w-full bg-transparent border-2 border-primary-orange text-primary-orange hover:bg-primary-orange/10 font-medium py-3 px-8 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-            >
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-              </svg>
-              Start as Expert (Human-in-the-Loop)
-            </button>
-            <p className="text-xs text-gray-500 text-center">
-              Expert mode allows you to review, edit, and approve AI-generated follow-up questions before they are sent to the candidate.
+    <div className="min-h-screen flex flex-col bg-white dark:bg-black transition-colors duration-200">
+      <Header showQuickStart={true} />
+      
+      <main className="flex-1">
+        {/* Hero Section */}
+        <section className="border-b border-gray-200 dark:border-[#2A2A2A]">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+            <h1 className="text-5xl md:text-6xl font-light text-black dark:text-white leading-tight mb-6">
+              Interview
+              <br />
+              <span className="font-normal">Dashboard</span>
+            </h1>
+            <p className="text-xl text-gray-600 dark:text-gray-400 max-w-2xl font-light">
+              Configure and launch AI-powered interviews for your candidates with intelligent, adaptive assessments.
             </p>
           </div>
-        </div>
-      </div>
+        </section>
+
+        {/* Main Content */}
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
+            {/* Left Column - Account & Position Selection */}
+            <div className="lg:col-span-8 space-y-12">
+              {/* Account Selector */}
+              <div>
+                <h2 className="text-xs font-medium text-epam-cyan uppercase tracking-[0.2em] mb-6">
+                  Select Account
+                </h2>
+                <AccountSelector
+                  accounts={accounts}
+                  selectedAccount={selectedAccount}
+                  onSelectAccount={setSelectedAccount}
+                  loading={loading}
+                />
+              </div>
+
+              {/* Positions Grid */}
+              <div>
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-xs font-medium text-epam-cyan uppercase tracking-[0.2em]">
+                    Open Positions ({positions.length})
+                  </h2>
+                  <button
+                    type="button"
+                    className="text-sm text-gray-500 dark:text-gray-400 hover:text-epam-cyan transition-colors flex items-center gap-1"
+                    onClick={() => alert('Add position feature coming soon')}
+                  >
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                    </svg>
+                    Add
+                  </button>
+                </div>
+
+                <div className="border border-gray-200 dark:border-[#2A2A2A]">
+                  {loading ? (
+                    <div className="flex items-center justify-center py-20">
+                      <div className="w-6 h-6 border-2 border-gray-300 dark:border-gray-600 border-t-epam-cyan rounded-full animate-spin"></div>
+                    </div>
+                  ) : positions.length === 0 ? (
+                    <div className="text-center py-20 text-gray-500 dark:text-gray-400">
+                      No open positions for this account
+                    </div>
+                  ) : (
+                    <div className="divide-y divide-gray-200 dark:divide-[#2A2A2A]">
+                      {positions.map(position => (
+                        <PositionCard
+                          key={position.id}
+                          position={position}
+                          isSelected={selectedPosition === position.id}
+                          onSelect={setSelectedPosition}
+                        />
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Data Model Configuration */}
+              {selectedPosition && dataModel && (
+                <div>
+                  <h2 className="text-xs font-medium text-epam-cyan uppercase tracking-[0.2em] mb-6">
+                    Interview Configuration
+                  </h2>
+                  <DataModelPanel
+                    dataModel={dataModel}
+                    onUpdate={handleDataModelUpdate}
+                    isEditable={true}
+                  />
+                </div>
+              )}
+            </div>
+
+            {/* Right Column - Resume & Start */}
+            <div className="lg:col-span-4 space-y-8">
+              {/* Selected Position Summary */}
+              {selectedPositionData && (
+                <div className="border-l-2 border-epam-cyan pl-6">
+                  <h3 className="font-medium text-black dark:text-white mb-1">
+                    {selectedPositionData.title}
+                  </h3>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    {selectedPositionData.data_model.duration_minutes} min • {selectedPositionData.data_model.experience_level}
+                  </p>
+                </div>
+              )}
+
+              {/* Resume Upload */}
+              <div>
+                <h2 className="text-xs font-medium text-epam-cyan uppercase tracking-[0.2em] mb-6">
+                  Candidate Resume
+                </h2>
+                <div className="space-y-4">
+                  <ResumeSelector
+                    resumes={resumes}
+                    selectedResume={selectedResume}
+                    onSelectResume={setSelectedResume}
+                  />
+                  
+                  <FileUpload
+                    label="Resume"
+                    text={resumeText}
+                    onTextChange={(text) => {
+                      setResumeText(text)
+                      if (text && selectedResume) setSelectedResume('')
+                    }}
+                    file={resumeFile}
+                    onFileChange={(file) => {
+                      setResumeFile(file)
+                      if (file && selectedResume) setSelectedResume('')
+                    }}
+                    disabled={!!selectedResume}
+                  />
+                </div>
+              </div>
+
+              {/* Start Buttons */}
+              <div className="space-y-3 pt-4">
+                <button
+                  onClick={() => handleStartInterview(false)}
+                  disabled={startingInterview || !selectedPosition || (!resumeText && !resumeFile && !selectedResume)}
+                  className="btn-primary w-full flex items-center justify-center gap-2 h-12 disabled:opacity-40"
+                >
+                  {startingInterview ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin"></div>
+                      Starting...
+                    </>
+                  ) : (
+                    <>
+                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 010 1.971l-11.54 6.347a1.125 1.125 0 01-1.667-.985V5.653z" />
+                      </svg>
+                      Start Interview
+                    </>
+                  )}
+                </button>
+                
+                <button
+                  onClick={() => handleStartInterview(true)}
+                  disabled={startingInterview || !selectedPosition || (!resumeText && !resumeFile && !selectedResume)}
+                  className="btn-secondary w-full flex items-center justify-center gap-2 h-12 disabled:opacity-40"
+                >
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456z" />
+                  </svg>
+                  Start as Expert
+                </button>
+                
+                <p className="text-xs text-gray-500 dark:text-gray-500 text-center pt-2">
+                  Expert mode: Review and approve AI questions
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <Footer />
     </div>
   )
 }
-

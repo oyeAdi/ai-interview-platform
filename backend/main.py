@@ -1,10 +1,13 @@
 """FastAPI server with WebSocket support"""
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException, UploadFile, File, Form
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException, UploadFile, File, Form, Body
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from typing import Optional
+from typing import Optional, List
+from pydantic import BaseModel
 import json
 import os
+import uuid
+from datetime import datetime
 from backend.config import Config
 from backend.websocket.connection_manager import ConnectionManager
 from backend.websocket.message_handler import MessageHandler
@@ -14,6 +17,57 @@ from backend.utils.file_parser import FileParser
 from backend.utils.logger import Logger
 
 app = FastAPI(title="AI Interviewer API")
+
+# Pydantic models for request/response
+class SkillRequirement(BaseModel):
+    skill: str
+    proficiency: str
+    weight: float
+
+class QuestionDistribution(BaseModel):
+    easy: float
+    medium: float
+    hard: float
+
+class DataModel(BaseModel):
+    duration_minutes: int = 45
+    experience_level: str = "mid"
+    expectations: str = "medium"
+    required_skills: List[SkillRequirement] = []
+    interview_flow: List[str] = ["coding", "conceptual"]
+    question_distribution: QuestionDistribution = QuestionDistribution(easy=0.3, medium=0.5, hard=0.2)
+
+class PositionCreate(BaseModel):
+    title: str
+    data_model: DataModel
+    jd_text: str = ""
+    status: str = "open"
+
+class PositionUpdate(BaseModel):
+    title: Optional[str] = None
+    data_model: Optional[DataModel] = None
+    jd_text: Optional[str] = None
+    status: Optional[str] = None
+
+# Helper functions for data file operations
+def load_json_file(filepath: str) -> dict:
+    """Load JSON file with error handling"""
+    if not os.path.exists(filepath):
+        return {}
+    with open(filepath, 'r', encoding='utf-8') as f:
+        return json.load(f)
+
+def save_json_file(filepath: str, data: dict):
+    """Save data to JSON file"""
+    with open(filepath, 'w', encoding='utf-8') as f:
+        json.dump(data, f, indent=2, ensure_ascii=False)
+
+# Data file paths
+MODELS_DIR = os.path.join(os.path.dirname(__file__), "models")
+ORGANIZATIONS_FILE = os.path.join(MODELS_DIR, "organizations.json")
+ACCOUNTS_FILE = os.path.join(MODELS_DIR, "accounts.json")
+POSITIONS_FILE = os.path.join(MODELS_DIR, "positions.json")
+QUESTION_BANK_FILE = os.path.join(MODELS_DIR, "question_bank.json")
 
 # CORS middleware
 app.add_middleware(
@@ -122,6 +176,274 @@ async def get_resumes():
     with open(resumes_file, 'r', encoding='utf-8') as f:
         data = json.load(f)
         return {"resumes": data.get("resumes", [])}
+
+# ==================== Organization/Account/Position APIs ====================
+
+@app.get("/api/organizations")
+async def get_organizations():
+    """Get list of all organizations"""
+    data = load_json_file(ORGANIZATIONS_FILE)
+    return {"organizations": data.get("organizations", [])}
+
+@app.get("/api/organizations/{org_id}")
+async def get_organization(org_id: str):
+    """Get specific organization details"""
+    data = load_json_file(ORGANIZATIONS_FILE)
+    for org in data.get("organizations", []):
+        if org["id"] == org_id:
+            return org
+    raise HTTPException(status_code=404, detail="Organization not found")
+
+@app.get("/api/organizations/{org_id}/accounts")
+async def get_organization_accounts(org_id: str):
+    """Get all accounts for an organization"""
+    data = load_json_file(ACCOUNTS_FILE)
+    accounts = [acc for acc in data.get("accounts", []) if acc.get("org_id") == org_id]
+    return {"accounts": accounts}
+
+@app.get("/api/accounts")
+async def get_all_accounts():
+    """Get all accounts"""
+    data = load_json_file(ACCOUNTS_FILE)
+    return {"accounts": data.get("accounts", [])}
+
+@app.get("/api/accounts/{account_id}")
+async def get_account(account_id: str):
+    """Get specific account details"""
+    data = load_json_file(ACCOUNTS_FILE)
+    for acc in data.get("accounts", []):
+        if acc["id"] == account_id:
+            return acc
+    raise HTTPException(status_code=404, detail="Account not found")
+
+@app.get("/api/accounts/{account_id}/positions")
+async def get_account_positions(account_id: str, status: Optional[str] = None):
+    """Get all positions for an account, optionally filtered by status"""
+    data = load_json_file(POSITIONS_FILE)
+    positions = [pos for pos in data.get("positions", []) if pos.get("account_id") == account_id]
+    
+    if status:
+        positions = [pos for pos in positions if pos.get("status") == status]
+    
+    return {"positions": positions}
+
+@app.post("/api/accounts/{account_id}/positions")
+async def create_position(account_id: str, position: PositionCreate):
+    """Create a new position under an account"""
+    # Verify account exists
+    accounts_data = load_json_file(ACCOUNTS_FILE)
+    account = next((acc for acc in accounts_data.get("accounts", []) if acc["id"] == account_id), None)
+    if not account:
+        raise HTTPException(status_code=404, detail="Account not found")
+    
+    # Load positions
+    positions_data = load_json_file(POSITIONS_FILE)
+    if "positions" not in positions_data:
+        positions_data["positions"] = []
+    
+    # Generate unique ID
+    position_id = f"{account_id}_{uuid.uuid4().hex[:8]}"
+    
+    # Create new position
+    new_position = {
+        "id": position_id,
+        "title": position.title,
+        "account_id": account_id,
+        "status": position.status,
+        "created_at": datetime.now().strftime("%Y-%m-%d"),
+        "data_model": position.data_model.dict(),
+        "jd_text": position.jd_text
+    }
+    
+    positions_data["positions"].append(new_position)
+    save_json_file(POSITIONS_FILE, positions_data)
+    
+    # Update account's positions list
+    if position_id not in account.get("positions", []):
+        account.setdefault("positions", []).append(position_id)
+        save_json_file(ACCOUNTS_FILE, accounts_data)
+    
+    return {"status": "created", "position": new_position}
+
+@app.get("/api/positions")
+async def get_all_positions(status: Optional[str] = None):
+    """Get all positions, optionally filtered by status"""
+    data = load_json_file(POSITIONS_FILE)
+    positions = data.get("positions", [])
+    
+    if status:
+        positions = [pos for pos in positions if pos.get("status") == status]
+    
+    return {"positions": positions}
+
+@app.get("/api/positions/{position_id}")
+async def get_position(position_id: str):
+    """Get specific position details with data model"""
+    data = load_json_file(POSITIONS_FILE)
+    for pos in data.get("positions", []):
+        if pos["id"] == position_id:
+            return pos
+    raise HTTPException(status_code=404, detail="Position not found")
+
+@app.put("/api/positions/{position_id}")
+async def update_position(position_id: str, update: PositionUpdate):
+    """Update position details"""
+    data = load_json_file(POSITIONS_FILE)
+    
+    for i, pos in enumerate(data.get("positions", [])):
+        if pos["id"] == position_id:
+            if update.title is not None:
+                data["positions"][i]["title"] = update.title
+            if update.data_model is not None:
+                data["positions"][i]["data_model"] = update.data_model.dict()
+            if update.jd_text is not None:
+                data["positions"][i]["jd_text"] = update.jd_text
+            if update.status is not None:
+                data["positions"][i]["status"] = update.status
+            
+            data["positions"][i]["updated_at"] = datetime.now().strftime("%Y-%m-%d")
+            save_json_file(POSITIONS_FILE, data)
+            return {"status": "updated", "position": data["positions"][i]}
+    
+    raise HTTPException(status_code=404, detail="Position not found")
+
+@app.put("/api/positions/{position_id}/config")
+async def update_position_config(position_id: str, data_model: DataModel):
+    """Update only the data model configuration for a position"""
+    data = load_json_file(POSITIONS_FILE)
+    
+    for i, pos in enumerate(data.get("positions", [])):
+        if pos["id"] == position_id:
+            data["positions"][i]["data_model"] = data_model.dict()
+            data["positions"][i]["updated_at"] = datetime.now().strftime("%Y-%m-%d")
+            save_json_file(POSITIONS_FILE, data)
+            return {"status": "updated", "data_model": data["positions"][i]["data_model"]}
+    
+    raise HTTPException(status_code=404, detail="Position not found")
+
+@app.delete("/api/positions/{position_id}")
+async def delete_position(position_id: str):
+    """Delete a position"""
+    data = load_json_file(POSITIONS_FILE)
+    
+    for i, pos in enumerate(data.get("positions", [])):
+        if pos["id"] == position_id:
+            account_id = pos.get("account_id")
+            deleted_position = data["positions"].pop(i)
+            save_json_file(POSITIONS_FILE, data)
+            
+            # Remove from account's positions list
+            if account_id:
+                accounts_data = load_json_file(ACCOUNTS_FILE)
+                for acc in accounts_data.get("accounts", []):
+                    if acc["id"] == account_id and position_id in acc.get("positions", []):
+                        acc["positions"].remove(position_id)
+                        save_json_file(ACCOUNTS_FILE, accounts_data)
+                        break
+            
+            return {"status": "deleted", "position_id": position_id}
+    
+    raise HTTPException(status_code=404, detail="Position not found")
+
+# ==================== Question Bank APIs ====================
+
+@app.get("/api/question-bank")
+async def get_question_bank(
+    category: Optional[str] = None,
+    difficulty: Optional[str] = None,
+    skill: Optional[str] = None,
+    experience_level: Optional[str] = None
+):
+    """Get questions from the enhanced question bank with optional filters"""
+    data = load_json_file(QUESTION_BANK_FILE)
+    questions = data.get("questions", [])
+    
+    if category:
+        questions = [q for q in questions if q.get("category") == category]
+    if difficulty:
+        questions = [q for q in questions if q.get("difficulty") == difficulty]
+    if skill:
+        questions = [q for q in questions if skill in q.get("skills", [])]
+    if experience_level:
+        questions = [q for q in questions if experience_level in q.get("experience_levels", [])]
+    
+    return {
+        "questions": questions,
+        "categories": data.get("categories", []),
+        "difficulty_levels": data.get("difficulty_levels", []),
+        "skills_taxonomy": data.get("skills_taxonomy", {})
+    }
+
+@app.get("/api/question-bank/skills")
+async def get_skills_taxonomy():
+    """Get the skills taxonomy"""
+    data = load_json_file(QUESTION_BANK_FILE)
+    return {"skills_taxonomy": data.get("skills_taxonomy", {})}
+
+# ==================== Enhanced Interview Start ====================
+
+@app.post("/api/interview/start")
+async def start_interview_with_position(
+    position_id: Optional[str] = Form(None),
+    resume_text: Optional[str] = Form(None),
+    resume_file: Optional[UploadFile] = File(None),
+    resume_id: Optional[str] = Form(None),
+    expert_mode: Optional[str] = Form(None)
+):
+    """Start interview with position-based configuration"""
+    try:
+        # Get position data if provided
+        position = None
+        jd_content = ""
+        
+        if position_id:
+            positions_data = load_json_file(POSITIONS_FILE)
+            position = next((p for p in positions_data.get("positions", []) if p["id"] == position_id), None)
+            if not position:
+                raise HTTPException(status_code=404, detail="Position not found")
+            jd_content = position.get("jd_text", "")
+        
+        # Get resume content
+        resume_content = resume_text or ""
+        if resume_file:
+            import tempfile
+            with tempfile.NamedTemporaryFile(delete=False, suffix=os.path.splitext(resume_file.filename)[1]) as tmp:
+                content = await resume_file.read()
+                tmp.write(content)
+                temp_path = tmp.name
+            resume_content = file_parser.parse_file(temp_path)
+            os.remove(temp_path)
+        
+        # Analyze language
+        result = jd_analyzer.analyze(
+            jd_text=jd_content,
+            resume_text=resume_content
+        )
+        
+        # Create interview controller
+        language = result["language"]
+        is_expert_mode = expert_mode == 'true'
+        controller = InterviewController(language, position_id, expert_mode=is_expert_mode)
+        session_id = controller.context_manager.session_id
+        
+        # Attach position data model to controller if available
+        if position and position.get("data_model"):
+            controller.data_model = position["data_model"]
+        
+        # Store controller
+        active_interviews[session_id] = controller
+        
+        return {
+            "language": language,
+            "confidence": result["confidence"],
+            "session_id": session_id,
+            "expert_mode": is_expert_mode,
+            "position": position
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket, view: str = "candidate"):

@@ -5,21 +5,40 @@ module.exports = {
     './src/components/**/*.{js,ts,jsx,tsx,mdx}',
     './src/app/**/*.{js,ts,jsx,tsx,mdx}',
   ],
+  darkMode: 'class',
   theme: {
     extend: {
       colors: {
-        primary: {
-          orange: '#FF6B35',
-          'orange-light': '#FF8C42',
+        // EPAM Brand Colors - Cyan accent
+        epam: {
+          cyan: '#00D4AA',
+          'cyan-light': '#00FFD0',
+          'cyan-dark': '#00A88A',
         },
-        dark: {
-          black: '#0A0A0A',
-          'black-light': '#1A1A1A',
+        surface: {
+          primary: 'var(--surface-primary)',
+          secondary: 'var(--surface-secondary)',
+          tertiary: 'var(--surface-tertiary)',
+          card: 'var(--surface-card)',
         },
+        text: {
+          primary: 'var(--text-primary)',
+          secondary: 'var(--text-secondary)',
+          tertiary: 'var(--text-tertiary)',
+        },
+        border: {
+          light: 'var(--border-light)',
+          medium: 'var(--border-medium)',
+        },
+      },
+      fontFamily: {
+        sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'sans-serif'],
+        mono: ['JetBrains Mono', 'Fira Code', 'Consolas', 'monospace'],
+      },
+      letterSpacing: {
+        'widest': '0.2em',
       },
     },
   },
   plugins: [],
 }
-
-

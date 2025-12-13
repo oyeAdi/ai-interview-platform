@@ -66,3 +66,6 @@ def generate_partial_response(question: Dict, question_type: str) -> str:
     return f"I think I understand better now. It relates to {keywords[0] if keywords else 'the core concept'}. Am I on the right track?"
 
 
+
+
+

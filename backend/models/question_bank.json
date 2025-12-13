@@ -1,0 +1,326 @@
+{
+  "questions": [
+    {
+      "id": "py_coding_001",
+      "type": "coding",
+      "category": "coding",
+      "difficulty": "medium",
+      "experience_levels": ["mid", "senior"],
+      "skills": ["python", "data_structures"],
+      "text": "Implement a function to find the longest palindromic substring in a given string.",
+      "starter_code": "def longest_palindrome(s: str) -> str:\n    \"\"\"\n    Find the longest palindromic substring.\n    \n    Args:\n        s: Input string\n    Returns:\n        The longest palindromic substring\n    \"\"\"\n    # Your code here\n    pass",
+      "language": "python",
+      "time_limit_minutes": 15,
+      "test_cases": [
+        {"input": "babad", "expected": "bab", "note": "aba is also valid"},
+        {"input": "cbbd", "expected": "bb"},
+        {"input": "a", "expected": "a"},
+        {"input": "ac", "expected": "a"}
+      ],
+      "hints": ["Consider expanding from center", "There are 2n-1 possible centers"],
+      "evaluation_rubric": {
+        "correctness": {"weight": 0.50, "criteria": "All test cases pass"},
+        "efficiency": {"weight": 0.25, "criteria": "O(n²) time complexity or better"},
+        "code_quality": {"weight": 0.15, "criteria": "Clean, readable code"},
+        "edge_cases": {"weight": 0.10, "criteria": "Handles empty string, single char"}
+      }
+    },
+    {
+      "id": "py_coding_002",
+      "type": "coding",
+      "category": "coding",
+      "difficulty": "easy",
+      "experience_levels": ["junior", "mid"],
+      "skills": ["python", "data_structures"],
+      "text": "Implement a function to check if two strings are anagrams of each other.",
+      "starter_code": "def is_anagram(s1: str, s2: str) -> bool:\n    \"\"\"\n    Check if two strings are anagrams.\n    \n    Args:\n        s1: First string\n        s2: Second string\n    Returns:\n        True if anagrams, False otherwise\n    \"\"\"\n    # Your code here\n    pass",
+      "language": "python",
+      "time_limit_minutes": 10,
+      "test_cases": [
+        {"input": ["listen", "silent"], "expected": true},
+        {"input": ["hello", "world"], "expected": false},
+        {"input": ["anagram", "nagaram"], "expected": true}
+      ],
+      "evaluation_rubric": {
+        "correctness": {"weight": 0.50, "criteria": "All test cases pass"},
+        "efficiency": {"weight": 0.25, "criteria": "O(n) time complexity"},
+        "code_quality": {"weight": 0.25, "criteria": "Clean, readable code"}
+      }
+    },
+    {
+      "id": "py_coding_003",
+      "type": "coding",
+      "category": "coding",
+      "difficulty": "hard",
+      "experience_levels": ["senior", "lead"],
+      "skills": ["python", "data_structures", "algorithms"],
+      "text": "Implement an LRU (Least Recently Used) Cache with O(1) get and put operations.",
+      "starter_code": "class LRUCache:\n    \"\"\"\n    Design and implement a data structure for LRU Cache.\n    \n    Operations:\n    - get(key): Get the value if key exists, else return -1\n    - put(key, value): Set or insert the value\n    \n    When cache reaches capacity, remove least recently used item.\n    \"\"\"\n    \n    def __init__(self, capacity: int):\n        # Your code here\n        pass\n    \n    def get(self, key: int) -> int:\n        # Your code here\n        pass\n    \n    def put(self, key: int, value: int) -> None:\n        # Your code here\n        pass",
+      "language": "python",
+      "time_limit_minutes": 25,
+      "test_cases": [
+        {
+          "operations": ["LRUCache", "put", "put", "get", "put", "get", "put", "get", "get", "get"],
+          "inputs": [[2], [1, 1], [2, 2], [1], [3, 3], [2], [4, 4], [1], [3], [4]],
+          "expected": [null, null, null, 1, null, -1, null, -1, 3, 4]
+        }
+      ],
+      "evaluation_rubric": {
+        "correctness": {"weight": 0.40, "criteria": "All operations work correctly"},
+        "efficiency": {"weight": 0.35, "criteria": "O(1) for both get and put"},
+        "code_quality": {"weight": 0.15, "criteria": "Clean implementation"},
+        "design": {"weight": 0.10, "criteria": "Proper use of data structures"}
+      }
+    },
+    {
+      "id": "java_coding_001",
+      "type": "coding",
+      "category": "coding",
+      "difficulty": "medium",
+      "experience_levels": ["mid", "senior"],
+      "skills": ["java", "data_structures"],
+      "text": "Implement a function to find the kth largest element in an unsorted array.",
+      "starter_code": "public class Solution {\n    /**\n     * Find the kth largest element in an unsorted array.\n     * \n     * @param nums Array of integers\n     * @param k The kth position (1-indexed)\n     * @return The kth largest element\n     */\n    public int findKthLargest(int[] nums, int k) {\n        // Your code here\n        return 0;\n    }\n}",
+      "language": "java",
+      "time_limit_minutes": 15,
+      "test_cases": [
+        {"input": [[3, 2, 1, 5, 6, 4], 2], "expected": 5},
+        {"input": [[3, 2, 3, 1, 2, 4, 5, 5, 6], 4], "expected": 4}
+      ],
+      "evaluation_rubric": {
+        "correctness": {"weight": 0.50, "criteria": "All test cases pass"},
+        "efficiency": {"weight": 0.30, "criteria": "Better than O(n log n) preferred"},
+        "code_quality": {"weight": 0.20, "criteria": "Clean Java code"}
+      }
+    },
+    {
+      "id": "py_design_001",
+      "type": "open_ended",
+      "category": "system_design",
+      "difficulty": "hard",
+      "experience_levels": ["senior", "lead"],
+      "skills": ["system_design", "microservices", "databases"],
+      "text": "Design a URL shortening service like bit.ly. Discuss the system architecture, data storage, and how you would handle high traffic.",
+      "time_limit_minutes": 20,
+      "expected_topics": [
+        "Hash generation strategy",
+        "Database design (SQL vs NoSQL)",
+        "Caching layer",
+        "Load balancing",
+        "Analytics tracking",
+        "Scalability considerations"
+      ],
+      "evaluation_rubric": {
+        "completeness": {"weight": 0.30, "criteria": "Covers all major components"},
+        "scalability": {"weight": 0.25, "criteria": "Addresses high-traffic scenarios"},
+        "technical_depth": {"weight": 0.25, "criteria": "Detailed technical decisions"},
+        "trade_offs": {"weight": 0.20, "criteria": "Discusses pros/cons of choices"}
+      }
+    },
+    {
+      "id": "py_design_002",
+      "type": "open_ended",
+      "category": "system_design",
+      "difficulty": "medium",
+      "experience_levels": ["mid", "senior"],
+      "skills": ["system_design", "databases"],
+      "text": "Design a rate limiter for an API. Explain different algorithms and when to use each.",
+      "time_limit_minutes": 15,
+      "expected_topics": [
+        "Token bucket algorithm",
+        "Sliding window",
+        "Fixed window",
+        "Distributed rate limiting",
+        "Redis usage"
+      ],
+      "evaluation_rubric": {
+        "completeness": {"weight": 0.30, "criteria": "Covers multiple algorithms"},
+        "technical_depth": {"weight": 0.35, "criteria": "Clear explanation of trade-offs"},
+        "practical_application": {"weight": 0.35, "criteria": "Real-world considerations"}
+      }
+    },
+    {
+      "id": "py_concept_001",
+      "type": "open_ended",
+      "category": "conceptual",
+      "difficulty": "medium",
+      "experience_levels": ["mid", "senior"],
+      "skills": ["python"],
+      "text": "Explain the Global Interpreter Lock (GIL) in Python. What are its implications for multi-threaded applications, and how can you work around its limitations?",
+      "time_limit_minutes": 10,
+      "expected_keywords": ["GIL", "thread", "multiprocessing", "CPU-bound", "I/O-bound", "asyncio"],
+      "evaluation_rubric": {
+        "accuracy": {"weight": 0.35, "criteria": "Correct understanding of GIL"},
+        "completeness": {"weight": 0.30, "criteria": "Covers implications and workarounds"},
+        "depth": {"weight": 0.20, "criteria": "Discusses when GIL matters"},
+        "clarity": {"weight": 0.15, "criteria": "Clear explanation"}
+      }
+    },
+    {
+      "id": "java_concept_001",
+      "type": "open_ended",
+      "category": "conceptual",
+      "difficulty": "medium",
+      "experience_levels": ["mid", "senior"],
+      "skills": ["java"],
+      "text": "Explain the difference between HashMap and ConcurrentHashMap in Java. When would you use each?",
+      "time_limit_minutes": 10,
+      "expected_keywords": ["thread-safe", "synchronized", "segment", "lock", "performance"],
+      "evaluation_rubric": {
+        "accuracy": {"weight": 0.35, "criteria": "Correct technical understanding"},
+        "completeness": {"weight": 0.30, "criteria": "Covers both data structures"},
+        "practical": {"weight": 0.20, "criteria": "Good use case examples"},
+        "clarity": {"weight": 0.15, "criteria": "Clear explanation"}
+      }
+    },
+    {
+      "id": "py_concept_002",
+      "type": "open_ended",
+      "category": "conceptual",
+      "difficulty": "easy",
+      "experience_levels": ["junior", "mid"],
+      "skills": ["python"],
+      "text": "What is the difference between a list and a tuple in Python? When would you use one over the other?",
+      "time_limit_minutes": 5,
+      "expected_keywords": ["mutable", "immutable", "hashable", "performance"],
+      "evaluation_rubric": {
+        "accuracy": {"weight": 0.40, "criteria": "Correct understanding"},
+        "completeness": {"weight": 0.30, "criteria": "Mentions key differences"},
+        "practical": {"weight": 0.30, "criteria": "Good use case examples"}
+      }
+    },
+    {
+      "id": "ms_concept_001",
+      "type": "open_ended",
+      "category": "conceptual",
+      "difficulty": "hard",
+      "experience_levels": ["senior", "lead"],
+      "skills": ["microservices", "system_design"],
+      "text": "Explain the CAP theorem and its implications for distributed systems. How do different databases make trade-offs?",
+      "time_limit_minutes": 12,
+      "expected_keywords": ["Consistency", "Availability", "Partition tolerance", "eventual consistency", "strong consistency"],
+      "evaluation_rubric": {
+        "accuracy": {"weight": 0.35, "criteria": "Correct understanding of CAP"},
+        "depth": {"weight": 0.30, "criteria": "Discusses real database examples"},
+        "practical": {"weight": 0.20, "criteria": "When to choose what"},
+        "clarity": {"weight": 0.15, "criteria": "Clear explanation"}
+      }
+    },
+    {
+      "id": "db_concept_001",
+      "type": "open_ended",
+      "category": "conceptual",
+      "difficulty": "medium",
+      "experience_levels": ["mid", "senior"],
+      "skills": ["databases"],
+      "text": "Explain database indexing. What are the different types of indexes and when would you use each?",
+      "time_limit_minutes": 10,
+      "expected_keywords": ["B-tree", "hash index", "composite", "covering index", "clustered", "non-clustered"],
+      "evaluation_rubric": {
+        "accuracy": {"weight": 0.35, "criteria": "Correct understanding of indexes"},
+        "completeness": {"weight": 0.30, "criteria": "Covers multiple index types"},
+        "practical": {"weight": 0.20, "criteria": "When to use which"},
+        "clarity": {"weight": 0.15, "criteria": "Clear explanation"}
+      }
+    },
+    {
+      "id": "ps_001",
+      "type": "open_ended",
+      "category": "problem_solving",
+      "difficulty": "medium",
+      "experience_levels": ["mid", "senior"],
+      "skills": ["coding", "algorithms"],
+      "text": "You have a system that processes millions of log entries per day. How would you design a solution to find the top 10 most frequent error messages in real-time?",
+      "time_limit_minutes": 12,
+      "expected_topics": ["Streaming algorithms", "Min-heap", "Count-min sketch", "MapReduce"],
+      "evaluation_rubric": {
+        "approach": {"weight": 0.35, "criteria": "Sound algorithmic approach"},
+        "scalability": {"weight": 0.30, "criteria": "Handles scale"},
+        "trade_offs": {"weight": 0.20, "criteria": "Discusses memory vs accuracy"},
+        "clarity": {"weight": 0.15, "criteria": "Clear explanation"}
+      }
+    }
+  ],
+  "categories": ["conceptual", "coding", "system_design", "problem_solving"],
+  "experience_levels": ["junior", "mid", "senior", "lead"],
+  "difficulty_levels": ["easy", "medium", "hard"],
+  "skills_taxonomy": {
+    "python": {
+      "display_name": "Python",
+      "icon": "🐍",
+      "related": ["data_structures", "algorithms"]
+    },
+    "java": {
+      "display_name": "Java",
+      "icon": "☕",
+      "related": ["spring", "data_structures"]
+    },
+    "javascript": {
+      "display_name": "JavaScript",
+      "icon": "🟨",
+      "related": ["react", "nodejs"]
+    },
+    "system_design": {
+      "display_name": "System Design",
+      "icon": "🏗️",
+      "related": ["microservices", "scalability", "databases"]
+    },
+    "coding": {
+      "display_name": "Coding & Problem Solving",
+      "icon": "💻",
+      "related": ["algorithms", "data_structures"]
+    },
+    "databases": {
+      "display_name": "Databases",
+      "icon": "🗄️",
+      "related": ["sql", "nosql"]
+    },
+    "microservices": {
+      "display_name": "Microservices",
+      "icon": "🔗",
+      "related": ["system_design", "api_design"]
+    },
+    "react": {
+      "display_name": "React",
+      "icon": "⚛️",
+      "related": ["javascript", "frontend"]
+    },
+    "nodejs": {
+      "display_name": "Node.js",
+      "icon": "🟢",
+      "related": ["javascript", "backend"]
+    },
+    "spring": {
+      "display_name": "Spring Framework",
+      "icon": "🍃",
+      "related": ["java", "microservices"]
+    },
+    "aws": {
+      "display_name": "AWS",
+      "icon": "☁️",
+      "related": ["cloud", "devops"]
+    },
+    "kubernetes": {
+      "display_name": "Kubernetes",
+      "icon": "⎈",
+      "related": ["docker", "devops"]
+    },
+    "docker": {
+      "display_name": "Docker",
+      "icon": "🐳",
+      "related": ["kubernetes", "devops"]
+    },
+    "data_structures": {
+      "display_name": "Data Structures",
+      "icon": "📊",
+      "related": ["algorithms", "coding"]
+    },
+    "algorithms": {
+      "display_name": "Algorithms",
+      "icon": "🧮",
+      "related": ["data_structures", "coding"]
+    }
+  }
+}
+
+

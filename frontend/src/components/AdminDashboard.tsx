@@ -4,10 +4,21 @@ import { useEffect, useState, useRef } from 'react'
 import LiveScores from './LiveScores'
 import StrategyVisualization from './StrategyVisualization'
 import LogViewer from './LogViewer'
+import TimeMetrics from './TimeMetrics'
 
 interface AdminDashboardProps {
   sessionId: string
   language: string
+}
+
+interface ResponseTiming {
+  questionId: string
+  questionNumber: number
+  isFollowup: boolean
+  followupNumber?: number
+  startTime: number
+  endTime?: number
+  score?: number
 }
 
 export default function AdminDashboard({ sessionId, language }: AdminDashboardProps) {
@@ -27,6 +38,10 @@ export default function AdminDashboard({ sessionId, language }: AdminDashboardPr
   })
   const [connectionStatus, setConnectionStatus] = useState<'connecting' | 'connected' | 'disconnected'>('connecting')
   const [responseHistory, setResponseHistory] = useState<any[]>([])
+  const [responseTimings, setResponseTimings] = useState<ResponseTiming[]>([])
+  const [currentQuestionStart, setCurrentQuestionStart] = useState<number | null>(null)
+  const [isAnswering, setIsAnswering] = useState(false)
+  const [activeTab, setActiveTab] = useState<'evaluation' | 'timing'>('evaluation')
   const wsRef = useRef<WebSocket | null>(null)
 
   useEffect(() => {
@@ -63,6 +78,21 @@ export default function AdminDashboard({ sessionId, language }: AdminDashboardPr
               score: score,
               type: currentQuestion?.isFollowup ? 'followup' : 'initial'
             }])
+            
+            // Update timing data
+            if (currentQuestionStart) {
+              setResponseTimings(prev => {
+                const updated = [...prev]
+                const lastTiming = updated[updated.length - 1]
+                if (lastTiming && !lastTiming.endTime) {
+                  lastTiming.endTime = Date.now()
+                  lastTiming.score = score
+                }
+                return updated
+              })
+              setIsAnswering(false)
+            }
+            
             // Clear typing when evaluation received (answer was submitted)
             setLastSubmittedAnswer(candidateTyping)
             setCandidateTyping('')
@@ -75,23 +105,52 @@ export default function AdminDashboard({ sessionId, language }: AdminDashboardPr
           } else if (message.type === 'question') {
             // NEW main question - use round_number from backend
             const qNum = message.data?.round_number || (progress.rounds_completed + 1)
+            const questionId = message.data?.question_id || `q${qNum}`
             setCurrentQuestion({ 
               text: message.data?.text || message.text, 
               isFollowup: false,
-              questionNumber: qNum
+              questionNumber: qNum,
+              questionId
             })
             setCandidateTyping('')
             setLastSubmittedAnswer('')
+            
+            // Start timing for new question
+            const startTime = Date.now()
+            setCurrentQuestionStart(startTime)
+            setIsAnswering(true)
+            setResponseTimings(prev => [...prev, {
+              questionId,
+              questionNumber: qNum,
+              isFollowup: false,
+              startTime
+            }])
           } else if (message.type === 'followup') {
             // Follow-up - keep the SAME questionNumber as current question
+            const qNum = currentQuestion?.questionNumber || progress.rounds_completed
+            const followupNum = message.data?.followup_number || 1
+            const questionId = `${currentQuestion?.questionId || 'q'}-f${followupNum}`
             setCurrentQuestion(prev => ({ 
               text: message.data?.text || message.text, 
               isFollowup: true,
-              followupNumber: message.data?.followup_number || 1,
-              questionNumber: prev?.questionNumber || progress.rounds_completed  // Keep same question number
+              followupNumber: followupNum,
+              questionNumber: prev?.questionNumber || progress.rounds_completed,
+              questionId
             }))
             setCandidateTyping('')
             setLastSubmittedAnswer('')
+            
+            // Start timing for follow-up
+            const startTime = Date.now()
+            setCurrentQuestionStart(startTime)
+            setIsAnswering(true)
+            setResponseTimings(prev => [...prev, {
+              questionId,
+              questionNumber: qNum,
+              isFollowup: true,
+              followupNumber: followupNum,
+              startTime
+            }])
           } else if (message.type === 'typing') {
             // Real-time typing from candidate
             setCandidateTyping(message.data?.text || '')
@@ -153,28 +212,30 @@ export default function AdminDashboard({ sessionId, language }: AdminDashboardPr
   }
 
   return (
-    <div className="min-h-screen bg-dark-black">
+    <div className="min-h-screen bg-[#0D0D0D]">
       {/* Header */}
-      <header className="bg-dark-black-light border-b border-gray-800 sticky top-0 z-10">
+      <header className="bg-[#0D0D0D] border-b border-gray-800/50 sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             {/* Left: Logo & Session */}
             <div className="flex items-center gap-4">
-              <div className="w-10 h-10 bg-primary-orange rounded-lg flex items-center justify-center">
-                <span className="text-dark-black font-bold">AI</span>
-              </div>
+              {/* EPAM Logo */}
+              <svg className="h-8" viewBox="0 0 100 32" fill="none">
+                <text x="0" y="24" fill="white" fontSize="24" fontWeight="bold" fontFamily="Arial, sans-serif">EPAM</text>
+              </svg>
+              <div className="h-6 w-px bg-gray-700"></div>
               <div>
-                <h1 className="text-xl font-bold text-white">Admin Control Panel</h1>
-                <p className="text-xs text-gray-500 font-mono">{sessionId}</p>
+                <h1 className="text-lg font-bold text-white">Admin Dashboard</h1>
+                <p className="text-xs text-gray-500 font-mono">{sessionId?.slice(0, 12)}...</p>
               </div>
               {/* Connection Status */}
-              <div className={`flex items-center gap-2 px-3 py-1 rounded-full text-xs ${
-                connectionStatus === 'connected' ? 'bg-green-500/20 text-green-400' :
-                connectionStatus === 'connecting' ? 'bg-yellow-500/20 text-yellow-400' :
-                'bg-red-500/20 text-red-400'
+              <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium ${
+                connectionStatus === 'connected' ? 'bg-[#39FF14]/10 text-[#39FF14]' :
+                connectionStatus === 'connecting' ? 'bg-yellow-500/10 text-yellow-400' :
+                'bg-red-500/10 text-red-400'
               }`}>
                 <span className={`w-2 h-2 rounded-full ${
-                  connectionStatus === 'connected' ? 'bg-green-400 animate-pulse' :
+                  connectionStatus === 'connected' ? 'bg-[#39FF14] animate-pulse' :
                   connectionStatus === 'connecting' ? 'bg-yellow-400 animate-pulse' :
                   'bg-red-400'
                 }`}></span>
@@ -192,7 +253,7 @@ export default function AdminDashboard({ sessionId, language }: AdminDashboardPr
                   <p className="text-xs text-gray-500">Question</p>
                 </div>
                 <div className="text-center">
-                  <p className="text-2xl font-bold text-primary-orange">{avgScore || '--'}</p>
+                  <p className="text-2xl font-bold text-[#39FF14]">{avgScore || '--'}</p>
                   <p className="text-xs text-gray-500">Avg Score</p>
                 </div>
                 <div className="text-center">
@@ -204,7 +265,7 @@ export default function AdminDashboard({ sessionId, language }: AdminDashboardPr
                 href={`/interview?view=candidate&session_id=${sessionId}&lang=${language}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="px-4 py-2 bg-primary-orange hover:bg-orange-500 text-dark-black font-semibold rounded-lg transition-colors"
+                className="px-4 py-2 bg-[#39FF14] hover:bg-[#7FFF5C] text-black font-semibold rounded-lg transition-colors"
               >
                 Open Candidate View
               </a>
@@ -216,14 +277,14 @@ export default function AdminDashboard({ sessionId, language }: AdminDashboardPr
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-6 py-6 space-y-6">
         {/* Progress Bar */}
-        <div className="bg-dark-black-light rounded-xl p-5 border border-gray-800">
+        <div className="bg-[#141414] rounded-2xl p-5 border border-gray-800/50">
           <div className="flex items-center justify-between mb-3">
             <span className="text-sm font-medium text-gray-300">Interview Progress</span>
-            <span className="text-sm font-mono text-primary-orange">{progress.percentage.toFixed(0)}%</span>
+            <span className="text-sm font-mono text-[#39FF14]">{progress.percentage.toFixed(0)}%</span>
           </div>
           <div className="h-2 bg-gray-800 rounded-full overflow-hidden mb-4">
             <div 
-              className="h-full bg-primary-orange transition-all duration-500"
+              className="h-full bg-gradient-to-r from-[#39FF14] to-[#7FFF5C] transition-all duration-500"
               style={{ width: `${progress.percentage}%` }}
             />
           </div>
@@ -231,23 +292,29 @@ export default function AdminDashboard({ sessionId, language }: AdminDashboardPr
           <div className="flex justify-between">
             {Array.from({ length: progress.total_rounds }).map((_, i) => (
               <div key={i} className="flex flex-col items-center">
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-all ${
                   i < progress.rounds_completed 
-                    ? 'bg-green-500 text-white' 
+                    ? 'bg-[#39FF14] text-black' 
                     : i === progress.rounds_completed 
-                      ? 'bg-primary-orange text-dark-black' 
-                      : 'bg-gray-700 text-gray-400'
+                      ? 'bg-[#39FF14]/20 text-[#39FF14] ring-2 ring-[#39FF14]' 
+                      : 'bg-gray-800 text-gray-500'
                 }`}>
-                  {i + 1}
+                  {i < progress.rounds_completed ? (
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>
+                  ) : (
+                    i + 1
+                  )}
                 </div>
                 {/* Follow-up dots (2 per question) */}
                 <div className="flex gap-1 mt-2">
                   {Array.from({ length: progress.max_followups || 2 }).map((_, j) => (
-                    <div key={j} className={`w-2 h-2 rounded-full ${
+                    <div key={j} className={`w-2 h-2 rounded-full transition-all ${
                       i < progress.rounds_completed 
-                        ? 'bg-green-500' 
+                        ? 'bg-[#39FF14]' 
                         : i === progress.rounds_completed && j < progress.current_followup 
-                          ? 'bg-primary-orange' 
+                          ? 'bg-[#39FF14]' 
                           : 'bg-gray-700'
                     }`} />
                   ))}
@@ -258,35 +325,35 @@ export default function AdminDashboard({ sessionId, language }: AdminDashboardPr
         </div>
 
         {/* Q&A Panel - Full Width */}
-        <div className="bg-dark-black-light rounded-xl border border-gray-800 overflow-hidden">
-          <div className="bg-primary-orange/10 px-5 py-3 border-b border-gray-800 flex items-center justify-between">
-            <h3 className="text-sm font-semibold text-primary-orange">Candidate View</h3>
-            <span className="px-2 py-1 bg-primary-orange/20 text-primary-orange text-xs font-mono rounded">
+        <div className="bg-[#141414] rounded-2xl border border-gray-800/50 overflow-hidden">
+          <div className="bg-[#39FF14]/5 px-5 py-3 border-b border-gray-800/50 flex items-center justify-between">
+            <h3 className="text-sm font-semibold text-[#39FF14]">Candidate View</h3>
+            <span className="px-2 py-1 bg-[#39FF14]/20 text-[#39FF14] text-xs font-mono rounded-full font-bold">
               {getQuestionLabel()}
             </span>
           </div>
           <div className="p-5 space-y-4">
             {/* Question */}
             <div>
-              <p className="text-xs text-gray-500 mb-1 uppercase tracking-wide">Question</p>
-              <p className="text-white">
+              <p className="text-xs text-gray-500 mb-2 uppercase tracking-wide">Question</p>
+              <p className="text-white text-lg">
                 {currentQuestion?.text || <span className="text-gray-500 italic">Waiting for question...</span>}
               </p>
             </div>
             {/* Candidate Answer */}
             <div>
-              <div className="flex items-center gap-2 mb-1">
+              <div className="flex items-center gap-2 mb-2">
                 <p className="text-xs text-gray-500 uppercase tracking-wide">Candidate Answer</p>
                 {candidateTyping && (
-                  <span className="flex items-center gap-1 text-xs text-primary-orange">
-                    <span className="w-1.5 h-1.5 bg-primary-orange rounded-full animate-pulse"></span>
+                  <span className="flex items-center gap-1 text-xs text-[#39FF14]">
+                    <span className="w-1.5 h-1.5 bg-[#39FF14] rounded-full animate-pulse"></span>
                     Typing...
                   </span>
                 )}
               </div>
-              <div className="bg-gray-900/50 rounded-lg p-3 min-h-[60px] border border-gray-700">
+              <div className="bg-[#0D0D0D] rounded-xl p-4 min-h-[60px] border border-gray-800/50">
                 {candidateTyping ? (
-                  <p className="text-gray-300">{candidateTyping}<span className="animate-pulse">|</span></p>
+                  <p className="text-gray-300">{candidateTyping}<span className="text-[#39FF14] animate-pulse">|</span></p>
                 ) : lastSubmittedAnswer ? (
                   <p className="text-white">{lastSubmittedAnswer}</p>
                 ) : (
@@ -302,11 +369,11 @@ export default function AdminDashboard({ sessionId, language }: AdminDashboardPr
           {/* Left Column - 45% */}
           <div className="lg:col-span-5 space-y-6">
             {/* Strategy Card */}
-            <div className="bg-dark-black-light rounded-xl border border-gray-800 overflow-hidden">
-              <div className="bg-primary-orange/10 px-5 py-3 border-b border-gray-800 flex items-center justify-between">
-                <h3 className="text-sm font-semibold text-primary-orange">Active Strategy</h3>
+            <div className="bg-[#141414] rounded-2xl border border-gray-800/50 overflow-hidden">
+              <div className="bg-[#39FF14]/5 px-5 py-3 border-b border-gray-800/50 flex items-center justify-between">
+                <h3 className="text-sm font-semibold text-[#39FF14]">Active Strategy</h3>
                 {strategy && (
-                  <span className="px-2 py-1 bg-primary-orange/20 text-orange-300 text-xs font-mono rounded">
+                  <span className="px-2 py-1 bg-[#39FF14]/20 text-[#39FF14] text-xs font-mono rounded-full font-bold uppercase">
                     {strategy.id}
                   </span>
                 )}
@@ -323,12 +390,12 @@ export default function AdminDashboard({ sessionId, language }: AdminDashboardPr
             </div>
 
             {/* Timeline Card */}
-            <div className="bg-dark-black-light rounded-xl border border-gray-800 overflow-hidden">
-              <div className="bg-primary-orange/10 px-5 py-3 border-b border-gray-800 flex items-center justify-between">
-                <h3 className="text-sm font-semibold text-primary-orange">Interview Timeline</h3>
+            <div className="bg-[#141414] rounded-2xl border border-gray-800/50 overflow-hidden">
+              <div className="bg-[#39FF14]/5 px-5 py-3 border-b border-gray-800/50 flex items-center justify-between">
+                <h3 className="text-sm font-semibold text-[#39FF14]">Interview Timeline</h3>
                 {logData && (
-                  <span className="flex items-center gap-1 text-xs text-primary-orange">
-                    <span className="w-1.5 h-1.5 bg-primary-orange rounded-full animate-pulse"></span>
+                  <span className="flex items-center gap-1 text-xs text-[#39FF14]">
+                    <span className="w-1.5 h-1.5 bg-[#39FF14] rounded-full animate-pulse"></span>
                     Recording
                   </span>
                 )}
@@ -347,44 +414,83 @@ export default function AdminDashboard({ sessionId, language }: AdminDashboardPr
 
           {/* Right Column - 55% */}
           <div className="lg:col-span-7">
-            <div className="bg-dark-black-light rounded-xl border border-gray-800 overflow-hidden h-full">
-              <div className="bg-primary-orange/10 px-5 py-3 border-b border-gray-800 flex items-center justify-between">
-                <h3 className="text-sm font-semibold text-primary-orange">Live Evaluation</h3>
-                {evaluation && (
-                  <span className="text-xs text-gray-500">
-                    Updated {new Date().toLocaleTimeString()}
-                  </span>
-                )}
-              </div>
-              <div className="p-5">
-                {evaluation ? (
-                  <LiveScores evaluation={evaluation} />
-                ) : (
-                  <div className="text-center py-16">
-                    <div className="w-16 h-16 bg-gray-800 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                      <svg className="w-8 h-8 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                      </svg>
-                    </div>
-                    <h4 className="text-white font-medium mb-2">Waiting for Response</h4>
-                    <p className="text-gray-500 text-sm">Scores will appear after candidate submits an answer</p>
-                    <div className="mt-6 flex justify-center gap-6 text-xs">
-                      <div className="flex items-center gap-2">
-                        <div className="w-3 h-3 bg-green-500 rounded"></div>
-                        <span className="text-gray-400">Deterministic</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <div className="w-3 h-3 bg-purple-500 rounded"></div>
-                        <span className="text-gray-400">LLM Assessment</span>
-                      </div>
-                    </div>
+            <div className="bg-[#141414] rounded-2xl border border-gray-800/50 overflow-hidden h-full">
+              {/* Tab Header */}
+              <div className="flex border-b border-gray-800/50">
+                <button
+                  onClick={() => setActiveTab('evaluation')}
+                  className={`flex-1 px-5 py-3 text-sm font-semibold transition-colors ${
+                    activeTab === 'evaluation'
+                      ? 'bg-[#39FF14]/5 text-[#39FF14] border-b-2 border-[#39FF14]'
+                      : 'text-gray-500 hover:text-gray-300'
+                  }`}
+                >
+                  <div className="flex items-center justify-center gap-2">
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                    </svg>
+                    Live Evaluation
                   </div>
+                </button>
+                <button
+                  onClick={() => setActiveTab('timing')}
+                  className={`flex-1 px-5 py-3 text-sm font-semibold transition-colors ${
+                    activeTab === 'timing'
+                      ? 'bg-[#39FF14]/5 text-[#39FF14] border-b-2 border-[#39FF14]'
+                      : 'text-gray-500 hover:text-gray-300'
+                  }`}
+                >
+                  <div className="flex items-center justify-center gap-2">
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Time Efficiency
+                    {isAnswering && (
+                      <span className="w-2 h-2 bg-[#39FF14] rounded-full animate-pulse"></span>
+                    )}
+                  </div>
+                </button>
+              </div>
+              
+              <div className="p-5">
+                {activeTab === 'evaluation' ? (
+                  <>
+                    {evaluation ? (
+                      <LiveScores evaluation={evaluation} />
+                    ) : (
+                      <div className="text-center py-16">
+                        <div className="w-16 h-16 bg-gray-800 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                          <svg className="w-8 h-8 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                          </svg>
+                        </div>
+                        <h4 className="text-white font-medium mb-2">Waiting for Response</h4>
+                        <p className="text-gray-500 text-sm">Scores will appear after candidate submits an answer</p>
+                        <div className="mt-6 flex justify-center gap-6 text-xs">
+                          <div className="flex items-center gap-2">
+                            <div className="w-3 h-3 bg-green-500 rounded"></div>
+                            <span className="text-gray-400">Deterministic</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <div className="w-3 h-3 bg-purple-500 rounded"></div>
+                            <span className="text-gray-400">LLM Assessment</span>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <TimeMetrics
+                    timings={responseTimings}
+                    currentQuestionStart={currentQuestionStart || undefined}
+                    isAnswering={isAnswering}
+                  />
                 )}
               </div>
 
-              {/* Score History Chart */}
-              {responseHistory.length > 0 && (
-                <div className="border-t border-gray-800 px-5 py-4">
+              {/* Score History Chart (only show in evaluation tab) */}
+              {activeTab === 'evaluation' && responseHistory.length > 0 && (
+                <div className="border-t border-gray-800/50 px-5 py-4">
                   <div className="flex items-center justify-between mb-3">
                     <span className="text-xs text-gray-500">Score Trend</span>
                     <span className="text-xs text-gray-400">{responseHistory.length} responses</span>
@@ -393,7 +499,7 @@ export default function AdminDashboard({ sessionId, language }: AdminDashboardPr
                     {responseHistory.map((r, i) => (
                       <div 
                         key={i}
-                        className="flex-1 bg-primary-orange rounded-t transition-all duration-300 relative group"
+                        className="flex-1 bg-gradient-to-t from-[#39FF14] to-[#7FFF5C] rounded-t transition-all duration-300 relative group"
                         style={{ height: `${Math.max(8, r.score)}%` }}
                       >
                         <div className="absolute -top-6 left-1/2 -translate-x-1/2 bg-gray-800 px-1.5 py-0.5 rounded text-xs text-white opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">

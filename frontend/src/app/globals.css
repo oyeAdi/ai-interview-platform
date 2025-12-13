@@ -1,25 +1,161 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  --primary-orange: #FF6B35;
-  --primary-orange-light: #FF8C42;
-  --dark-black: #0A0A0A;
-  --dark-black-light: #1A1A1A;
+  /* EPAM Brand Colors */
+  --epam-cyan: #00D4AA;
+  --epam-cyan-light: #00FFD0;
+  --epam-cyan-dark: #00A88A;
+  
+  /* Light Mode */
+  --surface-primary: #FFFFFF;
+  --surface-secondary: #F5F5F5;
+  --surface-tertiary: #EBEBEB;
+  --surface-card: #FFFFFF;
+  
+  --text-primary: #000000;
+  --text-secondary: #666666;
+  --text-tertiary: #999999;
+  
+  --border-light: #E0E0E0;
+  --border-medium: #CCCCCC;
 }
 
-body {
-  margin: 0;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+/* Dark mode - EPAM's signature look */
+.dark {
+  --surface-primary: #000000;
+  --surface-secondary: #0A0A0A;
+  --surface-tertiary: #1A1A1A;
+  --surface-card: #0A0A0A;
+  
+  --text-primary: #FFFFFF;
+  --text-secondary: #B0B0B0;
+  --text-tertiary: #707070;
+  
+  --border-light: #2A2A2A;
+  --border-medium: #3A3A3A;
 }
 
 * {
   box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
+html {
+  scroll-behavior: smooth;
+}
 
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: var(--surface-primary);
+  color: var(--text-primary);
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+/* Custom scrollbar - Minimal */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-medium);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-tertiary);
+}
+
+/* Focus styles */
+*:focus-visible {
+  outline: 1px solid var(--epam-cyan);
+  outline-offset: 2px;
+}
+
+/* Button base styles */
+@layer components {
+  .btn-primary {
+    @apply px-6 py-3 font-medium transition-all duration-200;
+    @apply disabled:opacity-50 disabled:cursor-not-allowed;
+    background-color: var(--epam-cyan);
+    color: #000000;
+  }
+  
+  .btn-primary:hover:not(:disabled) {
+    background-color: var(--epam-cyan-light);
+  }
+  
+  .btn-secondary {
+    @apply px-6 py-3 bg-transparent font-medium transition-all duration-200;
+    @apply disabled:opacity-50 disabled:cursor-not-allowed;
+    border: 1px solid var(--epam-cyan);
+    color: var(--epam-cyan);
+  }
+  
+  .btn-secondary:hover:not(:disabled) {
+    background-color: rgba(0, 212, 170, 0.1);
+  }
+  
+  .btn-ghost {
+    @apply px-4 py-2 bg-transparent font-medium transition-all duration-200;
+    color: var(--text-secondary);
+  }
+  
+  .btn-ghost:hover {
+    color: var(--text-primary);
+  }
+  
+  .card {
+    background-color: var(--surface-card);
+    border: 1px solid var(--border-light);
+    @apply transition-all duration-200;
+  }
+  
+  .input-field {
+    @apply w-full px-4 py-3 transition-all duration-200;
+    background-color: var(--surface-secondary);
+    border: 1px solid var(--border-light);
+    color: var(--text-primary);
+  }
+  
+  .input-field::placeholder {
+    color: var(--text-tertiary);
+  }
+  
+  .input-field:focus {
+    border-color: var(--epam-cyan);
+    outline: none;
+  }
+  
+  .section-title {
+    @apply text-xs font-medium uppercase tracking-[0.2em];
+    color: var(--epam-cyan);
+  }
+  
+  .section-subtitle {
+    @apply text-sm;
+    color: var(--text-secondary);
+  }
+}
+
+/* Selection styling */
+::selection {
+  background-color: var(--epam-cyan);
+  color: #000000;
+}
+
+/* Code block styling */
+pre, code {
+  font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+}

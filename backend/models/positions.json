@@ -1,0 +1,424 @@
+{
+  "positions": [
+    {
+      "id": "uber_senior_python",
+      "title": "Senior Python Developer",
+      "account_id": "uber",
+      "status": "open",
+      "created_at": "2024-12-01",
+      "data_model": {
+        "duration_minutes": 30,
+        "experience_level": "senior",
+        "expectations": "high",
+        "required_skills": [
+          {
+            "skill": "python",
+            "proficiency": "expert",
+            "weight": 0.3
+          },
+          {
+            "skill": "system_design",
+            "proficiency": "advanced",
+            "weight": 0.25
+          },
+          {
+            "skill": "microservices",
+            "proficiency": "advanced",
+            "weight": 0.2
+          },
+          {
+            "skill": "databases",
+            "proficiency": "intermediate",
+            "weight": 0.15
+          },
+          {
+            "skill": "coding",
+            "proficiency": "expert",
+            "weight": 0.1
+          }
+        ],
+        "interview_flow": [
+          "coding",
+          "problem_solving",
+          "system_design",
+          "conceptual"
+        ],
+        "question_distribution": {
+          "easy": 0.2,
+          "medium": 0.5,
+          "hard": 0.46
+        }
+      },
+      "jd_text": "We are looking for a Senior Python Developer with 5+ years of experience. The ideal candidate should have strong knowledge of Python fundamentals, system design, microservices architecture, and database management. Experience with Django/FastAPI and cloud platforms (AWS/GCP) is preferred.",
+      "updated_at": "2025-12-12"
+    },
+    {
+      "id": "uber_java_lead",
+      "title": "Java Tech Lead",
+      "account_id": "uber",
+      "status": "open",
+      "created_at": "2024-12-05",
+      "data_model": {
+        "duration_minutes": 60,
+        "experience_level": "lead",
+        "expectations": "high",
+        "required_skills": [
+          {
+            "skill": "java",
+            "proficiency": "expert",
+            "weight": 0.25
+          },
+          {
+            "skill": "system_design",
+            "proficiency": "expert",
+            "weight": 0.3
+          },
+          {
+            "skill": "microservices",
+            "proficiency": "expert",
+            "weight": 0.2
+          },
+          {
+            "skill": "leadership",
+            "proficiency": "advanced",
+            "weight": 0.15
+          },
+          {
+            "skill": "coding",
+            "proficiency": "expert",
+            "weight": 0.1
+          },
+          {
+            "skill": "",
+            "proficiency": "intermediate",
+            "weight": 0.1
+          }
+        ],
+        "interview_flow": [
+          "system_design",
+          "coding",
+          "conceptual"
+        ],
+        "question_distribution": {
+          "easy": 0.1,
+          "medium": 0.4,
+          "hard": 0.5
+        }
+      },
+      "jd_text": "We are seeking a Java Tech Lead to drive technical excellence in our backend services. The role requires 8+ years of experience with Java, Spring Boot, and distributed systems. Strong system design skills and experience leading teams of 5+ engineers is essential.",
+      "updated_at": "2025-12-12"
+    },
+    {
+      "id": "uber_fullstack",
+      "title": "Full Stack Engineer",
+      "account_id": "uber",
+      "status": "open",
+      "created_at": "2024-12-08",
+      "data_model": {
+        "duration_minutes": 45,
+        "experience_level": "mid",
+        "expectations": "medium",
+        "required_skills": [
+          {
+            "skill": "javascript",
+            "proficiency": "advanced",
+            "weight": 0.25
+          },
+          {
+            "skill": "react",
+            "proficiency": "advanced",
+            "weight": 0.2
+          },
+          {
+            "skill": "nodejs",
+            "proficiency": "intermediate",
+            "weight": 0.2
+          },
+          {
+            "skill": "databases",
+            "proficiency": "intermediate",
+            "weight": 0.15
+          },
+          {
+            "skill": "coding",
+            "proficiency": "advanced",
+            "weight": 0.2
+          }
+        ],
+        "interview_flow": [
+          "coding",
+          "conceptual",
+          "system_design"
+        ],
+        "question_distribution": {
+          "easy": 0.3,
+          "medium": 0.5,
+          "hard": 0.2
+        }
+      },
+      "jd_text": "Join our team as a Full Stack Engineer. We need someone with 3-5 years of experience in JavaScript, React, and Node.js. Experience with TypeScript, REST APIs, and SQL/NoSQL databases is required."
+    },
+    {
+      "id": "snow_senior_java",
+      "title": "Senior Java Developer",
+      "account_id": "servicenow",
+      "status": "open",
+      "created_at": "2024-12-03",
+      "data_model": {
+        "duration_minutes": 45,
+        "experience_level": "senior",
+        "expectations": "high",
+        "required_skills": [
+          {
+            "skill": "java",
+            "proficiency": "expert",
+            "weight": 0.3
+          },
+          {
+            "skill": "spring",
+            "proficiency": "advanced",
+            "weight": 0.25
+          },
+          {
+            "skill": "microservices",
+            "proficiency": "advanced",
+            "weight": 0.2
+          },
+          {
+            "skill": "databases",
+            "proficiency": "intermediate",
+            "weight": 0.15
+          },
+          {
+            "skill": "coding",
+            "proficiency": "expert",
+            "weight": 0.1
+          }
+        ],
+        "interview_flow": [
+          "coding",
+          "system_design",
+          "conceptual"
+        ],
+        "question_distribution": {
+          "easy": 0.2,
+          "medium": 0.5,
+          "hard": 0.3
+        }
+      },
+      "jd_text": "ServiceNow is looking for a Senior Java Developer with expertise in Spring Boot, microservices, and cloud-native development. 5+ years of experience required."
+    },
+    {
+      "id": "snow_devops",
+      "title": "DevOps Engineer",
+      "account_id": "servicenow",
+      "status": "open",
+      "created_at": "2024-12-06",
+      "data_model": {
+        "duration_minutes": 40,
+        "experience_level": "mid",
+        "expectations": "medium",
+        "required_skills": [
+          {
+            "skill": "kubernetes",
+            "proficiency": "advanced",
+            "weight": 0.25
+          },
+          {
+            "skill": "docker",
+            "proficiency": "advanced",
+            "weight": 0.2
+          },
+          {
+            "skill": "ci_cd",
+            "proficiency": "advanced",
+            "weight": 0.2
+          },
+          {
+            "skill": "cloud",
+            "proficiency": "intermediate",
+            "weight": 0.2
+          },
+          {
+            "skill": "scripting",
+            "proficiency": "intermediate",
+            "weight": 0.15
+          }
+        ],
+        "interview_flow": [
+          "conceptual",
+          "problem_solving",
+          "system_design"
+        ],
+        "question_distribution": {
+          "easy": 0.3,
+          "medium": 0.5,
+          "hard": 0.2
+        }
+      },
+      "jd_text": "We need a DevOps Engineer with strong experience in Kubernetes, Docker, CI/CD pipelines, and cloud platforms. 3-5 years of experience in DevOps practices."
+    },
+    {
+      "id": "amz_sde2",
+      "title": "SDE II",
+      "account_id": "amazon",
+      "status": "open",
+      "created_at": "2024-12-02",
+      "data_model": {
+        "duration_minutes": 50,
+        "experience_level": "mid",
+        "expectations": "high",
+        "required_skills": [
+          {
+            "skill": "java",
+            "proficiency": "advanced",
+            "weight": 0.25
+          },
+          {
+            "skill": "coding",
+            "proficiency": "expert",
+            "weight": 0.3
+          },
+          {
+            "skill": "system_design",
+            "proficiency": "intermediate",
+            "weight": 0.2
+          },
+          {
+            "skill": "data_structures",
+            "proficiency": "expert",
+            "weight": 0.25
+          }
+        ],
+        "interview_flow": [
+          "coding",
+          "coding",
+          "system_design",
+          "conceptual"
+        ],
+        "question_distribution": {
+          "easy": 0.1,
+          "medium": 0.5,
+          "hard": 0.4
+        }
+      },
+      "jd_text": "Amazon is hiring SDE II engineers. Strong problem-solving skills, data structures & algorithms knowledge, and 3-5 years of experience in Java or Python required."
+    },
+    {
+      "id": "amz_backend",
+      "title": "Backend Engineer",
+      "account_id": "amazon",
+      "status": "open",
+      "created_at": "2024-12-07",
+      "data_model": {
+        "duration_minutes": 45,
+        "experience_level": "senior",
+        "expectations": "high",
+        "required_skills": [
+          {
+            "skill": "python",
+            "proficiency": "expert",
+            "weight": 0.25
+          },
+          {
+            "skill": "aws",
+            "proficiency": "advanced",
+            "weight": 0.25
+          },
+          {
+            "skill": "microservices",
+            "proficiency": "advanced",
+            "weight": 0.2
+          },
+          {
+            "skill": "databases",
+            "proficiency": "advanced",
+            "weight": 0.15
+          },
+          {
+            "skill": "coding",
+            "proficiency": "expert",
+            "weight": 0.15
+          }
+        ],
+        "interview_flow": [
+          "system_design",
+          "coding",
+          "conceptual"
+        ],
+        "question_distribution": {
+          "easy": 0.15,
+          "medium": 0.5,
+          "hard": 0.35
+        }
+      },
+      "jd_text": "Backend Engineer position at Amazon. Must have 5+ years experience with Python, AWS services, and distributed systems."
+    },
+    {
+      "id": "exp_fullstack",
+      "title": "Full Stack Developer",
+      "account_id": "expedia",
+      "status": "open",
+      "created_at": "2024-12-04",
+      "data_model": {
+        "duration_minutes": 45,
+        "experience_level": "mid",
+        "expectations": "medium",
+        "required_skills": [
+          {
+            "skill": "java",
+            "proficiency": "advanced",
+            "weight": 0.25
+          },
+          {
+            "skill": "react",
+            "proficiency": "advanced",
+            "weight": 0.25
+          },
+          {
+            "skill": "spring",
+            "proficiency": "intermediate",
+            "weight": 0.2
+          },
+          {
+            "skill": "databases",
+            "proficiency": "intermediate",
+            "weight": 0.15
+          },
+          {
+            "skill": "coding",
+            "proficiency": "advanced",
+            "weight": 0.15
+          }
+        ],
+        "interview_flow": [
+          "coding",
+          "conceptual",
+          "system_design"
+        ],
+        "question_distribution": {
+          "easy": 0.25,
+          "medium": 0.5,
+          "hard": 0.25
+        }
+      },
+      "jd_text": "Expedia is looking for a Full Stack Developer with Java backend and React frontend experience. 3-5 years of experience required."
+    }
+  ],
+  "experience_levels": [
+    "junior",
+    "mid",
+    "senior",
+    "lead"
+  ],
+  "expectation_levels": [
+    "basic",
+    "medium",
+    "high"
+  ],
+  "status_options": [
+    "open",
+    "closed",
+    "on_hold"
+  ]
+}
