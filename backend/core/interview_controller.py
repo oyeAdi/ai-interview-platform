@@ -98,7 +98,41 @@ class InterviewController:
                 }
         
         # Standard question selection from question bank
-        question = self.question_manager.select_question(context)
+        # If question_categories are set (from quick start), use category-based selection
+        if self.question_categories:
+            # Count how many questions we've asked per category
+            questions_by_category = {}
+            for summary in context.get("round_summaries", []):
+                cat = summary.get("question_category", "unknown")
+                questions_by_category[cat] = questions_by_category.get(cat, 0) + 1
+            
+            # Find a category that still has quota
+            selected_category = None
+            for cat_name, cat_config in self.question_categories.items():
+                if cat_config.get("enabled", False):
+                    asked_count = questions_by_category.get(cat_name, 0)
+                    if asked_count < cat_config.get("count", 0):
+                        selected_category = cat_name
+                        break
+            
+            if selected_category:
+                # Filter questions by this category
+                filtered_questions = [
+                    q for q in self.question_manager.question_bank
+                    if q.get("category") == selected_category
+                    and q["id"] not in self.question_manager.questions_asked
+                ]
+                if filtered_questions:
+                    import random
+                    question = random.choice(filtered_questions)
+                else:
+                    question = None
+            else:
+                # All categories exhausted
+                question = None
+        else:
+            # Default behavior: select from all questions
+            question = self.question_manager.select_question(context)
         
         if not question:
             return None
@@ -110,13 +144,17 @@ class InterviewController:
         self.context_manager.update_round(round_num)
         self.context_manager.add_question_asked(question["id"])
         
+        # Track question category
+        question_category = question.get("category", "unknown")
+        
         return {
             "type": "question",
             "question_id": question["id"],
             "text": question["text"],
             "question_type": question["type"],
             "topic": question.get("topic"),
-            "round_number": round_num
+            "round_number": round_num,
+            "category": question_category
         }
     
     def _generate_personalized_first_question(self) -> Optional[Dict]:
