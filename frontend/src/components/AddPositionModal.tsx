@@ -375,7 +375,7 @@ export default function AddPositionModal({
                         onClick={() => setVisibleCount(prev => prev + 4)}
                         className="w-full py-2 text-sm text-[#00E5FF] border border-dashed border-[#00E5FF]/30 hover:border-[#00E5FF] hover:bg-[#00E5FF]/5 transition-colors mb-4"
                       >
-                        Show more ({filteredTemplates.length - visibleCount} remaining)
+                        Show {Math.min(4, filteredTemplates.length - visibleCount)} more ↓
                       </button>
                     )}
                     
