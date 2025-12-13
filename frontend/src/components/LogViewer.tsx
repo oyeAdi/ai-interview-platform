@@ -1,5 +1,7 @@
 'use client'
 
+import { apiUrl } from '@/config/api'
+
 interface LogViewerProps {
   logData: any
 }

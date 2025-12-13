@@ -4,6 +4,7 @@ import { useState, useMemo, useEffect } from 'react'
 import SearchBar from './SearchBar'
 import FilterChips from './FilterChips'
 import PositionCard from './PositionCard'
+import { apiUrl } from '@/config/api'
 
 interface Skill {
   skill: string

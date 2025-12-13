@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react'
 import { apiUrl } from '@/config/api'
-import { apiUrl } from '@/config/api'
 
 interface CodeSubmission {
   id: string

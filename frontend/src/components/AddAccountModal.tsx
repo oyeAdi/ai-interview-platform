@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { apiUrl } from '@/config/api'
 
 interface AddAccountModalProps {
   isOpen: boolean

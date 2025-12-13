@@ -7,6 +7,7 @@ import CandidateView from '@/components/CandidateView'
 import AdminDashboard from '@/components/AdminDashboard'
 import ExpertView from '@/components/ExpertView'
 import Header from '@/components/Header'
+import { apiUrl } from '@/config/api'
 
 interface SessionInfo {
   session_id: string
