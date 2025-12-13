@@ -8,6 +8,18 @@ interface Skill {
   weight: number
 }
 
+interface CategoryConfig {
+  enabled: boolean
+  count: number
+}
+
+interface QuestionCategories {
+  coding: CategoryConfig
+  conceptual: CategoryConfig
+  system_design: CategoryConfig
+  problem_solving: CategoryConfig
+}
+
 interface DataModel {
   duration_minutes: number
   experience_level: string
@@ -19,6 +31,7 @@ interface DataModel {
     medium: number
     hard: number
   }
+  question_categories?: QuestionCategories
 }
 
 interface DataModelPanelProps {
@@ -38,6 +51,20 @@ const AVAILABLE_SKILLS = [
   'system_design', 'microservices', 'databases', 'coding',
   'algorithms', 'data_structures', 'aws', 'kubernetes', 'docker'
 ]
+
+const QUESTION_CATEGORY_INFO = {
+  coding: { label: 'Coding', description: 'Monaco editor, algorithms, DS', icon: '💻' },
+  conceptual: { label: 'Conceptual', description: 'Theory, language features', icon: '📚' },
+  system_design: { label: 'System Design', description: 'Architecture, scalability', icon: '🏗️' },
+  problem_solving: { label: 'Problem Solving', description: 'Real-world scenarios', icon: '🧩' }
+}
+
+const DEFAULT_CATEGORIES: QuestionCategories = {
+  coding: { enabled: true, count: 2 },
+  conceptual: { enabled: true, count: 2 },
+  system_design: { enabled: true, count: 1 },
+  problem_solving: { enabled: true, count: 1 }
+}
 
 export default function DataModelPanel({ dataModel, onUpdate, isEditable = true }: DataModelPanelProps) {
   const [isExpanded, setIsExpanded] = useState(true)
@@ -77,6 +104,23 @@ export default function DataModelPanel({ dataModel, onUpdate, isEditable = true 
       updatedFlow = updatedFlow.filter(p => p !== phase)
     }
     handleChange('interview_flow', updatedFlow)
+  }
+
+  const handleCategoryChange = (category: keyof QuestionCategories, field: 'enabled' | 'count', value: boolean | number) => {
+    const currentCategories = localModel.question_categories || DEFAULT_CATEGORIES
+    const updatedCategories = {
+      ...currentCategories,
+      [category]: {
+        ...currentCategories[category],
+        [field]: value
+      }
+    }
+    handleChange('question_categories', updatedCategories)
+  }
+
+  const getTotalQuestions = () => {
+    const categories = localModel.question_categories || DEFAULT_CATEGORIES
+    return Object.values(categories).reduce((sum, cat) => sum + (cat.enabled ? cat.count : 0), 0)
   }
 
   const moveFlowItem = (index: number, direction: 'up' | 'down') => {
@@ -204,10 +248,102 @@ export default function DataModelPanel({ dataModel, onUpdate, isEditable = true 
             </div>
           </div>
 
+          {/* Question Categories */}
+          <div>
+            <div className="flex items-center justify-between mb-4">
+              <label className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                Question Categories
+              </label>
+              <span className="text-xs text-epam-cyan">
+                Total: {getTotalQuestions()} questions
+              </span>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {(Object.keys(QUESTION_CATEGORY_INFO) as (keyof QuestionCategories)[]).map((category) => {
+                const info = QUESTION_CATEGORY_INFO[category]
+                const categories = localModel.question_categories || DEFAULT_CATEGORIES
+                const config = categories[category]
+                
+                return (
+                  <div 
+                    key={category}
+                    className={`p-4 border transition-colors duration-200 ${
+                      config.enabled 
+                        ? 'border-epam-cyan bg-epam-cyan/5' 
+                        : 'border-gray-200 dark:border-[#2A2A2A] bg-gray-50 dark:bg-[#0A0A0A]'
+                    }`}
+                  >
+                    <div className="flex items-start gap-3">
+                      {/* Checkbox */}
+                      <label className="relative flex items-center cursor-pointer mt-0.5">
+                        <input
+                          type="checkbox"
+                          checked={config.enabled}
+                          onChange={(e) => handleCategoryChange(category, 'enabled', e.target.checked)}
+                          disabled={!isEditable}
+                          className="sr-only peer"
+                        />
+                        <div className={`w-5 h-5 border-2 flex items-center justify-center transition-colors
+                                        ${config.enabled 
+                                          ? 'bg-epam-cyan border-epam-cyan' 
+                                          : 'bg-transparent border-gray-300 dark:border-[#3A3A3A]'
+                                        }`}>
+                          {config.enabled && (
+                            <svg className="w-3 h-3 text-black" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                            </svg>
+                          )}
+                        </div>
+                      </label>
+                      
+                      {/* Category Info */}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className="text-base">{info.icon}</span>
+                          <span className={`font-medium text-sm ${config.enabled ? 'text-black dark:text-white' : 'text-gray-400'}`}>
+                            {info.label}
+                          </span>
+                        </div>
+                        <p className="text-xs text-gray-500 mt-1">{info.description}</p>
+                      </div>
+                      
+                      {/* Question Count */}
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => handleCategoryChange(category, 'count', Math.max(0, config.count - 1))}
+                          disabled={!isEditable || !config.enabled || config.count <= 0}
+                          className="w-6 h-6 flex items-center justify-center border border-gray-300 dark:border-[#3A3A3A]
+                                   text-gray-500 hover:border-epam-cyan hover:text-epam-cyan disabled:opacity-30
+                                   transition-colors"
+                        >
+                          -
+                        </button>
+                        <span className={`w-6 text-center text-sm font-medium ${config.enabled ? 'text-black dark:text-white' : 'text-gray-400'}`}>
+                          {config.count}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => handleCategoryChange(category, 'count', config.count + 1)}
+                          disabled={!isEditable || !config.enabled}
+                          className="w-6 h-6 flex items-center justify-center border border-gray-300 dark:border-[#3A3A3A]
+                                   text-gray-500 hover:border-epam-cyan hover:text-epam-cyan disabled:opacity-30
+                                   transition-colors"
+                        >
+                          +
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+
           {/* Question Distribution */}
           <div>
             <label className="block text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-4">
-              Question Distribution
+              Difficulty Distribution
             </label>
             <div className="grid grid-cols-3 gap-6">
               <div>

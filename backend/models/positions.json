@@ -18,7 +18,13 @@
           { "skill": "coding", "proficiency": "expert", "weight": 0.1 }
         ],
         "interview_flow": ["coding", "problem_solving", "system_design", "conceptual"],
-        "question_distribution": { "easy": 0.2, "medium": 0.5, "hard": 0.3 }
+        "question_distribution": { "easy": 0.2, "medium": 0.5, "hard": 0.3 },
+        "question_categories": {
+          "coding": { "enabled": true, "count": 2 },
+          "conceptual": { "enabled": true, "count": 2 },
+          "system_design": { "enabled": true, "count": 1 },
+          "problem_solving": { "enabled": true, "count": 1 }
+        }
       },
       "jd_text": "We are looking for a Senior Python Developer with 5+ years of experience. The ideal candidate should have strong knowledge of Python fundamentals, system design, microservices architecture, and database management."
     },

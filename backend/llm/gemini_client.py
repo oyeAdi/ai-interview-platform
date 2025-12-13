@@ -1,4 +1,5 @@
 """Gemini API client for LLM operations"""
+import json
 import google.generativeai as genai
 from typing import Dict, Optional, List
 from backend.config import Config
@@ -829,4 +830,230 @@ Respond with ONLY the follow-up question, nothing else.
         except Exception as e:
             print(f"Error generating follow-up suggestion: {e}")
             return "Would you like to see the code architecture for this?"
+
+    def enhance_question(
+        self,
+        seed_question: Dict,
+        context: Dict,
+        experience_level: str = "mid"
+    ) -> Dict:
+        """
+        Enhance a bank question based on interview context.
+        Uses the seed question as a template and adapts it.
+        
+        Args:
+            seed_question: The bank question to enhance
+            context: Interview context (previous answers, topics covered)
+            experience_level: Target experience level
+        
+        Returns:
+            Enhanced question dict with original seed_id preserved
+        """
+        seed_text = seed_question.get("text", "")
+        seed_topic = seed_question.get("topic", "")
+        seed_category = seed_question.get("category", "conceptual")
+        
+        # Get context from previous rounds
+        round_summaries = context.get("interview_context", {}).get("round_summaries", [])
+        previous_topics = [s.get("topic", "") for s in round_summaries]
+        
+        prompt = f"""You are enhancing an interview question based on the interview context.
+
+SEED QUESTION:
+"{seed_text}"
+Topic: {seed_topic}
+Category: {seed_category}
+
+INTERVIEW CONTEXT:
+- Experience Level: {experience_level}
+- Topics Already Covered: {', '.join(previous_topics) if previous_topics else 'None yet'}
+- Number of Questions Asked: {len(round_summaries)}
+
+TASK:
+1. Keep the core concept from the seed question
+2. Adapt the phrasing to feel natural in the interview flow
+3. If topics have been covered, you may connect this question to previous discussions
+4. Adjust complexity for {experience_level} level
+5. Make it conversational and engaging
+
+Generate ONLY the enhanced question text. Keep it concise (1-3 sentences).
+"""
+
+        try:
+            response = self.model.generate_content(
+                prompt,
+                generation_config=genai.types.GenerationConfig(
+                    max_output_tokens=300,
+                    temperature=0.4  # Moderate creativity
+                )
+            )
+            
+            enhanced_text = ""
+            if hasattr(response, 'candidates') and response.candidates:
+                candidate = response.candidates[0]
+                if hasattr(candidate, 'content') and hasattr(candidate.content, 'parts'):
+                    parts = candidate.content.parts
+                    if parts:
+                        enhanced_text = ''.join([part.text for part in parts if hasattr(part, 'text')]).strip()
+            
+            if not enhanced_text and hasattr(response, 'text'):
+                enhanced_text = response.text.strip()
+            
+            # Clean up
+            if enhanced_text.startswith('"') and enhanced_text.endswith('"'):
+                enhanced_text = enhanced_text[1:-1]
+            
+            # Return enhanced question with original metadata
+            return {
+                **seed_question,
+                "text": enhanced_text if enhanced_text else seed_text,
+                "is_enhanced": True,
+                "seed_question_id": seed_question.get("id")
+            }
+            
+        except Exception as e:
+            print(f"Error enhancing question: {e}")
+            # Return original seed question on error
+            return seed_question
+
+    def review_code(
+        self,
+        code: str,
+        question: Dict,
+        language: str = "python"
+    ) -> Dict:
+        """
+        Review submitted code and provide evaluation.
+        
+        Args:
+            code: The submitted code
+            question: The coding question with test cases and rubric
+            language: Programming language
+        
+        Returns:
+            Evaluation dict with scores and feedback
+        """
+        question_text = question.get("text", "")
+        test_cases = question.get("test_cases", [])
+        rubric = question.get("evaluation_rubric", {})
+        
+        prompt = f"""You are a code reviewer evaluating a candidate's solution.
+
+QUESTION:
+{question_text}
+
+SUBMITTED CODE:
+```{language}
+{code}
+```
+
+TEST CASES:
+{json.dumps(test_cases[:5], indent=2) if test_cases else "Not provided"}
+
+EVALUATION RUBRIC:
+{json.dumps(rubric, indent=2) if rubric else "Standard evaluation"}
+
+TASK: Evaluate the code and provide scores.
+
+Evaluate these aspects (0-100 each):
+1. CORRECTNESS: Does the code solve the problem correctly?
+2. EFFICIENCY: Is the time/space complexity optimal?
+3. CODE_QUALITY: Is the code clean, readable, well-structured?
+4. EDGE_CASES: Does it handle edge cases properly?
+
+Format your response as:
+CORRECTNESS: [score]
+EFFICIENCY: [score]
+CODE_QUALITY: [score]
+EDGE_CASES: [score]
+FEEDBACK: [2-3 sentences of constructive feedback]
+APPROACH: [1 sentence describing their approach]
+"""
+
+        try:
+            import json
+            response = self.model.generate_content(
+                prompt,
+                generation_config=genai.types.GenerationConfig(
+                    max_output_tokens=500,
+                    temperature=0.2  # Low temperature for consistent evaluation
+                )
+            )
+            
+            response_text = ""
+            if hasattr(response, 'candidates') and response.candidates:
+                candidate = response.candidates[0]
+                if hasattr(candidate, 'content') and hasattr(candidate.content, 'parts'):
+                    parts = candidate.content.parts
+                    if parts:
+                        response_text = ''.join([part.text for part in parts if hasattr(part, 'text')]).strip()
+            
+            if not response_text and hasattr(response, 'text'):
+                response_text = response.text.strip()
+            
+            # Parse response
+            result = {
+                "correctness": 50,
+                "efficiency": 50,
+                "code_quality": 50,
+                "edge_cases": 50,
+                "feedback": "",
+                "approach": ""
+            }
+            
+            for line in response_text.split('\n'):
+                line_upper = line.upper()
+                if line_upper.startswith('CORRECTNESS:'):
+                    try:
+                        result["correctness"] = int(line.split(':')[1].strip().split()[0])
+                    except:
+                        pass
+                elif line_upper.startswith('EFFICIENCY:'):
+                    try:
+                        result["efficiency"] = int(line.split(':')[1].strip().split()[0])
+                    except:
+                        pass
+                elif line_upper.startswith('CODE_QUALITY:'):
+                    try:
+                        result["code_quality"] = int(line.split(':')[1].strip().split()[0])
+                    except:
+                        pass
+                elif line_upper.startswith('EDGE_CASES:'):
+                    try:
+                        result["edge_cases"] = int(line.split(':')[1].strip().split()[0])
+                    except:
+                        pass
+                elif line_upper.startswith('FEEDBACK:'):
+                    result["feedback"] = line.split(':', 1)[1].strip()
+                elif line_upper.startswith('APPROACH:'):
+                    result["approach"] = line.split(':', 1)[1].strip()
+            
+            # Calculate combined score
+            weights = rubric if rubric else {
+                "correctness": {"weight": 0.40},
+                "efficiency": {"weight": 0.25},
+                "code_quality": {"weight": 0.20},
+                "edge_cases": {"weight": 0.15}
+            }
+            
+            combined = 0
+            for key in ["correctness", "efficiency", "code_quality", "edge_cases"]:
+                weight = weights.get(key, {}).get("weight", 0.25)
+                combined += result[key] * weight
+            
+            result["combined_score"] = round(combined, 1)
+            
+            return result
+            
+        except Exception as e:
+            print(f"Error reviewing code: {e}")
+            return {
+                "correctness": 50,
+                "efficiency": 50,
+                "code_quality": 50,
+                "edge_cases": 50,
+                "combined_score": 50,
+                "feedback": "Unable to evaluate code automatically.",
+                "approach": "Review required."
+            }
 

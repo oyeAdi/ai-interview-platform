@@ -8,6 +8,77 @@ import FileUpload from '@/components/FileUpload'
 import JDSelector from '@/components/JDSelector'
 import ResumeSelector from '@/components/ResumeSelector'
 
+interface QuestionCategories {
+  coding: { enabled: boolean; count: number }
+  conceptual: { enabled: boolean; count: number }
+  system_design: { enabled: boolean; count: number }
+  problem_solving: { enabled: boolean; count: number }
+}
+
+interface InterviewPreset {
+  id: string
+  name: string
+  description: string
+  icon: string
+  duration: number
+  categories: QuestionCategories
+}
+
+const INTERVIEW_PRESETS: InterviewPreset[] = [
+  {
+    id: 'coding_challenge',
+    name: 'Coding Challenge',
+    description: 'Coding questions only (algorithms, DS)',
+    icon: '💻',
+    duration: 30,
+    categories: {
+      coding: { enabled: true, count: 3 },
+      conceptual: { enabled: false, count: 0 },
+      system_design: { enabled: false, count: 0 },
+      problem_solving: { enabled: false, count: 0 }
+    }
+  },
+  {
+    id: 'full_technical',
+    name: 'Full Technical',
+    description: 'All question types balanced',
+    icon: '📋',
+    duration: 60,
+    categories: {
+      coding: { enabled: true, count: 2 },
+      conceptual: { enabled: true, count: 2 },
+      system_design: { enabled: true, count: 1 },
+      problem_solving: { enabled: true, count: 1 }
+    }
+  },
+  {
+    id: 'system_design',
+    name: 'System Design',
+    description: 'Architecture & design focus',
+    icon: '🏗️',
+    duration: 45,
+    categories: {
+      coding: { enabled: false, count: 0 },
+      conceptual: { enabled: true, count: 1 },
+      system_design: { enabled: true, count: 3 },
+      problem_solving: { enabled: true, count: 1 }
+    }
+  },
+  {
+    id: 'conceptual_deep',
+    name: 'Conceptual Deep Dive',
+    description: 'Theory and fundamentals',
+    icon: '📚',
+    duration: 45,
+    categories: {
+      coding: { enabled: false, count: 0 },
+      conceptual: { enabled: true, count: 4 },
+      system_design: { enabled: false, count: 0 },
+      problem_solving: { enabled: true, count: 2 }
+    }
+  }
+]
+
 export default function QuickStartPage() {
   const router = useRouter()
   const [jdText, setJdText] = useState('')
@@ -19,6 +90,7 @@ export default function QuickStartPage() {
   const [loading, setLoading] = useState(false)
   const [jds, setJds] = useState<any[]>([])
   const [resumes, setResumes] = useState<any[]>([])
+  const [selectedPreset, setSelectedPreset] = useState<string>('full_technical')
 
   // Load JDs and Resumes on mount
   useEffect(() => {
@@ -150,6 +222,55 @@ export default function QuickStartPage() {
             <p className="text-xl text-gray-600 dark:text-gray-400 max-w-2xl font-light">
               Upload a job description and resume to quickly start an interview without pre-configured position settings.
             </p>
+          </div>
+        </section>
+
+        {/* Interview Type Presets */}
+        <section className="border-b border-gray-200 dark:border-[#2A2A2A]">
+          <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+            <h2 className="text-xs font-medium text-epam-cyan uppercase tracking-[0.2em] mb-6">
+              Select Interview Type
+            </h2>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {INTERVIEW_PRESETS.map((preset) => (
+                <button
+                  key={preset.id}
+                  type="button"
+                  onClick={() => setSelectedPreset(preset.id)}
+                  className={`p-4 border text-left transition-all duration-200 group
+                             ${selectedPreset === preset.id
+                               ? 'border-epam-cyan bg-epam-cyan/5'
+                               : 'border-gray-200 dark:border-[#2A2A2A] hover:border-epam-cyan/50'
+                             }`}
+                >
+                  <div className="text-2xl mb-2">{preset.icon}</div>
+                  <div className={`font-medium text-sm mb-1 ${
+                    selectedPreset === preset.id ? 'text-epam-cyan' : 'text-black dark:text-white'
+                  }`}>
+                    {preset.name}
+                  </div>
+                  <div className="text-xs text-gray-500 mb-2">{preset.description}</div>
+                  <div className="text-xs text-gray-400">{preset.duration} min</div>
+                </button>
+              ))}
+            </div>
+            
+            {/* Show selected categories */}
+            {selectedPreset && (
+              <div className="mt-6 p-4 bg-gray-50 dark:bg-[#0A0A0A] border border-gray-100 dark:border-[#1A1A1A]">
+                <div className="flex items-center gap-4 flex-wrap">
+                  <span className="text-xs text-gray-500 uppercase tracking-wide">Questions:</span>
+                  {Object.entries(INTERVIEW_PRESETS.find(p => p.id === selectedPreset)?.categories || {})
+                    .filter(([_, config]) => config.enabled && config.count > 0)
+                    .map(([category, config]) => (
+                      <span key={category} className="px-2 py-1 text-xs bg-epam-cyan/10 text-epam-cyan border border-epam-cyan/20">
+                        {category.replace('_', ' ')} × {config.count}
+                      </span>
+                    ))
+                  }
+                </div>
+              </div>
+            )}
           </div>
         </section>
 

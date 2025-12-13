@@ -2105,6 +2105,182 @@ async def list_all_results(limit: int = 20, offset: int = 0):
         "offset": offset
     }
 
+# ============================================================================
+# CODE SUBMISSION & REVIEW ENDPOINTS
+# ============================================================================
+
+CODE_SUBMISSIONS_FILE = os.path.join(os.path.dirname(__file__), "models", "code_submissions.json")
+
+class CodeSubmissionRequest(BaseModel):
+    session_id: str
+    question_id: str
+    code: str
+    language: str = "python"
+    time_taken_seconds: int = 0
+    activity_data: Optional[dict] = None
+
+class AdminReviewRequest(BaseModel):
+    reviewer: str
+    notes: str
+    score_override: Optional[float] = None
+    status: str = "reviewed"  # reviewed, approved, rejected
+
+@app.post("/api/code/submit")
+async def submit_code(request: CodeSubmissionRequest):
+    """Submit code for evaluation"""
+    from backend.evaluation.code_evaluator import evaluate_code_submission
+    from backend.llm.gemini_client import GeminiClient
+    
+    # Load question from bank
+    question_bank = load_json_file(QUESTION_BANK_FILE)
+    question = None
+    for q in question_bank.get("questions", []):
+        if q["id"] == request.question_id:
+            question = q
+            break
+    
+    if not question:
+        raise HTTPException(status_code=404, detail="Question not found")
+    
+    # Initialize Gemini for LLM review
+    try:
+        gemini = GeminiClient()
+    except:
+        gemini = None
+    
+    # Evaluate the code
+    submission_id = str(uuid.uuid4())[:8]
+    evaluation = evaluate_code_submission(
+        code=request.code,
+        question=question,
+        language=request.language,
+        submission_id=submission_id,
+        activity_data=request.activity_data,
+        gemini_client=gemini
+    )
+    
+    # Store submission
+    submissions_data = load_json_file(CODE_SUBMISSIONS_FILE) if os.path.exists(CODE_SUBMISSIONS_FILE) else {"submissions": {}}
+    
+    submissions_data["submissions"][submission_id] = {
+        "id": submission_id,
+        "session_id": request.session_id,
+        "question_id": request.question_id,
+        "code": request.code,
+        "language": request.language,
+        "time_taken_seconds": request.time_taken_seconds,
+        "submitted_at": datetime.utcnow().isoformat(),
+        "evaluation": evaluation,
+        "activity_data": request.activity_data
+    }
+    
+    save_json_file(CODE_SUBMISSIONS_FILE, submissions_data)
+    
+    return {
+        "submission_id": submission_id,
+        "combined_score": evaluation["combined_score"],
+        "rubric_scores": evaluation["rubric_scores"],
+        "static_analysis": evaluation["static_analysis"],
+        "feedback": evaluation["llm_review"].get("feedback", ""),
+        "needs_review": evaluation["admin_review"]["status"] == "pending",
+        "activity_flags": evaluation["activity_flags"]
+    }
+
+@app.get("/api/code/submissions")
+async def list_code_submissions(session_id: Optional[str] = None, status: Optional[str] = None, limit: int = 50):
+    """List code submissions with optional filters"""
+    submissions_data = load_json_file(CODE_SUBMISSIONS_FILE) if os.path.exists(CODE_SUBMISSIONS_FILE) else {"submissions": {}}
+    
+    submissions = list(submissions_data.get("submissions", {}).values())
+    
+    # Filter by session_id
+    if session_id:
+        submissions = [s for s in submissions if s.get("session_id") == session_id]
+    
+    # Filter by admin review status
+    if status:
+        submissions = [s for s in submissions if s.get("evaluation", {}).get("admin_review", {}).get("status") == status]
+    
+    # Sort by submitted_at descending
+    submissions.sort(key=lambda x: x.get("submitted_at", ""), reverse=True)
+    
+    return {
+        "submissions": submissions[:limit],
+        "total": len(submissions)
+    }
+
+@app.get("/api/code/submission/{submission_id}")
+async def get_code_submission(submission_id: str):
+    """Get a specific code submission with full details"""
+    submissions_data = load_json_file(CODE_SUBMISSIONS_FILE) if os.path.exists(CODE_SUBMISSIONS_FILE) else {"submissions": {}}
+    
+    submission = submissions_data.get("submissions", {}).get(submission_id)
+    if not submission:
+        raise HTTPException(status_code=404, detail="Submission not found")
+    
+    return submission
+
+@app.post("/api/code/review/{submission_id}")
+async def review_code_submission(submission_id: str, request: AdminReviewRequest):
+    """Admin review of a code submission"""
+    submissions_data = load_json_file(CODE_SUBMISSIONS_FILE) if os.path.exists(CODE_SUBMISSIONS_FILE) else {"submissions": {}}
+    
+    if submission_id not in submissions_data.get("submissions", {}):
+        raise HTTPException(status_code=404, detail="Submission not found")
+    
+    submission = submissions_data["submissions"][submission_id]
+    
+    # Update admin review
+    submission["evaluation"]["admin_review"] = {
+        "status": request.status,
+        "reviewer": request.reviewer,
+        "notes": request.notes,
+        "score_override": request.score_override,
+        "reviewed_at": datetime.utcnow().isoformat()
+    }
+    
+    # Update combined score if override provided
+    if request.score_override is not None:
+        submission["evaluation"]["combined_score"] = request.score_override
+        submission["evaluation"]["score_overridden"] = True
+    
+    save_json_file(CODE_SUBMISSIONS_FILE, submissions_data)
+    
+    return {
+        "message": "Review submitted successfully",
+        "submission_id": submission_id,
+        "new_status": request.status,
+        "final_score": submission["evaluation"]["combined_score"]
+    }
+
+@app.get("/api/code/pending-reviews")
+async def get_pending_code_reviews():
+    """Get all code submissions pending admin review"""
+    submissions_data = load_json_file(CODE_SUBMISSIONS_FILE) if os.path.exists(CODE_SUBMISSIONS_FILE) else {"submissions": {}}
+    
+    pending = [
+        {
+            "id": s["id"],
+            "session_id": s["session_id"],
+            "question_id": s["question_id"],
+            "language": s["language"],
+            "submitted_at": s["submitted_at"],
+            "combined_score": s["evaluation"]["combined_score"],
+            "activity_flags": s["evaluation"].get("activity_flags", []),
+            "review_reason": s["evaluation"]["admin_review"].get("reason", "")
+        }
+        for s in submissions_data.get("submissions", {}).values()
+        if s.get("evaluation", {}).get("admin_review", {}).get("status") == "pending"
+    ]
+    
+    # Sort by submitted_at
+    pending.sort(key=lambda x: x.get("submitted_at", ""), reverse=True)
+    
+    return {
+        "pending_reviews": pending,
+        "total": len(pending)
+    }
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)

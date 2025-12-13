@@ -117,10 +117,12 @@ class InterviewController:
         }
     
     def _generate_personalized_first_question(self) -> Optional[Dict]:
-        """Generate a personalized first question based on resume and experience level"""
-        if not self.resume_text:
-            return None
-        
+        """
+        Generate a personalized first question using:
+        1. Bank question as seed (structural template)
+        2. Resume for personalization
+        3. AI enhancement for natural conversation
+        """
         experience_level = "mid"  # default
         position_title = self.language.title() + " Developer"
         required_skills = []
@@ -129,75 +131,57 @@ class InterviewController:
             experience_level = self.data_model.get("experience_level", "mid")
             required_skills = [s.get("skill", "") for s in self.data_model.get("required_skills", [])]
         
+        # Step 1: Find a seed question from the bank
+        seed_question = self.question_manager.find_seed_question(
+            experience_level=experience_level,
+            skills=required_skills if required_skills else [self.language],
+            category="conceptual" if experience_level == "junior" else None,
+            difficulty="easy" if experience_level == "junior" else "medium"
+        )
+        
+        # If no resume, just return the seed question directly
+        if not self.resume_text:
+            if seed_question:
+                self.question_manager.questions_asked.append(seed_question["id"])
+                return seed_question
+            return None
+        
         try:
-            # Different prompts based on experience level
-            if experience_level in ["senior", "lead"]:
-                # PROBING: Ask about specific project/experience from resume
-                prompt = f"""You are a technical interviewer for a {position_title} position ({experience_level} level).
-                
-Based on this candidate's resume, generate ONE specific, probing question about their most relevant project or experience.
+            # Step 2: Enhance the seed question with resume personalization
+            seed_text = seed_question.get("text", "") if seed_question else ""
+            seed_topic = seed_question.get("topic", "") if seed_question else ""
+            seed_category = seed_question.get("category", "conceptual") if seed_question else "conceptual"
+            
+            prompt = f"""You are a friendly, professional technical interviewer for a {position_title} position ({experience_level} level).
 
-Resume:
-{self.resume_text[:2000]}
+Your task: Create a personalized first question that combines a technical topic with the candidate's background.
 
-Required Skills: {', '.join(required_skills[:5]) if required_skills else self.language}
+SEED QUESTION (use as structural inspiration):
+"{seed_text}"
+Topic: {seed_topic}
+Category: {seed_category}
 
-Guidelines for SENIOR/LEAD level probing question:
-- Ask about a SPECIFIC project, technology, or challenge mentioned in their resume
-- Focus on: decision-making, architecture choices, trade-offs, challenges overcome
-- Ask WHY they made certain decisions, not just WHAT they did
-- Reference specific details from their resume to make it personal
-- Example formats:
-  - "I noticed you worked on [specific project]. What was the most challenging architectural decision you had to make, and why?"
-  - "You mentioned scaling [system]. Walk me through your approach to identifying and resolving the main bottlenecks."
-  - "In your role at [company], how did you decide between [option A] and [option B] for [specific problem]?"
+CANDIDATE'S RESUME:
+{self.resume_text[:1800]}
 
-Generate ONLY the question text, nothing else. Make it conversational and specific to their background."""
+REQUIRED SKILLS: {', '.join(required_skills[:5]) if required_skills else self.language}
 
-            elif experience_level == "mid":
-                # MID-LEVEL: Mix of probing and technical
-                prompt = f"""You are a technical interviewer for a {position_title} position (mid-level).
+INSTRUCTIONS:
+1. Start with a warm, brief acknowledgment (e.g., "I noticed from your resume..." or "I see you've worked with...")
+2. Connect the seed question's topic to something specific from their resume
+3. Make it feel like a natural conversation starter, not a generic question
+4. Adjust complexity for {experience_level} level:
+   - Junior: Direct, fundamental, encouraging
+   - Mid: Practical, hands-on experience focused
+   - Senior/Lead: Probing, decision-focused, architectural
 
-Based on this candidate's resume, generate ONE question that explores their hands-on experience.
+EXAMPLE OUTPUT FORMATS:
+- "I noticed you worked with [tech from resume]. The seed topic is about [topic]. How did you approach [specific aspect] in your [project]?"
+- "I see you've built [feature from resume]. When you were working on that, how did you handle [seed topic concept]?"
 
-Resume:
-{self.resume_text[:2000]}
+Generate ONLY the personalized question text. Keep it conversational and warm."""
 
-Required Skills: {', '.join(required_skills[:5]) if required_skills else self.language}
-
-Guidelines for MID-level question:
-- Reference something specific from their resume (a project, technology, or responsibility)
-- Ask about their practical implementation experience
-- Focus on HOW they approached problems, not just theoretical knowledge
-- Example formats:
-  - "I see you've worked with [technology]. Can you tell me about a time you had to debug a particularly tricky issue with it?"
-  - "You mentioned building [feature]. What was your approach to ensuring it was maintainable and scalable?"
-
-Generate ONLY the question text, nothing else. Make it conversational."""
-
-            else:  # junior
-                # JUNIOR: Direct technical question, but friendly
-                prompt = f"""You are a technical interviewer for a {position_title} position (junior/entry level).
-
-Based on this candidate's resume, generate ONE straightforward technical question that assesses their foundational knowledge.
-
-Resume:
-{self.resume_text[:1500]}
-
-Required Skills: {', '.join(required_skills[:5]) if required_skills else self.language}
-
-Guidelines for JUNIOR level question:
-- Keep it focused on fundamental concepts they should know
-- If they mentioned any projects, ask about a basic concept they used
-- Be encouraging and conversational, not intimidating
-- Example formats:
-  - "I see you've worked with {self.language}. Can you explain how [basic concept] works?"
-  - "You mentioned using [technology] in your project. What do you like about it?"
-  - "Let's start with something fundamental - can you explain [core concept] to me?"
-
-Generate ONLY the question text, nothing else. Keep it friendly and approachable."""
-
-            # Generate question using LLM
+            # Generate enhanced question using LLM
             response = self.gemini_client.model.generate_content(prompt)
             question_text = response.text.strip()
             
@@ -205,18 +189,33 @@ Generate ONLY the question text, nothing else. Keep it friendly and approachable
             if question_text.startswith('"') and question_text.endswith('"'):
                 question_text = question_text[1:-1]
             
+            # Remove any meta-text the LLM might have added
+            for prefix in ["Question:", "Here's the question:", "Personalized question:"]:
+                if question_text.lower().startswith(prefix.lower()):
+                    question_text = question_text[len(prefix):].strip()
+            
+            # Mark seed question as used
+            if seed_question:
+                self.question_manager.questions_asked.append(seed_question["id"])
+            
             return {
                 "id": f"personalized_{self.context_manager.session_id[:8]}",
                 "text": question_text,
-                "type": "probing" if experience_level in ["senior", "lead", "mid"] else "conceptual",
-                "topic": "experience_based",
-                "difficulty": "medium" if experience_level in ["senior", "lead"] else "easy",
+                "type": seed_question.get("type", "probing") if seed_question else "probing",
+                "category": seed_category,
+                "topic": seed_topic or "experience_based",
+                "difficulty": seed_question.get("difficulty", "medium") if seed_question else "medium",
                 "is_personalized": True,
+                "seed_question_id": seed_question.get("id") if seed_question else None,
                 "experience_level": experience_level
             }
             
         except Exception as e:
             print(f"Error generating personalized question: {e}")
+            # Fallback to seed question without personalization
+            if seed_question:
+                self.question_manager.questions_asked.append(seed_question["id"])
+                return seed_question
             return None
     
     def process_response(self, response_text: str, response_type: str = "initial") -> Dict:

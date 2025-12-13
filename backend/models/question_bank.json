@@ -73,6 +73,289 @@
       }
     },
     {
+      "id": "py_coding_004",
+      "type": "coding",
+      "category": "coding",
+      "difficulty": "easy",
+      "experience_levels": ["junior"],
+      "skills": ["python", "data_structures"],
+      "text": "Write a function to reverse a string without using built-in reverse methods.",
+      "starter_code": "def reverse_string(s: str) -> str:\n    \"\"\"\n    Reverse the input string.\n    \n    Args:\n        s: Input string\n    Returns:\n        Reversed string\n    \"\"\"\n    # Your code here\n    pass",
+      "language": "python",
+      "time_limit_minutes": 5,
+      "test_cases": [
+        {"input": "hello", "expected": "olleh"},
+        {"input": "Python", "expected": "nohtyP"},
+        {"input": "", "expected": ""},
+        {"input": "a", "expected": "a"}
+      ],
+      "evaluation_rubric": {
+        "correctness": {"weight": 0.60, "criteria": "All test cases pass"},
+        "code_quality": {"weight": 0.40, "criteria": "Clean, readable code"}
+      }
+    },
+    {
+      "id": "py_coding_005",
+      "type": "coding",
+      "category": "coding",
+      "difficulty": "easy",
+      "experience_levels": ["junior"],
+      "skills": ["python", "data_structures"],
+      "text": "Implement a function to find the maximum element in a list without using max().",
+      "starter_code": "def find_max(nums: list) -> int:\n    \"\"\"\n    Find the maximum element in the list.\n    \n    Args:\n        nums: List of integers\n    Returns:\n        Maximum element\n    \"\"\"\n    # Your code here\n    pass",
+      "language": "python",
+      "time_limit_minutes": 5,
+      "test_cases": [
+        {"input": [1, 5, 3, 9, 2], "expected": 9},
+        {"input": [-1, -5, -3], "expected": -1},
+        {"input": [42], "expected": 42}
+      ],
+      "evaluation_rubric": {
+        "correctness": {"weight": 0.60, "criteria": "All test cases pass"},
+        "code_quality": {"weight": 0.40, "criteria": "Clean, readable code"}
+      }
+    },
+    {
+      "id": "py_coding_006",
+      "type": "coding",
+      "category": "coding",
+      "difficulty": "easy",
+      "experience_levels": ["junior"],
+      "skills": ["python", "data_structures"],
+      "text": "Write a function to count the occurrences of each character in a string.",
+      "starter_code": "def char_count(s: str) -> dict:\n    \"\"\"\n    Count occurrences of each character.\n    \n    Args:\n        s: Input string\n    Returns:\n        Dictionary with character counts\n    \"\"\"\n    # Your code here\n    pass",
+      "language": "python",
+      "time_limit_minutes": 8,
+      "test_cases": [
+        {"input": "hello", "expected": {"h": 1, "e": 1, "l": 2, "o": 1}},
+        {"input": "aaa", "expected": {"a": 3}},
+        {"input": "", "expected": {}}
+      ],
+      "evaluation_rubric": {
+        "correctness": {"weight": 0.60, "criteria": "All test cases pass"},
+        "code_quality": {"weight": 0.40, "criteria": "Clean, readable code"}
+      }
+    },
+    {
+      "id": "py_coding_007",
+      "type": "coding",
+      "category": "coding",
+      "difficulty": "easy",
+      "experience_levels": ["junior", "mid"],
+      "skills": ["python", "data_structures"],
+      "text": "Implement a function to check if a number is prime.",
+      "starter_code": "def is_prime(n: int) -> bool:\n    \"\"\"\n    Check if number is prime.\n    \n    Args:\n        n: Integer to check\n    Returns:\n        True if prime, False otherwise\n    \"\"\"\n    # Your code here\n    pass",
+      "language": "python",
+      "time_limit_minutes": 8,
+      "test_cases": [
+        {"input": 7, "expected": true},
+        {"input": 4, "expected": false},
+        {"input": 2, "expected": true},
+        {"input": 1, "expected": false}
+      ],
+      "evaluation_rubric": {
+        "correctness": {"weight": 0.50, "criteria": "All test cases pass"},
+        "efficiency": {"weight": 0.25, "criteria": "O(sqrt(n)) preferred"},
+        "code_quality": {"weight": 0.25, "criteria": "Clean, readable code"}
+      }
+    },
+    {
+      "id": "py_coding_008",
+      "type": "coding",
+      "category": "coding",
+      "difficulty": "medium",
+      "experience_levels": ["mid", "senior"],
+      "skills": ["python", "data_structures"],
+      "text": "Implement a function to find all pairs in an array that sum to a target value.",
+      "starter_code": "def two_sum_pairs(nums: list, target: int) -> list:\n    \"\"\"\n    Find all pairs that sum to target.\n    \n    Args:\n        nums: List of integers\n        target: Target sum\n    Returns:\n        List of pairs (tuples)\n    \"\"\"\n    # Your code here\n    pass",
+      "language": "python",
+      "time_limit_minutes": 12,
+      "test_cases": [
+        {"input": [[1, 2, 3, 4, 5], 6], "expected": [[1, 5], [2, 4]]},
+        {"input": [[1, 1, 1, 1], 2], "expected": [[1, 1]]},
+        {"input": [[1, 2, 3], 10], "expected": []}
+      ],
+      "evaluation_rubric": {
+        "correctness": {"weight": 0.50, "criteria": "All test cases pass"},
+        "efficiency": {"weight": 0.30, "criteria": "O(n) time complexity"},
+        "code_quality": {"weight": 0.20, "criteria": "Clean, readable code"}
+      }
+    },
+    {
+      "id": "py_coding_009",
+      "type": "coding",
+      "category": "coding",
+      "difficulty": "medium",
+      "experience_levels": ["mid", "senior"],
+      "skills": ["python", "data_structures"],
+      "text": "Implement a function to merge two sorted arrays into one sorted array.",
+      "starter_code": "def merge_sorted(arr1: list, arr2: list) -> list:\n    \"\"\"\n    Merge two sorted arrays.\n    \n    Args:\n        arr1: First sorted array\n        arr2: Second sorted array\n    Returns:\n        Merged sorted array\n    \"\"\"\n    # Your code here\n    pass",
+      "language": "python",
+      "time_limit_minutes": 10,
+      "test_cases": [
+        {"input": [[1, 3, 5], [2, 4, 6]], "expected": [1, 2, 3, 4, 5, 6]},
+        {"input": [[], [1, 2, 3]], "expected": [1, 2, 3]},
+        {"input": [[1], [2]], "expected": [1, 2]}
+      ],
+      "evaluation_rubric": {
+        "correctness": {"weight": 0.50, "criteria": "All test cases pass"},
+        "efficiency": {"weight": 0.30, "criteria": "O(n+m) time complexity"},
+        "code_quality": {"weight": 0.20, "criteria": "Clean, readable code"}
+      }
+    },
+    {
+      "id": "py_coding_010",
+      "type": "coding",
+      "category": "coding",
+      "difficulty": "medium",
+      "experience_levels": ["mid", "senior"],
+      "skills": ["python", "data_structures"],
+      "text": "Implement a function to detect a cycle in a linked list.",
+      "starter_code": "class ListNode:\n    def __init__(self, val=0, next=None):\n        self.val = val\n        self.next = next\n\ndef has_cycle(head: ListNode) -> bool:\n    \"\"\"\n    Detect if linked list has a cycle.\n    \n    Args:\n        head: Head of the linked list\n    Returns:\n        True if cycle exists, False otherwise\n    \"\"\"\n    # Your code here\n    pass",
+      "language": "python",
+      "time_limit_minutes": 12,
+      "test_cases": [
+        {"input": "list with cycle at node 1", "expected": true},
+        {"input": "list without cycle", "expected": false}
+      ],
+      "hints": ["Consider Floyd's cycle detection algorithm", "Use two pointers with different speeds"],
+      "evaluation_rubric": {
+        "correctness": {"weight": 0.50, "criteria": "Detects cycles correctly"},
+        "efficiency": {"weight": 0.30, "criteria": "O(n) time, O(1) space"},
+        "code_quality": {"weight": 0.20, "criteria": "Clean implementation"}
+      }
+    },
+    {
+      "id": "py_coding_011",
+      "type": "coding",
+      "category": "coding",
+      "difficulty": "medium",
+      "experience_levels": ["mid", "senior"],
+      "skills": ["python", "data_structures"],
+      "text": "Implement a function to validate if a binary search tree is valid.",
+      "starter_code": "class TreeNode:\n    def __init__(self, val=0, left=None, right=None):\n        self.val = val\n        self.left = left\n        self.right = right\n\ndef is_valid_bst(root: TreeNode) -> bool:\n    \"\"\"\n    Check if binary tree is a valid BST.\n    \n    Args:\n        root: Root of the binary tree\n    Returns:\n        True if valid BST, False otherwise\n    \"\"\"\n    # Your code here\n    pass",
+      "language": "python",
+      "time_limit_minutes": 15,
+      "test_cases": [
+        {"input": "[2, 1, 3]", "expected": true},
+        {"input": "[5, 1, 4, null, null, 3, 6]", "expected": false}
+      ],
+      "evaluation_rubric": {
+        "correctness": {"weight": 0.50, "criteria": "All test cases pass"},
+        "efficiency": {"weight": 0.30, "criteria": "O(n) time complexity"},
+        "code_quality": {"weight": 0.20, "criteria": "Clean, readable code"}
+      }
+    },
+    {
+      "id": "py_coding_012",
+      "type": "coding",
+      "category": "coding",
+      "difficulty": "medium",
+      "experience_levels": ["mid", "senior"],
+      "skills": ["python", "algorithms"],
+      "text": "Implement binary search on a sorted array.",
+      "starter_code": "def binary_search(nums: list, target: int) -> int:\n    \"\"\"\n    Find target in sorted array using binary search.\n    \n    Args:\n        nums: Sorted list of integers\n        target: Value to find\n    Returns:\n        Index of target, or -1 if not found\n    \"\"\"\n    # Your code here\n    pass",
+      "language": "python",
+      "time_limit_minutes": 10,
+      "test_cases": [
+        {"input": [[-1, 0, 3, 5, 9, 12], 9], "expected": 4},
+        {"input": [[-1, 0, 3, 5, 9, 12], 2], "expected": -1},
+        {"input": [[5], 5], "expected": 0}
+      ],
+      "evaluation_rubric": {
+        "correctness": {"weight": 0.50, "criteria": "All test cases pass"},
+        "efficiency": {"weight": 0.30, "criteria": "O(log n) time complexity"},
+        "code_quality": {"weight": 0.20, "criteria": "Clean, readable code"}
+      }
+    },
+    {
+      "id": "py_coding_013",
+      "type": "coding",
+      "category": "coding",
+      "difficulty": "hard",
+      "experience_levels": ["senior", "lead"],
+      "skills": ["python", "algorithms"],
+      "text": "Implement a function to find the median of two sorted arrays in O(log(m+n)) time.",
+      "starter_code": "def find_median_sorted_arrays(nums1: list, nums2: list) -> float:\n    \"\"\"\n    Find median of two sorted arrays.\n    \n    Args:\n        nums1: First sorted array\n        nums2: Second sorted array\n    Returns:\n        Median value\n    \"\"\"\n    # Your code here\n    pass",
+      "language": "python",
+      "time_limit_minutes": 25,
+      "test_cases": [
+        {"input": [[1, 3], [2]], "expected": 2.0},
+        {"input": [[1, 2], [3, 4]], "expected": 2.5}
+      ],
+      "hints": ["Use binary search on the smaller array", "Partition both arrays"],
+      "evaluation_rubric": {
+        "correctness": {"weight": 0.40, "criteria": "All test cases pass"},
+        "efficiency": {"weight": 0.40, "criteria": "O(log(min(m,n))) time"},
+        "code_quality": {"weight": 0.20, "criteria": "Clean implementation"}
+      }
+    },
+    {
+      "id": "py_coding_014",
+      "type": "coding",
+      "category": "coding",
+      "difficulty": "hard",
+      "experience_levels": ["senior", "lead"],
+      "skills": ["python", "algorithms", "data_structures"],
+      "text": "Implement a Trie (prefix tree) with insert, search, and startsWith methods.",
+      "starter_code": "class Trie:\n    \"\"\"\n    Implement a Trie (Prefix Tree).\n    \"\"\"\n    \n    def __init__(self):\n        # Your code here\n        pass\n    \n    def insert(self, word: str) -> None:\n        # Your code here\n        pass\n    \n    def search(self, word: str) -> bool:\n        # Your code here\n        pass\n    \n    def starts_with(self, prefix: str) -> bool:\n        # Your code here\n        pass",
+      "language": "python",
+      "time_limit_minutes": 20,
+      "test_cases": [
+        {"operations": ["Trie", "insert", "search", "search", "startsWith", "insert", "search"],
+         "inputs": [[], ["apple"], ["apple"], ["app"], ["app"], ["app"], ["app"]],
+         "expected": [null, null, true, false, true, null, true]}
+      ],
+      "evaluation_rubric": {
+        "correctness": {"weight": 0.40, "criteria": "All operations work correctly"},
+        "efficiency": {"weight": 0.35, "criteria": "O(m) for all operations"},
+        "code_quality": {"weight": 0.25, "criteria": "Clean implementation"}
+      }
+    },
+    {
+      "id": "py_coding_015",
+      "type": "coding",
+      "category": "coding",
+      "difficulty": "hard",
+      "experience_levels": ["senior", "lead"],
+      "skills": ["python", "algorithms"],
+      "text": "Implement a function to serialize and deserialize a binary tree.",
+      "starter_code": "class TreeNode:\n    def __init__(self, val=0, left=None, right=None):\n        self.val = val\n        self.left = left\n        self.right = right\n\nclass Codec:\n    def serialize(self, root: TreeNode) -> str:\n        \"\"\"Encodes a tree to a single string.\"\"\"\n        # Your code here\n        pass\n    \n    def deserialize(self, data: str) -> TreeNode:\n        \"\"\"Decodes your encoded data to tree.\"\"\"\n        # Your code here\n        pass",
+      "language": "python",
+      "time_limit_minutes": 25,
+      "test_cases": [
+        {"input": "[1,2,3,null,null,4,5]", "expected": "[1,2,3,null,null,4,5]"}
+      ],
+      "evaluation_rubric": {
+        "correctness": {"weight": 0.50, "criteria": "Serialization and deserialization work correctly"},
+        "efficiency": {"weight": 0.25, "criteria": "O(n) time complexity"},
+        "code_quality": {"weight": 0.25, "criteria": "Clean implementation"}
+      }
+    },
+    {
+      "id": "py_coding_016",
+      "type": "coding",
+      "category": "coding",
+      "difficulty": "hard",
+      "experience_levels": ["lead"],
+      "skills": ["python", "algorithms"],
+      "text": "Implement a function to find the longest increasing subsequence in an array.",
+      "starter_code": "def length_of_lis(nums: list) -> int:\n    \"\"\"\n    Find length of longest increasing subsequence.\n    \n    Args:\n        nums: List of integers\n    Returns:\n        Length of LIS\n    \"\"\"\n    # Your code here\n    pass",
+      "language": "python",
+      "time_limit_minutes": 20,
+      "test_cases": [
+        {"input": [10, 9, 2, 5, 3, 7, 101, 18], "expected": 4},
+        {"input": [0, 1, 0, 3, 2, 3], "expected": 4},
+        {"input": [7, 7, 7, 7, 7], "expected": 1}
+      ],
+      "hints": ["Consider dynamic programming", "Binary search can optimize to O(n log n)"],
+      "evaluation_rubric": {
+        "correctness": {"weight": 0.40, "criteria": "All test cases pass"},
+        "efficiency": {"weight": 0.40, "criteria": "O(n log n) preferred, O(n²) acceptable"},
+        "code_quality": {"weight": 0.20, "criteria": "Clean implementation"}
+      }
+    },
+    {
       "id": "java_coding_001",
       "type": "coding",
       "category": "coding",
@@ -80,7 +363,7 @@
       "experience_levels": ["mid", "senior"],
       "skills": ["java", "data_structures"],
       "text": "Implement a function to find the kth largest element in an unsorted array.",
-      "starter_code": "public class Solution {\n    /**\n     * Find the kth largest element in an unsorted array.\n     * \n     * @param nums Array of integers\n     * @param k The kth position (1-indexed)\n     * @return The kth largest element\n     */\n    public int findKthLargest(int[] nums, int k) {\n        // Your code here\n        return 0;\n    }\n}",
+      "starter_code": "public class Solution {\n    public int findKthLargest(int[] nums, int k) {\n        // Your code here\n        return 0;\n    }\n}",
       "language": "java",
       "time_limit_minutes": 15,
       "test_cases": [
@@ -91,6 +374,467 @@
         "correctness": {"weight": 0.50, "criteria": "All test cases pass"},
         "efficiency": {"weight": 0.30, "criteria": "Better than O(n log n) preferred"},
         "code_quality": {"weight": 0.20, "criteria": "Clean Java code"}
+      }
+    },
+    {
+      "id": "java_coding_002",
+      "type": "coding",
+      "category": "coding",
+      "difficulty": "easy",
+      "experience_levels": ["junior"],
+      "skills": ["java", "data_structures"],
+      "text": "Implement a function to reverse a linked list.",
+      "starter_code": "public class Solution {\n    public ListNode reverseList(ListNode head) {\n        // Your code here\n        return null;\n    }\n}\n\nclass ListNode {\n    int val;\n    ListNode next;\n    ListNode(int val) { this.val = val; }\n}",
+      "language": "java",
+      "time_limit_minutes": 10,
+      "test_cases": [
+        {"input": "[1,2,3,4,5]", "expected": "[5,4,3,2,1]"},
+        {"input": "[1,2]", "expected": "[2,1]"},
+        {"input": "[]", "expected": "[]"}
+      ],
+      "evaluation_rubric": {
+        "correctness": {"weight": 0.60, "criteria": "All test cases pass"},
+        "code_quality": {"weight": 0.40, "criteria": "Clean Java code"}
+      }
+    },
+    {
+      "id": "java_coding_003",
+      "type": "coding",
+      "category": "coding",
+      "difficulty": "easy",
+      "experience_levels": ["junior"],
+      "skills": ["java", "data_structures"],
+      "text": "Implement a function to check if a string has all unique characters.",
+      "starter_code": "public class Solution {\n    public boolean isUnique(String s) {\n        // Your code here\n        return false;\n    }\n}",
+      "language": "java",
+      "time_limit_minutes": 8,
+      "test_cases": [
+        {"input": "abcde", "expected": true},
+        {"input": "hello", "expected": false},
+        {"input": "", "expected": true}
+      ],
+      "evaluation_rubric": {
+        "correctness": {"weight": 0.60, "criteria": "All test cases pass"},
+        "code_quality": {"weight": 0.40, "criteria": "Clean Java code"}
+      }
+    },
+    {
+      "id": "java_coding_004",
+      "type": "coding",
+      "category": "coding",
+      "difficulty": "easy",
+      "experience_levels": ["junior", "mid"],
+      "skills": ["java", "data_structures"],
+      "text": "Implement a function to check if a string is a valid palindrome, considering only alphanumeric characters.",
+      "starter_code": "public class Solution {\n    public boolean isPalindrome(String s) {\n        // Your code here\n        return false;\n    }\n}",
+      "language": "java",
+      "time_limit_minutes": 10,
+      "test_cases": [
+        {"input": "A man, a plan, a canal: Panama", "expected": true},
+        {"input": "race a car", "expected": false},
+        {"input": " ", "expected": true}
+      ],
+      "evaluation_rubric": {
+        "correctness": {"weight": 0.50, "criteria": "All test cases pass"},
+        "efficiency": {"weight": 0.25, "criteria": "O(n) time complexity"},
+        "code_quality": {"weight": 0.25, "criteria": "Clean Java code"}
+      }
+    },
+    {
+      "id": "java_coding_005",
+      "type": "coding",
+      "category": "coding",
+      "difficulty": "medium",
+      "experience_levels": ["mid", "senior"],
+      "skills": ["java", "data_structures"],
+      "text": "Implement a function to find the longest substring without repeating characters.",
+      "starter_code": "public class Solution {\n    public int lengthOfLongestSubstring(String s) {\n        // Your code here\n        return 0;\n    }\n}",
+      "language": "java",
+      "time_limit_minutes": 15,
+      "test_cases": [
+        {"input": "abcabcbb", "expected": 3},
+        {"input": "bbbbb", "expected": 1},
+        {"input": "pwwkew", "expected": 3}
+      ],
+      "hints": ["Consider using a sliding window", "Use a HashSet or HashMap"],
+      "evaluation_rubric": {
+        "correctness": {"weight": 0.50, "criteria": "All test cases pass"},
+        "efficiency": {"weight": 0.30, "criteria": "O(n) time complexity"},
+        "code_quality": {"weight": 0.20, "criteria": "Clean Java code"}
+      }
+    },
+    {
+      "id": "java_coding_006",
+      "type": "coding",
+      "category": "coding",
+      "difficulty": "medium",
+      "experience_levels": ["mid", "senior"],
+      "skills": ["java", "data_structures"],
+      "text": "Implement a min stack that supports push, pop, top, and getMin in O(1) time.",
+      "starter_code": "public class MinStack {\n    public MinStack() {\n        // Your code here\n    }\n    \n    public void push(int val) {\n        // Your code here\n    }\n    \n    public void pop() {\n        // Your code here\n    }\n    \n    public int top() {\n        // Your code here\n        return 0;\n    }\n    \n    public int getMin() {\n        // Your code here\n        return 0;\n    }\n}",
+      "language": "java",
+      "time_limit_minutes": 15,
+      "test_cases": [
+        {"operations": ["MinStack", "push", "push", "push", "getMin", "pop", "top", "getMin"],
+         "inputs": [[], [-2], [0], [-3], [], [], [], []],
+         "expected": [null, null, null, null, -3, null, 0, -2]}
+      ],
+      "evaluation_rubric": {
+        "correctness": {"weight": 0.50, "criteria": "All operations work correctly"},
+        "efficiency": {"weight": 0.30, "criteria": "O(1) for all operations"},
+        "code_quality": {"weight": 0.20, "criteria": "Clean Java code"}
+      }
+    },
+    {
+      "id": "java_coding_007",
+      "type": "coding",
+      "category": "coding",
+      "difficulty": "hard",
+      "experience_levels": ["senior", "lead"],
+      "skills": ["java", "data_structures", "algorithms"],
+      "text": "Implement a function to merge k sorted linked lists.",
+      "starter_code": "public class Solution {\n    public ListNode mergeKLists(ListNode[] lists) {\n        // Your code here\n        return null;\n    }\n}\n\nclass ListNode {\n    int val;\n    ListNode next;\n    ListNode(int val) { this.val = val; }\n}",
+      "language": "java",
+      "time_limit_minutes": 25,
+      "test_cases": [
+        {"input": "[[1,4,5],[1,3,4],[2,6]]", "expected": "[1,1,2,3,4,4,5,6]"},
+        {"input": "[]", "expected": "[]"},
+        {"input": "[[]]", "expected": "[]"}
+      ],
+      "hints": ["Consider using a min-heap", "Divide and conquer approach also works"],
+      "evaluation_rubric": {
+        "correctness": {"weight": 0.40, "criteria": "All test cases pass"},
+        "efficiency": {"weight": 0.40, "criteria": "O(N log k) time complexity"},
+        "code_quality": {"weight": 0.20, "criteria": "Clean Java code"}
+      }
+    },
+    {
+      "id": "java_coding_008",
+      "type": "coding",
+      "category": "coding",
+      "difficulty": "hard",
+      "experience_levels": ["senior", "lead"],
+      "skills": ["java", "algorithms"],
+      "text": "Implement a function to find all unique permutations of a collection with duplicates.",
+      "starter_code": "import java.util.*;\n\npublic class Solution {\n    public List<List<Integer>> permuteUnique(int[] nums) {\n        // Your code here\n        return null;\n    }\n}",
+      "language": "java",
+      "time_limit_minutes": 20,
+      "test_cases": [
+        {"input": [1, 1, 2], "expected": [[1,1,2], [1,2,1], [2,1,1]]},
+        {"input": [1, 2, 3], "expected": [[1,2,3], [1,3,2], [2,1,3], [2,3,1], [3,1,2], [3,2,1]]}
+      ],
+      "evaluation_rubric": {
+        "correctness": {"weight": 0.50, "criteria": "All unique permutations found"},
+        "efficiency": {"weight": 0.25, "criteria": "Avoids generating duplicates"},
+        "code_quality": {"weight": 0.25, "criteria": "Clean Java code"}
+      }
+    },
+    {
+      "id": "py_concept_001",
+      "type": "open_ended",
+      "category": "conceptual",
+      "difficulty": "medium",
+      "experience_levels": ["mid", "senior"],
+      "skills": ["python"],
+      "text": "Explain the Global Interpreter Lock (GIL) in Python. What are its implications for multi-threaded applications, and how can you work around its limitations?",
+      "time_limit_minutes": 10,
+      "expected_keywords": ["GIL", "thread", "multiprocessing", "CPU-bound", "I/O-bound", "asyncio"],
+      "evaluation_rubric": {
+        "accuracy": {"weight": 0.35, "criteria": "Correct understanding of GIL"},
+        "completeness": {"weight": 0.30, "criteria": "Covers implications and workarounds"},
+        "depth": {"weight": 0.20, "criteria": "Discusses when GIL matters"},
+        "clarity": {"weight": 0.15, "criteria": "Clear explanation"}
+      }
+    },
+    {
+      "id": "py_concept_002",
+      "type": "open_ended",
+      "category": "conceptual",
+      "difficulty": "easy",
+      "experience_levels": ["junior", "mid"],
+      "skills": ["python"],
+      "text": "What is the difference between a list and a tuple in Python? When would you use one over the other?",
+      "time_limit_minutes": 5,
+      "expected_keywords": ["mutable", "immutable", "hashable", "performance"],
+      "evaluation_rubric": {
+        "accuracy": {"weight": 0.40, "criteria": "Correct understanding"},
+        "completeness": {"weight": 0.30, "criteria": "Mentions key differences"},
+        "practical": {"weight": 0.30, "criteria": "Good use case examples"}
+      }
+    },
+    {
+      "id": "py_concept_003",
+      "type": "open_ended",
+      "category": "conceptual",
+      "difficulty": "easy",
+      "experience_levels": ["junior"],
+      "skills": ["python"],
+      "text": "What are *args and **kwargs in Python? Give an example of when you would use each.",
+      "time_limit_minutes": 5,
+      "expected_keywords": ["positional arguments", "keyword arguments", "unpacking", "flexible"],
+      "evaluation_rubric": {
+        "accuracy": {"weight": 0.40, "criteria": "Correct understanding"},
+        "completeness": {"weight": 0.30, "criteria": "Explains both *args and **kwargs"},
+        "practical": {"weight": 0.30, "criteria": "Good examples"}
+      }
+    },
+    {
+      "id": "py_concept_004",
+      "type": "open_ended",
+      "category": "conceptual",
+      "difficulty": "easy",
+      "experience_levels": ["junior"],
+      "skills": ["python"],
+      "text": "Explain the difference between == and 'is' in Python. When should you use each?",
+      "time_limit_minutes": 5,
+      "expected_keywords": ["equality", "identity", "value comparison", "object reference"],
+      "evaluation_rubric": {
+        "accuracy": {"weight": 0.50, "criteria": "Correct understanding"},
+        "completeness": {"weight": 0.30, "criteria": "Covers both operators"},
+        "practical": {"weight": 0.20, "criteria": "Good examples"}
+      }
+    },
+    {
+      "id": "py_concept_005",
+      "type": "open_ended",
+      "category": "conceptual",
+      "difficulty": "easy",
+      "experience_levels": ["junior", "mid"],
+      "skills": ["python"],
+      "text": "What is a decorator in Python? How would you write a simple decorator?",
+      "time_limit_minutes": 8,
+      "expected_keywords": ["function wrapper", "@", "higher-order function", "closure"],
+      "evaluation_rubric": {
+        "accuracy": {"weight": 0.40, "criteria": "Correct understanding of decorators"},
+        "completeness": {"weight": 0.30, "criteria": "Can explain how they work"},
+        "practical": {"weight": 0.30, "criteria": "Can write a simple example"}
+      }
+    },
+    {
+      "id": "py_concept_006",
+      "type": "open_ended",
+      "category": "conceptual",
+      "difficulty": "medium",
+      "experience_levels": ["mid", "senior"],
+      "skills": ["python"],
+      "text": "Explain Python's memory management and garbage collection. What are reference counting and cyclic garbage collection?",
+      "time_limit_minutes": 10,
+      "expected_keywords": ["reference counting", "gc module", "cyclic references", "generations"],
+      "evaluation_rubric": {
+        "accuracy": {"weight": 0.40, "criteria": "Correct understanding"},
+        "completeness": {"weight": 0.30, "criteria": "Covers both mechanisms"},
+        "depth": {"weight": 0.30, "criteria": "Understanding of generational GC"}
+      }
+    },
+    {
+      "id": "py_concept_007",
+      "type": "open_ended",
+      "category": "conceptual",
+      "difficulty": "medium",
+      "experience_levels": ["mid", "senior"],
+      "skills": ["python"],
+      "text": "What are generators in Python? How do they differ from regular functions, and when would you use them?",
+      "time_limit_minutes": 8,
+      "expected_keywords": ["yield", "iterator", "lazy evaluation", "memory efficient"],
+      "evaluation_rubric": {
+        "accuracy": {"weight": 0.35, "criteria": "Correct understanding"},
+        "completeness": {"weight": 0.30, "criteria": "Explains yield and iteration"},
+        "practical": {"weight": 0.35, "criteria": "Good use cases"}
+      }
+    },
+    {
+      "id": "py_concept_008",
+      "type": "open_ended",
+      "category": "conceptual",
+      "difficulty": "medium",
+      "experience_levels": ["mid", "senior"],
+      "skills": ["python"],
+      "text": "Explain the difference between shallow copy and deep copy in Python. When would you use each?",
+      "time_limit_minutes": 8,
+      "expected_keywords": ["copy module", "nested objects", "reference", "independent copy"],
+      "evaluation_rubric": {
+        "accuracy": {"weight": 0.40, "criteria": "Correct understanding"},
+        "completeness": {"weight": 0.30, "criteria": "Explains both types"},
+        "practical": {"weight": 0.30, "criteria": "Good examples of when to use each"}
+      }
+    },
+    {
+      "id": "py_concept_009",
+      "type": "open_ended",
+      "category": "conceptual",
+      "difficulty": "hard",
+      "experience_levels": ["senior", "lead"],
+      "skills": ["python"],
+      "text": "Explain Python's descriptor protocol. How do @property, @classmethod, and @staticmethod use descriptors?",
+      "time_limit_minutes": 12,
+      "expected_keywords": ["__get__", "__set__", "__delete__", "data descriptor", "non-data descriptor"],
+      "evaluation_rubric": {
+        "accuracy": {"weight": 0.40, "criteria": "Correct understanding of protocol"},
+        "completeness": {"weight": 0.30, "criteria": "Covers all three decorators"},
+        "depth": {"weight": 0.30, "criteria": "Understands descriptor lookup order"}
+      }
+    },
+    {
+      "id": "py_concept_010",
+      "type": "open_ended",
+      "category": "conceptual",
+      "difficulty": "hard",
+      "experience_levels": ["senior", "lead"],
+      "skills": ["python"],
+      "text": "Explain metaclasses in Python. When would you use them and what are the alternatives?",
+      "time_limit_minutes": 12,
+      "expected_keywords": ["type", "__new__", "__init__", "class factory", "__metaclass__"],
+      "evaluation_rubric": {
+        "accuracy": {"weight": 0.40, "criteria": "Correct understanding of metaclasses"},
+        "completeness": {"weight": 0.30, "criteria": "Covers use cases and alternatives"},
+        "depth": {"weight": 0.30, "criteria": "Understanding of class creation process"}
+      }
+    },
+    {
+      "id": "java_concept_001",
+      "type": "open_ended",
+      "category": "conceptual",
+      "difficulty": "medium",
+      "experience_levels": ["mid", "senior"],
+      "skills": ["java"],
+      "text": "Explain the difference between HashMap and ConcurrentHashMap in Java. When would you use each?",
+      "time_limit_minutes": 10,
+      "expected_keywords": ["thread-safe", "synchronized", "segment", "lock", "performance"],
+      "evaluation_rubric": {
+        "accuracy": {"weight": 0.35, "criteria": "Correct technical understanding"},
+        "completeness": {"weight": 0.30, "criteria": "Covers both data structures"},
+        "practical": {"weight": 0.20, "criteria": "Good use case examples"},
+        "clarity": {"weight": 0.15, "criteria": "Clear explanation"}
+      }
+    },
+    {
+      "id": "java_concept_002",
+      "type": "open_ended",
+      "category": "conceptual",
+      "difficulty": "easy",
+      "experience_levels": ["junior", "mid"],
+      "skills": ["java"],
+      "text": "What is the difference between an interface and an abstract class in Java? When would you use each?",
+      "time_limit_minutes": 8,
+      "expected_keywords": ["multiple inheritance", "default methods", "state", "contract"],
+      "evaluation_rubric": {
+        "accuracy": {"weight": 0.40, "criteria": "Correct understanding"},
+        "completeness": {"weight": 0.30, "criteria": "Covers key differences"},
+        "practical": {"weight": 0.30, "criteria": "Good use case examples"}
+      }
+    },
+    {
+      "id": "java_concept_003",
+      "type": "open_ended",
+      "category": "conceptual",
+      "difficulty": "easy",
+      "experience_levels": ["junior"],
+      "skills": ["java"],
+      "text": "Explain the Java memory model. What are the heap and stack, and what is stored in each?",
+      "time_limit_minutes": 8,
+      "expected_keywords": ["heap", "stack", "objects", "primitives", "references"],
+      "evaluation_rubric": {
+        "accuracy": {"weight": 0.50, "criteria": "Correct understanding"},
+        "completeness": {"weight": 0.30, "criteria": "Covers both areas"},
+        "clarity": {"weight": 0.20, "criteria": "Clear explanation"}
+      }
+    },
+    {
+      "id": "java_concept_004",
+      "type": "open_ended",
+      "category": "conceptual",
+      "difficulty": "medium",
+      "experience_levels": ["mid", "senior"],
+      "skills": ["java"],
+      "text": "Explain Java's garbage collection mechanisms. What are the different GC algorithms and when would you choose each?",
+      "time_limit_minutes": 10,
+      "expected_keywords": ["G1", "CMS", "Parallel GC", "generational", "young generation", "old generation"],
+      "evaluation_rubric": {
+        "accuracy": {"weight": 0.35, "criteria": "Correct understanding"},
+        "completeness": {"weight": 0.35, "criteria": "Covers multiple algorithms"},
+        "practical": {"weight": 0.30, "criteria": "When to use each"}
+      }
+    },
+    {
+      "id": "java_concept_005",
+      "type": "open_ended",
+      "category": "conceptual",
+      "difficulty": "hard",
+      "experience_levels": ["senior", "lead"],
+      "skills": ["java"],
+      "text": "Explain the Java Memory Model (JMM) and the happens-before relationship. How does volatile work?",
+      "time_limit_minutes": 12,
+      "expected_keywords": ["happens-before", "volatile", "memory barrier", "visibility", "ordering"],
+      "evaluation_rubric": {
+        "accuracy": {"weight": 0.40, "criteria": "Correct understanding of JMM"},
+        "completeness": {"weight": 0.30, "criteria": "Covers key concepts"},
+        "depth": {"weight": 0.30, "criteria": "Understanding of concurrency implications"}
+      }
+    },
+    {
+      "id": "ms_concept_001",
+      "type": "open_ended",
+      "category": "conceptual",
+      "difficulty": "hard",
+      "experience_levels": ["senior", "lead"],
+      "skills": ["microservices", "system_design"],
+      "text": "Explain the CAP theorem and its implications for distributed systems. How do different databases make trade-offs?",
+      "time_limit_minutes": 12,
+      "expected_keywords": ["Consistency", "Availability", "Partition tolerance", "eventual consistency", "strong consistency"],
+      "evaluation_rubric": {
+        "accuracy": {"weight": 0.35, "criteria": "Correct understanding of CAP"},
+        "depth": {"weight": 0.30, "criteria": "Discusses real database examples"},
+        "practical": {"weight": 0.20, "criteria": "When to choose what"},
+        "clarity": {"weight": 0.15, "criteria": "Clear explanation"}
+      }
+    },
+    {
+      "id": "db_concept_001",
+      "type": "open_ended",
+      "category": "conceptual",
+      "difficulty": "medium",
+      "experience_levels": ["mid", "senior"],
+      "skills": ["databases"],
+      "text": "Explain database indexing. What are the different types of indexes and when would you use each?",
+      "time_limit_minutes": 10,
+      "expected_keywords": ["B-tree", "hash index", "composite", "covering index", "clustered", "non-clustered"],
+      "evaluation_rubric": {
+        "accuracy": {"weight": 0.35, "criteria": "Correct understanding of indexes"},
+        "completeness": {"weight": 0.30, "criteria": "Covers multiple index types"},
+        "practical": {"weight": 0.20, "criteria": "When to use which"},
+        "clarity": {"weight": 0.15, "criteria": "Clear explanation"}
+      }
+    },
+    {
+      "id": "db_concept_002",
+      "type": "open_ended",
+      "category": "conceptual",
+      "difficulty": "medium",
+      "experience_levels": ["mid", "senior"],
+      "skills": ["databases"],
+      "text": "Explain ACID properties in databases. What happens when you sacrifice each property?",
+      "time_limit_minutes": 10,
+      "expected_keywords": ["Atomicity", "Consistency", "Isolation", "Durability", "transactions"],
+      "evaluation_rubric": {
+        "accuracy": {"weight": 0.40, "criteria": "Correct understanding of ACID"},
+        "completeness": {"weight": 0.30, "criteria": "Covers all four properties"},
+        "practical": {"weight": 0.30, "criteria": "Real-world implications"}
+      }
+    },
+    {
+      "id": "db_concept_003",
+      "type": "open_ended",
+      "category": "conceptual",
+      "difficulty": "hard",
+      "experience_levels": ["senior", "lead"],
+      "skills": ["databases"],
+      "text": "Explain database sharding strategies. What are the trade-offs of different sharding approaches?",
+      "time_limit_minutes": 12,
+      "expected_keywords": ["horizontal sharding", "consistent hashing", "range-based", "cross-shard queries"],
+      "evaluation_rubric": {
+        "accuracy": {"weight": 0.35, "criteria": "Correct understanding"},
+        "completeness": {"weight": 0.30, "criteria": "Covers multiple strategies"},
+        "depth": {"weight": 0.35, "criteria": "Understanding of trade-offs"}
       }
     },
     {
@@ -140,87 +884,120 @@
       }
     },
     {
-      "id": "py_concept_001",
+      "id": "py_design_003",
       "type": "open_ended",
-      "category": "conceptual",
-      "difficulty": "medium",
-      "experience_levels": ["mid", "senior"],
-      "skills": ["python"],
-      "text": "Explain the Global Interpreter Lock (GIL) in Python. What are its implications for multi-threaded applications, and how can you work around its limitations?",
-      "time_limit_minutes": 10,
-      "expected_keywords": ["GIL", "thread", "multiprocessing", "CPU-bound", "I/O-bound", "asyncio"],
-      "evaluation_rubric": {
-        "accuracy": {"weight": 0.35, "criteria": "Correct understanding of GIL"},
-        "completeness": {"weight": 0.30, "criteria": "Covers implications and workarounds"},
-        "depth": {"weight": 0.20, "criteria": "Discusses when GIL matters"},
-        "clarity": {"weight": 0.15, "criteria": "Clear explanation"}
-      }
-    },
-    {
-      "id": "java_concept_001",
-      "type": "open_ended",
-      "category": "conceptual",
-      "difficulty": "medium",
-      "experience_levels": ["mid", "senior"],
-      "skills": ["java"],
-      "text": "Explain the difference between HashMap and ConcurrentHashMap in Java. When would you use each?",
-      "time_limit_minutes": 10,
-      "expected_keywords": ["thread-safe", "synchronized", "segment", "lock", "performance"],
-      "evaluation_rubric": {
-        "accuracy": {"weight": 0.35, "criteria": "Correct technical understanding"},
-        "completeness": {"weight": 0.30, "criteria": "Covers both data structures"},
-        "practical": {"weight": 0.20, "criteria": "Good use case examples"},
-        "clarity": {"weight": 0.15, "criteria": "Clear explanation"}
-      }
-    },
-    {
-      "id": "py_concept_002",
-      "type": "open_ended",
-      "category": "conceptual",
-      "difficulty": "easy",
-      "experience_levels": ["junior", "mid"],
-      "skills": ["python"],
-      "text": "What is the difference between a list and a tuple in Python? When would you use one over the other?",
-      "time_limit_minutes": 5,
-      "expected_keywords": ["mutable", "immutable", "hashable", "performance"],
-      "evaluation_rubric": {
-        "accuracy": {"weight": 0.40, "criteria": "Correct understanding"},
-        "completeness": {"weight": 0.30, "criteria": "Mentions key differences"},
-        "practical": {"weight": 0.30, "criteria": "Good use case examples"}
-      }
-    },
-    {
-      "id": "ms_concept_001",
-      "type": "open_ended",
-      "category": "conceptual",
+      "category": "system_design",
       "difficulty": "hard",
       "experience_levels": ["senior", "lead"],
-      "skills": ["microservices", "system_design"],
-      "text": "Explain the CAP theorem and its implications for distributed systems. How do different databases make trade-offs?",
-      "time_limit_minutes": 12,
-      "expected_keywords": ["Consistency", "Availability", "Partition tolerance", "eventual consistency", "strong consistency"],
+      "skills": ["system_design", "microservices"],
+      "text": "Design a real-time chat application like Slack. Discuss message delivery, presence, and scalability.",
+      "time_limit_minutes": 25,
+      "expected_topics": [
+        "WebSocket connections",
+        "Message queues",
+        "Presence service",
+        "Message persistence",
+        "Push notifications",
+        "Read receipts"
+      ],
       "evaluation_rubric": {
-        "accuracy": {"weight": 0.35, "criteria": "Correct understanding of CAP"},
-        "depth": {"weight": 0.30, "criteria": "Discusses real database examples"},
-        "practical": {"weight": 0.20, "criteria": "When to choose what"},
-        "clarity": {"weight": 0.15, "criteria": "Clear explanation"}
+        "completeness": {"weight": 0.30, "criteria": "Covers all major components"},
+        "scalability": {"weight": 0.30, "criteria": "Handles millions of users"},
+        "technical_depth": {"weight": 0.25, "criteria": "Detailed architecture"},
+        "trade_offs": {"weight": 0.15, "criteria": "Discusses alternatives"}
       }
     },
     {
-      "id": "db_concept_001",
+      "id": "py_design_004",
       "type": "open_ended",
-      "category": "conceptual",
+      "category": "system_design",
+      "difficulty": "hard",
+      "experience_levels": ["senior", "lead"],
+      "skills": ["system_design", "databases"],
+      "text": "Design a distributed cache like Redis. Discuss consistency, eviction policies, and clustering.",
+      "time_limit_minutes": 20,
+      "expected_topics": [
+        "LRU/LFU eviction",
+        "Consistent hashing",
+        "Replication",
+        "Cache invalidation",
+        "Cluster management"
+      ],
+      "evaluation_rubric": {
+        "completeness": {"weight": 0.30, "criteria": "Covers all major aspects"},
+        "scalability": {"weight": 0.30, "criteria": "Distributed design"},
+        "technical_depth": {"weight": 0.25, "criteria": "Detailed algorithms"},
+        "trade_offs": {"weight": 0.15, "criteria": "Discusses consistency vs availability"}
+      }
+    },
+    {
+      "id": "py_design_005",
+      "type": "open_ended",
+      "category": "system_design",
       "difficulty": "medium",
       "experience_levels": ["mid", "senior"],
-      "skills": ["databases"],
-      "text": "Explain database indexing. What are the different types of indexes and when would you use each?",
-      "time_limit_minutes": 10,
-      "expected_keywords": ["B-tree", "hash index", "composite", "covering index", "clustered", "non-clustered"],
+      "skills": ["system_design"],
+      "text": "Design a notification system that can send push notifications, emails, and SMS. How would you handle different priorities and delivery guarantees?",
+      "time_limit_minutes": 18,
+      "expected_topics": [
+        "Message queues",
+        "Priority handling",
+        "Retry logic",
+        "Rate limiting",
+        "Template management"
+      ],
       "evaluation_rubric": {
-        "accuracy": {"weight": 0.35, "criteria": "Correct understanding of indexes"},
-        "completeness": {"weight": 0.30, "criteria": "Covers multiple index types"},
-        "practical": {"weight": 0.20, "criteria": "When to use which"},
-        "clarity": {"weight": 0.15, "criteria": "Clear explanation"}
+        "completeness": {"weight": 0.30, "criteria": "Covers all channels"},
+        "reliability": {"weight": 0.30, "criteria": "Handles failures gracefully"},
+        "technical_depth": {"weight": 0.25, "criteria": "Good architecture"},
+        "practical": {"weight": 0.15, "criteria": "Real-world considerations"}
+      }
+    },
+    {
+      "id": "py_design_006",
+      "type": "open_ended",
+      "category": "system_design",
+      "difficulty": "hard",
+      "experience_levels": ["lead"],
+      "skills": ["system_design", "microservices"],
+      "text": "Design a ride-sharing service like Uber. Focus on matching drivers with riders and handling surge pricing.",
+      "time_limit_minutes": 30,
+      "expected_topics": [
+        "Location tracking",
+        "Matching algorithm",
+        "Surge pricing",
+        "ETA calculation",
+        "Trip management",
+        "Payment processing"
+      ],
+      "evaluation_rubric": {
+        "completeness": {"weight": 0.25, "criteria": "Covers core features"},
+        "scalability": {"weight": 0.30, "criteria": "Handles millions of requests"},
+        "technical_depth": {"weight": 0.25, "criteria": "Detailed algorithms"},
+        "trade_offs": {"weight": 0.20, "criteria": "Discusses alternatives"}
+      }
+    },
+    {
+      "id": "py_design_007",
+      "type": "open_ended",
+      "category": "system_design",
+      "difficulty": "hard",
+      "experience_levels": ["lead"],
+      "skills": ["system_design", "databases"],
+      "text": "Design a distributed job scheduler like Apache Airflow. How would you handle dependencies, retries, and monitoring?",
+      "time_limit_minutes": 25,
+      "expected_topics": [
+        "DAG representation",
+        "Task queues",
+        "Worker management",
+        "Failure handling",
+        "Monitoring and alerting"
+      ],
+      "evaluation_rubric": {
+        "completeness": {"weight": 0.30, "criteria": "Covers all components"},
+        "reliability": {"weight": 0.30, "criteria": "Handles failures well"},
+        "technical_depth": {"weight": 0.25, "criteria": "Detailed design"},
+        "practical": {"weight": 0.15, "criteria": "Real-world applicability"}
       }
     },
     {
@@ -239,6 +1016,102 @@
         "trade_offs": {"weight": 0.20, "criteria": "Discusses memory vs accuracy"},
         "clarity": {"weight": 0.15, "criteria": "Clear explanation"}
       }
+    },
+    {
+      "id": "ps_002",
+      "type": "open_ended",
+      "category": "problem_solving",
+      "difficulty": "easy",
+      "experience_levels": ["junior", "mid"],
+      "skills": ["coding", "algorithms"],
+      "text": "You have a list of user sessions with start and end times. How would you find the maximum number of concurrent users at any point in time?",
+      "time_limit_minutes": 10,
+      "expected_topics": ["Sorting", "Event-based approach", "Two pointers"],
+      "evaluation_rubric": {
+        "approach": {"weight": 0.40, "criteria": "Sound approach"},
+        "efficiency": {"weight": 0.30, "criteria": "Optimal time complexity"},
+        "clarity": {"weight": 0.30, "criteria": "Clear explanation"}
+      }
+    },
+    {
+      "id": "ps_003",
+      "type": "open_ended",
+      "category": "problem_solving",
+      "difficulty": "medium",
+      "experience_levels": ["mid", "senior"],
+      "skills": ["coding", "algorithms"],
+      "text": "Design an algorithm to detect duplicate files in a file system. How would you handle very large files efficiently?",
+      "time_limit_minutes": 12,
+      "expected_topics": ["Hashing", "File size comparison", "Chunking", "Memory efficiency"],
+      "evaluation_rubric": {
+        "approach": {"weight": 0.35, "criteria": "Sound approach"},
+        "efficiency": {"weight": 0.35, "criteria": "Handles large files"},
+        "practical": {"weight": 0.30, "criteria": "Real-world considerations"}
+      }
+    },
+    {
+      "id": "ps_004",
+      "type": "open_ended",
+      "category": "problem_solving",
+      "difficulty": "hard",
+      "experience_levels": ["senior", "lead"],
+      "skills": ["coding", "algorithms"],
+      "text": "Design a system to detect anomalies in time-series data from IoT sensors. How would you handle different types of anomalies?",
+      "time_limit_minutes": 15,
+      "expected_topics": ["Statistical methods", "Machine learning", "Sliding windows", "Threshold tuning"],
+      "evaluation_rubric": {
+        "approach": {"weight": 0.35, "criteria": "Sound approach"},
+        "completeness": {"weight": 0.30, "criteria": "Handles multiple anomaly types"},
+        "practical": {"weight": 0.35, "criteria": "Real-world applicability"}
+      }
+    },
+    {
+      "id": "ps_005",
+      "type": "open_ended",
+      "category": "problem_solving",
+      "difficulty": "easy",
+      "experience_levels": ["junior"],
+      "skills": ["coding"],
+      "text": "You need to implement a feature that shows the most recent 5 items a user has viewed. How would you design this?",
+      "time_limit_minutes": 8,
+      "expected_topics": ["Queue", "Deque", "LRU-like structure"],
+      "evaluation_rubric": {
+        "approach": {"weight": 0.40, "criteria": "Sound approach"},
+        "implementation": {"weight": 0.30, "criteria": "Correct data structure choice"},
+        "clarity": {"weight": 0.30, "criteria": "Clear explanation"}
+      }
+    },
+    {
+      "id": "ps_006",
+      "type": "open_ended",
+      "category": "problem_solving",
+      "difficulty": "medium",
+      "experience_levels": ["mid", "senior"],
+      "skills": ["coding", "algorithms"],
+      "text": "Design an algorithm to implement autocomplete for a search box. How would you optimize for both speed and memory?",
+      "time_limit_minutes": 12,
+      "expected_topics": ["Trie", "Prefix matching", "Ranking", "Caching"],
+      "evaluation_rubric": {
+        "approach": {"weight": 0.35, "criteria": "Sound approach"},
+        "efficiency": {"weight": 0.35, "criteria": "Optimized solution"},
+        "practical": {"weight": 0.30, "criteria": "Real-world considerations"}
+      }
+    },
+    {
+      "id": "ps_007",
+      "type": "open_ended",
+      "category": "problem_solving",
+      "difficulty": "hard",
+      "experience_levels": ["senior", "lead"],
+      "skills": ["coding", "algorithms"],
+      "text": "Design a system to find the shortest path in a road network with dynamic traffic conditions. How would you handle real-time updates?",
+      "time_limit_minutes": 15,
+      "expected_topics": ["Dijkstra", "A*", "Dynamic updates", "Heuristics", "Caching"],
+      "evaluation_rubric": {
+        "approach": {"weight": 0.35, "criteria": "Sound algorithmic approach"},
+        "efficiency": {"weight": 0.30, "criteria": "Handles real-time updates"},
+        "practical": {"weight": 0.35, "criteria": "Real-world applicability"}
+      }
     }
   ],
   "categories": ["conceptual", "coding", "system_design", "problem_solving"],
@@ -247,80 +1120,78 @@
   "skills_taxonomy": {
     "python": {
       "display_name": "Python",
-      "icon": "🐍",
+      "icon": "python",
       "related": ["data_structures", "algorithms"]
     },
     "java": {
       "display_name": "Java",
-      "icon": "☕",
+      "icon": "java",
       "related": ["spring", "data_structures"]
     },
     "javascript": {
       "display_name": "JavaScript",
-      "icon": "🟨",
+      "icon": "javascript",
       "related": ["react", "nodejs"]
     },
     "system_design": {
       "display_name": "System Design",
-      "icon": "🏗️",
+      "icon": "architecture",
       "related": ["microservices", "scalability", "databases"]
     },
     "coding": {
       "display_name": "Coding & Problem Solving",
-      "icon": "💻",
+      "icon": "code",
       "related": ["algorithms", "data_structures"]
     },
     "databases": {
       "display_name": "Databases",
-      "icon": "🗄️",
+      "icon": "database",
       "related": ["sql", "nosql"]
     },
     "microservices": {
       "display_name": "Microservices",
-      "icon": "🔗",
+      "icon": "microservices",
       "related": ["system_design", "api_design"]
     },
     "react": {
       "display_name": "React",
-      "icon": "⚛️",
+      "icon": "react",
       "related": ["javascript", "frontend"]
     },
     "nodejs": {
       "display_name": "Node.js",
-      "icon": "🟢",
+      "icon": "nodejs",
       "related": ["javascript", "backend"]
     },
     "spring": {
       "display_name": "Spring Framework",
-      "icon": "🍃",
+      "icon": "spring",
       "related": ["java", "microservices"]
     },
     "aws": {
       "display_name": "AWS",
-      "icon": "☁️",
+      "icon": "aws",
       "related": ["cloud", "devops"]
     },
     "kubernetes": {
       "display_name": "Kubernetes",
-      "icon": "⎈",
+      "icon": "kubernetes",
       "related": ["docker", "devops"]
     },
     "docker": {
       "display_name": "Docker",
-      "icon": "🐳",
+      "icon": "docker",
       "related": ["kubernetes", "devops"]
     },
     "data_structures": {
       "display_name": "Data Structures",
-      "icon": "📊",
+      "icon": "data_structures",
       "related": ["algorithms", "coding"]
     },
     "algorithms": {
       "display_name": "Algorithms",
-      "icon": "🧮",
+      "icon": "algorithms",
       "related": ["data_structures", "coding"]
     }
   }
 }
-
-
