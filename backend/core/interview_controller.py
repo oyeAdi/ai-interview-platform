@@ -47,6 +47,9 @@ class InterviewController:
         self.data_model: Optional[Dict] = None
         self.resume_text: str = ""
         self.first_question_generated: bool = False
+        
+        # Question categories for filtering (from quick start or position data model)
+        self.question_categories: Optional[Dict] = None
     
     def start_interview(self) -> Dict:
         """Start the interview with a warm, natural greeting"""

@@ -170,6 +170,12 @@ export default function QuickStartPage() {
       if (selectedJd) formData.append('jd_id', selectedJd)
       if (selectedResume) formData.append('resume_id', selectedResume)
       if (expertMode) formData.append('expert_mode', 'true')
+      
+      // Send selected preset's question categories
+      const selectedPresetData = INTERVIEW_PRESETS.find(p => p.id === selectedPreset)
+      if (selectedPresetData) {
+        formData.append('question_categories', JSON.stringify(selectedPresetData.categories))
+      }
 
       const response = await fetch(apiUrl('api/analyze-language'), {
         method: 'POST',

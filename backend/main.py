@@ -215,7 +215,8 @@ async def analyze_language(
     resume_file: Optional[UploadFile] = File(None),
     jd_id: Optional[str] = Form(None),
     resume_id: Optional[str] = Form(None),
-    expert_mode: Optional[str] = Form(None)
+    expert_mode: Optional[str] = Form(None),
+    question_categories: Optional[str] = Form(None)
 ):
     """Analyze JD and Resume to determine language"""
     try:
@@ -256,6 +257,18 @@ async def analyze_language(
         is_expert_mode = expert_mode == 'true'
         controller = InterviewController(language, jd_id, expert_mode=is_expert_mode)
         session_id = controller.context_manager.session_id
+        
+        # Parse and set question categories if provided (from quick start)
+        if question_categories:
+            try:
+                categories_dict = json.loads(question_categories)
+                controller.question_categories = categories_dict
+            except json.JSONDecodeError:
+                print(f"Warning: Invalid question_categories JSON: {question_categories}")
+        
+        # Attach resume text for personalized first question
+        if resume_content:
+            controller.resume_text = resume_content
         
         # Store controller
         active_interviews[session_id] = controller
