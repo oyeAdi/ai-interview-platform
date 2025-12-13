@@ -969,8 +969,9 @@ async def websocket_endpoint(websocket: WebSocket, view: str = "candidate"):
                             continue
                     except Exception as e:
                         import traceback
-                        print(f"Error restoring session: {e}")
-                        print(traceback.format_exc())
+                        error_trace = traceback.format_exc()
+                        print(f"[ERROR] Failed to restore session {session_id} for view '{view}': {e}")
+                        print(f"[ERROR] Traceback:\n{error_trace}")
                         await websocket.send_json({
                             "type": "error",
                             "message": f"Could not restore session. Please start a new interview."
