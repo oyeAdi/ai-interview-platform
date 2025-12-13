@@ -1,0 +1,153 @@
+# Cursor Rules for AI Interview Platform
+
+## Project Overview
+This is an AI-powered interview platform built with:
+- **Frontend**: Next.js 14 (App Router), React, TypeScript, TailwindCSS
+- **Backend**: FastAPI, Python, WebSockets
+- **AI**: Google Gemini for question generation and evaluation
+
+---
+
+## Architecture Principles
+
+### Modularity & Plug-and-Play
+1. **Components should be self-contained** - Each component manages its own state, types, and styling
+2. **Use composition over inheritance** - Build complex UIs by combining simple components
+3. **Props for configuration** - Components should be configurable via props, not hardcoded
+4. **Types co-located** - Keep interfaces/types in the same file or a nearby `types.ts`
+
+### Component Structure
+```
+frontend/src/components/
+├── ui/           # Reusable primitives (SearchBar, FilterChips, etc.)
+├── forms/        # Form components (FileUpload, DataModelPanel)
+├── cards/        # Card components (AccountCard, PositionCard)
+├── grids/        # Grid/list containers (AccountGrid, PositionGrid)
+└── modals/       # Modal dialogs (AddAccountModal, AddPositionModal)
+```
+
+---
+
+## Common Mistakes to Avoid
+
+### CSS / Layout
+- [ ] **Always add `overflow-hidden`** to card containers to prevent content leaking
+- [ ] **Use `min-w-0`** on flex children that need to truncate text
+- [ ] **Use `flex-shrink-0`** on elements that shouldn't shrink (icons, badges)
+- [ ] **Use `truncate` class** for single-line text that may overflow
+- [ ] **Avoid fixed widths** - prefer responsive classes (w-full, flex-1)
+
+### TypeScript
+- [ ] **Define interfaces at top of file** before component
+- [ ] **Export shared types** from a central `types.ts` if used across components
+- [ ] **Use `Record<string, T>`** for dynamic keys instead of `any`
+
+### React
+- [ ] **Always provide `key` prop** in lists (use unique IDs, not indices)
+- [ ] **Use `useCallback` for functions passed to children** to prevent re-renders
+- [ ] **Clean up effects** - return cleanup function in useEffect when needed
+
+### API Calls
+- [ ] **Handle loading states** - show skeleton/spinner while fetching
+- [ ] **Handle error states** - show user-friendly error messages
+- [ ] **Use try/catch** in async functions with proper error logging
+
+---
+
+## Styling Conventions
+
+### Colors (EPAM Theme)
+```css
+--epam-cyan: #00E5FF          /* Primary accent */
+--background-dark: #000000     /* Dark mode background */
+--surface-dark: #0A0A0A        /* Card backgrounds (dark) */
+--border-dark: #2A2A2A         /* Borders (dark) */
+--text-primary: #FFFFFF        /* Main text (dark) */
+--text-secondary: #9CA3AF      /* Muted text */
+```
+
+### Component Patterns
+```tsx
+// Card with proper overflow handling
+<div className="p-4 border border-gray-200 dark:border-[#2A2A2A] overflow-hidden">
+  <div className="flex items-start gap-3">
+    <div className="flex-shrink-0">...</div>  {/* Fixed element */}
+    <div className="min-w-0 flex-1">          {/* Truncatable content */}
+      <h3 className="truncate">...</h3>
+    </div>
+  </div>
+</div>
+
+// Button with loading state
+<button disabled={loading} className="btn-primary disabled:opacity-40">
+  {loading ? <Spinner /> : 'Submit'}
+</button>
+```
+
+---
+
+## Backend Conventions
+
+### API Endpoints
+- `GET /api/{resource}` - List all
+- `GET /api/{resource}/{id}` - Get one
+- `POST /api/{resource}` - Create
+- `PUT /api/{resource}/{id}` - Update
+- `DELETE /api/{resource}/{id}` - Delete
+
+### File Locations
+```
+backend/
+├── main.py              # FastAPI app, routes
+├── core/                # Business logic
+├── models/              # JSON data files
+├── llm/                 # AI/Gemini integration
+└── resumes/             # Resume storage
+```
+
+---
+
+## Testing Checklist
+
+Before committing:
+- [ ] Run `npm run build` - no TypeScript errors
+- [ ] Test responsive layout (mobile, tablet, desktop)
+- [ ] Test dark/light mode toggle
+- [ ] Test empty states (no data)
+- [ ] Test loading states
+- [ ] Test error handling
+
+---
+
+## Quick References
+
+### Start Development
+```bash
+# Terminal 1 - Backend
+cd backend && python main.py
+
+# Terminal 2 - Frontend
+cd frontend && npm run dev
+```
+
+### Common Commands
+```bash
+# Add new dependency (frontend)
+cd frontend && npm install <package>
+
+# Add new dependency (backend)
+pip install <package> && pip freeze > requirements.txt
+
+# Format code
+npm run lint -- --fix
+```
+
+---
+
+## Notes & Learnings
+
+### 2024-12-13
+- Cards need `overflow-hidden` to prevent layout leaking
+- Use `flex-shrink-0` on icons and badges
+- Grid layouts: use responsive breakpoints (sm:, md:, lg:, xl:)
+

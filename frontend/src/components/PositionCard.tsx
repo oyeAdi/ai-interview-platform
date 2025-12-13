@@ -138,7 +138,7 @@ export default function PositionCard({
       type="button"
       onClick={() => onSelect(position.id)}
       className={`
-        w-full text-left p-4 border transition-all duration-200
+        w-full text-left p-4 border transition-all duration-200 overflow-hidden
         ${isSelected
           ? 'border-[#00E5FF] bg-[#00E5FF]/5'
           : 'border-gray-200 dark:border-[#2A2A2A] hover:border-gray-300 dark:hover:border-[#3A3A3A] bg-white dark:bg-black'
