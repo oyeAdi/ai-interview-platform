@@ -21,12 +21,20 @@ interface ResponseTiming {
   score?: number
 }
 
+interface CurrentQuestion {
+  text: string
+  isFollowup: boolean
+  followupNumber?: number
+  questionNumber: number
+  questionId: string
+}
+
 export default function AdminDashboard({ sessionId, language }: AdminDashboardProps) {
   const [ws, setWs] = useState<WebSocket | null>(null)
   const [evaluation, setEvaluation] = useState<any>(null)
   const [strategy, setStrategy] = useState<any>(null)
   const [logData, setLogData] = useState<any>(null)
-  const [currentQuestion, setCurrentQuestion] = useState<any>(null)
+  const [currentQuestion, setCurrentQuestion] = useState<CurrentQuestion | null>(null)
   const [candidateTyping, setCandidateTyping] = useState<string>('')
   const [lastSubmittedAnswer, setLastSubmittedAnswer] = useState<string>('')
   const [progress, setProgress] = useState({ 
@@ -132,7 +140,7 @@ export default function AdminDashboard({ sessionId, language }: AdminDashboardPr
             const qNum = currentQuestion?.questionNumber || progress.rounds_completed
             const followupNum = message.data?.followup_number || 1
             const questionId = `${currentQuestion?.questionId || 'q'}-f${followupNum}`
-            setCurrentQuestion(prev => ({ 
+            setCurrentQuestion((prev: CurrentQuestion | null) => ({ 
               text: message.data?.text || message.text, 
               isFollowup: true,
               followupNumber: followupNum,
