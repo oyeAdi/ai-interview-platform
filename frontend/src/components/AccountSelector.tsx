@@ -15,6 +15,7 @@ interface AccountSelectorProps {
   accounts: Account[]
   selectedAccount: string
   onSelectAccount: (accountId: string) => void
+  onAddAccount?: () => void
   loading?: boolean
 }
 
@@ -22,6 +23,7 @@ export default function AccountSelector({
   accounts,
   selectedAccount,
   onSelectAccount,
+  onAddAccount,
   loading = false
 }: AccountSelectorProps) {
   const [isOpen, setIsOpen] = useState(false)
@@ -94,6 +96,28 @@ export default function AccountSelector({
       {isOpen && !loading && (
         <div className="absolute z-20 w-full mt-1 bg-white dark:bg-black
                       border border-gray-200 dark:border-[#2A2A2A] shadow-lg">
+          {/* Add Account Button */}
+          {onAddAccount && (
+            <button
+              type="button"
+              onClick={() => {
+                setIsOpen(false)
+                onAddAccount()
+              }}
+              className="w-full flex items-center gap-4 px-4 py-3 text-left
+                       border-b border-gray-200 dark:border-[#2A2A2A]
+                       text-[#00E5FF] hover:bg-[#00E5FF]/10 transition-colors"
+            >
+              <div className="w-10 h-10 border border-dashed border-[#00E5FF] 
+                            flex items-center justify-center">
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                </svg>
+              </div>
+              <span className="font-medium">Add New Account</span>
+            </button>
+          )}
+          
           {accounts.length === 0 ? (
             <div className="px-4 py-4 text-center text-gray-500 dark:text-gray-400">
               No accounts available

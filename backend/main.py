@@ -207,6 +207,55 @@ async def get_all_accounts():
     data = load_json_file(ACCOUNTS_FILE)
     return {"accounts": data.get("accounts", [])}
 
+class AccountCreate(BaseModel):
+    name: str
+    description: str = ""
+    org_id: str = "epam"
+
+@app.post("/api/accounts")
+async def create_account(account: AccountCreate):
+    """Create a new account"""
+    data = load_json_file(ACCOUNTS_FILE)
+    if "accounts" not in data:
+        data["accounts"] = []
+    
+    # Generate unique ID from name
+    account_id = account.name.lower().replace(" ", "_").replace("-", "_")
+    
+    # Check if account already exists
+    if any(acc["id"] == account_id for acc in data["accounts"]):
+        raise HTTPException(status_code=400, detail="Account with this name already exists")
+    
+    new_account = {
+        "id": account_id,
+        "name": account.name,
+        "org_id": account.org_id,
+        "description": account.description,
+        "positions": []
+    }
+    
+    data["accounts"].append(new_account)
+    save_json_file(ACCOUNTS_FILE, data)
+    
+    return {"status": "created", "account": new_account}
+
+@app.delete("/api/accounts/{account_id}")
+async def delete_account(account_id: str):
+    """Delete an account (only if it has no positions)"""
+    data = load_json_file(ACCOUNTS_FILE)
+    
+    for i, acc in enumerate(data.get("accounts", [])):
+        if acc["id"] == account_id:
+            # Check if account has positions
+            if acc.get("positions") and len(acc["positions"]) > 0:
+                raise HTTPException(status_code=400, detail="Cannot delete account with existing positions")
+            
+            data["accounts"].pop(i)
+            save_json_file(ACCOUNTS_FILE, data)
+            return {"status": "deleted", "account_id": account_id}
+    
+    raise HTTPException(status_code=404, detail="Account not found")
+
 @app.get("/api/accounts/{account_id}")
 async def get_account(account_id: str):
     """Get specific account details"""

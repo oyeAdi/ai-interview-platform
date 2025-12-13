@@ -10,6 +10,7 @@ import DataModelPanel from '@/components/DataModelPanel'
 import CandidateSelector from '@/components/CandidateSelector'
 import FileUpload from '@/components/FileUpload'
 import AddPositionModal from '@/components/AddPositionModal'
+import AddAccountModal from '@/components/AddAccountModal'
 
 interface Account {
   id: string
@@ -64,6 +65,7 @@ export default function DashboardPage() {
   const [startingInterview, setStartingInterview] = useState(false)
   const [dataModel, setDataModel] = useState<DataModel | null>(null)
   const [showAddPosition, setShowAddPosition] = useState(false)
+  const [showAddAccount, setShowAddAccount] = useState(false)
 
   // Load accounts on mount
   useEffect(() => {
@@ -227,6 +229,7 @@ export default function DashboardPage() {
                   accounts={accounts}
                   selectedAccount={selectedAccount}
                   onSelectAccount={setSelectedAccount}
+                  onAddAccount={() => setShowAddAccount(true)}
                   loading={loading}
                 />
               </div>
@@ -396,6 +399,24 @@ export default function DashboardPage() {
                 setPositions(data.positions || [])
               })
           }
+        }}
+      />
+
+      {/* Add Account Modal */}
+      <AddAccountModal
+        isOpen={showAddAccount}
+        onClose={() => setShowAddAccount(false)}
+        onAccountCreated={() => {
+          // Refresh accounts list
+          fetch('http://localhost:8000/api/accounts')
+            .then(res => res.json())
+            .then(data => {
+              setAccounts(data.accounts || [])
+              // Select the newly created account (last one)
+              if (data.accounts && data.accounts.length > 0) {
+                setSelectedAccount(data.accounts[data.accounts.length - 1].id)
+              }
+            })
         }}
       />
     </div>
