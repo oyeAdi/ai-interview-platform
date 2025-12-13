@@ -173,10 +173,21 @@ class InterviewController:
             required_skills = [s.get("skill", "") for s in self.data_model.get("required_skills", [])]
         
         # Step 1: Find a seed question from the bank
+        # If question_categories are set, use the first enabled category
+        seed_category = None
+        if self.question_categories:
+            for cat_name, cat_config in self.question_categories.items():
+                if cat_config.get("enabled", False) and cat_config.get("count", 0) > 0:
+                    seed_category = cat_name
+                    break
+        else:
+            # Default: conceptual for junior, otherwise None (any category)
+            seed_category = "conceptual" if experience_level == "junior" else None
+        
         seed_question = self.question_manager.find_seed_question(
             experience_level=experience_level,
             skills=required_skills if required_skills else [self.language],
-            category="conceptual" if experience_level == "junior" else None,
+            category=seed_category,
             difficulty="easy" if experience_level == "junior" else "medium"
         )
         
