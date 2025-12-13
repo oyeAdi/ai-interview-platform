@@ -159,14 +159,26 @@ def initialize_data_files():
     
     for filepath, default_data in files_to_init.items():
         if not os.path.exists(filepath):
-            # Create with default structure
+            # Create with default structure only if file doesn't exist
             save_json_file(filepath, default_data)
             print(f"⚠️  Initialized {filepath} with default structure (file was missing)")
         else:
-            # Verify file is valid JSON and has expected structure
+            # Verify file is valid JSON - but DON'T overwrite if it has data
             try:
                 data = load_json_file(filepath)
-                # If file exists but is empty or invalid, reinitialize
+                # Only reinitialize if file is completely empty or invalid JSON structure
+                # Don't overwrite files that have actual data from the repo
+                if data and isinstance(data, dict):
+                    # Check if it has meaningful data (not just empty lists/dicts)
+                    has_data = any(
+                        isinstance(v, list) and len(v) > 0 or 
+                        isinstance(v, dict) and len(v) > 0 
+                        for v in data.values()
+                    )
+                    if has_data:
+                        print(f"✓ {filepath} exists with data ({len(data)} keys)")
+                        continue
+                # Only overwrite if truly empty/invalid
                 if not data or not isinstance(data, dict):
                     save_json_file(filepath, default_data)
                     print(f"⚠️  Reinitialized {filepath} (file was empty or invalid)")
