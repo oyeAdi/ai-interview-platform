@@ -65,6 +65,11 @@ export default function AddPositionModal({
   const [saving, setSaving] = useState(false)
   const [saveAsTemplate, setSaveAsTemplate] = useState(false)
   const [templateName, setTemplateName] = useState('')
+  
+  // Template filtering state
+  const [templateSearch, setTemplateSearch] = useState('')
+  const [selectedCategory, setSelectedCategory] = useState<string>('all')
+  const [visibleCount, setVisibleCount] = useState(4)
 
   // Form state
   const [title, setTitle] = useState('')
@@ -236,77 +241,155 @@ export default function AddPositionModal({
         {/* Content */}
         <div className="flex-1 overflow-y-auto p-6">
           {/* Step 1: Template Selection */}
-          {step === 1 && (
-            <div>
-              <h3 className="text-sm font-medium text-black dark:text-white mb-4">Choose a Template</h3>
-              
-              {loading ? (
-                <div className="flex items-center justify-center py-12">
-                  <div className="w-6 h-6 border-2 border-[#00E5FF]/30 border-t-[#00E5FF] animate-spin"></div>
-                </div>
-              ) : loadError ? (
-                <div className="py-8 text-center">
-                  <p className="text-red-500 text-sm mb-4">{loadError}</p>
-                  <button
-                    onClick={handleSkipTemplate}
-                    className="text-sm text-[#00E5FF] hover:underline"
-                  >
-                    Create from scratch instead →
-                  </button>
-                </div>
-              ) : templates.length === 0 ? (
-                <div className="py-8 text-center">
-                  <p className="text-gray-500 text-sm mb-4">No templates available yet.</p>
-                  <button
-                    onClick={handleSkipTemplate}
-                    className="text-sm text-[#00E5FF] hover:underline"
-                  >
-                    Create from scratch →
-                  </button>
-                </div>
-              ) : (
-                <>
-                  <div className="grid grid-cols-2 gap-3 mb-6">
-                    {templates.map(template => (
+          {step === 1 && (() => {
+            // Filter templates based on search and category
+            const filteredTemplates = templates.filter(t => {
+              const matchesSearch = templateSearch === '' || 
+                t.name.toLowerCase().includes(templateSearch.toLowerCase()) ||
+                t.category.toLowerCase().includes(templateSearch.toLowerCase())
+              const matchesCategory = selectedCategory === 'all' || t.category === selectedCategory
+              return matchesSearch && matchesCategory
+            })
+            const visibleTemplates = filteredTemplates.slice(0, visibleCount)
+            const hasMore = filteredTemplates.length > visibleCount
+            
+            return (
+              <div>
+                <h3 className="text-sm font-medium text-black dark:text-white mb-4">Choose a Template</h3>
+                
+                {loading ? (
+                  <div className="flex items-center justify-center py-12">
+                    <div className="w-6 h-6 border-2 border-[#00E5FF]/30 border-t-[#00E5FF] animate-spin"></div>
+                  </div>
+                ) : loadError ? (
+                  <div className="py-8 text-center">
+                    <p className="text-red-500 text-sm mb-4">{loadError}</p>
+                    <button
+                      onClick={handleSkipTemplate}
+                      className="text-sm text-[#00E5FF] hover:underline"
+                    >
+                      Create from scratch instead →
+                    </button>
+                  </div>
+                ) : templates.length === 0 ? (
+                  <div className="py-8 text-center">
+                    <p className="text-gray-500 text-sm mb-4">No templates available yet.</p>
+                    <button
+                      onClick={handleSkipTemplate}
+                      className="text-sm text-[#00E5FF] hover:underline"
+                    >
+                      Create from scratch →
+                    </button>
+                  </div>
+                ) : (
+                  <>
+                    {/* Search */}
+                    <div className="mb-4">
+                      <div className="relative">
+                        <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                        </svg>
+                        <input
+                          type="text"
+                          value={templateSearch}
+                          onChange={(e) => { setTemplateSearch(e.target.value); setVisibleCount(4) }}
+                          placeholder="Search templates..."
+                          className="w-full pl-10 pr-4 py-2.5 text-sm bg-white dark:bg-black border border-gray-200 dark:border-[#2A2A2A] text-black dark:text-white focus:outline-none focus:border-[#00E5FF]"
+                        />
+                      </div>
+                    </div>
+                    
+                    {/* Category Filter */}
+                    <div className="flex flex-wrap gap-2 mb-4">
                       <button
-                        key={template.id}
-                        onClick={() => handleSelectTemplate(template)}
-                        className={`text-left p-4 border transition-colors ${
-                          selectedTemplate?.id === template.id
-                            ? 'border-[#00E5FF] bg-[#00E5FF]/10'
-                            : 'border-gray-200 dark:border-[#2A2A2A] hover:border-[#00E5FF]/50'
+                        onClick={() => { setSelectedCategory('all'); setVisibleCount(4) }}
+                        className={`px-3 py-1.5 text-xs transition-colors ${
+                          selectedCategory === 'all'
+                            ? 'bg-[#00E5FF] text-black'
+                            : 'bg-gray-100 dark:bg-[#1A1A1A] text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-[#2A2A2A]'
                         }`}
                       >
-                        <div className="flex items-start justify-between">
-                          <div>
-                            <h4 className="font-medium text-black dark:text-white text-sm">{template.name}</h4>
-                            <p className="text-xs text-gray-500 mt-1">{template.category}</p>
-                          </div>
-                          {template.is_custom && (
-                            <span className="text-[10px] text-[#00E5FF] uppercase">Custom</span>
-                          )}
-                        </div>
-                        <div className="flex flex-wrap gap-1 mt-2">
-                          {template.experience_levels.map(level => (
-                            <span key={level} className="px-1.5 py-0.5 text-[10px] bg-gray-100 dark:bg-[#1A1A1A] text-gray-600 dark:text-gray-400 capitalize">
-                              {level}
-                            </span>
-                          ))}
-                        </div>
+                        All
                       </button>
-                    ))}
-                  </div>
-                  
-                  <button
-                    onClick={handleSkipTemplate}
-                    className="text-sm text-gray-500 hover:text-[#00E5FF] transition-colors"
-                  >
-                    Skip and create from scratch →
-                  </button>
-                </>
-              )}
-            </div>
-          )}
+                      {categories.map(cat => (
+                        <button
+                          key={cat}
+                          onClick={() => { setSelectedCategory(cat); setVisibleCount(4) }}
+                          className={`px-3 py-1.5 text-xs transition-colors ${
+                            selectedCategory === cat
+                              ? 'bg-[#00E5FF] text-black'
+                              : 'bg-gray-100 dark:bg-[#1A1A1A] text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-[#2A2A2A]'
+                          }`}
+                        >
+                          {cat}
+                        </button>
+                      ))}
+                    </div>
+                    
+                    {/* Results count */}
+                    <p className="text-xs text-gray-500 mb-3">
+                      Showing {visibleTemplates.length} of {filteredTemplates.length} templates
+                    </p>
+                    
+                    {/* Template Grid */}
+                    {filteredTemplates.length === 0 ? (
+                      <div className="py-6 text-center">
+                        <p className="text-gray-500 text-sm">No templates match your search.</p>
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-2 gap-3 mb-4">
+                        {visibleTemplates.map(template => (
+                          <button
+                            key={template.id}
+                            onClick={() => handleSelectTemplate(template)}
+                            className={`text-left p-4 border transition-colors ${
+                              selectedTemplate?.id === template.id
+                                ? 'border-[#00E5FF] bg-[#00E5FF]/10'
+                                : 'border-gray-200 dark:border-[#2A2A2A] hover:border-[#00E5FF]/50'
+                            }`}
+                          >
+                            <div className="flex items-start justify-between">
+                              <div className="min-w-0 flex-1">
+                                <h4 className="font-medium text-black dark:text-white text-sm truncate">{template.name}</h4>
+                                <p className="text-xs text-gray-500 mt-1">{template.category}</p>
+                              </div>
+                              {template.is_custom && (
+                                <span className="text-[10px] text-[#00E5FF] uppercase flex-shrink-0 ml-2">Custom</span>
+                              )}
+                            </div>
+                            <div className="flex flex-wrap gap-1 mt-2">
+                              {template.experience_levels.map(level => (
+                                <span key={level} className="px-1.5 py-0.5 text-[10px] bg-gray-100 dark:bg-[#1A1A1A] text-gray-600 dark:text-gray-400 capitalize">
+                                  {level}
+                                </span>
+                              ))}
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                    
+                    {/* Show More */}
+                    {hasMore && (
+                      <button
+                        onClick={() => setVisibleCount(prev => prev + 4)}
+                        className="w-full py-2 text-sm text-[#00E5FF] border border-dashed border-[#00E5FF]/30 hover:border-[#00E5FF] hover:bg-[#00E5FF]/5 transition-colors mb-4"
+                      >
+                        Show more ({filteredTemplates.length - visibleCount} remaining)
+                      </button>
+                    )}
+                    
+                    <button
+                      onClick={handleSkipTemplate}
+                      className="text-sm text-gray-500 hover:text-[#00E5FF] transition-colors"
+                    >
+                      Skip and create from scratch →
+                    </button>
+                  </>
+                )}
+              </div>
+            )
+          })()}
 
           {/* Step 2: Configure Position */}
           {step === 2 && (
