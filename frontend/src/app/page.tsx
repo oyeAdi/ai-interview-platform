@@ -236,13 +236,16 @@ export default function DashboardPage() {
 
   // Sidebar handlers - with toggle support
   const handleAccountSelect = (accountId: string) => {
-    // Toggle: if clicking same account, deselect it
-    if (selectedAccount === accountId && sidebarType === 'account') {
+    // Toggle: if clicking same account, deselect it completely
+    if (selectedAccount === accountId) {
+      setSelectedAccount('')
+      setSelectedPosition('')
       setSidebarType(null)
       setSidebarId(null)
       return
     }
     setSelectedAccount(accountId)
+    setSelectedPosition('') // Clear position when switching accounts
     setSidebarType('account')
     setSidebarId(accountId)
   }
