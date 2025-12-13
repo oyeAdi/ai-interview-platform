@@ -4,8 +4,8 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
-import AccountSelector from '@/components/AccountSelector'
-import PositionCard from '@/components/PositionCard'
+import AccountGrid from '@/components/AccountGrid'
+import PositionGrid from '@/components/PositionGrid'
 import DataModelPanel from '@/components/DataModelPanel'
 import CandidateSelector from '@/components/CandidateSelector'
 import FileUpload from '@/components/FileUpload'
@@ -55,26 +55,31 @@ export default function DashboardPage() {
   
   // State
   const [accounts, setAccounts] = useState<Account[]>([])
-  const [positions, setPositions] = useState<Position[]>([])
+  const [allPositions, setAllPositions] = useState<Position[]>([]) // All positions for account stats
+  const [accountPositions, setAccountPositions] = useState<Position[]>([]) // Positions for selected account
   const [selectedAccount, setSelectedAccount] = useState('')
   const [selectedPosition, setSelectedPosition] = useState('')
   const [selectedCandidate, setSelectedCandidate] = useState('')
   const [resumeText, setResumeText] = useState('')
   const [resumeFile, setResumeFile] = useState<File | null>(null)
   const [loading, setLoading] = useState(true)
+  const [positionsLoading, setPositionsLoading] = useState(false)
   const [startingInterview, setStartingInterview] = useState(false)
   const [dataModel, setDataModel] = useState<DataModel | null>(null)
   const [showAddPosition, setShowAddPosition] = useState(false)
   const [showAddAccount, setShowAddAccount] = useState(false)
 
-  // Load accounts on mount
+  // Load accounts and all positions on mount
   useEffect(() => {
-    fetch('http://localhost:8000/api/accounts')
-      .then(res => res.json())
-      .then(data => {
-        setAccounts(data.accounts || [])
-        if (data.accounts?.length > 0) {
-          setSelectedAccount(data.accounts[0].id)
+    Promise.all([
+      fetch('http://localhost:8000/api/accounts').then(res => res.json()),
+      fetch('http://localhost:8000/api/positions').then(res => res.json())
+    ])
+      .then(([accountsData, positionsData]) => {
+        setAccounts(accountsData.accounts || [])
+        setAllPositions(positionsData.positions || [])
+        if (accountsData.accounts?.length > 0) {
+          setSelectedAccount(accountsData.accounts[0].id)
         }
         setLoading(false)
       })
@@ -87,20 +92,20 @@ export default function DashboardPage() {
   // Load positions when account changes
   useEffect(() => {
     if (selectedAccount) {
-      setLoading(true)
-      fetch(`http://localhost:8000/api/accounts/${selectedAccount}/positions?status=open`)
+      setPositionsLoading(true)
+      fetch(`http://localhost:8000/api/accounts/${selectedAccount}/positions`)
         .then(res => res.json())
         .then(data => {
-          setPositions(data.positions || [])
+          setAccountPositions(data.positions || [])
           setSelectedPosition('')
           setSelectedCandidate('')
           setResumeText('')
           setDataModel(null)
-          setLoading(false)
+          setPositionsLoading(false)
         })
         .catch(err => {
           console.error('Error loading positions:', err)
-          setLoading(false)
+          setPositionsLoading(false)
         })
     }
   }, [selectedAccount])
@@ -108,17 +113,16 @@ export default function DashboardPage() {
   // Update data model when position changes
   useEffect(() => {
     if (selectedPosition) {
-      const position = positions.find(p => p.id === selectedPosition)
+      const position = accountPositions.find(p => p.id === selectedPosition)
       if (position?.data_model) {
         setDataModel(position.data_model)
       }
-      // Clear candidate selection when position changes
       setSelectedCandidate('')
       setResumeText('')
     } else {
       setDataModel(null)
     }
-  }, [selectedPosition, positions])
+  }, [selectedPosition, accountPositions])
 
   const handleCandidateSelect = (candidateId: string, resumeTextFromCandidate?: string) => {
     setSelectedCandidate(candidateId)
@@ -194,7 +198,35 @@ export default function DashboardPage() {
     }
   }
 
-  const selectedPositionData = positions.find(p => p.id === selectedPosition)
+  const refreshPositions = () => {
+    if (selectedAccount) {
+      fetch(`http://localhost:8000/api/accounts/${selectedAccount}/positions`)
+        .then(res => res.json())
+        .then(data => {
+          setAccountPositions(data.positions || [])
+        })
+    }
+    // Also refresh all positions for account stats
+    fetch('http://localhost:8000/api/positions')
+      .then(res => res.json())
+      .then(data => {
+        setAllPositions(data.positions || [])
+      })
+  }
+
+  const refreshAccounts = () => {
+    fetch('http://localhost:8000/api/accounts')
+      .then(res => res.json())
+      .then(data => {
+        setAccounts(data.accounts || [])
+        if (data.accounts && data.accounts.length > 0 && !selectedAccount) {
+          setSelectedAccount(data.accounts[0].id)
+        }
+      })
+  }
+
+  const selectedAccountData = accounts.find(a => a.id === selectedAccount)
+  const selectedPositionData = accountPositions.find(p => p.id === selectedPosition)
 
   return (
     <div className="min-h-screen flex flex-col bg-white dark:bg-black transition-colors duration-200">
@@ -203,181 +235,158 @@ export default function DashboardPage() {
       <main className="flex-1">
         {/* Hero Section */}
         <section className="border-b border-gray-200 dark:border-[#2A2A2A]">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-            <h1 className="text-5xl md:text-6xl font-light text-black dark:text-white leading-tight mb-6">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+            <h1 className="text-4xl md:text-5xl font-light text-black dark:text-white leading-tight mb-4">
               Interview
-              <br />
-              <span className="font-normal">Dashboard</span>
+              <span className="font-normal"> Dashboard</span>
             </h1>
-            <p className="text-xl text-gray-600 dark:text-gray-400 max-w-2xl font-light">
-              Configure and launch AI-powered interviews for your candidates with intelligent, adaptive assessments.
+            <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl font-light">
+              Configure and launch AI-powered interviews for your candidates.
             </p>
           </div>
         </section>
 
         {/* Main Content */}
-        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
-            {/* Left Column - Account & Position Selection */}
-            <div className="lg:col-span-8 space-y-12">
-              {/* Account Selector */}
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          <div className="space-y-12">
+            {/* Accounts Section */}
+            <div>
+              <h2 className="text-xs font-medium text-[#00E5FF] uppercase tracking-[0.2em] mb-6">
+                Accounts ({accounts.length})
+              </h2>
+              <AccountGrid
+                accounts={accounts}
+                positions={allPositions}
+                selectedAccount={selectedAccount}
+                onSelectAccount={setSelectedAccount}
+                onAddAccount={() => setShowAddAccount(true)}
+                loading={loading}
+              />
+            </div>
+
+            {/* Positions Section */}
+            {selectedAccount && (
               <div>
-                <h2 className="text-xs font-medium text-epam-cyan uppercase tracking-[0.2em] mb-6">
-                  Select Account
+                <h2 className="text-xs font-medium text-[#00E5FF] uppercase tracking-[0.2em] mb-6">
+                  Positions {selectedAccountData && `for ${selectedAccountData.name}`}
                 </h2>
-                <AccountSelector
-                  accounts={accounts}
-                  selectedAccount={selectedAccount}
-                  onSelectAccount={setSelectedAccount}
-                  onAddAccount={() => setShowAddAccount(true)}
-                  loading={loading}
+                <PositionGrid
+                  positions={accountPositions}
+                  selectedPosition={selectedPosition}
+                  onSelectPosition={setSelectedPosition}
+                  onAddPosition={() => setShowAddPosition(true)}
+                  accountName={selectedAccountData?.name}
+                  loading={positionsLoading}
                 />
               </div>
+            )}
 
-              {/* Positions Grid */}
-              <div>
-                <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-xs font-medium text-epam-cyan uppercase tracking-[0.2em]">
-                    Open Positions ({positions.length})
-                  </h2>
-                  <button
-                    type="button"
-                    className="text-sm text-gray-500 dark:text-gray-400 hover:text-epam-cyan transition-colors flex items-center gap-1"
-                    onClick={() => setShowAddPosition(true)}
-                  >
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                    </svg>
-                    Add
-                  </button>
-                </div>
-
-                <div className="border border-gray-200 dark:border-[#2A2A2A]">
-                  {loading ? (
-                    <div className="flex items-center justify-center py-20">
-                      <div className="w-6 h-6 border-2 border-gray-300 dark:border-gray-600 border-t-epam-cyan rounded-full animate-spin"></div>
-                    </div>
-                  ) : positions.length === 0 ? (
-                    <div className="text-center py-20 text-gray-500 dark:text-gray-400">
-                      No open positions for this account
-                    </div>
-                  ) : (
-                    <div className="divide-y divide-gray-200 dark:divide-[#2A2A2A]">
-                      {positions.map(position => (
-                        <PositionCard
-                          key={position.id}
-                          position={position}
-                          isSelected={selectedPosition === position.id}
-                          onSelect={setSelectedPosition}
-                        />
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Data Model Configuration */}
-              {selectedPosition && dataModel && (
-                <div>
-                  <h2 className="text-xs font-medium text-epam-cyan uppercase tracking-[0.2em] mb-6">
+            {/* Configuration & Launch Section */}
+            {selectedPosition && (
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                {/* Left: Configuration */}
+                <div className="lg:col-span-8">
+                  <h2 className="text-xs font-medium text-[#00E5FF] uppercase tracking-[0.2em] mb-6">
                     Interview Configuration
                   </h2>
-                  <DataModelPanel
-                    dataModel={dataModel}
-                    onUpdate={handleDataModelUpdate}
-                    isEditable={true}
-                  />
-                </div>
-              )}
-            </div>
-
-            {/* Right Column - Candidate Selection & Start */}
-            <div className="lg:col-span-4 space-y-8">
-              {/* Selected Position Summary */}
-              {selectedPositionData && (
-                <div className="border-l-2 border-epam-cyan pl-6">
-                  <h3 className="font-medium text-black dark:text-white mb-1">
-                    {selectedPositionData.title}
-                  </h3>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">
-                    {selectedPositionData.data_model.duration_minutes} min • {selectedPositionData.data_model.experience_level}
-                  </p>
-                </div>
-              )}
-
-              {/* Candidate Selection - Sorted by Match Score */}
-              <div>
-                <h2 className="text-xs font-medium text-epam-cyan uppercase tracking-[0.2em] mb-6">
-                  Select Candidate
-                </h2>
-                <div className="border border-gray-200 dark:border-[#2A2A2A] p-4">
-                  <CandidateSelector
-                    positionId={selectedPosition || null}
-                    selectedCandidate={selectedCandidate}
-                    onSelectCandidate={handleCandidateSelect}
-                  />
-                </div>
-              </div>
-
-              {/* Or Upload Custom Resume */}
-              <div>
-                <h2 className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-[0.2em] mb-4">
-                  Or Upload Resume
-                </h2>
-                <FileUpload
-                  label="Resume"
-                  text={selectedCandidate ? '' : resumeText}
-                  onTextChange={(text) => {
-                    setResumeText(text)
-                    if (text) setSelectedCandidate('')
-                  }}
-                  file={resumeFile}
-                  onFileChange={(file) => {
-                    setResumeFile(file)
-                    if (file) setSelectedCandidate('')
-                  }}
-                  disabled={!!selectedCandidate}
-                />
-              </div>
-
-              {/* Start Buttons */}
-              <div className="space-y-3 pt-4">
-                <button
-                  onClick={() => handleStartInterview(false)}
-                  disabled={startingInterview || !selectedPosition || (!resumeText && !resumeFile && !selectedCandidate)}
-                  className="btn-primary w-full flex items-center justify-center gap-2 h-12 disabled:opacity-40"
-                >
-                  {startingInterview ? (
-                    <>
-                      <div className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin"></div>
-                      Starting...
-                    </>
-                  ) : (
-                    <>
-                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 010 1.971l-11.54 6.347a1.125 1.125 0 01-1.667-.985V5.653z" />
-                      </svg>
-                      Start Interview
-                    </>
+                  {dataModel && (
+                    <DataModelPanel
+                      dataModel={dataModel}
+                      onUpdate={handleDataModelUpdate}
+                      isEditable={true}
+                    />
                   )}
-                </button>
-                
-                <button
-                  onClick={() => handleStartInterview(true)}
-                  disabled={startingInterview || !selectedPosition || (!resumeText && !resumeFile && !selectedCandidate)}
-                  className="btn-secondary w-full flex items-center justify-center gap-2 h-12 disabled:opacity-40"
-                >
-                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456z" />
-                  </svg>
-                  Start as Expert
-                </button>
-                
-                <p className="text-xs text-gray-500 dark:text-gray-500 text-center pt-2">
-                  Expert mode: Review and approve AI questions
-                </p>
+                </div>
+
+                {/* Right: Candidate & Start */}
+                <div className="lg:col-span-4 space-y-6">
+                  {/* Selected Position Summary */}
+                  {selectedPositionData && (
+                    <div className="border-l-2 border-[#00E5FF] pl-4 py-1">
+                      <h3 className="font-medium text-black dark:text-white">
+                        {selectedPositionData.title}
+                      </h3>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                        {selectedPositionData.data_model.duration_minutes} min • {selectedPositionData.data_model.experience_level}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Candidate Selection */}
+                  <div>
+                    <h3 className="text-xs font-medium text-gray-500 uppercase tracking-[0.15em] mb-4">
+                      Select Candidate
+                    </h3>
+                    <div className="border border-gray-200 dark:border-[#2A2A2A] p-4">
+                      <CandidateSelector
+                        positionId={selectedPosition || null}
+                        selectedCandidate={selectedCandidate}
+                        onSelectCandidate={handleCandidateSelect}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Upload Resume */}
+                  <div>
+                    <h3 className="text-xs font-medium text-gray-500 uppercase tracking-[0.15em] mb-4">
+                      Or Upload Resume
+                    </h3>
+                    <FileUpload
+                      label="Resume"
+                      text={selectedCandidate ? '' : resumeText}
+                      onTextChange={(text) => {
+                        setResumeText(text)
+                        if (text) setSelectedCandidate('')
+                      }}
+                      file={resumeFile}
+                      onFileChange={(file) => {
+                        setResumeFile(file)
+                        if (file) setSelectedCandidate('')
+                      }}
+                      disabled={!!selectedCandidate}
+                    />
+                  </div>
+
+                  {/* Start Buttons */}
+                  <div className="space-y-3 pt-2">
+                    <button
+                      onClick={() => handleStartInterview(false)}
+                      disabled={startingInterview || !selectedPosition || (!resumeText && !resumeFile && !selectedCandidate)}
+                      className="btn-primary w-full flex items-center justify-center gap-2 h-12 disabled:opacity-40"
+                    >
+                      {startingInterview ? (
+                        <>
+                          <div className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin"></div>
+                          Starting...
+                        </>
+                      ) : (
+                        <>
+                          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 010 1.971l-11.54 6.347a1.125 1.125 0 01-1.667-.985V5.653z" />
+                          </svg>
+                          Start Interview
+                        </>
+                      )}
+                    </button>
+                    
+                    <button
+                      onClick={() => handleStartInterview(true)}
+                      disabled={startingInterview || !selectedPosition || (!resumeText && !resumeFile && !selectedCandidate)}
+                      className="btn-secondary w-full flex items-center justify-center gap-2 h-12 disabled:opacity-40"
+                    >
+                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456z" />
+                      </svg>
+                      Start as Expert
+                    </button>
+                    
+                    <p className="text-xs text-gray-500 text-center pt-1">
+                      Expert mode: Review and approve AI questions
+                    </p>
+                  </div>
+                </div>
               </div>
-            </div>
+            )}
           </div>
         </section>
       </main>
@@ -390,16 +399,7 @@ export default function DashboardPage() {
         onClose={() => setShowAddPosition(false)}
         accounts={accounts}
         selectedAccountId={selectedAccount}
-        onPositionCreated={() => {
-          // Refresh positions list
-          if (selectedAccount) {
-            fetch(`http://localhost:8000/api/accounts/${selectedAccount}/positions?status=open`)
-              .then(res => res.json())
-              .then(data => {
-                setPositions(data.positions || [])
-              })
-          }
-        }}
+        onPositionCreated={refreshPositions}
       />
 
       {/* Add Account Modal */}
@@ -407,12 +407,11 @@ export default function DashboardPage() {
         isOpen={showAddAccount}
         onClose={() => setShowAddAccount(false)}
         onAccountCreated={() => {
-          // Refresh accounts list
+          refreshAccounts()
+          // Select the newly created account
           fetch('http://localhost:8000/api/accounts')
             .then(res => res.json())
             .then(data => {
-              setAccounts(data.accounts || [])
-              // Select the newly created account (last one)
               if (data.accounts && data.accounts.length > 0) {
                 setSelectedAccount(data.accounts[data.accounts.length - 1].id)
               }
