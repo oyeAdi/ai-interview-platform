@@ -151,7 +151,7 @@ def initialize_data_files():
         POSITIONS_FILE: {"positions": [], "experience_levels": ["junior", "mid", "senior", "lead"], "expectation_levels": ["basic", "medium", "high"], "status_options": ["open", "closed", "on_hold"]},
         QUESTION_BANK_FILE: {"questions": []},
         WIKI_FILE: {"entries": [], "categories": []},
-        SESSIONS_FILE: {"sessions": []},
+        SESSIONS_FILE: {"sessions": {}},
         RESULTS_FILE: {"results": []},
         os.path.join(Config.JDS_DIR, "jds.json"): {"jds": []},
         os.path.join(Config.RESUMES_DIR, "resumes.json"): {"resumes": []},
