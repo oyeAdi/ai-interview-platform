@@ -1347,9 +1347,112 @@ async def search_wiki(q: str, category: Optional[str] = None):
     
     return {"results": results[:10], "total": len(results)}
 
+def gather_wiki_context(question: str, category: str = None) -> str:
+    """Gather relevant code context for wiki question"""
+    context_parts = []
+    
+    # Keywords to search for in the question
+    keywords = question.lower()
+    
+    # Add relevant context based on question content
+    if "matching" in keywords or "candidate" in keywords:
+        context_parts.append("File: backend/main.py - Candidate Matching Logic")
+        context_parts.append("""
+def calculate_candidate_match_score(position, candidate):
+    - Calculates skill match between position requirements and candidate skills
+    - Uses primary language filter (Python/Java)
+    - Applies partial skill matching (e.g., Django -> Python)
+    - Scores experience level alignment
+    - Returns percentage match (0-100)
+""")
+    
+    if "interview" in keywords or "flow" in keywords:
+        context_parts.append("File: backend/core/interview_controller.py - Interview Flow")
+        context_parts.append("""
+class InterviewController:
+    - Manages interview lifecycle (start, questions, answers, end)
+    - Handles WebSocket communication
+    - Coordinates with QuestionManager and Evaluator
+    - Supports expert mode (admin approval of follow-ups)
+""")
+    
+    if "question" in keywords or "generation" in keywords:
+        context_parts.append("File: backend/core/question_manager.py - Question Generation")
+        context_parts.append("""
+class QuestionManager:
+    - Loads question bank from JSON files
+    - Selects questions based on topic and difficulty
+    - Tracks asked questions to avoid duplicates
+    - Supports multiple question types (coding, conceptual, etc.)
+""")
+    
+    if "evaluation" in keywords or "scoring" in keywords:
+        context_parts.append("File: backend/evaluation/evaluator.py - Evaluation Logic")
+        context_parts.append("""
+class Evaluator:
+    - Evaluates candidate responses
+    - Uses keyword coverage scoring
+    - Applies completeness scoring
+    - Calculates overall score (0-100)
+    - Integrates with LLM for nuanced evaluation
+""")
+    
+    if "follow" in keywords or "strategy" in keywords:
+        context_parts.append("File: backend/strategies/*.py - Follow-up Strategies")
+        context_parts.append("""
+Strategies available:
+- DepthFocused: Deep dive on weak areas
+- BreadthFocused: Cover more topics
+- Clarification: Ask for more details
+- Challenge: Harder follow-ups
+Selection based on evaluation score.
+""")
+    
+    if "position" in keywords or "account" in keywords:
+        context_parts.append("File: backend/models/*.json - Data Models")
+        context_parts.append("""
+Data structure:
+- organizations.json: Top-level organization (EPAM)
+- accounts.json: Client accounts (Uber, Amazon, etc.)
+- positions.json: Open positions with data_model config
+- position_templates.json: Reusable position templates
+""")
+    
+    if "expert" in keywords or "admin" in keywords:
+        context_parts.append("File: backend/main.py - Expert Mode APIs")
+        context_parts.append("""
+Expert Mode:
+- POST /api/expert/approve: Approve AI-generated follow-up
+- POST /api/expert/edit: Modify follow-up before sending
+- POST /api/expert/override: Replace with custom question
+- Admin can review all AI suggestions before candidate sees them
+""")
+    
+    # Add general context if nothing specific matched
+    if not context_parts:
+        context_parts.append("AI Interview Platform - General Architecture")
+        context_parts.append("""
+Backend (FastAPI):
+- main.py: REST APIs and WebSocket endpoints
+- core/: Interview controller, question manager
+- evaluation/: Response evaluation logic
+- strategies/: Follow-up question strategies
+- llm/: Gemini integration for AI features
+- models/: JSON data storage
+
+Frontend (Next.js):
+- Dashboard: Account/Position management
+- Interview: Candidate and Admin views
+- Components: Reusable UI elements
+""")
+    
+    return "\n".join(context_parts)
+
 @app.post("/api/wiki/ask")
 async def ask_wiki(request: WikiAskRequest):
     """Ask a question - returns cached answer or generates new one (Admin only)"""
+    from backend.llm.gemini_client import GeminiClient
+    
     wiki_data = load_json_file(WIKI_FILE)
     
     # Update query count
@@ -1374,39 +1477,81 @@ async def ask_wiki(request: WikiAskRequest):
             "followup_suggestion": "Would you like to see the code architecture for this?"
         }
     
-    # Cache miss - need to generate with LLM
+    # Cache miss - generate with LLM
     wiki_data["metadata"]["llm_calls"] = wiki_data["metadata"].get("llm_calls", 0) + 1
     
-    # For now, return a placeholder (LLM integration in next phase)
-    # In Phase 2, this will call Gemini to generate the answer
-    placeholder_answer = f"I don't have a cached answer for: '{request.question}'. This will be answered by AI in the next phase."
-    
-    # Create new entry (will be populated by LLM in Phase 2)
-    new_entry = {
-        "id": f"wiki_{uuid.uuid4().hex[:8]}",
-        "question": request.question,
-        "answer": placeholder_answer,
-        "category": request.category or "General",
-        "code_refs": [],
-        "keywords": request.question.lower().split()[:5],
-        "created_at": datetime.now().isoformat(),
-        "auto_generated": True,
-        "needs_llm": True  # Flag for Phase 2
-    }
-    
-    if "entries" not in wiki_data:
-        wiki_data["entries"] = []
-    wiki_data["entries"].append(new_entry)
-    save_json_file(WIKI_FILE, wiki_data)
-    
-    return {
-        "source": "pending_llm",
-        "answer": placeholder_answer,
-        "question": request.question,
-        "category": new_entry["category"],
-        "code_refs": [],
-        "followup_suggestion": None
-    }
+    try:
+        # Gather relevant code context
+        code_context = gather_wiki_context(request.question, request.category)
+        
+        # Generate answer using LLM
+        gemini = GeminiClient()
+        result = gemini.answer_codebase_question(
+            question=request.question,
+            code_context=code_context,
+            category=request.category
+        )
+        
+        # Generate follow-up suggestion
+        followup = gemini.generate_followup_suggestion(
+            question=request.question,
+            answer=result.get("answer", "")
+        )
+        
+        # Create new entry with LLM-generated content
+        new_entry = {
+            "id": f"wiki_{uuid.uuid4().hex[:8]}",
+            "question": request.question,
+            "answer": result.get("answer", ""),
+            "category": request.category or "General",
+            "code_refs": result.get("code_refs", []),
+            "keywords": result.get("keywords", request.question.lower().split()[:5]),
+            "created_at": datetime.now().isoformat(),
+            "auto_generated": True
+        }
+        
+        if "entries" not in wiki_data:
+            wiki_data["entries"] = []
+        wiki_data["entries"].append(new_entry)
+        save_json_file(WIKI_FILE, wiki_data)
+        
+        return {
+            "source": "llm",
+            "answer": result.get("answer", ""),
+            "question": request.question,
+            "category": new_entry["category"],
+            "code_refs": result.get("code_refs", []),
+            "followup_suggestion": followup
+        }
+        
+    except Exception as e:
+        print(f"Error generating wiki answer: {e}")
+        # Fallback - save question for later
+        new_entry = {
+            "id": f"wiki_{uuid.uuid4().hex[:8]}",
+            "question": request.question,
+            "answer": f"Unable to generate answer at this time. Error: {str(e)}",
+            "category": request.category or "General",
+            "code_refs": [],
+            "keywords": request.question.lower().split()[:5],
+            "created_at": datetime.now().isoformat(),
+            "auto_generated": True,
+            "needs_retry": True
+        }
+        
+        if "entries" not in wiki_data:
+            wiki_data["entries"] = []
+        wiki_data["entries"].append(new_entry)
+        save_json_file(WIKI_FILE, wiki_data)
+        
+        return {
+            "source": "error",
+            "answer": f"Unable to generate answer. Please try again. Error: {str(e)[:100]}",
+            "question": request.question,
+            "category": new_entry["category"],
+            "code_refs": [],
+            "followup_suggestion": None
+        }
 
 @app.get("/api/wiki/entries")
 async def get_wiki_entries(category: Optional[str] = None, limit: int = 20):
@@ -1464,6 +1609,29 @@ async def get_wiki_stats():
         "last_indexed": metadata.get("last_indexed"),
         "categories": len(wiki_data.get("categories", []))
     }
+
+class ReindexRequest(BaseModel):
+    use_llm: bool = False
+    category: Optional[str] = None
+
+@app.post("/api/wiki/reindex")
+async def reindex_wiki(request: ReindexRequest):
+    """Manually trigger wiki reindexing (Admin only)"""
+    from backend.wiki_indexer import run_indexer
+    
+    try:
+        categories = [request.category] if request.category else None
+        run_indexer(use_llm=request.use_llm, categories_to_index=categories)
+        
+        # Return updated stats
+        wiki_data = load_json_file(WIKI_FILE)
+        return {
+            "status": "success",
+            "total_entries": len(wiki_data.get("entries", [])),
+            "last_indexed": wiki_data.get("metadata", {}).get("last_indexed")
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Reindexing failed: {str(e)}")
 
 if __name__ == "__main__":
     import uvicorn

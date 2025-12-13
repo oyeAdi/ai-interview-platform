@@ -429,3 +429,237 @@ Write ONLY the narrative paragraph, nothing else:"""
         
         return "".join(parts)
 
+    # ==================== Wiki Documentation Methods ====================
+    
+    def answer_codebase_question(self, question: str, code_context: str, category: str = None) -> Dict:
+        """
+        Generate an answer about the codebase using LLM.
+        Returns: { "answer": str, "code_refs": List[str], "keywords": List[str] }
+        """
+        prompt = f"""You are a documentation assistant for the AI Interview Platform codebase.
+
+Question: {question}
+
+Relevant code context:
+{code_context[:3000]}
+
+Category hint: {category or "General"}
+
+Provide a clear, concise answer about the BUSINESS LOGIC.
+
+Rules:
+- Focus on explaining HOW the system works, not just WHAT it does
+- Include specific file references where the logic lives
+- Use technical terms correctly
+- Keep the answer under 300 words
+- Be direct and helpful
+
+Format your response as:
+ANSWER: [Your detailed answer here]
+CODE_REFS: [comma-separated list of file paths, e.g., backend/main.py, frontend/src/components/XYZ.tsx]
+KEYWORDS: [5-8 relevant keywords for searching]
+"""
+
+        try:
+            response = self.model.generate_content(
+                prompt,
+                generation_config=genai.types.GenerationConfig(
+                    max_output_tokens=1024,
+                    temperature=0.3  # Lower temperature for factual answers
+                )
+            )
+            
+            # Extract text from response
+            response_text = ""
+            if hasattr(response, 'candidates') and response.candidates:
+                candidate = response.candidates[0]
+                if hasattr(candidate, 'content') and hasattr(candidate.content, 'parts'):
+                    parts = candidate.content.parts
+                    if parts:
+                        response_text = ''.join([part.text for part in parts if hasattr(part, 'text')]).strip()
+            
+            if not response_text and hasattr(response, 'text'):
+                response_text = response.text.strip()
+            
+            # Parse response
+            answer = ""
+            code_refs = []
+            keywords = []
+            
+            lines = response_text.split('\n')
+            current_section = None
+            
+            for line in lines:
+                if line.startswith('ANSWER:'):
+                    current_section = 'answer'
+                    answer = line.replace('ANSWER:', '').strip()
+                elif line.startswith('CODE_REFS:'):
+                    current_section = 'refs'
+                    refs_text = line.replace('CODE_REFS:', '').strip()
+                    code_refs = [r.strip() for r in refs_text.split(',') if r.strip()]
+                elif line.startswith('KEYWORDS:'):
+                    current_section = 'keywords'
+                    kw_text = line.replace('KEYWORDS:', '').strip()
+                    keywords = [k.strip().lower() for k in kw_text.split(',') if k.strip()]
+                elif current_section == 'answer' and line.strip():
+                    answer += ' ' + line.strip()
+            
+            # Fallback if parsing failed
+            if not answer:
+                answer = response_text
+            
+            return {
+                "answer": answer,
+                "code_refs": code_refs,
+                "keywords": keywords
+            }
+            
+        except Exception as e:
+            print(f"Error generating wiki answer: {e}")
+            return {
+                "answer": f"I couldn't generate an answer for: '{question}'. Please try rephrasing your question.",
+                "code_refs": [],
+                "keywords": question.lower().split()[:5]
+            }
+    
+    def generate_wiki_documentation(self, entry_name: str, code_context: str, focus: str = "business_logic") -> Dict:
+        """
+        Generate comprehensive documentation for a codebase entry.
+        Used during initial indexing.
+        Returns: { "question": str, "answer": str, "code_refs": List[str], "keywords": List[str] }
+        """
+        prompt = f"""You are documenting the AI Interview Platform codebase.
+
+Entry to document: {entry_name}
+
+Code context:
+{code_context[:4000]}
+
+Focus: {focus}
+
+Generate documentation in the form of a Q&A entry.
+
+Rules:
+- Create a clear, searchable question about this functionality
+- Answer should explain the business logic and implementation
+- Include specific file paths as references
+- Add relevant keywords for search
+- Be comprehensive but concise (max 400 words for answer)
+
+Format:
+QUESTION: [A natural question someone might ask about this, e.g., "How does candidate matching work?"]
+ANSWER: [Detailed explanation of the business logic]
+CODE_REFS: [file paths, comma-separated]
+KEYWORDS: [8-10 search keywords]
+"""
+
+        try:
+            response = self.model.generate_content(
+                prompt,
+                generation_config=genai.types.GenerationConfig(
+                    max_output_tokens=1500,
+                    temperature=0.2
+                )
+            )
+            
+            # Extract text
+            response_text = ""
+            if hasattr(response, 'candidates') and response.candidates:
+                candidate = response.candidates[0]
+                if hasattr(candidate, 'content') and hasattr(candidate.content, 'parts'):
+                    parts = candidate.content.parts
+                    if parts:
+                        response_text = ''.join([part.text for part in parts if hasattr(part, 'text')]).strip()
+            
+            if not response_text and hasattr(response, 'text'):
+                response_text = response.text.strip()
+            
+            # Parse response
+            question = ""
+            answer = ""
+            code_refs = []
+            keywords = []
+            
+            lines = response_text.split('\n')
+            current_section = None
+            
+            for line in lines:
+                if line.startswith('QUESTION:'):
+                    current_section = 'question'
+                    question = line.replace('QUESTION:', '').strip()
+                elif line.startswith('ANSWER:'):
+                    current_section = 'answer'
+                    answer = line.replace('ANSWER:', '').strip()
+                elif line.startswith('CODE_REFS:'):
+                    current_section = 'refs'
+                    refs_text = line.replace('CODE_REFS:', '').strip()
+                    code_refs = [r.strip() for r in refs_text.split(',') if r.strip()]
+                elif line.startswith('KEYWORDS:'):
+                    current_section = 'keywords'
+                    kw_text = line.replace('KEYWORDS:', '').strip()
+                    keywords = [k.strip().lower() for k in kw_text.split(',') if k.strip()]
+                elif current_section == 'question' and line.strip() and not line.startswith('ANSWER'):
+                    question += ' ' + line.strip()
+                elif current_section == 'answer' and line.strip() and not line.startswith('CODE_REFS'):
+                    answer += ' ' + line.strip()
+            
+            return {
+                "question": question or f"How does {entry_name} work?",
+                "answer": answer or "Documentation pending.",
+                "code_refs": code_refs,
+                "keywords": keywords or entry_name.lower().split()
+            }
+            
+        except Exception as e:
+            print(f"Error generating wiki documentation: {e}")
+            return {
+                "question": f"How does {entry_name} work?",
+                "answer": f"Documentation for {entry_name} is pending generation.",
+                "code_refs": [],
+                "keywords": entry_name.lower().split()
+            }
+    
+    def generate_followup_suggestion(self, question: str, answer: str) -> str:
+        """
+        Generate a follow-up question suggestion based on the answer.
+        Returns: A suggested follow-up question string
+        """
+        prompt = f"""Based on this Q&A about a codebase, suggest ONE follow-up question the user might want to ask.
+
+Question: {question}
+Answer: {answer[:500]}
+
+Rules:
+- Suggest a natural follow-up (e.g., about architecture, implementation details, or related concepts)
+- Keep it short and specific
+- Make it actionable
+
+Respond with ONLY the follow-up question, nothing else.
+"""
+
+        try:
+            response = self.model.generate_content(
+                prompt,
+                generation_config=genai.types.GenerationConfig(
+                    max_output_tokens=100,
+                    temperature=0.5
+                )
+            )
+            
+            followup = ""
+            if hasattr(response, 'candidates') and response.candidates:
+                candidate = response.candidates[0]
+                if hasattr(candidate, 'content') and hasattr(candidate.content, 'parts'):
+                    parts = candidate.content.parts
+                    if parts:
+                        followup = ''.join([part.text for part in parts if hasattr(part, 'text')]).strip()
+            
+            if not followup and hasattr(response, 'text'):
+                followup = response.text.strip()
+            
+            return followup if followup else "Would you like to see the code architecture for this?"
+            
+        except Exception as e:
+            print(f"Error generating follow-up suggestion: {e}")
+            return "Would you like to see the code architecture for this?"
+
