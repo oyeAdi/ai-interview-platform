@@ -868,10 +868,14 @@ async def websocket_endpoint(websocket: WebSocket, view: str = "candidate"):
                             is_expert = view == "expert"
                             
                             # Create new controller for this session
+                            # IMPORTANT: Create controller first, then override session_id BEFORE logger initialization
                             controller = InterviewController(language, session_info.get("position_id"), expert_mode=is_expert)
-                            controller.context_manager.session_id = session_id
                             
-                            # Initialize session in logger
+                            # Override the auto-generated session_id with the one from sessions.json
+                            controller.context_manager.session_id = session_id
+                            controller.context_manager.context["interview_context"]["session_id"] = session_id
+                            
+                            # Initialize session in logger with the correct session_id
                             logger.initialize_session(session_id, language, session_info.get("position_id"))
                             
                             # Update session status to active
