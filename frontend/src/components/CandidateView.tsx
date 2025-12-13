@@ -4,6 +4,7 @@ import { useEffect, useState, useRef, lazy, Suspense } from 'react'
 import { useRouter } from 'next/navigation'
 import AnswerInput from './AnswerInput'
 import EndInterviewModal from './EndInterviewModal'
+import { apiUrl, wsUrl } from '@/config/api'
 
 // Lazy load Monaco editor for better performance
 const CodeEditor = lazy(() => import('./CodeEditor'))
@@ -46,7 +47,7 @@ export default function CandidateView({ sessionId, language }: CandidateViewProp
 
     const connect = () => {
       setConnectionStatus('connecting')
-      const websocket = new WebSocket(`ws://localhost:8000/ws?view=candidate`)
+      const websocket = new WebSocket(wsUrl('ws?view=candidate'))
       wsRef.current = websocket
       
       websocket.onopen = () => {
@@ -163,7 +164,7 @@ export default function CandidateView({ sessionId, language }: CandidateViewProp
   const handleEndInterview = async () => {
     setIsEndingInterview(true)
     try {
-      const response = await fetch(`http://localhost:8000/api/interview/${sessionId}/end`, {
+      const response = await fetch(apiUrl(`api/interview/${sessionId}/end`), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

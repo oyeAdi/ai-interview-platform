@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { apiUrl } from '@/config/api'
 
 interface Skill {
   skill: string
@@ -90,7 +91,7 @@ export default function AddPositionModal({
     
     setLoading(true)
     setLoadError(null)
-    fetch('http://localhost:8000/api/templates')
+    fetch(apiUrl('api/templates'))
       .then(res => {
         if (!res.ok) throw new Error(`Failed to load templates: ${res.status}`)
         return res.json()
@@ -175,7 +176,7 @@ export default function AddPositionModal({
 
     try {
       // Create position
-      const response = await fetch(`http://localhost:8000/api/accounts/${accountId}/positions`, {
+      const response = await fetch(apiUrl(`api/accounts/${accountId}/positions`), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -190,7 +191,7 @@ export default function AddPositionModal({
 
       // Save as template if requested
       if (saveAsTemplate && templateName.trim()) {
-        await fetch('http://localhost:8000/api/templates', {
+        await fetch(apiUrl('api/templates'), {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({

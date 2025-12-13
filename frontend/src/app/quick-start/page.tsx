@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { apiUrl } from '@/config/api'
 import { useRouter } from 'next/navigation'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
@@ -94,12 +95,12 @@ export default function QuickStartPage() {
 
   // Load JDs and Resumes on mount
   useEffect(() => {
-    fetch('http://localhost:8000/api/jds')
+    fetch(apiUrl('api/jds'))
       .then(res => res.json())
       .then(data => setJds(data.jds || []))
       .catch(err => console.error('Error loading JDs:', err))
     
-    fetch('http://localhost:8000/api/resumes')
+    fetch(apiUrl('api/resumes'))
       .then(res => res.json())
       .then(data => setResumes(data.resumes || []))
       .catch(err => console.error('Error loading Resumes:', err))
@@ -170,7 +171,7 @@ export default function QuickStartPage() {
       if (selectedResume) formData.append('resume_id', selectedResume)
       if (expertMode) formData.append('expert_mode', 'true')
 
-      const response = await fetch('http://localhost:8000/api/analyze-language', {
+      const response = await fetch(apiUrl('api/analyze-language'), {
         method: 'POST',
         body: formData,
       })

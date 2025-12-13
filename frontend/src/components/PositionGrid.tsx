@@ -108,7 +108,7 @@ export default function PositionGrid({
       const counts: Record<string, number> = {}
       for (const position of positions) {
         try {
-          const res = await fetch(`http://localhost:8000/api/positions/${position.id}/candidates`)
+          const res = await fetch(apiUrl(`api/positions/${position.id}/candidates`))
           const data = await res.json()
           // Only count candidates with meaningful match (score >= 30%)
           const matchedCount = data.candidates?.filter((c: { match_score: number }) => c.match_score >= 30).length || 0

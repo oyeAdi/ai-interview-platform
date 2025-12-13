@@ -1,6 +1,7 @@
 'use client'
 
 import { useSearchParams } from 'next/navigation'
+import { apiUrl } from '@/config/api'
 import { Suspense, useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import CandidateView from '@/components/CandidateView'
@@ -92,7 +93,7 @@ function InterviewSessionContent() {
       try {
         // Validate the token
         const response = await fetch(
-          `http://localhost:8000/api/interview/validate-token?session_id=${sessionId}&token=${token}`
+          apiUrl(`api/interview/validate-token?session_id=${sessionId}&token=${token}`)
         )
         
         if (!response.ok) {
@@ -114,7 +115,7 @@ function InterviewSessionContent() {
         
         // Get full session details
         const sessionResponse = await fetch(
-          `http://localhost:8000/api/interview/session/${sessionId}?token=${token}`
+          apiUrl(`api/interview/session/${sessionId}?token=${token}`)
         )
         
         if (!sessionResponse.ok) {

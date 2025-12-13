@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { apiUrl } from '@/config/api'
 
 interface Skill {
   skill: string
@@ -80,8 +81,8 @@ export default function PositionDetail({
 
     setLoading(true)
     Promise.all([
-      fetch(`http://localhost:8000/api/positions/${positionId}`).then(res => res.json()),
-      fetch(`http://localhost:8000/api/positions/${positionId}/candidates`).then(res => res.json()).catch(() => ({ candidates: [] }))
+      fetch(apiUrl(`api/positions/${positionId}`)).then(res => res.json()),
+      fetch(apiUrl(`api/positions/${positionId}/candidates`)).then(res => res.json()).catch(() => ({ candidates: [] }))
     ])
       .then(([positionData, candidatesData]) => {
         setPosition(positionData)
@@ -103,7 +104,7 @@ export default function PositionDetail({
 
     setSaving(true)
     try {
-      const response = await fetch(`http://localhost:8000/api/positions/${positionId}`, {
+      const response = await fetch(apiUrl(`api/positions/${positionId}`), {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -130,7 +131,7 @@ export default function PositionDetail({
   const handleDelete = async () => {
     setDeleting(true)
     try {
-      const response = await fetch(`http://localhost:8000/api/positions/${positionId}`, {
+      const response = await fetch(apiUrl(`api/positions/${positionId}`), {
         method: 'DELETE'
       })
 

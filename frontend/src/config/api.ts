@@ -13,3 +13,15 @@ export const apiUrl = (path: string) => {
   return `${API_BASE_URL}/${cleanPath}`;
 };
 
+/**
+ * Constructs a WebSocket URL
+ * @param path - WebSocket path (e.g., 'ws?view=admin')
+ * @returns WebSocket URL (e.g., 'ws://localhost:8000/ws?view=admin' locally, or 'wss://...' in production)
+ */
+export const wsUrl = (path: string) => {
+  // Convert http:// to ws:// and https:// to wss://
+  const baseUrl = API_BASE_URL.replace(/^http/, 'ws');
+  const cleanPath = path.startsWith('/') ? path.slice(1) : path;
+  return `${baseUrl}/${cleanPath}`;
+};
+

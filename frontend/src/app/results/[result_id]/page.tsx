@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { apiUrl } from '@/config/api'
 import { useParams, useRouter } from 'next/navigation'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
@@ -122,7 +123,7 @@ export default function ResultsPage() {
   const fetchResult = async () => {
     setLoading(true)
     try {
-      const res = await fetch(`http://localhost:8000/api/results/${resultId}?admin=true`)
+      const res = await fetch(apiUrl(`api/results/${resultId}?admin=true`))
       if (!res.ok) {
         throw new Error('Result not found')
       }
@@ -153,7 +154,7 @@ export default function ResultsPage() {
   const saveFeedback = async () => {
     setSavingFeedback(true)
     try {
-      const res = await fetch(`http://localhost:8000/api/results/${resultId}/feedback`, {
+      const res = await fetch(apiUrl(`api/results/${resultId}/feedback`), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -174,7 +175,7 @@ export default function ResultsPage() {
 
   const generateShareLink = async () => {
     try {
-      const res = await fetch(`http://localhost:8000/api/results/${resultId}/share`, {
+      const res = await fetch(apiUrl(`api/results/${resultId}/share`), {
         method: 'POST'
       })
       const data = await res.json()

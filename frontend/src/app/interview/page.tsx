@@ -80,7 +80,7 @@ function InterviewContent() {
       if (pathSessionId && token) {
         try {
           const response = await fetch(
-            `http://localhost:8000/api/interview/validate-token?session_id=${pathSessionId}&token=${token}`
+            apiUrl(`api/interview/validate-token?session_id=${pathSessionId}&token=${token}`)
           )
           
           if (!response.ok) {
@@ -96,7 +96,7 @@ function InterviewContent() {
           if (data.valid) {
             // Get full session details
             const sessionResponse = await fetch(
-              `http://localhost:8000/api/interview/session/${pathSessionId}?token=${token}`
+              apiUrl(`api/interview/session/${pathSessionId}?token=${token}`)
             )
             const sessionData = await sessionResponse.json()
             

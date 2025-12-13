@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import LogViewer from './LogViewer'
 import LiveScores from './LiveScores'
+import { apiUrl, wsUrl } from '@/config/api'
 
 interface ExpertViewProps {
   sessionId: string
@@ -39,7 +40,7 @@ export default function ExpertView({ sessionId, language }: ExpertViewProps) {
     if (!sessionId) return
 
     const connect = () => {
-      const websocket = new WebSocket(`ws://localhost:8000/ws?view=expert&session_id=${sessionId}`)
+      const websocket = new WebSocket(wsUrl(`ws?view=expert&session_id=${sessionId}`))
       wsRef.current = websocket
 
       websocket.onopen = () => {
@@ -120,7 +121,7 @@ export default function ExpertView({ sessionId, language }: ExpertViewProps) {
     setIsSubmitting(true)
     
     try {
-      const response = await fetch('http://localhost:8000/api/expert/approve', {
+      const response = await fetch(apiUrl('api/expert/approve'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -145,7 +146,7 @@ export default function ExpertView({ sessionId, language }: ExpertViewProps) {
     setIsSubmitting(true)
     
     try {
-      const response = await fetch('http://localhost:8000/api/expert/edit', {
+      const response = await fetch(apiUrl('api/expert/edit'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -173,7 +174,7 @@ export default function ExpertView({ sessionId, language }: ExpertViewProps) {
     setIsSubmitting(true)
     
     try {
-      const response = await fetch('http://localhost:8000/api/expert/override', {
+      const response = await fetch(apiUrl('api/expert/override'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

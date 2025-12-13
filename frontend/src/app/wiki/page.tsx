@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { apiUrl } from '@/config/api'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 
@@ -57,7 +58,7 @@ export default function WikiPage() {
 
   const fetchCategories = async () => {
     try {
-      const res = await fetch('http://localhost:8000/api/wiki/categories')
+      const res = await fetch(apiUrl('api/wiki/categories'))
       const data = await res.json()
       setCategories(data.categories || [])
     } catch (err) {
@@ -69,8 +70,8 @@ export default function WikiPage() {
     setLoading(true)
     try {
       const url = category 
-        ? `http://localhost:8000/api/wiki/entries?category=${encodeURIComponent(category)}&limit=50`
-        : 'http://localhost:8000/api/wiki/entries?limit=50'
+        ? apiUrl(`api/wiki/entries?category=${encodeURIComponent(category)}&limit=50`)
+        : apiUrl('api/wiki/entries?limit=50')
       const res = await fetch(url)
       const data = await res.json()
       setEntries(data.entries || [])
@@ -83,7 +84,7 @@ export default function WikiPage() {
 
   const fetchStats = async () => {
     try {
-      const res = await fetch('http://localhost:8000/api/wiki/stats')
+      const res = await fetch(apiUrl('api/wiki/stats'))
       const data = await res.json()
       setStats(data)
     } catch (err) {
@@ -99,7 +100,7 @@ export default function WikiPage() {
 
     setLoading(true)
     try {
-      const res = await fetch(`http://localhost:8000/api/wiki/search?q=${encodeURIComponent(searchQuery)}`)
+      const res = await fetch(apiUrl(`api/wiki/search?q=${encodeURIComponent(searchQuery)}`))
       const data = await res.json()
       setSearchResults(data.results || [])
     } catch (err) {
@@ -116,7 +117,7 @@ export default function WikiPage() {
     setAskAnswer(null)
 
     try {
-      const res = await fetch('http://localhost:8000/api/wiki/ask', {
+      const res = await fetch(apiUrl('api/wiki/ask'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ question: askQuestion, category: selectedCategory })
@@ -137,7 +138,7 @@ export default function WikiPage() {
     if (!confirm('Delete this wiki entry?')) return
 
     try {
-      await fetch(`http://localhost:8000/api/wiki/entry/${entryId}`, { method: 'DELETE' })
+      await fetch(apiUrl(`api/wiki/entry/${entryId}`), { method: 'DELETE' })
       fetchEntries(selectedCategory || undefined)
       fetchCategories()
       fetchStats()

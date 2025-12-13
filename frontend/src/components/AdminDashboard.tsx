@@ -5,6 +5,7 @@ import LiveScores from './LiveScores'
 import StrategyVisualization from './StrategyVisualization'
 import LogViewer from './LogViewer'
 import TimeMetrics from './TimeMetrics'
+import { wsUrl } from '@/config/api'
 
 interface AdminDashboardProps {
   sessionId: string
@@ -61,7 +62,7 @@ export default function AdminDashboard({ sessionId, language }: AdminDashboardPr
     }
 
     const connect = () => {
-      const websocket = new WebSocket(`ws://localhost:8000/ws?view=admin`)
+      const websocket = new WebSocket(wsUrl('ws?view=admin'))
       wsRef.current = websocket
       
       websocket.onopen = () => {

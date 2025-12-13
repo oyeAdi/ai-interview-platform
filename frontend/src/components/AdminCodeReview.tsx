@@ -1,6 +1,8 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { apiUrl } from '@/config/api'
+import { apiUrl } from '@/config/api'
 
 interface CodeSubmission {
   id: string
@@ -65,7 +67,7 @@ export default function AdminCodeReview({ submissionId, onClose }: AdminCodeRevi
 
   const fetchPendingReviews = async () => {
     try {
-      const res = await fetch('http://localhost:8000/api/code/pending-reviews')
+      const res = await fetch(apiUrl('api/code/pending-reviews'))
       const data = await res.json()
       setPendingReviews(data.pending_reviews || [])
     } catch (err) {
@@ -77,7 +79,7 @@ export default function AdminCodeReview({ submissionId, onClose }: AdminCodeRevi
 
   const fetchSubmission = async (id: string) => {
     try {
-      const res = await fetch(`http://localhost:8000/api/code/submission/${id}`)
+      const res = await fetch(apiUrl(`api/code/submission/${id}`))
       const data = await res.json()
       setSelectedSubmission(data)
     } catch (err) {
@@ -92,7 +94,7 @@ export default function AdminCodeReview({ submissionId, onClose }: AdminCodeRevi
 
     setSubmitting(true)
     try {
-      const res = await fetch(`http://localhost:8000/api/code/review/${selectedSubmission.id}`, {
+      const res = await fetch(apiUrl(`api/code/review/${selectedSubmission.id}`), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

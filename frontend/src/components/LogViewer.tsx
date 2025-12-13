@@ -62,7 +62,7 @@ export default function LogViewer({ logData }: LogViewerProps) {
       {/* Download Button */}
       {logData?.session_id && (
         <a
-          href={`http://localhost:8000/api/log/${logData.session_id}`}
+          href={apiUrl(`api/log/${logData.session_id}`)}
           download={`interview_log_${logData.session_id}.json`}
           className="inline-flex items-center gap-2 px-3 py-2 text-sm rounded-lg bg-primary-orange/10 text-primary-orange hover:bg-primary-orange/20 border border-primary-orange/30 transition-colors"
         >

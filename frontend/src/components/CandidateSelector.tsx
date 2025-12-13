@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { apiUrl } from '@/config/api'
 
 interface Candidate {
   id: string
@@ -47,7 +48,7 @@ export default function CandidateSelector({
     }
 
     setLoading(true)
-    fetch(`http://localhost:8000/api/positions/${positionId}/candidates`)
+    fetch(apiUrl(`api/positions/${positionId}/candidates`))
       .then(res => res.json())
       .then(data => {
         setCandidates(data.candidates || [])
@@ -63,7 +64,7 @@ export default function CandidateSelector({
   const handleSelectCandidate = async (candidateId: string) => {
     // Fetch full resume text when selected
     try {
-      const res = await fetch(`http://localhost:8000/api/resumes/${candidateId}`)
+      const res = await fetch(apiUrl(`api/resumes/${candidateId}`))
       const resume = await res.json()
       onSelectCandidate(candidateId, resume.text)
     } catch (err) {

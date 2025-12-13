@@ -39,7 +39,7 @@ export default function AddAccountModal({
     setError('')
 
     try {
-      const response = await fetch('http://localhost:8000/api/accounts', {
+      const response = await fetch(apiUrl('api/accounts'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

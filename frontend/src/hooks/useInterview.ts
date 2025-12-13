@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react'
 import { useWebSocket } from './useWebSocket'
 import type { Evaluation, Strategy, Progress, WebSocketMessage } from '@/types/interview'
+import { wsUrl } from '@/config/api'
 
 export function useInterview(sessionId: string, view: string) {
-  const { ws, connected, send } = useWebSocket('ws://localhost:8000/ws', view)
+  const { ws, connected, send } = useWebSocket(wsUrl('ws'), view)
   const [currentQuestion, setCurrentQuestion] = useState('')
   const [evaluation, setEvaluation] = useState<Evaluation | null>(null)
   const [strategy, setStrategy] = useState<Strategy | null>(null)

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { apiUrl } from '@/config/api'
 
 interface Account {
   id: string
@@ -48,8 +49,8 @@ export default function AccountDetail({
 
     setLoading(true)
     Promise.all([
-      fetch(`http://localhost:8000/api/accounts/${accountId}`).then(res => res.json()),
-      fetch(`http://localhost:8000/api/accounts/${accountId}/positions`).then(res => res.json())
+      fetch(apiUrl(`api/accounts/${accountId}`)).then(res => res.json()),
+      fetch(apiUrl(`api/accounts/${accountId}/positions`)).then(res => res.json())
     ])
       .then(([accountData, positionsData]) => {
         setAccount(accountData)
@@ -69,7 +70,7 @@ export default function AccountDetail({
 
     setSaving(true)
     try {
-      const response = await fetch(`http://localhost:8000/api/accounts/${accountId}`, {
+      const response = await fetch(apiUrl(`api/accounts/${accountId}`), {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -94,7 +95,7 @@ export default function AccountDetail({
   const handleDelete = async () => {
     setDeleting(true)
     try {
-      const response = await fetch(`http://localhost:8000/api/accounts/${accountId}`, {
+      const response = await fetch(apiUrl(`api/accounts/${accountId}`), {
         method: 'DELETE'
       })
 

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
+import { apiUrl } from '@/config/api'
 
 interface WikiEntry {
   question: string
@@ -44,7 +45,7 @@ export default function WikiWidget() {
 
   const fetchRecentQuestions = async () => {
     try {
-      const res = await fetch('http://localhost:8000/api/wiki/entries?limit=5')
+      const res = await fetch(apiUrl('api/wiki/entries?limit=5'))
       const data = await res.json()
       setRecentQuestions(data.entries?.map((e: any) => ({
         id: e.id,
@@ -58,7 +59,7 @@ export default function WikiWidget() {
 
   const fetchStats = async () => {
     try {
-      const res = await fetch('http://localhost:8000/api/wiki/stats')
+      const res = await fetch(apiUrl('api/wiki/stats'))
       const data = await res.json()
       setStats(data)
     } catch (err) {
@@ -74,7 +75,7 @@ export default function WikiWidget() {
     setAnswer(null)
 
     try {
-      const res = await fetch('http://localhost:8000/api/wiki/ask', {
+      const res = await fetch(apiUrl('api/wiki/ask'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ question: queryText })

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { apiUrl } from '@/config/api'
 import { useParams } from 'next/navigation'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
@@ -34,7 +35,7 @@ export default function SharedResultsPage() {
   const fetchSharedResult = async () => {
     setLoading(true)
     try {
-      const res = await fetch(`http://localhost:8000/api/results/shared/${token}`)
+      const res = await fetch(apiUrl(`api/results/shared/${token}`))
       if (!res.ok) {
         if (res.status === 404) {
           throw new Error('This link is invalid or has expired')
