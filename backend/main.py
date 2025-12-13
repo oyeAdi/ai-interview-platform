@@ -432,25 +432,37 @@ def calculate_candidate_match_score(resume: dict, position: dict) -> float:
     candidate_skills = set(s.lower() for s in resume.get("skills", []))
     candidate_language = resume.get("language", "").lower()
     
+    # Skip generic skills that everyone has
+    GENERIC_SKILLS = {"coding", "programming", "software"}
+    
     for skill_req in required_skills:
         skill = skill_req.get("skill", "").lower()
         weight = skill_req.get("weight", 0.1)
+        
+        # Skip generic skills in scoring (don't add to max_score either)
+        if skill in GENERIC_SKILLS:
+            continue
+            
         max_score += weight
         
-        # Check if candidate has this skill
+        # Check if candidate has this exact skill or it's their primary language
         if skill in candidate_skills or skill == candidate_language:
             score += weight
-        # Partial match for related skills
-        elif any(skill in cs or cs in skill for cs in candidate_skills):
+        # Strict partial match - only for closely related skills
+        elif skill in ["javascript", "typescript"] and any(s in candidate_skills for s in ["javascript", "typescript"]):
+            score += weight * 0.7
+        elif skill in ["python", "django", "flask"] and any(s in candidate_skills for s in ["python", "django", "flask"]):
+            score += weight * 0.5
+        elif skill in ["java", "spring", "spring_boot"] and any(s in candidate_skills for s in ["java", "spring", "spring_boot"]):
             score += weight * 0.5
     
-    # Bonus for primary language match
-    position_skills = [s.get("skill", "").lower() for s in required_skills]
+    # Bonus for primary language match (only if it's a required skill)
+    position_skills = [s.get("skill", "").lower() for s in required_skills if s.get("skill", "").lower() not in GENERIC_SKILLS]
     if candidate_language in position_skills:
-        score += 0.2  # 20% bonus for language match
-        max_score += 0.2
+        score += 0.15  # 15% bonus for language match
+        max_score += 0.15
     
-    # Experience level alignment bonus
+    # Experience level alignment - stricter scoring
     candidate_level = resume.get("experience_level", "mid")
     position_level = position.get("data_model", {}).get("experience_level", "mid")
     level_order = {"junior": 1, "mid": 2, "senior": 3, "lead": 4}
@@ -458,13 +470,15 @@ def calculate_candidate_match_score(resume: dict, position: dict) -> float:
     candidate_level_num = level_order.get(candidate_level, 2)
     position_level_num = level_order.get(position_level, 2)
     
-    # Perfect match or one level above gets bonus
-    if candidate_level_num == position_level_num:
-        score += 0.1
-    elif candidate_level_num == position_level_num + 1:
-        score += 0.05  # Slightly overqualified
-    
     max_score += 0.1
+    
+    # Perfect match gets full bonus, adjacent levels get partial
+    level_diff = abs(candidate_level_num - position_level_num)
+    if level_diff == 0:
+        score += 0.1
+    elif level_diff == 1:
+        score += 0.05
+    # 2+ levels apart = no bonus (underqualified or overqualified)
     
     return round((score / max_score) * 100, 1) if max_score > 0 else 0.0
 
