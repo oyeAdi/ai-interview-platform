@@ -345,6 +345,168 @@ async def delete_position(position_id: str):
     
     raise HTTPException(status_code=404, detail="Position not found")
 
+# ==================== Candidate Matching APIs ====================
+
+RESUMES_FILE = os.path.join(os.path.dirname(__file__), "resumes", "resumes.json")
+TEMPLATES_FILE = os.path.join(MODELS_DIR, "position_templates.json")
+
+def calculate_candidate_match_score(resume: dict, position: dict) -> float:
+    """Calculate how well a candidate matches a position based on skills"""
+    score = 0.0
+    max_score = 0.0
+    
+    required_skills = position.get("data_model", {}).get("required_skills", [])
+    candidate_skills = set(s.lower() for s in resume.get("skills", []))
+    candidate_language = resume.get("language", "").lower()
+    
+    for skill_req in required_skills:
+        skill = skill_req.get("skill", "").lower()
+        weight = skill_req.get("weight", 0.1)
+        max_score += weight
+        
+        # Check if candidate has this skill
+        if skill in candidate_skills or skill == candidate_language:
+            score += weight
+        # Partial match for related skills
+        elif any(skill in cs or cs in skill for cs in candidate_skills):
+            score += weight * 0.5
+    
+    # Bonus for primary language match
+    position_skills = [s.get("skill", "").lower() for s in required_skills]
+    if candidate_language in position_skills:
+        score += 0.2  # 20% bonus for language match
+        max_score += 0.2
+    
+    # Experience level alignment bonus
+    candidate_level = resume.get("experience_level", "mid")
+    position_level = position.get("data_model", {}).get("experience_level", "mid")
+    level_order = {"junior": 1, "mid": 2, "senior": 3, "lead": 4}
+    
+    candidate_level_num = level_order.get(candidate_level, 2)
+    position_level_num = level_order.get(position_level, 2)
+    
+    # Perfect match or one level above gets bonus
+    if candidate_level_num == position_level_num:
+        score += 0.1
+    elif candidate_level_num == position_level_num + 1:
+        score += 0.05  # Slightly overqualified
+    
+    max_score += 0.1
+    
+    return round((score / max_score) * 100, 1) if max_score > 0 else 0.0
+
+@app.get("/api/positions/{position_id}/candidates")
+async def get_candidates_for_position(position_id: str):
+    """Get all candidates sorted by match score for a position"""
+    # Load position
+    positions_data = load_json_file(POSITIONS_FILE)
+    position = next((p for p in positions_data.get("positions", []) if p["id"] == position_id), None)
+    
+    if not position:
+        raise HTTPException(status_code=404, detail="Position not found")
+    
+    # Load resumes
+    resumes_data = load_json_file(RESUMES_FILE)
+    resumes = resumes_data.get("resumes", [])
+    
+    # Calculate match scores and sort
+    candidates = []
+    for resume in resumes:
+        match_score = calculate_candidate_match_score(resume, position)
+        candidates.append({
+            "id": resume.get("id"),
+            "name": resume.get("name"),
+            "experience_level": resume.get("experience_level", "mid"),
+            "skills": resume.get("skills", []),
+            "language": resume.get("language"),
+            "match_score": match_score
+        })
+    
+    # Sort by match score (highest first)
+    candidates.sort(key=lambda x: x["match_score"], reverse=True)
+    
+    return {
+        "position_id": position_id,
+        "position_title": position.get("title"),
+        "candidates": candidates
+    }
+
+@app.get("/api/resumes/{resume_id}")
+async def get_resume(resume_id: str):
+    """Get specific resume details"""
+    resumes_data = load_json_file(RESUMES_FILE)
+    for resume in resumes_data.get("resumes", []):
+        if resume["id"] == resume_id:
+            return resume
+    raise HTTPException(status_code=404, detail="Resume not found")
+
+# ==================== Position Templates APIs ====================
+
+class TemplateCreate(BaseModel):
+    name: str
+    category: str
+    experience_levels: List[str]
+    default_config: DataModel
+
+@app.get("/api/templates")
+async def get_templates():
+    """Get all position templates"""
+    data = load_json_file(TEMPLATES_FILE)
+    return {
+        "templates": data.get("templates", []),
+        "categories": data.get("categories", []),
+        "available_skills": data.get("available_skills", [])
+    }
+
+@app.get("/api/templates/{template_id}")
+async def get_template(template_id: str):
+    """Get a specific template"""
+    data = load_json_file(TEMPLATES_FILE)
+    for template in data.get("templates", []):
+        if template["id"] == template_id:
+            return template
+    raise HTTPException(status_code=404, detail="Template not found")
+
+@app.post("/api/templates")
+async def create_template(template: TemplateCreate):
+    """Create a new position template"""
+    data = load_json_file(TEMPLATES_FILE)
+    if "templates" not in data:
+        data["templates"] = []
+    
+    # Generate unique ID
+    template_id = f"custom_{uuid.uuid4().hex[:8]}"
+    
+    new_template = {
+        "id": template_id,
+        "name": template.name,
+        "category": template.category,
+        "experience_levels": template.experience_levels,
+        "default_config": template.default_config.dict(),
+        "is_custom": True
+    }
+    
+    data["templates"].append(new_template)
+    save_json_file(TEMPLATES_FILE, data)
+    
+    return {"status": "created", "template": new_template}
+
+@app.delete("/api/templates/{template_id}")
+async def delete_template(template_id: str):
+    """Delete a custom template (built-in templates cannot be deleted)"""
+    data = load_json_file(TEMPLATES_FILE)
+    
+    for i, template in enumerate(data.get("templates", [])):
+        if template["id"] == template_id:
+            if not template.get("is_custom", False):
+                raise HTTPException(status_code=400, detail="Cannot delete built-in templates")
+            
+            deleted = data["templates"].pop(i)
+            save_json_file(TEMPLATES_FILE, data)
+            return {"status": "deleted", "template_id": template_id}
+    
+    raise HTTPException(status_code=404, detail="Template not found")
+
 # ==================== Question Bank APIs ====================
 
 @app.get("/api/question-bank")
@@ -429,6 +591,10 @@ async def start_interview_with_position(
         # Attach position data model to controller if available
         if position and position.get("data_model"):
             controller.data_model = position["data_model"]
+        
+        # Attach resume text for personalized first question
+        if resume_content:
+            controller.resume_text = resume_content
         
         # Store controller
         active_interviews[session_id] = controller

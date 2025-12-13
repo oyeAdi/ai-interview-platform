@@ -7,8 +7,9 @@ import Footer from '@/components/Footer'
 import AccountSelector from '@/components/AccountSelector'
 import PositionCard from '@/components/PositionCard'
 import DataModelPanel from '@/components/DataModelPanel'
-import ResumeSelector from '@/components/ResumeSelector'
+import CandidateSelector from '@/components/CandidateSelector'
 import FileUpload from '@/components/FileUpload'
+import AddPositionModal from '@/components/AddPositionModal'
 
 interface Account {
   id: string
@@ -54,27 +55,24 @@ export default function DashboardPage() {
   // State
   const [accounts, setAccounts] = useState<Account[]>([])
   const [positions, setPositions] = useState<Position[]>([])
-  const [resumes, setResumes] = useState<any[]>([])
   const [selectedAccount, setSelectedAccount] = useState('')
   const [selectedPosition, setSelectedPosition] = useState('')
-  const [selectedResume, setSelectedResume] = useState('')
+  const [selectedCandidate, setSelectedCandidate] = useState('')
   const [resumeText, setResumeText] = useState('')
   const [resumeFile, setResumeFile] = useState<File | null>(null)
   const [loading, setLoading] = useState(true)
   const [startingInterview, setStartingInterview] = useState(false)
   const [dataModel, setDataModel] = useState<DataModel | null>(null)
+  const [showAddPosition, setShowAddPosition] = useState(false)
 
   // Load accounts on mount
   useEffect(() => {
-    Promise.all([
-      fetch('http://localhost:8000/api/accounts').then(res => res.json()),
-      fetch('http://localhost:8000/api/resumes').then(res => res.json())
-    ])
-      .then(([accountsData, resumesData]) => {
-        setAccounts(accountsData.accounts || [])
-        setResumes(resumesData.resumes || [])
-        if (accountsData.accounts?.length > 0) {
-          setSelectedAccount(accountsData.accounts[0].id)
+    fetch('http://localhost:8000/api/accounts')
+      .then(res => res.json())
+      .then(data => {
+        setAccounts(data.accounts || [])
+        if (data.accounts?.length > 0) {
+          setSelectedAccount(data.accounts[0].id)
         }
         setLoading(false)
       })
@@ -93,6 +91,8 @@ export default function DashboardPage() {
         .then(data => {
           setPositions(data.positions || [])
           setSelectedPosition('')
+          setSelectedCandidate('')
+          setResumeText('')
           setDataModel(null)
           setLoading(false)
         })
@@ -110,33 +110,29 @@ export default function DashboardPage() {
       if (position?.data_model) {
         setDataModel(position.data_model)
       }
+      // Clear candidate selection when position changes
+      setSelectedCandidate('')
+      setResumeText('')
     } else {
       setDataModel(null)
     }
   }, [selectedPosition, positions])
 
-  // Update resume text when resume is selected
-  useEffect(() => {
-    if (selectedResume) {
-      const resume = resumes.find(r => r.id === selectedResume)
-      if (resume) {
-        setResumeText(resume.text)
-        setResumeFile(null)
-      }
-    } else {
-      if (!resumeFile) {
-        setResumeText('')
-      }
+  const handleCandidateSelect = (candidateId: string, resumeTextFromCandidate?: string) => {
+    setSelectedCandidate(candidateId)
+    if (resumeTextFromCandidate) {
+      setResumeText(resumeTextFromCandidate)
+      setResumeFile(null)
     }
-  }, [selectedResume, resumes])
+  }
 
   const handleStartInterview = async (expertMode: boolean = false) => {
     if (!selectedPosition) {
       alert('Please select a position')
       return
     }
-    if (!resumeText && !resumeFile && !selectedResume) {
-      alert('Please provide a resume')
+    if (!resumeText && !resumeFile && !selectedCandidate) {
+      alert('Please select a candidate or provide a resume')
       return
     }
 
@@ -148,7 +144,7 @@ export default function DashboardPage() {
       
       if (resumeText) formData.append('resume_text', resumeText)
       if (resumeFile) formData.append('resume_file', resumeFile)
-      if (selectedResume) formData.append('resume_id', selectedResume)
+      if (selectedCandidate) formData.append('resume_id', selectedCandidate)
       if (expertMode) formData.append('expert_mode', 'true')
 
       const response = await fetch('http://localhost:8000/api/interview/start', {
@@ -244,7 +240,7 @@ export default function DashboardPage() {
                   <button
                     type="button"
                     className="text-sm text-gray-500 dark:text-gray-400 hover:text-epam-cyan transition-colors flex items-center gap-1"
-                    onClick={() => alert('Add position feature coming soon')}
+                    onClick={() => setShowAddPosition(true)}
                   >
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
@@ -292,7 +288,7 @@ export default function DashboardPage() {
               )}
             </div>
 
-            {/* Right Column - Resume & Start */}
+            {/* Right Column - Candidate Selection & Start */}
             <div className="lg:col-span-4 space-y-8">
               {/* Selected Position Summary */}
               {selectedPositionData && (
@@ -306,40 +302,46 @@ export default function DashboardPage() {
                 </div>
               )}
 
-              {/* Resume Upload */}
+              {/* Candidate Selection - Sorted by Match Score */}
               <div>
                 <h2 className="text-xs font-medium text-epam-cyan uppercase tracking-[0.2em] mb-6">
-                  Candidate Resume
+                  Select Candidate
                 </h2>
-                <div className="space-y-4">
-                  <ResumeSelector
-                    resumes={resumes}
-                    selectedResume={selectedResume}
-                    onSelectResume={setSelectedResume}
-                  />
-                  
-                  <FileUpload
-                    label="Resume"
-                    text={resumeText}
-                    onTextChange={(text) => {
-                      setResumeText(text)
-                      if (text && selectedResume) setSelectedResume('')
-                    }}
-                    file={resumeFile}
-                    onFileChange={(file) => {
-                      setResumeFile(file)
-                      if (file && selectedResume) setSelectedResume('')
-                    }}
-                    disabled={!!selectedResume}
+                <div className="border border-gray-200 dark:border-[#2A2A2A] p-4">
+                  <CandidateSelector
+                    positionId={selectedPosition || null}
+                    selectedCandidate={selectedCandidate}
+                    onSelectCandidate={handleCandidateSelect}
                   />
                 </div>
+              </div>
+
+              {/* Or Upload Custom Resume */}
+              <div>
+                <h2 className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-[0.2em] mb-4">
+                  Or Upload Resume
+                </h2>
+                <FileUpload
+                  label="Resume"
+                  text={selectedCandidate ? '' : resumeText}
+                  onTextChange={(text) => {
+                    setResumeText(text)
+                    if (text) setSelectedCandidate('')
+                  }}
+                  file={resumeFile}
+                  onFileChange={(file) => {
+                    setResumeFile(file)
+                    if (file) setSelectedCandidate('')
+                  }}
+                  disabled={!!selectedCandidate}
+                />
               </div>
 
               {/* Start Buttons */}
               <div className="space-y-3 pt-4">
                 <button
                   onClick={() => handleStartInterview(false)}
-                  disabled={startingInterview || !selectedPosition || (!resumeText && !resumeFile && !selectedResume)}
+                  disabled={startingInterview || !selectedPosition || (!resumeText && !resumeFile && !selectedCandidate)}
                   className="btn-primary w-full flex items-center justify-center gap-2 h-12 disabled:opacity-40"
                 >
                   {startingInterview ? (
@@ -359,7 +361,7 @@ export default function DashboardPage() {
                 
                 <button
                   onClick={() => handleStartInterview(true)}
-                  disabled={startingInterview || !selectedPosition || (!resumeText && !resumeFile && !selectedResume)}
+                  disabled={startingInterview || !selectedPosition || (!resumeText && !resumeFile && !selectedCandidate)}
                   className="btn-secondary w-full flex items-center justify-center gap-2 h-12 disabled:opacity-40"
                 >
                   <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -378,6 +380,24 @@ export default function DashboardPage() {
       </main>
 
       <Footer />
+
+      {/* Add Position Modal */}
+      <AddPositionModal
+        isOpen={showAddPosition}
+        onClose={() => setShowAddPosition(false)}
+        accounts={accounts}
+        selectedAccountId={selectedAccount}
+        onPositionCreated={() => {
+          // Refresh positions list
+          if (selectedAccount) {
+            fetch(`http://localhost:8000/api/accounts/${selectedAccount}/positions?status=open`)
+              .then(res => res.json())
+              .then(data => {
+                setPositions(data.positions || [])
+              })
+          }
+        }}
+      />
     </div>
   )
 }

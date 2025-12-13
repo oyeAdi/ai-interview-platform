@@ -38,6 +38,11 @@ class InterviewController:
         self.pending_followup: Optional[Dict] = None
         self.pending_evaluation: Optional[Dict] = None
         self.pending_strategy: Optional[Dict] = None
+        
+        # Position data model and resume for personalized questions
+        self.data_model: Optional[Dict] = None
+        self.resume_text: str = ""
+        self.first_question_generated: bool = False
     
     def start_interview(self) -> Dict:
         """Start the interview"""
@@ -50,6 +55,31 @@ class InterviewController:
     def get_next_question(self) -> Optional[Dict]:
         """Get next question for the interview"""
         context = self.context_manager.get_context()
+        round_num = len(self.context_manager.context["interview_context"]["round_summaries"]) + 1
+        
+        # For the first question, generate a personalized question based on resume and experience level
+        if round_num == 1 and not self.first_question_generated and self.resume_text:
+            personalized_question = self._generate_personalized_first_question()
+            if personalized_question:
+                self.first_question_generated = True
+                self.current_question = personalized_question
+                self.current_followup_count = 0
+                
+                # Update context
+                self.context_manager.update_round(round_num)
+                self.context_manager.add_question_asked(personalized_question["id"])
+                
+                return {
+                    "type": "question",
+                    "question_id": personalized_question["id"],
+                    "text": personalized_question["text"],
+                    "question_type": personalized_question["type"],
+                    "topic": personalized_question.get("topic"),
+                    "round_number": round_num,
+                    "is_personalized": True
+                }
+        
+        # Standard question selection from question bank
         question = self.question_manager.select_question(context)
         
         if not question:
@@ -59,7 +89,6 @@ class InterviewController:
         self.current_followup_count = 0
         
         # Update context
-        round_num = len(self.context_manager.context["interview_context"]["round_summaries"]) + 1
         self.context_manager.update_round(round_num)
         self.context_manager.add_question_asked(question["id"])
         
@@ -71,6 +100,109 @@ class InterviewController:
             "topic": question.get("topic"),
             "round_number": round_num
         }
+    
+    def _generate_personalized_first_question(self) -> Optional[Dict]:
+        """Generate a personalized first question based on resume and experience level"""
+        if not self.resume_text:
+            return None
+        
+        experience_level = "mid"  # default
+        position_title = self.language.title() + " Developer"
+        required_skills = []
+        
+        if self.data_model:
+            experience_level = self.data_model.get("experience_level", "mid")
+            required_skills = [s.get("skill", "") for s in self.data_model.get("required_skills", [])]
+        
+        try:
+            # Different prompts based on experience level
+            if experience_level in ["senior", "lead"]:
+                # PROBING: Ask about specific project/experience from resume
+                prompt = f"""You are a technical interviewer for a {position_title} position ({experience_level} level).
+                
+Based on this candidate's resume, generate ONE specific, probing question about their most relevant project or experience.
+
+Resume:
+{self.resume_text[:2000]}
+
+Required Skills: {', '.join(required_skills[:5]) if required_skills else self.language}
+
+Guidelines for SENIOR/LEAD level probing question:
+- Ask about a SPECIFIC project, technology, or challenge mentioned in their resume
+- Focus on: decision-making, architecture choices, trade-offs, challenges overcome
+- Ask WHY they made certain decisions, not just WHAT they did
+- Reference specific details from their resume to make it personal
+- Example formats:
+  - "I noticed you worked on [specific project]. What was the most challenging architectural decision you had to make, and why?"
+  - "You mentioned scaling [system]. Walk me through your approach to identifying and resolving the main bottlenecks."
+  - "In your role at [company], how did you decide between [option A] and [option B] for [specific problem]?"
+
+Generate ONLY the question text, nothing else. Make it conversational and specific to their background."""
+
+            elif experience_level == "mid":
+                # MID-LEVEL: Mix of probing and technical
+                prompt = f"""You are a technical interviewer for a {position_title} position (mid-level).
+
+Based on this candidate's resume, generate ONE question that explores their hands-on experience.
+
+Resume:
+{self.resume_text[:2000]}
+
+Required Skills: {', '.join(required_skills[:5]) if required_skills else self.language}
+
+Guidelines for MID-level question:
+- Reference something specific from their resume (a project, technology, or responsibility)
+- Ask about their practical implementation experience
+- Focus on HOW they approached problems, not just theoretical knowledge
+- Example formats:
+  - "I see you've worked with [technology]. Can you tell me about a time you had to debug a particularly tricky issue with it?"
+  - "You mentioned building [feature]. What was your approach to ensuring it was maintainable and scalable?"
+
+Generate ONLY the question text, nothing else. Make it conversational."""
+
+            else:  # junior
+                # JUNIOR: Direct technical question, but friendly
+                prompt = f"""You are a technical interviewer for a {position_title} position (junior/entry level).
+
+Based on this candidate's resume, generate ONE straightforward technical question that assesses their foundational knowledge.
+
+Resume:
+{self.resume_text[:1500]}
+
+Required Skills: {', '.join(required_skills[:5]) if required_skills else self.language}
+
+Guidelines for JUNIOR level question:
+- Keep it focused on fundamental concepts they should know
+- If they mentioned any projects, ask about a basic concept they used
+- Be encouraging and conversational, not intimidating
+- Example formats:
+  - "I see you've worked with {self.language}. Can you explain how [basic concept] works?"
+  - "You mentioned using [technology] in your project. What do you like about it?"
+  - "Let's start with something fundamental - can you explain [core concept] to me?"
+
+Generate ONLY the question text, nothing else. Keep it friendly and approachable."""
+
+            # Generate question using LLM
+            response = self.gemini_client.model.generate_content(prompt)
+            question_text = response.text.strip()
+            
+            # Clean up the response
+            if question_text.startswith('"') and question_text.endswith('"'):
+                question_text = question_text[1:-1]
+            
+            return {
+                "id": f"personalized_{self.context_manager.session_id[:8]}",
+                "text": question_text,
+                "type": "probing" if experience_level in ["senior", "lead", "mid"] else "conceptual",
+                "topic": "experience_based",
+                "difficulty": "medium" if experience_level in ["senior", "lead"] else "easy",
+                "is_personalized": True,
+                "experience_level": experience_level
+            }
+            
+        except Exception as e:
+            print(f"Error generating personalized question: {e}")
+            return None
     
     def process_response(self, response_text: str, response_type: str = "initial") -> Dict:
         """Process candidate response"""
