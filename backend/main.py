@@ -888,34 +888,51 @@ async def websocket_endpoint(websocket: WebSocket, view: str = "candidate"):
                             
                             for session in log_data.get("interview_sessions", []):
                                 if session.get("session_id") == session_id:
-                                # Restore session
-                                language = session.get("detected_language", "python")
-                                jd_id = session.get("jd_id")
-                                # Check if expert view - set expert_mode accordingly
-                                is_expert = view == "expert"
-                                controller = InterviewController(language, jd_id, expert_mode=is_expert)
-                                controller.context_manager.session_id = session_id
-                                
-                                # Restore interview state from log
-                                questions = session.get("questions", [])
-                                if questions:
-                                    # Restore context from questions
-                                    controller.context_manager.context["interview_context"]["round_summaries"] = []
+                                    # Restore session
+                                    language = session.get("detected_language", "python")
+                                    jd_id = session.get("jd_id")
+                                    # Check if expert view - set expert_mode accordingly
+                                    is_expert = view == "expert"
+                                    controller = InterviewController(language, jd_id, expert_mode=is_expert)
+                                    controller.context_manager.session_id = session_id
                                     
-                                    # Find the last question that was asked but not completed
-                                    last_question = questions[-1]
-                                    question_id = last_question.get("question_id")
-                                    
-                                    # Check if last question has responses
-                                    responses = last_question.get("responses", [])
-                                    if responses:
-                                        # Question was answered, check if follow-ups are complete
-                                        last_response = responses[-1]
-                                        followup_num = last_response.get("followup_number", 0)
+                                    # Restore interview state from log
+                                    questions = session.get("questions", [])
+                                    if questions:
+                                        # Restore context from questions
+                                        controller.context_manager.context["interview_context"]["round_summaries"] = []
                                         
-                                        # If follow-ups are incomplete, restore current question
-                                        if followup_num < Config.FOLLOWUPS_PER_QUESTION:
-                                            # Find question in question bank
+                                        # Find the last question that was asked but not completed
+                                        last_question = questions[-1]
+                                        question_id = last_question.get("question_id")
+                                        
+                                        # Check if last question has responses
+                                        responses = last_question.get("responses", [])
+                                        if responses:
+                                            # Question was answered, check if follow-ups are complete
+                                            last_response = responses[-1]
+                                            followup_num = last_response.get("followup_number", 0)
+                                            
+                                            # If follow-ups are incomplete, restore current question
+                                            if followup_num < Config.MAX_FOLLOWUPS_PER_QUESTION:
+                                                # Find question in question bank
+                                                from core.question_manager import QuestionManager
+                                                qm = QuestionManager(language)
+                                                all_questions = qm.load_questions()
+                                                for q in all_questions:
+                                                    if q.get("id") == question_id:
+                                                        controller.current_question = {
+                                                            "type": "question",
+                                                            "question_id": q["id"],
+                                                            "text": q["text"],
+                                                            "question_type": q["type"],
+                                                            "topic": q.get("topic"),
+                                                            "round_number": last_question.get("round_number", len(questions))
+                                                        }
+                                                        controller.current_followup_count = followup_num
+                                                        break
+                                        else:
+                                            # Question was asked but not answered yet
                                             from core.question_manager import QuestionManager
                                             qm = QuestionManager(language)
                                             all_questions = qm.load_questions()
@@ -929,28 +946,11 @@ async def websocket_endpoint(websocket: WebSocket, view: str = "candidate"):
                                                         "topic": q.get("topic"),
                                                         "round_number": last_question.get("round_number", len(questions))
                                                     }
-                                                    controller.current_followup_count = followup_num
                                                     break
-                                    else:
-                                        # Question was asked but not answered yet
-                                        from core.question_manager import QuestionManager
-                                        qm = QuestionManager(language)
-                                        all_questions = qm.load_questions()
-                                        for q in all_questions:
-                                            if q.get("id") == question_id:
-                                                controller.current_question = {
-                                                    "type": "question",
-                                                    "question_id": q["id"],
-                                                    "text": q["text"],
-                                                    "question_type": q["type"],
-                                                    "topic": q.get("topic"),
-                                                    "round_number": last_question.get("round_number", len(questions))
-                                                }
-                                                break
-                                
-                                active_interviews[session_id] = controller
-                                session_found = True
-                                break
+                                    
+                                    active_interviews[session_id] = controller
+                                    session_found = True
+                                    break
                         
                         if not session_found:
                             await websocket.send_json({
