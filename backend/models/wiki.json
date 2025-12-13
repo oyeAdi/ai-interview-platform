@@ -1,5 +1,428 @@
 {
-  "entries": [],
+  "entries": [
+    {
+      "id": "wiki_1194bfb9",
+      "question": "How does Interview Lifecycle work?",
+      "answer": "How interviews progress from start to end\n\nThis feature is implemented in: backend/core/interview_controller.py",
+      "category": "Interview Flow",
+      "code_refs": [
+        "backend/core/interview_controller.py"
+      ],
+      "keywords": [
+        "interview",
+        "lifecycle",
+        "how",
+        "interviews",
+        "progress",
+        "from",
+        "start"
+      ],
+      "created_at": "2025-12-13T12:21:52.633228",
+      "auto_generated": true,
+      "indexed_from": "Interview Lifecycle"
+    },
+    {
+      "id": "wiki_d6247fe7",
+      "question": "How does Session Management work?",
+      "answer": "How interview sessions are created and managed\n\nThis feature is implemented in: backend/core/interview_controller.py",
+      "category": "Interview Flow",
+      "code_refs": [
+        "backend/core/interview_controller.py"
+      ],
+      "keywords": [
+        "session",
+        "management",
+        "how",
+        "interview",
+        "sessions",
+        "are",
+        "created"
+      ],
+      "created_at": "2025-12-13T12:21:52.633410",
+      "auto_generated": true,
+      "indexed_from": "Session Management"
+    },
+    {
+      "id": "wiki_142c8285",
+      "question": "How does WebSocket Communication work?",
+      "answer": "Real-time message routing between candidate and admin\n\nThis feature is implemented in: backend/websocket/message_handler.py",
+      "category": "Interview Flow",
+      "code_refs": [
+        "backend/websocket/message_handler.py"
+      ],
+      "keywords": [
+        "websocket",
+        "communication",
+        "real-time",
+        "message",
+        "routing",
+        "between",
+        "candidate"
+      ],
+      "created_at": "2025-12-13T12:21:52.633553",
+      "auto_generated": true,
+      "indexed_from": "WebSocket Communication"
+    },
+    {
+      "id": "wiki_d12a0e03",
+      "question": "How does Match Score Algorithm work?",
+      "answer": "How candidates are matched to positions\n\nThis feature is implemented in: backend/main.py",
+      "category": "Candidate Matching",
+      "code_refs": [
+        "backend/main.py"
+      ],
+      "keywords": [
+        "match",
+        "score",
+        "algorithm",
+        "how",
+        "candidates",
+        "are",
+        "matched",
+        "to"
+      ],
+      "created_at": "2025-12-13T12:21:52.633866",
+      "auto_generated": true,
+      "indexed_from": "Match Score Algorithm"
+    },
+    {
+      "id": "wiki_2801de39",
+      "question": "How does Skill Comparison work?",
+      "answer": "How skills are compared between positions and candidates\n\nThis feature is implemented in: backend/main.py",
+      "category": "Candidate Matching",
+      "code_refs": [
+        "backend/main.py"
+      ],
+      "keywords": [
+        "skill",
+        "comparison",
+        "how",
+        "skills",
+        "are",
+        "compared",
+        "between"
+      ],
+      "created_at": "2025-12-13T12:21:52.634087",
+      "auto_generated": true,
+      "indexed_from": "Skill Comparison"
+    },
+    {
+      "id": "wiki_e054b45b",
+      "question": "How does Question Bank Structure work?",
+      "answer": "How questions are organized and stored\n\nThis feature is implemented in: backend/questions/python.json, backend/questions/java.json",
+      "category": "Question Generation",
+      "code_refs": [
+        "backend/questions/python.json",
+        "backend/questions/java.json"
+      ],
+      "keywords": [
+        "question",
+        "bank",
+        "structure",
+        "how",
+        "questions",
+        "are",
+        "organized",
+        "and"
+      ],
+      "created_at": "2025-12-13T12:21:52.634320",
+      "auto_generated": true,
+      "indexed_from": "Question Bank Structure"
+    },
+    {
+      "id": "wiki_56e0c17f",
+      "question": "How does Question Selection work?",
+      "answer": "How questions are selected for interviews\n\nThis feature is implemented in: backend/core/question_manager.py",
+      "category": "Question Generation",
+      "code_refs": [
+        "backend/core/question_manager.py"
+      ],
+      "keywords": [
+        "question",
+        "selection",
+        "how",
+        "questions",
+        "are",
+        "selected",
+        "for"
+      ],
+      "created_at": "2025-12-13T12:21:52.634433",
+      "auto_generated": true,
+      "indexed_from": "Question Selection"
+    },
+    {
+      "id": "wiki_047e1cb8",
+      "question": "How does AI Question Generation work?",
+      "answer": "How AI generates follow-up questions\n\nThis feature is implemented in: backend/llm/gemini_client.py",
+      "category": "Question Generation",
+      "code_refs": [
+        "backend/llm/gemini_client.py"
+      ],
+      "keywords": [
+        "ai",
+        "question",
+        "generation",
+        "how",
+        "ai",
+        "generates",
+        "follow-up",
+        "questions"
+      ],
+      "created_at": "2025-12-13T12:21:52.634601",
+      "auto_generated": true,
+      "indexed_from": "AI Question Generation"
+    },
+    {
+      "id": "wiki_a47503af",
+      "question": "How does Strategy Factory work?",
+      "answer": "How follow-up strategies are selected\n\nThis feature is implemented in: backend/strategies/strategy_factory.py",
+      "category": "Follow-up Strategies",
+      "code_refs": [
+        "backend/strategies/strategy_factory.py"
+      ],
+      "keywords": [
+        "strategy",
+        "factory",
+        "how",
+        "follow-up",
+        "strategies",
+        "are",
+        "selected"
+      ],
+      "created_at": "2025-12-13T12:21:52.634717",
+      "auto_generated": true,
+      "indexed_from": "Strategy Factory"
+    },
+    {
+      "id": "wiki_723b6090",
+      "question": "How does Depth Focused Strategy work?",
+      "answer": "Deep dive strategy for weak areas\n\nThis feature is implemented in: backend/strategies/depth_focused.py",
+      "category": "Follow-up Strategies",
+      "code_refs": [
+        "backend/strategies/depth_focused.py"
+      ],
+      "keywords": [
+        "depth",
+        "focused",
+        "strategy",
+        "deep",
+        "dive",
+        "strategy",
+        "for",
+        "weak"
+      ],
+      "created_at": "2025-12-13T12:21:52.634822",
+      "auto_generated": true,
+      "indexed_from": "Depth Focused Strategy"
+    },
+    {
+      "id": "wiki_d54eab4d",
+      "question": "How does Breadth Focused Strategy work?",
+      "answer": "Strategy to cover more topics\n\nThis feature is implemented in: backend/strategies/breadth_focused.py",
+      "category": "Follow-up Strategies",
+      "code_refs": [
+        "backend/strategies/breadth_focused.py"
+      ],
+      "keywords": [
+        "breadth",
+        "focused",
+        "strategy",
+        "strategy",
+        "to",
+        "cover",
+        "more",
+        "topics"
+      ],
+      "created_at": "2025-12-13T12:21:52.634923",
+      "auto_generated": true,
+      "indexed_from": "Breadth Focused Strategy"
+    },
+    {
+      "id": "wiki_c2414122",
+      "question": "How does Evaluator Engine work?",
+      "answer": "How responses are evaluated\n\nThis feature is implemented in: backend/evaluation/evaluator.py",
+      "category": "Evaluation & Scoring",
+      "code_refs": [
+        "backend/evaluation/evaluator.py"
+      ],
+      "keywords": [
+        "evaluator",
+        "engine",
+        "how",
+        "responses",
+        "are",
+        "evaluated"
+      ],
+      "created_at": "2025-12-13T12:21:52.635043",
+      "auto_generated": true,
+      "indexed_from": "Evaluator Engine"
+    },
+    {
+      "id": "wiki_2a3ab2e5",
+      "question": "How does Scoring Algorithms work?",
+      "answer": "Scoring methods for different question types\n\nThis feature is implemented in: backend/evaluation/scoring_algorithms.py",
+      "category": "Evaluation & Scoring",
+      "code_refs": [
+        "backend/evaluation/scoring_algorithms.py"
+      ],
+      "keywords": [
+        "scoring",
+        "algorithms",
+        "scoring",
+        "methods",
+        "for",
+        "different",
+        "question"
+      ],
+      "created_at": "2025-12-13T12:21:52.635158",
+      "auto_generated": true,
+      "indexed_from": "Scoring Algorithms"
+    },
+    {
+      "id": "wiki_fc3f3f30",
+      "question": "How does Organization Structure work?",
+      "answer": "How organizations are structured\n\nThis feature is implemented in: backend/models/organizations.json",
+      "category": "Data Models",
+      "code_refs": [
+        "backend/models/organizations.json"
+      ],
+      "keywords": [
+        "organization",
+        "structure",
+        "how",
+        "organizations",
+        "are",
+        "structured"
+      ],
+      "created_at": "2025-12-13T12:21:52.635257",
+      "auto_generated": true,
+      "indexed_from": "Organization Structure"
+    },
+    {
+      "id": "wiki_870bb898",
+      "question": "How does Account Model work?",
+      "answer": "Client account data structure\n\nThis feature is implemented in: backend/models/accounts.json",
+      "category": "Data Models",
+      "code_refs": [
+        "backend/models/accounts.json"
+      ],
+      "keywords": [
+        "account",
+        "model",
+        "client",
+        "account",
+        "data",
+        "structure"
+      ],
+      "created_at": "2025-12-13T12:21:52.635359",
+      "auto_generated": true,
+      "indexed_from": "Account Model"
+    },
+    {
+      "id": "wiki_a700b297",
+      "question": "How does Position Model work?",
+      "answer": "Job position data structure with interview configuration\n\nThis feature is implemented in: backend/models/positions.json",
+      "category": "Data Models",
+      "code_refs": [
+        "backend/models/positions.json"
+      ],
+      "keywords": [
+        "position",
+        "model",
+        "job",
+        "position",
+        "data",
+        "structure",
+        "with"
+      ],
+      "created_at": "2025-12-13T12:21:52.635532",
+      "auto_generated": true,
+      "indexed_from": "Position Model"
+    },
+    {
+      "id": "wiki_9142ba49",
+      "question": "How does Expert Mode Flow work?",
+      "answer": "How admin approval system works\n\nThis feature is implemented in: backend/core/interview_controller.py, backend/main.py",
+      "category": "Expert Mode",
+      "code_refs": [
+        "backend/core/interview_controller.py",
+        "backend/main.py"
+      ],
+      "keywords": [
+        "expert",
+        "mode",
+        "flow",
+        "how",
+        "admin",
+        "approval",
+        "system",
+        "works"
+      ],
+      "created_at": "2025-12-13T12:21:52.635877",
+      "auto_generated": true,
+      "indexed_from": "Expert Mode Flow"
+    },
+    {
+      "id": "wiki_28832e35",
+      "question": "How does Approve/Edit/Override work?",
+      "answer": "Expert actions on follow-up questions\n\nThis feature is implemented in: backend/main.py",
+      "category": "Expert Mode",
+      "code_refs": [
+        "backend/main.py"
+      ],
+      "keywords": [
+        "approve/edit/override",
+        "expert",
+        "actions",
+        "on",
+        "follow-up",
+        "questions"
+      ],
+      "created_at": "2025-12-13T12:21:52.636083",
+      "auto_generated": true,
+      "indexed_from": "Approve/Edit/Override"
+    },
+    {
+      "id": "wiki_55b466e0",
+      "question": "How does Gemini Client work?",
+      "answer": "How AI models are integrated\n\nThis feature is implemented in: backend/llm/gemini_client.py",
+      "category": "LLM Integration",
+      "code_refs": [
+        "backend/llm/gemini_client.py"
+      ],
+      "keywords": [
+        "gemini",
+        "client",
+        "how",
+        "ai",
+        "models",
+        "are",
+        "integrated"
+      ],
+      "created_at": "2025-12-13T12:21:52.636259",
+      "auto_generated": true,
+      "indexed_from": "Gemini Client"
+    },
+    {
+      "id": "wiki_ba9ff28d",
+      "question": "How does Follow-up Generation work?",
+      "answer": "AI-generated interview follow-ups\n\nThis feature is implemented in: backend/llm/gemini_client.py",
+      "category": "LLM Integration",
+      "code_refs": [
+        "backend/llm/gemini_client.py"
+      ],
+      "keywords": [
+        "follow-up",
+        "generation",
+        "ai-generated",
+        "interview",
+        "follow-ups"
+      ],
+      "created_at": "2025-12-13T12:21:52.636404",
+      "auto_generated": true,
+      "indexed_from": "Follow-up Generation"
+    }
+  ],
   "categories": [
     "Interview Flow",
     "Candidate Matching",
@@ -15,10 +438,10 @@
     "Logging & Analytics"
   ],
   "metadata": {
-    "last_indexed": null,
+    "last_indexed": "2025-12-13T12:21:52.636407",
     "total_queries": 0,
     "cache_hits": 0,
-    "llm_calls": 0
+    "llm_calls": 0,
+    "indexer_version": "1.0"
   }
 }
-
