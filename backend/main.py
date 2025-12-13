@@ -7,7 +7,7 @@ from pydantic import BaseModel
 import json
 import os
 import uuid
-from datetime import datetime
+from datetime import datetime, timedelta
 from backend.config import Config
 from backend.websocket.connection_manager import ConnectionManager
 from backend.websocket.message_handler import MessageHandler
@@ -70,6 +70,7 @@ POSITIONS_FILE = os.path.join(MODELS_DIR, "positions.json")
 QUESTION_BANK_FILE = os.path.join(MODELS_DIR, "question_bank.json")
 WIKI_FILE = os.path.join(MODELS_DIR, "wiki.json")
 SESSIONS_FILE = os.path.join(MODELS_DIR, "interview_sessions.json")
+RESULTS_FILE = os.path.join(MODELS_DIR, "interview_results.json")
 
 # CORS middleware
 app.add_middleware(
@@ -1129,10 +1130,13 @@ async def get_pending_followup(session_id: str):
 
 # ==================== Interview Session Links ====================
 
-def generate_interview_links(session_id: str, position_id: str, candidate_id: str) -> dict:
-    """Generate unique links for candidate and admin views"""
+def generate_interview_links(session_id: str, position_id: str, candidate_id: str, ttl_minutes: int = 30) -> dict:
+    """Generate unique links for candidate and admin views with TTL"""
     candidate_token = str(uuid.uuid4())
     admin_token = str(uuid.uuid4())
+    
+    created_at = datetime.now()
+    expires_at = created_at + timedelta(minutes=ttl_minutes)
     
     session_data = {
         "session_id": session_id,
@@ -1140,8 +1144,10 @@ def generate_interview_links(session_id: str, position_id: str, candidate_id: st
         "candidate_id": candidate_id,
         "candidate_token": candidate_token,
         "admin_token": admin_token,
-        "created_at": datetime.now().isoformat(),
-        "status": "pending"  # pending, active, completed
+        "created_at": created_at.isoformat(),
+        "expires_at": expires_at.isoformat(),
+        "ttl_minutes": ttl_minutes,
+        "status": "pending"  # pending, active, completed, expired
     }
     
     # Load existing sessions
@@ -1157,40 +1163,51 @@ def generate_interview_links(session_id: str, position_id: str, candidate_id: st
         "candidate_link": f"/interview/{session_id}?token={candidate_token}&view=candidate",
         "admin_link": f"/interview/{session_id}?token={admin_token}&view=admin",
         "candidate_token": candidate_token,
-        "admin_token": admin_token
+        "admin_token": admin_token,
+        "expires_at": expires_at.isoformat(),
+        "ttl_minutes": ttl_minutes
     }
 
+class CreateSessionRequest(BaseModel):
+    position_id: str
+    candidate_id: str
+    ttl_minutes: int = 30  # Default 30 mins
+
 @app.post("/api/interview/create-session")
-async def create_interview_session(
-    position_id: str = Body(...),
-    candidate_id: str = Body(...)
-):
+async def create_interview_session(request: CreateSessionRequest):
     """Create interview session and generate unique links for candidate and admin"""
+    # Validate TTL (1-1440 minutes, i.e., max 24 hours)
+    ttl = max(1, min(request.ttl_minutes, 1440))
+    
     # Validate position exists
     positions_data = load_json_file(POSITIONS_FILE)
-    position = next((p for p in positions_data.get("positions", []) if p["id"] == position_id), None)
+    position = next((p for p in positions_data.get("positions", []) if p["id"] == request.position_id), None)
     if not position:
         raise HTTPException(status_code=404, detail="Position not found")
     
-    # Validate candidate exists
-    resumes_data = load_json_file(RESUMES_FILE)
-    candidate = next((r for r in resumes_data.get("resumes", []) if r["id"] == candidate_id), None)
-    if not candidate:
-        raise HTTPException(status_code=404, detail="Candidate not found")
+    # Validate candidate exists (allow 'custom' for uploaded resumes)
+    candidate = None
+    if request.candidate_id != 'custom':
+        resumes_data = load_json_file(RESUMES_FILE)
+        candidate = next((r for r in resumes_data.get("resumes", []) if r["id"] == request.candidate_id), None)
+        if not candidate:
+            raise HTTPException(status_code=404, detail="Candidate not found")
     
-    # Generate session ID and links
+    # Generate session ID and links with TTL
     session_id = str(uuid.uuid4())[:8]
-    links = generate_interview_links(session_id, position_id, candidate_id)
+    links = generate_interview_links(session_id, request.position_id, request.candidate_id, ttl)
     
     return {
         "status": "created",
         "session_id": session_id,
-        "position": {"id": position_id, "title": position.get("title")},
-        "candidate": {"id": candidate_id, "name": candidate.get("name")},
+        "position": {"id": request.position_id, "title": position.get("title")},
+        "candidate": {"id": request.candidate_id, "name": candidate.get("name") if candidate else "Custom Resume"},
         "links": {
             "candidate": links["candidate_link"],
             "admin": links["admin_link"]
-        }
+        },
+        "expires_at": links["expires_at"],
+        "ttl_minutes": ttl
     }
 
 @app.get("/api/interview/validate-token")
@@ -1202,10 +1219,32 @@ async def validate_interview_token(session_id: str, token: str):
     if not session:
         raise HTTPException(status_code=404, detail="Session not found")
     
+    # Check if session has expired
+    expires_at_str = session.get("expires_at")
+    if expires_at_str:
+        expires_at = datetime.fromisoformat(expires_at_str)
+        if datetime.now() > expires_at:
+            # Update session status to expired
+            session["status"] = "expired"
+            sessions["sessions"][session_id] = session
+            save_json_file(SESSIONS_FILE, sessions)
+            raise HTTPException(status_code=410, detail="Session link has expired")
+    
+    # Validate token
     if token == session.get("candidate_token"):
-        return {"valid": True, "view": "candidate", "session_id": session_id}
+        return {
+            "valid": True, 
+            "view": "candidate", 
+            "session_id": session_id,
+            "expires_at": session.get("expires_at")
+        }
     elif token == session.get("admin_token"):
-        return {"valid": True, "view": "admin", "session_id": session_id}
+        return {
+            "valid": True, 
+            "view": "admin", 
+            "session_id": session_id,
+            "expires_at": session.get("expires_at")
+        }
     else:
         raise HTTPException(status_code=403, detail="Invalid token")
 
@@ -1632,6 +1671,366 @@ async def reindex_wiki(request: ReindexRequest):
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Reindexing failed: {str(e)}")
+
+# ==================== Interview Results & Evaluation ====================
+
+class EndInterviewRequest(BaseModel):
+    ended_by: str = "candidate"  # candidate, admin, system
+    reason: str = "completed"  # completed, ended_early, timeout
+
+class AdminFeedbackRequest(BaseModel):
+    overall_notes: str = ""
+    question_notes: dict = {}
+    recommendation: str = "pending"  # proceed, hold, reject, pending
+
+def generate_question_feedback(question_text: str, candidate_answer: str, scores: dict) -> dict:
+    """Generate AI feedback for a single question response"""
+    try:
+        from backend.llm.gemini_client import GeminiClient
+        gemini = GeminiClient()
+        
+        overall_score = scores.get("overall_score", 0)
+        
+        prompt = f"""Analyze this interview response and provide structured feedback.
+
+Question: {question_text[:500]}
+
+Candidate Answer: {candidate_answer[:1000]}
+
+Score: {overall_score}/100
+
+Provide feedback in this exact format:
+SUMMARY: [1-2 sentence summary of the answer quality]
+STRENGTHS: [2-3 bullet points of what was done well, separated by |]
+WEAKNESSES: [2-3 bullet points of gaps or areas to improve, separated by |]
+"""
+        
+        response = gemini.model.generate_content(prompt)
+        response_text = ""
+        
+        if hasattr(response, 'candidates') and response.candidates:
+            candidate = response.candidates[0]
+            if hasattr(candidate, 'content') and hasattr(candidate.content, 'parts'):
+                parts = candidate.content.parts
+                if parts:
+                    response_text = ''.join([part.text for part in parts if hasattr(part, 'text')]).strip()
+        
+        if not response_text and hasattr(response, 'text'):
+            response_text = response.text.strip()
+        
+        # Parse response
+        summary = ""
+        strengths = []
+        weaknesses = []
+        
+        for line in response_text.split('\n'):
+            if line.startswith('SUMMARY:'):
+                summary = line.replace('SUMMARY:', '').strip()
+            elif line.startswith('STRENGTHS:'):
+                strengths_text = line.replace('STRENGTHS:', '').strip()
+                strengths = [s.strip() for s in strengths_text.split('|') if s.strip()]
+            elif line.startswith('WEAKNESSES:'):
+                weaknesses_text = line.replace('WEAKNESSES:', '').strip()
+                weaknesses = [w.strip() for w in weaknesses_text.split('|') if w.strip()]
+        
+        return {
+            "summary": summary or "Response evaluated.",
+            "strengths": strengths or ["Answer provided"],
+            "weaknesses": weaknesses or ["Could provide more detail"]
+        }
+        
+    except Exception as e:
+        print(f"Error generating feedback: {e}")
+        return {
+            "summary": "Response evaluated based on scoring criteria.",
+            "strengths": ["Answer was provided"],
+            "weaknesses": ["Feedback generation unavailable"]
+        }
+
+@app.post("/api/interview/{session_id}/end")
+async def end_interview(session_id: str, request: EndInterviewRequest):
+    """End interview and generate results with AI feedback"""
+    # Check if session exists
+    sessions = load_json_file(SESSIONS_FILE)
+    session = sessions.get("sessions", {}).get(session_id)
+    
+    if not session:
+        raise HTTPException(status_code=404, detail="Session not found")
+    
+    # Update session status
+    session["status"] = "completed"
+    session["ended_at"] = datetime.now().isoformat()
+    session["ended_by"] = request.ended_by
+    session["end_reason"] = request.reason
+    sessions["sessions"][session_id] = session
+    save_json_file(SESSIONS_FILE, sessions)
+    
+    # Get interview data from logger
+    from backend.utils.logger import Logger
+    logger = Logger()
+    log_data = logger.get_session_log(session_id)
+    
+    # Get position and candidate info
+    positions_data = load_json_file(POSITIONS_FILE)
+    position = next((p for p in positions_data.get("positions", []) if p["id"] == session.get("position_id")), None)
+    
+    resumes_data = load_json_file(RESUMES_FILE)
+    candidate = next((r for r in resumes_data.get("resumes", []) if r["id"] == session.get("candidate_id")), None)
+    
+    # Process questions and generate feedback
+    question_results = []
+    all_scores = []
+    topics_covered = set()
+    
+    questions = log_data.get("questions", []) if log_data else []
+    
+    for q_data in questions:
+        question_text = q_data.get("question_text", "")
+        topic = q_data.get("topic", "General")
+        topics_covered.add(topic)
+        
+        # Get best response for this question
+        responses = q_data.get("responses", [])
+        if responses:
+            best_response = responses[0]
+            for r in responses:
+                if r.get("evaluation", {}).get("overall_score", 0) > best_response.get("evaluation", {}).get("overall_score", 0):
+                    best_response = r
+            
+            candidate_answer = best_response.get("candidate_response", "")
+            evaluation = best_response.get("evaluation", {})
+            overall_score = evaluation.get("overall_score", 0)
+            all_scores.append(overall_score)
+            
+            # Generate AI feedback for this question
+            ai_feedback = generate_question_feedback(question_text, candidate_answer, evaluation)
+            
+            question_results.append({
+                "question_id": q_data.get("question_id", ""),
+                "question_text": question_text,
+                "topic": topic,
+                "candidate_answer": candidate_answer,
+                "scores": {
+                    "deterministic": evaluation.get("deterministic_scores", {}),
+                    "llm_score": evaluation.get("llm_evaluation", {}).get("score", overall_score),
+                    "combined_score": overall_score
+                },
+                "ai_feedback": ai_feedback,
+                "followups": [
+                    {
+                        "question": r.get("followup_question", ""),
+                        "answer": r.get("candidate_response", ""),
+                        "score": r.get("evaluation", {}).get("overall_score", 0)
+                    }
+                    for r in responses[1:] if r.get("response_type") == "followup"
+                ]
+            })
+    
+    # Calculate overall metrics
+    avg_score = sum(all_scores) / len(all_scores) if all_scores else 0
+    score_trend = "stable"
+    if len(all_scores) > 2:
+        first_half = sum(all_scores[:len(all_scores)//2]) / (len(all_scores)//2)
+        second_half = sum(all_scores[len(all_scores)//2:]) / (len(all_scores) - len(all_scores)//2)
+        if second_half > first_half + 5:
+            score_trend = "improving"
+        elif second_half < first_half - 5:
+            score_trend = "declining"
+    
+    # Create result record
+    result_id = f"result_{uuid.uuid4().hex[:8]}"
+    result = {
+        "id": result_id,
+        "session_id": session_id,
+        "candidate": {
+            "id": session.get("candidate_id", ""),
+            "name": candidate.get("name") if candidate else "Unknown",
+            "experience_level": candidate.get("experience_level") if candidate else "Unknown"
+        },
+        "position": {
+            "id": session.get("position_id", ""),
+            "title": position.get("title") if position else "Unknown"
+        },
+        "created_at": datetime.now().isoformat(),
+        "ended_by": request.ended_by,
+        "end_reason": request.reason,
+        "status": "completed",
+        "overall_metrics": {
+            "total_score": round(avg_score, 1),
+            "questions_asked": len(question_results),
+            "avg_response_time_sec": log_data.get("avg_response_time", 0) if log_data else 0,
+            "score_trend": score_trend,
+            "topics_covered": list(topics_covered)
+        },
+        "question_results": question_results,
+        "admin_feedback": {
+            "overall_notes": "",
+            "question_notes": {},
+            "recommendation": "pending",
+            "added_by": None,
+            "added_at": None
+        },
+        "shareable_link": {
+            "token": None,
+            "expires_at": None,
+            "views": ["summary"]
+        }
+    }
+    
+    # Save result
+    results_data = load_json_file(RESULTS_FILE)
+    if "results" not in results_data:
+        results_data["results"] = {}
+    results_data["results"][result_id] = result
+    save_json_file(RESULTS_FILE, results_data)
+    
+    return {
+        "status": "completed",
+        "result_id": result_id,
+        "session_id": session_id,
+        "overall_score": round(avg_score, 1),
+        "questions_evaluated": len(question_results)
+    }
+
+@app.get("/api/results/{result_id}")
+async def get_interview_result(result_id: str, admin: bool = True):
+    """Get full interview result (Admin only for full view)"""
+    results_data = load_json_file(RESULTS_FILE)
+    result = results_data.get("results", {}).get(result_id)
+    
+    if not result:
+        raise HTTPException(status_code=404, detail="Result not found")
+    
+    if admin:
+        return result
+    else:
+        # Limited view for non-admin (just summary)
+        return {
+            "id": result["id"],
+            "position": result["position"],
+            "created_at": result["created_at"],
+            "status": result["status"],
+            "overall_metrics": {
+                "total_score": result["overall_metrics"]["total_score"],
+                "questions_asked": result["overall_metrics"]["questions_asked"]
+            }
+        }
+
+@app.get("/api/results/session/{session_id}")
+async def get_result_by_session(session_id: str):
+    """Get result by session ID"""
+    results_data = load_json_file(RESULTS_FILE)
+    
+    for result_id, result in results_data.get("results", {}).items():
+        if result.get("session_id") == session_id:
+            return result
+    
+    raise HTTPException(status_code=404, detail="Result not found for this session")
+
+@app.post("/api/results/{result_id}/feedback")
+async def add_admin_feedback(result_id: str, request: AdminFeedbackRequest):
+    """Add or update admin feedback on a result"""
+    results_data = load_json_file(RESULTS_FILE)
+    result = results_data.get("results", {}).get(result_id)
+    
+    if not result:
+        raise HTTPException(status_code=404, detail="Result not found")
+    
+    result["admin_feedback"] = {
+        "overall_notes": request.overall_notes,
+        "question_notes": request.question_notes,
+        "recommendation": request.recommendation,
+        "added_by": "admin",  # Could be enhanced with actual user info
+        "added_at": datetime.now().isoformat()
+    }
+    
+    results_data["results"][result_id] = result
+    save_json_file(RESULTS_FILE, results_data)
+    
+    return {"status": "feedback_saved", "result_id": result_id}
+
+@app.post("/api/results/{result_id}/share")
+async def create_shareable_link(result_id: str):
+    """Generate a shareable link for candidate to view their results"""
+    results_data = load_json_file(RESULTS_FILE)
+    result = results_data.get("results", {}).get(result_id)
+    
+    if not result:
+        raise HTTPException(status_code=404, detail="Result not found")
+    
+    share_token = f"share_{uuid.uuid4().hex[:12]}"
+    
+    result["shareable_link"] = {
+        "token": share_token,
+        "created_at": datetime.now().isoformat(),
+        "expires_at": None,  # No expiry for now
+        "views": ["summary"]  # Limited views for candidate
+    }
+    
+    results_data["results"][result_id] = result
+    save_json_file(RESULTS_FILE, results_data)
+    
+    return {
+        "share_url": f"/results/shared/{share_token}",
+        "token": share_token
+    }
+
+@app.get("/api/results/shared/{token}")
+async def get_shared_result(token: str):
+    """Get result via shareable link (limited view for candidates)"""
+    results_data = load_json_file(RESULTS_FILE)
+    
+    for result_id, result in results_data.get("results", {}).items():
+        if result.get("shareable_link", {}).get("token") == token:
+            # Return limited view for candidate
+            return {
+                "id": result["id"],
+                "position": result["position"],
+                "candidate": {"name": result["candidate"]["name"]},
+                "created_at": result["created_at"],
+                "status": result["status"],
+                "overall_metrics": {
+                    "total_score": result["overall_metrics"]["total_score"],
+                    "questions_asked": result["overall_metrics"]["questions_asked"],
+                    "score_trend": result["overall_metrics"]["score_trend"]
+                },
+                # Only show general summary, not detailed scores
+                "feedback_summary": result["admin_feedback"].get("overall_notes") if result["admin_feedback"].get("overall_notes") else "Your interview results are being reviewed."
+            }
+    
+    raise HTTPException(status_code=404, detail="Invalid or expired share link")
+
+@app.get("/api/results")
+async def list_all_results(limit: int = 20, offset: int = 0):
+    """List all interview results (Admin only)"""
+    results_data = load_json_file(RESULTS_FILE)
+    all_results = list(results_data.get("results", {}).values())
+    
+    # Sort by created_at descending
+    all_results.sort(key=lambda x: x.get("created_at", ""), reverse=True)
+    
+    # Paginate
+    paginated = all_results[offset:offset + limit]
+    
+    # Return summary view
+    return {
+        "results": [
+            {
+                "id": r["id"],
+                "session_id": r["session_id"],
+                "candidate": r["candidate"],
+                "position": r["position"],
+                "created_at": r["created_at"],
+                "status": r["status"],
+                "overall_score": r["overall_metrics"]["total_score"],
+                "recommendation": r["admin_feedback"].get("recommendation", "pending")
+            }
+            for r in paginated
+        ],
+        "total": len(all_results),
+        "limit": limit,
+        "offset": offset
+    }
 
 if __name__ == "__main__":
     import uvicorn

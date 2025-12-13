@@ -84,7 +84,12 @@ export default function DashboardPage() {
     position: { id: string; title: string }
     candidate: { id: string; name: string }
     links: { candidate: string; admin: string }
+    expires_at?: string
+    ttl_minutes?: number
   } | null>(null)
+  
+  // TTL for interview links
+  const [linkTTL, setLinkTTL] = useState(30) // Default 30 minutes
 
   // Load accounts and all positions on mount
   useEffect(() => {
@@ -168,7 +173,8 @@ export default function DashboardPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           position_id: selectedPosition,
-          candidate_id: selectedCandidate || 'custom'
+          candidate_id: selectedCandidate || 'custom',
+          ttl_minutes: linkTTL
         })
       })
 
@@ -215,7 +221,9 @@ export default function DashboardPage() {
           id: selectedCandidate || 'custom', 
           name: candidateName 
         },
-        links: sessionData.links
+        links: sessionData.links,
+        expires_at: sessionData.expires_at,
+        ttl_minutes: sessionData.ttl_minutes
       })
       setShowInterviewLinks(true)
 
@@ -506,6 +514,37 @@ export default function DashboardPage() {
                       }}
                       disabled={!!selectedCandidate}
                     />
+                  </div>
+
+                  {/* Link Expiry Selector */}
+                  <div className="mb-4 p-3 bg-gray-50 dark:bg-[#111] border border-gray-200 dark:border-[#2A2A2A]">
+                    <label className="text-xs text-gray-500 uppercase tracking-wider mb-2 block">
+                      Link Expiry (max 24hrs)
+                    </label>
+                    <div className="flex flex-wrap gap-2">
+                      {[
+                        { label: '2 min', value: 2 },
+                        { label: '5 min', value: 5 },
+                        { label: '10 min', value: 10 },
+                        { label: '30 min', value: 30 },
+                        { label: '1 hr', value: 60 },
+                        { label: '2 hrs', value: 120 },
+                        { label: '6 hrs', value: 360 },
+                        { label: '24 hrs', value: 1440 },
+                      ].map((option) => (
+                        <button
+                          key={option.value}
+                          onClick={() => setLinkTTL(option.value)}
+                          className={`px-3 py-1.5 text-xs font-medium transition-colors ${
+                            linkTTL === option.value
+                              ? 'bg-[#00E5FF] text-black'
+                              : 'bg-white dark:bg-[#1A1A1A] text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-[#2A2A2A] hover:border-[#00E5FF]'
+                          }`}
+                        >
+                          {option.label}
+                        </button>
+                      ))}
+                    </div>
                   </div>
 
                   {/* Start Buttons */}

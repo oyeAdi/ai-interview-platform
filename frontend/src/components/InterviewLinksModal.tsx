@@ -14,6 +14,8 @@ interface InterviewLinksModalProps {
       candidate: string
       admin: string
     }
+    expires_at?: string
+    ttl_minutes?: number
   } | null
 }
 
@@ -85,9 +87,26 @@ export default function InterviewLinksModal({ isOpen, onClose, sessionData }: In
                 <span className="text-gray-500">Candidate:</span>
                 <span className="ml-2 text-black dark:text-white font-medium">{sessionData.candidate.name}</span>
               </div>
-              <div className="col-span-2">
+              <div>
                 <span className="text-gray-500">Session ID:</span>
                 <span className="ml-2 text-[#00E5FF] font-mono">{sessionData.session_id}</span>
+              </div>
+              <div>
+                <span className="text-gray-500">Link Expires:</span>
+                <span className="ml-2 text-orange-500 font-medium">
+                  {sessionData.expires_at 
+                    ? new Date(sessionData.expires_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                    : 'N/A'
+                  }
+                  {sessionData.ttl_minutes && (
+                    <span className="text-gray-400 text-xs ml-1">
+                      ({sessionData.ttl_minutes >= 60 
+                        ? `${Math.floor(sessionData.ttl_minutes / 60)}hr${sessionData.ttl_minutes % 60 > 0 ? ` ${sessionData.ttl_minutes % 60}min` : ''}`
+                        : `${sessionData.ttl_minutes}min`
+                      })
+                    </span>
+                  )}
+                </span>
               </div>
             </div>
           </div>

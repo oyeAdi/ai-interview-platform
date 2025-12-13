@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef, lazy, Suspense } from 'react'
 import { useRouter } from 'next/navigation'
 import AnswerInput from './AnswerInput'
+import EndInterviewModal from './EndInterviewModal'
 
 // Lazy load Monaco editor for better performance
 const CodeEditor = lazy(() => import('./CodeEditor'))
@@ -35,6 +36,10 @@ export default function CandidateView({ sessionId, language }: CandidateViewProp
   const [connectionStatus, setConnectionStatus] = useState<'connecting' | 'connected' | 'disconnected'>('connecting')
   const [answerMode, setAnswerMode] = useState<'text' | 'code'>('text')
   const [codeAnswer, setCodeAnswer] = useState('')
+  
+  // End Interview Modal
+  const [showEndModal, setShowEndModal] = useState(false)
+  const [isEndingInterview, setIsEndingInterview] = useState(false)
 
   useEffect(() => {
     if (!sessionId) return
@@ -155,6 +160,44 @@ export default function CandidateView({ sessionId, language }: CandidateViewProp
     }))
   }
 
+  const handleEndInterview = async () => {
+    setIsEndingInterview(true)
+    try {
+      const response = await fetch(`http://localhost:8000/api/interview/${sessionId}/end`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ended_by: 'candidate',
+          reason: 'ended_early'
+        })
+      })
+      
+      if (response.ok) {
+        const data = await response.json()
+        console.log('Interview ended:', data)
+        setSessionEnded(true)
+        setShowEndModal(false)
+        
+        // Notify through WebSocket
+        if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+          wsRef.current.send(JSON.stringify({
+            type: 'interview_ended',
+            session_id: sessionId,
+            ended_by: 'candidate'
+          }))
+        }
+      } else {
+        const errorData = await response.json()
+        alert(errorData.detail || 'Failed to end interview')
+      }
+    } catch (error) {
+      console.error('Error ending interview:', error)
+      alert('Failed to end interview. Please try again.')
+    } finally {
+      setIsEndingInterview(false)
+    }
+  }
+
   if (sessionEnded) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
@@ -186,7 +229,7 @@ export default function CandidateView({ sessionId, language }: CandidateViewProp
               <span className="text-white font-medium">AI Interview</span>
             </div>
             
-            {/* Status */}
+            {/* Status & End Button */}
             <div className="flex items-center gap-4">
               <div className={`flex items-center gap-2 px-3 py-1.5 text-xs font-medium ${
                 connectionStatus === 'connected' 
@@ -205,6 +248,14 @@ export default function CandidateView({ sessionId, language }: CandidateViewProp
                 {connectionStatus === 'connected' ? 'Live' : connectionStatus === 'connecting' ? 'Connecting...' : 'Disconnected'}
               </div>
               <span className="text-xs text-gray-600 font-mono">{sessionId?.slice(0, 12)}...</span>
+              
+              {/* End Interview Button */}
+              <button
+                onClick={() => setShowEndModal(true)}
+                className="px-3 py-1.5 text-xs font-medium text-red-400 border border-red-400/30 hover:bg-red-400/10 transition-colors"
+              >
+                End Interview
+              </button>
             </div>
           </div>
         </div>
@@ -430,6 +481,14 @@ export default function CandidateView({ sessionId, language }: CandidateViewProp
           </p>
         </div>
       </main>
+
+      {/* End Interview Confirmation Modal */}
+      <EndInterviewModal
+        isOpen={showEndModal}
+        onClose={() => setShowEndModal(false)}
+        onConfirm={handleEndInterview}
+        isEnding={isEndingInterview}
+      />
     </div>
   )
 }
