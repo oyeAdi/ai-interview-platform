@@ -6,7 +6,7 @@
       "org_id": "epam",
       "logo": "/logos/uber.svg",
       "description": "Global mobility and delivery platform",
-      "positions": ["uber_senior_python", "uber_java_lead", "uber_fullstack"]
+      "positions": ["uber_senior_python", "uber_java_lead", "uber_fullstack", "uber_ios_senior", "uber_android_mid", "uber_ml_engineer", "uber_sre", "uber_data_engineer", "uber_security_engineer", "uber_backend_maps", "uber_frontend_senior"]
     },
     {
       "id": "servicenow",

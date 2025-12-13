@@ -67,6 +67,182 @@
       "jd_text": "Join our team as a Full Stack Engineer. 3-5 years of experience in JavaScript, React, and Node.js required."
     },
     {
+      "id": "uber_ios_senior",
+      "title": "Senior iOS Engineer",
+      "account_id": "uber",
+      "status": "open",
+      "created_at": "2024-12-10",
+      "data_model": {
+        "duration_minutes": 45,
+        "experience_level": "senior",
+        "expectations": "high",
+        "required_skills": [
+          { "skill": "swift", "proficiency": "expert", "weight": 0.3 },
+          { "skill": "ios", "proficiency": "expert", "weight": 0.25 },
+          { "skill": "system_design", "proficiency": "advanced", "weight": 0.2 },
+          { "skill": "coding", "proficiency": "expert", "weight": 0.15 },
+          { "skill": "testing", "proficiency": "advanced", "weight": 0.1 }
+        ],
+        "interview_flow": ["coding", "system_design", "conceptual"],
+        "question_distribution": { "easy": 0.2, "medium": 0.5, "hard": 0.3 }
+      },
+      "jd_text": "We're looking for a Senior iOS Engineer to build world-class mobile experiences for millions of riders and drivers. Strong Swift expertise, UIKit/SwiftUI knowledge, and experience with large-scale iOS apps required."
+    },
+    {
+      "id": "uber_android_mid",
+      "title": "Android Engineer",
+      "account_id": "uber",
+      "status": "open",
+      "created_at": "2024-12-09",
+      "data_model": {
+        "duration_minutes": 45,
+        "experience_level": "mid",
+        "expectations": "medium",
+        "required_skills": [
+          { "skill": "kotlin", "proficiency": "advanced", "weight": 0.3 },
+          { "skill": "android", "proficiency": "advanced", "weight": 0.25 },
+          { "skill": "java", "proficiency": "intermediate", "weight": 0.15 },
+          { "skill": "coding", "proficiency": "advanced", "weight": 0.2 },
+          { "skill": "testing", "proficiency": "intermediate", "weight": 0.1 }
+        ],
+        "interview_flow": ["coding", "conceptual", "problem_solving"],
+        "question_distribution": { "easy": 0.3, "medium": 0.5, "hard": 0.2 }
+      },
+      "jd_text": "Join Uber's Android team to build features used by millions daily. 3-5 years Android development experience with Kotlin required. Experience with MVVM architecture and Jetpack Compose preferred."
+    },
+    {
+      "id": "uber_ml_engineer",
+      "title": "Machine Learning Engineer",
+      "account_id": "uber",
+      "status": "open",
+      "created_at": "2024-12-07",
+      "data_model": {
+        "duration_minutes": 60,
+        "experience_level": "senior",
+        "expectations": "high",
+        "required_skills": [
+          { "skill": "python", "proficiency": "expert", "weight": 0.25 },
+          { "skill": "machine_learning", "proficiency": "expert", "weight": 0.3 },
+          { "skill": "tensorflow", "proficiency": "advanced", "weight": 0.15 },
+          { "skill": "system_design", "proficiency": "advanced", "weight": 0.2 },
+          { "skill": "coding", "proficiency": "expert", "weight": 0.1 }
+        ],
+        "interview_flow": ["coding", "system_design", "conceptual"],
+        "question_distribution": { "easy": 0.15, "medium": 0.45, "hard": 0.4 }
+      },
+      "jd_text": "Build ML models that power Uber's dynamic pricing, ETA predictions, and fraud detection. 5+ years experience with ML/AI, strong Python skills, and experience deploying models at scale required."
+    },
+    {
+      "id": "uber_sre",
+      "title": "Site Reliability Engineer",
+      "account_id": "uber",
+      "status": "open",
+      "created_at": "2024-12-06",
+      "data_model": {
+        "duration_minutes": 45,
+        "experience_level": "senior",
+        "expectations": "high",
+        "required_skills": [
+          { "skill": "linux", "proficiency": "expert", "weight": 0.2 },
+          { "skill": "kubernetes", "proficiency": "advanced", "weight": 0.25 },
+          { "skill": "python", "proficiency": "advanced", "weight": 0.15 },
+          { "skill": "distributed_systems", "proficiency": "expert", "weight": 0.25 },
+          { "skill": "coding", "proficiency": "advanced", "weight": 0.15 }
+        ],
+        "interview_flow": ["problem_solving", "system_design", "coding"],
+        "question_distribution": { "easy": 0.2, "medium": 0.5, "hard": 0.3 }
+      },
+      "jd_text": "Ensure Uber's services run reliably at massive scale. Experience with Kubernetes, observability tools, incident management, and automation required. On-call rotation expected."
+    },
+    {
+      "id": "uber_data_engineer",
+      "title": "Data Engineer",
+      "account_id": "uber",
+      "status": "open",
+      "created_at": "2024-12-04",
+      "data_model": {
+        "duration_minutes": 45,
+        "experience_level": "mid",
+        "expectations": "medium",
+        "required_skills": [
+          { "skill": "python", "proficiency": "advanced", "weight": 0.25 },
+          { "skill": "spark", "proficiency": "advanced", "weight": 0.25 },
+          { "skill": "sql", "proficiency": "expert", "weight": 0.2 },
+          { "skill": "databases", "proficiency": "advanced", "weight": 0.15 },
+          { "skill": "coding", "proficiency": "advanced", "weight": 0.15 }
+        ],
+        "interview_flow": ["coding", "conceptual", "problem_solving"],
+        "question_distribution": { "easy": 0.25, "medium": 0.5, "hard": 0.25 }
+      },
+      "jd_text": "Build data pipelines that process petabytes of ride data. Experience with Spark, Hive, Kafka, and data warehousing required. SQL expertise essential."
+    },
+    {
+      "id": "uber_security_engineer",
+      "title": "Security Engineer",
+      "account_id": "uber",
+      "status": "open",
+      "created_at": "2024-12-03",
+      "data_model": {
+        "duration_minutes": 45,
+        "experience_level": "senior",
+        "expectations": "high",
+        "required_skills": [
+          { "skill": "security", "proficiency": "expert", "weight": 0.3 },
+          { "skill": "python", "proficiency": "advanced", "weight": 0.2 },
+          { "skill": "networking", "proficiency": "advanced", "weight": 0.2 },
+          { "skill": "cloud_security", "proficiency": "advanced", "weight": 0.2 },
+          { "skill": "coding", "proficiency": "advanced", "weight": 0.1 }
+        ],
+        "interview_flow": ["conceptual", "problem_solving", "coding"],
+        "question_distribution": { "easy": 0.2, "medium": 0.5, "hard": 0.3 }
+      },
+      "jd_text": "Protect Uber's platform and user data from threats. Experience with application security, penetration testing, and security architecture required. CISSP or similar certification preferred."
+    },
+    {
+      "id": "uber_backend_maps",
+      "title": "Backend Engineer - Maps & Routing",
+      "account_id": "uber",
+      "status": "open",
+      "created_at": "2024-12-02",
+      "data_model": {
+        "duration_minutes": 45,
+        "experience_level": "senior",
+        "expectations": "high",
+        "required_skills": [
+          { "skill": "go", "proficiency": "expert", "weight": 0.25 },
+          { "skill": "algorithms", "proficiency": "expert", "weight": 0.25 },
+          { "skill": "distributed_systems", "proficiency": "advanced", "weight": 0.2 },
+          { "skill": "system_design", "proficiency": "advanced", "weight": 0.2 },
+          { "skill": "coding", "proficiency": "expert", "weight": 0.1 }
+        ],
+        "interview_flow": ["coding", "system_design", "conceptual"],
+        "question_distribution": { "easy": 0.15, "medium": 0.45, "hard": 0.4 }
+      },
+      "jd_text": "Build the routing engine that powers millions of trips. Strong algorithms background, experience with geospatial data, and Go/C++ expertise required. Knowledge of graph algorithms essential."
+    },
+    {
+      "id": "uber_frontend_senior",
+      "title": "Senior Frontend Engineer",
+      "account_id": "uber",
+      "status": "open",
+      "created_at": "2024-11-28",
+      "data_model": {
+        "duration_minutes": 45,
+        "experience_level": "senior",
+        "expectations": "high",
+        "required_skills": [
+          { "skill": "react", "proficiency": "expert", "weight": 0.3 },
+          { "skill": "typescript", "proficiency": "expert", "weight": 0.25 },
+          { "skill": "javascript", "proficiency": "expert", "weight": 0.15 },
+          { "skill": "system_design", "proficiency": "advanced", "weight": 0.2 },
+          { "skill": "coding", "proficiency": "expert", "weight": 0.1 }
+        ],
+        "interview_flow": ["coding", "system_design", "conceptual"],
+        "question_distribution": { "easy": 0.2, "medium": 0.5, "hard": 0.3 }
+      },
+      "jd_text": "Lead frontend development for Uber's web platform. 5+ years React/TypeScript experience, deep understanding of web performance, and experience with design systems required."
+    },
+    {
       "id": "snow_senior_java",
       "title": "Senior Java Developer",
       "account_id": "servicenow",

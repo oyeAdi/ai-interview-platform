@@ -280,7 +280,7 @@ export default function PositionGrid({
                 onClick={() => setVisibleCount(prev => prev + LOAD_MORE_COUNT)}
                 className="text-sm text-[#00E5FF] hover:underline transition-colors"
               >
-                Show more ({remainingCount} remaining) ↓
+                Show {Math.min(LOAD_MORE_COUNT, remainingCount)} more ↓
               </button>
             </div>
           )}
