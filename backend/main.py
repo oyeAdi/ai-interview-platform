@@ -836,13 +836,45 @@ async def websocket_endpoint(websocket: WebSocket, view: str = "candidate"):
                 
                 # Check if session exists in active interviews
                 if session_id not in active_interviews:
-                    # Try to restore session from logs
+                    # Try to restore session - first check sessions.json (new sessions), then log.json (resumed sessions)
                     try:
-                        log_data = logger.get_log_data()
                         session_found = False
                         
-                        for session in log_data.get("interview_sessions", []):
-                            if session.get("session_id") == session_id:
+                        # First, check if session exists in sessions.json (for new sessions that haven't started yet)
+                        sessions_data = load_json_file(SESSIONS_FILE)
+                        session_info = sessions_data.get("sessions", {}).get(session_id)
+                        
+                        if session_info:
+                            # Session exists in sessions.json - this is a new session
+                            # Get position to determine language
+                            positions_data = load_json_file(POSITIONS_FILE)
+                            position = next((p for p in positions_data.get("positions", []) if p["id"] == session_info.get("position_id")), None)
+                            
+                            # Default to python, but could be determined from position/JD
+                            language = "python"  # Default, could be enhanced to detect from position
+                            is_expert = view == "expert"
+                            
+                            # Create new controller for this session
+                            controller = InterviewController(language, session_info.get("position_id"), expert_mode=is_expert)
+                            controller.context_manager.session_id = session_id
+                            
+                            # Initialize session in logger
+                            logger.initialize_session(session_id, language, session_info.get("position_id"))
+                            
+                            # Update session status to active
+                            session_info["status"] = "active"
+                            sessions_data["sessions"][session_id] = session_info
+                            save_json_file(SESSIONS_FILE, sessions_data)
+                            
+                            active_interviews[session_id] = controller
+                            session_found = True
+                        
+                        # If not found in sessions.json, check log.json (for resumed sessions)
+                        if not session_found:
+                            log_data = logger.get_log_data()
+                            
+                            for session in log_data.get("interview_sessions", []):
+                                if session.get("session_id") == session_id:
                                 # Restore session
                                 language = session.get("detected_language", "python")
                                 jd_id = session.get("jd_id")
