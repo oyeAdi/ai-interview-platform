@@ -266,26 +266,31 @@ export default function DashboardPage() {
     }
   }
 
+  const sidebarOpen = sidebarType !== null && sidebarId !== null
+
   return (
     <div className="min-h-screen flex flex-col bg-white dark:bg-black transition-colors duration-200">
       <Header showQuickStart={true} />
       
-      <main className="flex-1">
-        {/* Hero Section */}
-        <section className="border-b border-gray-200 dark:border-[#2A2A2A]">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-            <h1 className="text-4xl md:text-5xl font-light text-black dark:text-white leading-tight mb-4">
-              Interview
-              <span className="font-normal"> Dashboard</span>
-            </h1>
-            <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl font-light">
-              Configure and launch AI-powered interviews for your candidates.
-            </p>
-          </div>
-        </section>
+      {/* Main wrapper with sidebar space */}
+      <div className="flex-1 flex">
+        {/* Main content - shrinks when sidebar open */}
+        <main className={`flex-1 transition-all duration-300 ${sidebarOpen ? 'mr-[380px]' : ''}`}>
+          {/* Hero Section */}
+          <section className="border-b border-gray-200 dark:border-[#2A2A2A]">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+              <h1 className="text-3xl md:text-4xl font-light text-black dark:text-white leading-tight mb-3">
+                Interview
+                <span className="font-normal"> Dashboard</span>
+              </h1>
+              <p className="text-base text-gray-600 dark:text-gray-400 max-w-2xl font-light">
+                Configure and launch AI-powered interviews for your candidates.
+              </p>
+            </div>
+          </section>
 
-        {/* Main Content */}
-        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          {/* Main Content */}
+          <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="space-y-12">
             {/* Accounts Section */}
             <div>
@@ -427,9 +432,20 @@ export default function DashboardPage() {
             )}
           </div>
         </section>
+        
+        <Footer />
       </main>
 
-      <Footer />
+        {/* Detail Sidebar - Fixed position, pushes content */}
+        <DetailSidebar
+          type={sidebarType}
+          selectedId={sidebarId}
+          onClose={handleSidebarClose}
+          onUpdate={handleSidebarUpdate}
+          onDelete={handleSidebarDelete}
+          onAddPosition={() => setShowAddPosition(true)}
+        />
+      </div>
 
       {/* Add Position Modal */}
       <AddPositionModal
@@ -457,14 +473,6 @@ export default function DashboardPage() {
         }}
       />
 
-      {/* Detail Sidebar */}
-      <DetailSidebar
-        type={sidebarType}
-        selectedId={sidebarId}
-        onClose={handleSidebarClose}
-        onUpdate={handleSidebarUpdate}
-        onDelete={handleSidebarDelete}
-      />
     </div>
   )
 }

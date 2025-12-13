@@ -22,13 +22,15 @@ interface AccountDetailProps {
   onUpdate: () => void
   onDelete: () => void
   onClose: () => void
+  onAddPosition?: () => void
 }
 
 export default function AccountDetail({
   accountId,
   onUpdate,
   onDelete,
-  onClose
+  onClose,
+  onAddPosition
 }: AccountDetailProps) {
   const [account, setAccount] = useState<Account | null>(null)
   const [positions, setPositions] = useState<Position[]>([])
@@ -204,11 +206,11 @@ export default function AccountDetail({
         </div>
 
         {/* Recent Positions */}
-        {recentPositions.length > 0 && (
-          <div>
-            <label className="block text-[10px] text-gray-500 uppercase tracking-wider mb-2">
-              Recent Positions
-            </label>
+        <div>
+          <label className="block text-[10px] text-gray-500 uppercase tracking-wider mb-2">
+            Recent Positions
+          </label>
+          {recentPositions.length > 0 ? (
             <div className="space-y-1.5">
               {recentPositions.map(pos => (
                 <div
@@ -233,7 +235,22 @@ export default function AccountDetail({
                 </div>
               ))}
             </div>
-          </div>
+          ) : (
+            <p className="text-xs text-gray-400 italic py-2">No positions yet</p>
+          )}
+        </div>
+
+        {/* Add Position Button */}
+        {onAddPosition && (
+          <button
+            onClick={onAddPosition}
+            className="w-full py-3 text-sm text-[#00E5FF] border border-dashed border-[#00E5FF]/50 hover:border-[#00E5FF] hover:bg-[#00E5FF]/5 transition-colors flex items-center justify-center gap-2"
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+            </svg>
+            Add New Position
+          </button>
         )}
       </div>
 
