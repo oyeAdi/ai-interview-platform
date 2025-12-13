@@ -163,8 +163,8 @@ def initialize_data_files():
             save_json_file(filepath, default_data)
             print(f"[WARN] Initialized {filepath} with default structure (file was missing)")
         else:
-            # File exists - verify it's valid JSON but NEVER overwrite it
-            # Files from the repo should have data, so if they exist, preserve them
+            # File exists - verify it's valid JSON
+            # On Render, files can become empty/corrupted, so we fix them
             try:
                 data = load_json_file(filepath)
                 if data and isinstance(data, dict):
@@ -177,15 +177,21 @@ def initialize_data_files():
                     if has_data:
                         print(f"[OK] {filepath} exists with data ({len(data)} keys, preserved)")
                     else:
-                        print(f"[INFO] {filepath} exists but is empty (preserved from repo)")
-                    # NEVER overwrite existing files - they come from the repo
+                        # File exists but is empty - this is OK, preserve it
+                        print(f"[INFO] {filepath} exists but is empty (preserved)")
                     continue
                 else:
-                    # File exists but is invalid JSON - log warning but don't overwrite
-                    print(f"[WARN] {filepath} exists but has invalid structure (preserved, may need manual fix)")
+                    # File exists but has invalid structure (not a dict) - fix it
+                    print(f"[WARN] {filepath} exists but has invalid structure (not a dict), initializing with default")
+                    save_json_file(filepath, default_data)
                     continue
+            except (json.JSONDecodeError, ValueError) as e:
+                # File exists but is empty or corrupted JSON - fix it
+                print(f"[WARN] {filepath} exists but is empty/corrupted ({e}), initializing with default structure")
+                save_json_file(filepath, default_data)
+                continue
             except Exception as e:
-                # File exists but can't be read - log error but don't overwrite
+                # Other errors (permissions, etc.) - log but don't overwrite
                 print(f"[ERROR] Error reading {filepath}: {e} (file preserved, may need manual fix)")
                 continue
 
