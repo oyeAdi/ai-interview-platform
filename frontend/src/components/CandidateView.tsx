@@ -26,18 +26,18 @@ export default function CandidateView({ sessionId, language }: CandidateViewProp
   const [isFollowup, setIsFollowup] = useState(false)
   const [followupNumber, setFollowupNumber] = useState(0)
   const [questionNumber, setQuestionNumber] = useState(1)
-  const [progress, setProgress] = useState({ 
-    rounds_completed: 0, 
-    total_rounds: 3, 
-    percentage: 0, 
-    current_followup: 0, 
-    max_followups: 2 
+  const [progress, setProgress] = useState({
+    rounds_completed: 0,
+    total_rounds: 3,
+    percentage: 0,
+    current_followup: 0,
+    max_followups: 2
   })
   const [sessionEnded, setSessionEnded] = useState(false)
   const [connectionStatus, setConnectionStatus] = useState<'connecting' | 'connected' | 'disconnected'>('connecting')
   const [answerMode, setAnswerMode] = useState<'text' | 'code'>('text')
   const [codeAnswer, setCodeAnswer] = useState('')
-  
+
   // End Interview Modal
   const [showEndModal, setShowEndModal] = useState(false)
   const [isEndingInterview, setIsEndingInterview] = useState(false)
@@ -49,76 +49,103 @@ export default function CandidateView({ sessionId, language }: CandidateViewProp
       setConnectionStatus('connecting')
       const websocket = new WebSocket(wsUrl('ws?view=candidate'))
       wsRef.current = websocket
-      
+
       websocket.onopen = () => {
+        console.log('WebSocket opened, waiting for connection confirmation...')
         setWs(websocket)
         setConnectionStatus('connected')
-        websocket.send(JSON.stringify({
-          type: 'start_interview',
-          session_id: sessionId
-        }))
+        // Wait a moment for connection confirmation, then send start_interview
+        // Connection confirmed in onmessage handler
+
       }
-      
+
       websocket.onerror = (error) => {
         console.error('WebSocket error:', error)
         setConnectionStatus('disconnected')
       }
-      
-      websocket.onclose = () => {
-        console.log('WebSocket closed, reconnecting...')
+
+      websocket.onclose = (event) => {
+        console.log('WebSocket closed, reconnecting...', event.code, event.reason)
         setConnectionStatus('disconnected')
-        setTimeout(() => {
-          if (sessionId && !sessionEnded) {
-            connect()
-          }
-        }, 2000)
+        // Only reconnect if not intentionally closed (code 1000) and session hasn't ended
+        if (event.code !== 1000 && sessionId && !sessionEnded) {
+          setTimeout(() => {
+            if (sessionId && !sessionEnded) {
+              connect()
+            }
+          }, 2000)
+        }
       }
 
       websocket.onmessage = (event) => {
-        const message = JSON.parse(event.data)
-        
-        if (message.type === 'error') {
-          console.error('WebSocket error:', message.message)
-          alert(`Error: ${message.message}\n\nPlease start a new interview from the landing page.`)
-          router.push('/')
-          return
-        } else if (message.type === 'greeting') {
-          // Greeting received
-        } else if (message.type === 'question') {
-          const data = message.data || {}
-          setCurrentQuestion(data.text || message.text || '')
-          setQuestionType(data.question_type || '')
-          setIsFollowup(false)
-          setFollowupNumber(0)
-          
-          // Check if this is a coding question
-          const isCoding = data.question_type === 'coding' || data.is_coding === true
-          setIsCodingQuestion(isCoding)
-          if (isCoding) {
-            setAnswerMode('code')
-            setCodingLanguage(data.coding_language || language || 'python')
-            setStarterCode(data.starter_code || '')
-            setCodeAnswer(data.starter_code || '')
-          } else {
-            setAnswerMode('text')
+        try {
+          const message = JSON.parse(event.data)
+          console.log('WebSocket message received:', message.type, message)
+
+          if (message.type === 'connected') {
+            console.log('WebSocket connection confirmed:', message.message)
+            // Now send start_interview
+            if (websocket.readyState === WebSocket.OPEN) {
+              websocket.send(JSON.stringify({
+                type: 'start_interview',
+                session_id: sessionId
+              }))
+            }
+            return
           }
-          
-          const roundNum = data.round_number || questionNumber
-          setQuestionNumber(roundNum)
-          setProgress(prev => ({ ...prev, current_followup: 0 }))
-        } else if (message.type === 'followup') {
-          setCurrentQuestion(message.data?.text || message.text || '')
-          setIsFollowup(true)
-          const fNum = message.data?.followup_number || 1
-          setFollowupNumber(fNum)
-          setProgress(prev => ({ ...prev, current_followup: fNum }))
-        } else if (message.type === 'progress') {
-          setProgress(prev => ({ ...prev, ...message.data }))
-        } else if (message.type === 'session_end') {
-          setSessionEnded(true)
-          setTimeout(() => {
-            router.push('/thanks')
-          }, 2000)
+
+          if (message.type === 'error') {
+            console.error('WebSocket error:', message.message)
+            // Close WebSocket gracefully before navigating
+            if (websocket.readyState === WebSocket.OPEN || websocket.readyState === WebSocket.CONNECTING) {
+              websocket.onclose = null // Prevent reconnection logic from firing
+              websocket.close(1000, 'Error received')
+            }
+            setSessionEnded(true) // Prevent reconnection
+            alert(`Error: ${message.message}\n\nPlease start a new interview from the landing page.`)
+            router.push('/')
+            return
+          } else if (message.type === 'greeting') {
+            // Greeting received
+            return
+          } else if (message.type === 'question') {
+            const data = message.data || {}
+            setCurrentQuestion(data.text || message.text || '')
+            setQuestionType(data.question_type || '')
+            setIsFollowup(false)
+            setFollowupNumber(0)
+
+            // Check if this is a coding question
+            const isCoding = data.question_type === 'coding' || data.is_coding === true
+            setIsCodingQuestion(isCoding)
+            if (isCoding) {
+              setAnswerMode('code')
+              setCodingLanguage(data.coding_language || language || 'python')
+              setStarterCode(data.starter_code || '')
+              setCodeAnswer(data.starter_code || '')
+            } else {
+              setAnswerMode('text')
+            }
+
+            const roundNum = data.round_number || questionNumber
+            setQuestionNumber(roundNum)
+            setProgress(prev => ({ ...prev, current_followup: 0 }))
+          } else if (message.type === 'followup') {
+            setCurrentQuestion(message.data?.text || message.text || '')
+            setIsFollowup(true)
+            const fNum = message.data?.followup_number || 1
+            setFollowupNumber(fNum)
+            setProgress(prev => ({ ...prev, current_followup: fNum }))
+          } else if (message.type === 'progress') {
+            setProgress(prev => ({ ...prev, ...message.data }))
+          } else if (message.type === 'session_end') {
+            setSessionEnded(true)
+            setTimeout(() => {
+              router.push('/thanks')
+            }, 2000)
+          }
+        } catch (error) {
+          console.error('Error parsing WebSocket message:', error)
         }
       }
     }
@@ -172,13 +199,13 @@ export default function CandidateView({ sessionId, language }: CandidateViewProp
           reason: 'ended_early'
         })
       })
-      
+
       if (response.ok) {
         const data = await response.json()
         console.log('Interview ended:', data)
         setSessionEnded(true)
         setShowEndModal(false)
-        
+
         // Notify through WebSocket
         if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
           wsRef.current.send(JSON.stringify({
@@ -229,27 +256,25 @@ export default function CandidateView({ sessionId, language }: CandidateViewProp
               <div className="h-6 w-px bg-[#2A2A2A]"></div>
               <span className="text-white font-medium">AI Interview</span>
             </div>
-            
+
             {/* Status & End Button */}
             <div className="flex items-center gap-4">
-              <div className={`flex items-center gap-2 px-3 py-1.5 text-xs font-medium ${
-                connectionStatus === 'connected' 
-                  ? 'text-[#00E5FF]' 
+              <div className={`flex items-center gap-2 px-3 py-1.5 text-xs font-medium ${connectionStatus === 'connected'
+                ? 'text-[#00E5FF]'
+                : connectionStatus === 'connecting'
+                  ? 'text-yellow-400'
+                  : 'text-red-400'
+                }`}>
+                <span className={`w-2 h-2 ${connectionStatus === 'connected'
+                  ? 'bg-[#00E5FF] animate-pulse'
                   : connectionStatus === 'connecting'
-                    ? 'text-yellow-400'
-                    : 'text-red-400'
-              }`}>
-                <span className={`w-2 h-2 ${
-                  connectionStatus === 'connected' 
-                    ? 'bg-[#00E5FF] animate-pulse' 
-                    : connectionStatus === 'connecting'
-                      ? 'bg-yellow-400 animate-pulse'
-                      : 'bg-red-400'
-                }`}></span>
+                    ? 'bg-yellow-400 animate-pulse'
+                    : 'bg-red-400'
+                  }`}></span>
                 {connectionStatus === 'connected' ? 'Live' : connectionStatus === 'connecting' ? 'Connecting...' : 'Disconnected'}
               </div>
               <span className="text-xs text-gray-600 font-mono">{sessionId?.slice(0, 12)}...</span>
-              
+
               {/* End Interview Button */}
               <button
                 onClick={() => setShowEndModal(true)}
@@ -281,26 +306,25 @@ export default function CandidateView({ sessionId, language }: CandidateViewProp
               <span className="text-sm text-gray-500">Complete</span>
             </div>
           </div>
-          
+
           {/* Progress Bar */}
           <div className="h-1 bg-[#1A1A1A] overflow-hidden">
-            <div 
+            <div
               className="h-full bg-[#00E5FF] transition-all duration-500 ease-out"
               style={{ width: `${progress.percentage}%` }}
             />
           </div>
-          
+
           {/* Question Dots */}
           <div className="flex justify-between mt-6">
             {Array.from({ length: progress.total_rounds }).map((_, i) => (
               <div key={i} className="flex flex-col items-center">
-                <div className={`w-10 h-10 flex items-center justify-center text-sm font-medium transition-all ${
-                  i < progress.rounds_completed 
-                    ? 'bg-[#00E5FF] text-black' 
-                    : i === progress.rounds_completed 
-                      ? 'border-2 border-[#00E5FF] text-[#00E5FF]' 
-                      : 'bg-[#1A1A1A] text-gray-600'
-                }`}>
+                <div className={`w-10 h-10 flex items-center justify-center text-sm font-medium transition-all ${i < progress.rounds_completed
+                  ? 'bg-[#00E5FF] text-black'
+                  : i === progress.rounds_completed
+                    ? 'border-2 border-[#00E5FF] text-[#00E5FF]'
+                    : 'bg-[#1A1A1A] text-gray-600'
+                  }`}>
                   {i < progress.rounds_completed ? (
                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
@@ -311,10 +335,9 @@ export default function CandidateView({ sessionId, language }: CandidateViewProp
                 </div>
                 {/* Simple completion indicator - no follow-up counts for candidates */}
                 <div className="w-full h-1 bg-[#2A2A2A] mt-2">
-                  <div className={`h-full bg-[#00E5FF] transition-all ${
-                    i < progress.rounds_completed ? 'w-full' : 
+                  <div className={`h-full bg-[#00E5FF] transition-all ${i < progress.rounds_completed ? 'w-full' :
                     i === progress.rounds_completed ? 'w-1/2 animate-pulse' : 'w-0'
-                  }`} />
+                    }`} />
                 </div>
               </div>
             ))}
@@ -325,11 +348,10 @@ export default function CandidateView({ sessionId, language }: CandidateViewProp
         <div className="border border-[#1A1A1A] overflow-hidden">
           <div className="px-6 py-4 border-b border-[#1A1A1A] flex items-center justify-between bg-[#0A0A0A]">
             <div className="flex items-center gap-3">
-              <span className={`px-3 py-1 text-xs font-medium ${
-                isFollowup 
-                  ? 'bg-purple-500/20 text-purple-400' 
-                  : 'bg-[#00E5FF]/20 text-[#00E5FF]'
-              }`}>
+              <span className={`px-3 py-1 text-xs font-medium ${isFollowup
+                ? 'bg-purple-500/20 text-purple-400'
+                : 'bg-[#00E5FF]/20 text-[#00E5FF]'
+                }`}>
                 {isFollowup ? 'Follow-up Question' : `Question ${questionNumber}`}
               </span>
               {questionType && (
@@ -343,7 +365,7 @@ export default function CandidateView({ sessionId, language }: CandidateViewProp
             </div>
             <span className="text-xs text-gray-600 uppercase tracking-wider">{language}</span>
           </div>
-          
+
           <div className="p-6 bg-[#0A0A0A]">
             {currentQuestion ? (
               <p className="text-white text-lg leading-relaxed">{currentQuestion}</p>
@@ -370,11 +392,10 @@ export default function CandidateView({ sessionId, language }: CandidateViewProp
               <button
                 type="button"
                 onClick={() => setAnswerMode('code')}
-                className={`flex-1 px-6 py-3 text-sm font-medium transition-colors flex items-center justify-center gap-2 ${
-                  answerMode === 'code'
-                    ? 'bg-[#00E5FF]/10 text-[#00E5FF] border-b-2 border-[#00E5FF]'
-                    : 'text-gray-500 hover:text-gray-300'
-                }`}
+                className={`flex-1 px-6 py-3 text-sm font-medium transition-colors flex items-center justify-center gap-2 ${answerMode === 'code'
+                  ? 'bg-[#00E5FF]/10 text-[#00E5FF] border-b-2 border-[#00E5FF]'
+                  : 'text-gray-500 hover:text-gray-300'
+                  }`}
               >
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5" />
@@ -384,11 +405,10 @@ export default function CandidateView({ sessionId, language }: CandidateViewProp
               <button
                 type="button"
                 onClick={() => setAnswerMode('text')}
-                className={`flex-1 px-6 py-3 text-sm font-medium transition-colors flex items-center justify-center gap-2 ${
-                  answerMode === 'text'
-                    ? 'bg-[#00E5FF]/10 text-[#00E5FF] border-b-2 border-[#00E5FF]'
-                    : 'text-gray-500 hover:text-gray-300'
-                }`}
+                className={`flex-1 px-6 py-3 text-sm font-medium transition-colors flex items-center justify-center gap-2 ${answerMode === 'text'
+                  ? 'bg-[#00E5FF]/10 text-[#00E5FF] border-b-2 border-[#00E5FF]'
+                  : 'text-gray-500 hover:text-gray-300'
+                  }`}
               >
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25H12" />
@@ -397,13 +417,13 @@ export default function CandidateView({ sessionId, language }: CandidateViewProp
               </button>
             </div>
           )}
-          
+
           <div className="px-6 py-4 border-b border-[#1A1A1A] bg-[#0A0A0A]">
             <h3 className="text-xs font-medium text-gray-400 uppercase tracking-wider">
               {answerMode === 'code' ? 'Your Code' : 'Your Answer'}
             </h3>
           </div>
-          
+
           <div className="p-6">
             {answerMode === 'code' ? (
               <div className="space-y-4">
@@ -414,7 +434,7 @@ export default function CandidateView({ sessionId, language }: CandidateViewProp
                     <span className="text-xs text-[#00E5FF] uppercase font-mono">{codingLanguage}</span>
                   </div>
                 </div>
-                
+
                 {/* Monaco Editor */}
                 <Suspense fallback={
                   <div className="h-[350px] bg-[#0A0A0A] border border-[#1A1A1A] flex items-center justify-center">
@@ -431,7 +451,7 @@ export default function CandidateView({ sessionId, language }: CandidateViewProp
                     height="350px"
                   />
                 </Suspense>
-                
+
                 {/* Submit button for code */}
                 <div className="flex items-center justify-between pt-2">
                   <span className="text-xs text-gray-500">
@@ -454,8 +474,8 @@ export default function CandidateView({ sessionId, language }: CandidateViewProp
                 </div>
               </div>
             ) : (
-              <AnswerInput 
-                onSubmit={handleSubmitAnswer} 
+              <AnswerInput
+                onSubmit={handleSubmitAnswer}
                 onTyping={handleTyping}
                 isCodingQuestion={isCodingQuestion}
                 language={codingLanguage}
@@ -470,7 +490,7 @@ export default function CandidateView({ sessionId, language }: CandidateViewProp
             <path strokeLinecap="round" strokeLinejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
           </svg>
           <p className="text-sm text-gray-400">
-            {answerMode === 'code' 
+            {answerMode === 'code'
               ? 'Write clean, well-commented code. The AI will evaluate your solution and may ask follow-up questions about your approach.'
               : 'Take your time to provide a thorough answer. The AI interviewer will ask follow-up questions based on your responses.'
             }

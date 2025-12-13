@@ -1,5 +1,139 @@
 {
-  "sessions": {}
+  "sessions": {
+    "17848ce6": {
+      "session_id": "17848ce6",
+      "position_id": "uber_senior_python",
+      "candidate_id": "resume1",
+      "candidate_token": "7ca4eb36-a8e5-4921-92ad-119def761e90",
+      "admin_token": "a8973f08-bd37-41ed-9023-ccbba5b114c4",
+      "created_at": "2025-12-13T18:34:21.599670",
+      "expires_at": "2025-12-13T18:36:21.599670",
+      "ttl_minutes": 2,
+      "status": "expired"
+    },
+    "11a0a387": {
+      "session_id": "11a0a387",
+      "position_id": "uber_ios_senior",
+      "candidate_id": "resume1",
+      "candidate_token": "ed98c75b-0212-4e65-8873-da3c2402bb47",
+      "admin_token": "ebf1d7d9-58ab-4551-9c15-c9abf5d90e63",
+      "created_at": "2025-12-13T18:38:06.502080",
+      "expires_at": "2025-12-13T18:40:06.502080",
+      "ttl_minutes": 2,
+      "status": "pending"
+    },
+    "ecca6bba": {
+      "session_id": "ecca6bba",
+      "position_id": "uber_senior_python",
+      "candidate_id": "resume1",
+      "candidate_token": "1a9ec4fa-1584-4c7b-9e50-fb37c2d10270",
+      "admin_token": "80d2d215-6810-49b1-83ec-5f1dc6ecb06b",
+      "created_at": "2025-12-13T18:51:22.687176",
+      "expires_at": "2025-12-13T19:21:22.687176",
+      "ttl_minutes": 30,
+      "status": "pending"
+    },
+    "031fd2b4": {
+      "session_id": "031fd2b4",
+      "position_id": "uber_senior_python",
+      "candidate_id": "resume1",
+      "candidate_token": "5c1f2bf7-21fc-4b37-bb32-44cedbb86ee7",
+      "admin_token": "d285c2dc-197a-4d96-8fdd-fc84b2289208",
+      "created_at": "2025-12-13T18:54:19.165517",
+      "expires_at": "2025-12-13T18:59:19.165517",
+      "ttl_minutes": 5,
+      "status": "pending"
+    },
+    "def85a9e": {
+      "session_id": "def85a9e",
+      "position_id": "uber_senior_python",
+      "candidate_id": "resume1",
+      "candidate_token": "df4c80f0-0722-475c-a97e-769ec085827a",
+      "admin_token": "4bf41e60-1d39-4b5d-acaa-34990d24cd31",
+      "created_at": "2025-12-13T19:01:01.747080",
+      "expires_at": "2025-12-13T19:31:01.747080",
+      "ttl_minutes": 30,
+      "status": "pending"
+    },
+    "59efecf4": {
+      "session_id": "59efecf4",
+      "position_id": "uber_ios_senior",
+      "candidate_id": "resume1",
+      "candidate_token": "597a99ca-d57d-45b5-9c34-3e4768282f61",
+      "admin_token": "68c4588b-a41b-493c-993a-26a3c8871001",
+      "created_at": "2025-12-13T19:04:11.664836",
+      "expires_at": "2025-12-13T19:34:11.664836",
+      "ttl_minutes": 30,
+      "status": "pending"
+    },
+    "a8342314": {
+      "session_id": "a8342314",
+      "position_id": "uber_ios_senior",
+      "candidate_id": "resume1",
+      "candidate_token": "7980a8ab-3058-4762-b505-e86f64b8f9a1",
+      "admin_token": "948d1160-639f-4799-8244-a60be2b7e204",
+      "created_at": "2025-12-13T19:09:09.015436",
+      "expires_at": "2025-12-13T19:39:09.015436",
+      "ttl_minutes": 30,
+      "status": "completed",
+      "ended_at": "2025-12-13T19:12:52.852595",
+      "ended_by": "candidate",
+      "end_reason": "ended_early"
+    },
+    "89cffed1": {
+      "session_id": "89cffed1",
+      "position_id": "uber_ios_senior",
+      "candidate_id": "resume1",
+      "candidate_token": "dfab8cb3-1abd-4282-b230-4317bb0f0d3e",
+      "admin_token": "cf98fb54-0ef1-4ca8-81f5-3b0a53614345",
+      "created_at": "2025-12-13T19:14:26.041681",
+      "expires_at": "2025-12-13T19:44:26.041681",
+      "ttl_minutes": 30,
+      "status": "pending"
+    },
+    "933a59c6": {
+      "session_id": "933a59c6",
+      "position_id": "uber_ios_senior",
+      "candidate_id": "resume2",
+      "candidate_token": "3921f8b4-c254-4b40-af3c-13d4b58d503b",
+      "admin_token": "a350abd9-e429-4f87-9cfe-ad81908c0e06",
+      "created_at": "2025-12-13T19:20:34.718165",
+      "expires_at": "2025-12-13T19:50:34.718165",
+      "ttl_minutes": 30,
+      "status": "pending"
+    },
+    "73645859": {
+      "session_id": "73645859",
+      "position_id": "uber_senior_python",
+      "candidate_id": "resume1",
+      "candidate_token": "1491f6d9-af33-4812-b243-31d867c1f713",
+      "admin_token": "75be7c0b-4f04-47fa-af5c-5ac5b23d8ea2",
+      "created_at": "2025-12-13T19:27:26.019843",
+      "expires_at": "2025-12-13T19:32:26.019843",
+      "ttl_minutes": 5,
+      "status": "pending"
+    },
+    "60de7182": {
+      "session_id": "60de7182",
+      "position_id": "uber_senior_python",
+      "candidate_id": "resume1",
+      "candidate_token": "7dd4cc97-389c-463e-93df-be1e5783bc39",
+      "admin_token": "ff5296c9-ee6f-4558-892a-b771d921390a",
+      "created_at": "2025-12-13T19:32:17.462719",
+      "expires_at": "2025-12-13T20:02:17.462719",
+      "ttl_minutes": 30,
+      "status": "pending"
+    },
+    "877474cd": {
+      "session_id": "877474cd",
+      "position_id": "uber_data_engineer",
+      "candidate_id": "resume15",
+      "candidate_token": "4ae8cb32-f49c-4375-8587-8fad55fe24e7",
+      "admin_token": "1b3cff0f-ea8b-46af-b8ef-92f9ad70e11e",
+      "created_at": "2025-12-13T19:44:05.835309",
+      "expires_at": "2025-12-13T20:44:05.835309",
+      "ttl_minutes": 60,
+      "status": "pending"
+    }
+  }
 }
-
-

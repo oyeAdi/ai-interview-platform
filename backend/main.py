@@ -7,11 +7,21 @@ from pydantic import BaseModel
 import json
 import os
 import uuid
+import asyncio
 from datetime import datetime, timedelta
 from config import Config
 from websocket.connection_manager import ConnectionManager
 from websocket.message_handler import MessageHandler
 from llm.jd_resume_analyzer import JDResumeAnalyzer
+import logging
+
+# Configure debug logging
+debug_logger = logging.getLogger("debug_logger")
+debug_logger.setLevel(logging.DEBUG)
+handler = logging.FileHandler(os.path.join(os.path.dirname(__file__), "logs", "server_debug.log"))
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+handler.setFormatter(formatter)
+debug_logger.addHandler(handler)
 from core.interview_controller import InterviewController
 from utils.file_parser import FileParser
 from utils.logger import Logger
@@ -834,18 +844,61 @@ async def start_interview_with_position(
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket, view: str = "candidate"):
     """WebSocket endpoint for interview communication"""
-    await connection_manager.connect(websocket, view)
+    try:
+        print(f"[DEBUG] WebSocket connection attempt, view={view}")
+        debug_logger.info(f"WebSocket connection attempt, view={view}")
+        await connection_manager.connect(websocket, view)
+        print(f"[DEBUG] WebSocket connected successfully, view={view}")
+        debug_logger.info(f"WebSocket connected successfully, view={view}")
+    except Exception as connect_error:
+        import traceback
+        error_msg = f"Failed to accept WebSocket connection: {connect_error}\n{traceback.format_exc()}"
+        print(f"[ERROR] {error_msg}")
+        debug_logger.error(error_msg)
+    except Exception as connect_error:
+        import traceback
+        print(f"[ERROR] Failed to accept WebSocket connection: {connect_error}")
+        print(f"[ERROR] Full traceback:\n{traceback.format_exc()}")
+        try:
+            await websocket.close(code=1011, reason="Connection failed")
+        except:
+            pass
+        return
+    
+    # Send initial connection confirmation (optional - don't fail if this fails)
+    try:
+        await websocket.send_json({
+            "type": "connected",
+            "message": "WebSocket connected successfully"
+        })
+        print(f"[DEBUG] Sent connection confirmation to {view}")
+    except Exception as confirm_error:
+        print(f"[WARN] Failed to send connection confirmation (non-critical): {confirm_error}")
+        # Don't fail the connection if confirmation fails
+        pass
     
     session_id = None
     controller = None
     
     try:
         while True:
-            data = await websocket.receive_json()
-            message_type = data.get("type")
+            try:
+                print(f"[DEBUG] Waiting for WebSocket message...")
+                data = await websocket.receive_json()
+                message_type = data.get("type")
+                
+                print(f"[DEBUG] Received WebSocket message: type={message_type}, data={data}")
+            except Exception as receive_error:
+                import traceback
+                print(f"[ERROR] Error receiving WebSocket message: {receive_error}")
+                print(traceback.format_exc())
+                # Don't break - let it continue to handle reconnection
+                # The client will reconnect automatically
+                continue
             
             if message_type == "start_interview":
                 session_id = data.get("session_id")
+                print(f"[DEBUG] start_interview message received, session_id={session_id}, view={view}")
                 if not session_id:
                     await websocket.send_json({
                         "type": "error",
@@ -861,44 +914,87 @@ async def websocket_endpoint(websocket: WebSocket, view: str = "candidate"):
                         
                         # First, check if session exists in sessions.json (for new sessions that haven't started yet)
                         sessions_data = load_json_file(SESSIONS_FILE)
-                        session_info = sessions_data.get("sessions", {}).get(session_id)
+                        sessions_dict = sessions_data.get("sessions", {})
+                        session_info = sessions_dict.get(session_id)
+                        
+                        print(f"[DEBUG] Looking for session {session_id} in sessions.json")
+                        print(f"[DEBUG] Sessions file has {len(sessions_dict)} sessions")
+                        if sessions_dict:
+                            print(f"[DEBUG] Session keys: {list(sessions_dict.keys())[:10]}")  # Show first 10 keys
+                            print(f"[DEBUG] Session ID type: {type(session_id)}, Value: '{session_id}'")
+                            # Check if session_id matches any key (case-insensitive or exact)
+                            matching_keys = [k for k in sessions_dict.keys() if str(k) == str(session_id)]
+                            print(f"[DEBUG] Matching keys: {matching_keys}")
+                        else:
+                            print(f"[DEBUG] Sessions dict is empty!")
                         
                         if session_info:
+                            print(f"[DEBUG] ✓ Found session {session_id} in sessions.json")
+                            print(f"[DEBUG] Found session {session_id} in sessions.json: {session_info.get('status', 'unknown')}")
                             # Session exists in sessions.json - this is a new session
-                            # Get position to determine language
-                            positions_data = load_json_file(POSITIONS_FILE)
-                            position = next((p for p in positions_data.get("positions", []) if p["id"] == session_info.get("position_id")), None)
-                            
-                            # Default to python, but could be determined from position/JD
-                            language = "python"  # Default, could be enhanced to detect from position
-                            is_expert = view == "expert"
-                            
-                            # Create new controller for this session
-                            # NOTE: InterviewController.__init__ will create a session with auto-generated ID
-                            # We'll override it immediately after creation
-                            controller = InterviewController(language, session_info.get("position_id"), expert_mode=is_expert)
-                            
-                            # Override the auto-generated session_id with the one from sessions.json
-                            # This must be done before any operations that use session_id
-                            old_session_id = controller.context_manager.session_id
-                            controller.context_manager.session_id = session_id
-                            controller.context_manager.context["interview_context"]["session_id"] = session_id
-                            
-                            # Initialize session in logger with the correct session_id
-                            # (The controller's __init__ already called initialize_session with wrong ID)
-                            # We call it again with the correct ID - logger will handle duplicates gracefully
-                            controller.logger.initialize_session(session_id, language, session_info.get("position_id"))
-                            
-                            # Update session status to active
-                            session_info["status"] = "active"
-                            sessions_data["sessions"][session_id] = session_info
-                            save_json_file(SESSIONS_FILE, sessions_data)
-                            
-                            active_interviews[session_id] = controller
-                            session_found = True
+                            try:
+                                # Get position to determine language
+                                positions_data = load_json_file(POSITIONS_FILE)
+                                position_id = session_info.get("position_id")
+                                position = next((p for p in positions_data.get("positions", []) if p["id"] == position_id), None) if position_id else None
+                                
+                                # Default to python, but could be determined from position/JD
+                                language = "python"  # Default, could be enhanced to detect from position
+                                is_expert = view == "expert"
+                                
+                                print(f"[DEBUG] Creating controller for session {session_id}, position_id={position_id}, view={view}")
+                                
+                                # Create new controller for this session
+                                # NOTE: InterviewController.__init__ will create a session with auto-generated ID
+                                # We'll override it immediately after creation
+                                controller = InterviewController(language, position_id, expert_mode=is_expert)
+                                
+                                # Override the auto-generated session_id with the one from sessions.json
+                                # This must be done before any operations that use session_id
+                                old_session_id = controller.context_manager.session_id
+                                controller.context_manager.session_id = session_id
+                                controller.context_manager.context["interview_context"]["session_id"] = session_id
+                                
+                                # Initialize session in logger with the correct session_id
+                                # (The controller's __init__ already called initialize_session with wrong ID)
+                                # We call it again with the correct ID - logger will handle duplicates gracefully
+                                controller.logger.initialize_session(session_id, language, position_id)
+                                
+                                # Set question categories and difficulty distribution if present
+                                if session_info.get("question_categories"):
+                                    controller.question_categories = session_info["question_categories"]
+                                if session_info.get("difficulty_distribution"):
+                                    controller.difficulty_distribution = session_info["difficulty_distribution"]
+                                
+                                # Set resume text if available
+                                candidate_id = session_info.get("candidate_id")
+                                if candidate_id and candidate_id != 'custom':
+                                    resumes_file_data = load_json_file(RESUMES_FILE)
+                                    candidate_resume = next((r for r in resumes_file_data.get("resumes", []) if r["id"] == candidate_id), None)
+                                    if candidate_resume:
+                                        controller.resume_text = candidate_resume.get("text", "")
+                                
+                                # Set position data model if available
+                                if position and position.get("data_model"):
+                                    controller.data_model = position["data_model"]
+                                
+                                # Update session status to active
+                                session_info["status"] = "active"
+                                sessions_data["sessions"][session_id] = session_info
+                                save_json_file(SESSIONS_FILE, sessions_data)
+                                
+                                active_interviews[session_id] = controller
+                                session_found = True
+                                print(f"[DEBUG] Successfully created controller for session {session_id}")
+                            except Exception as inner_e:
+                                import traceback
+                                print(f"[ERROR] Error creating controller for session {session_id}: {inner_e}")
+                                print(traceback.format_exc())
+                                raise  # Re-raise to be caught by outer exception handler
                         
                         # If not found in sessions.json, check log.json (for resumed sessions)
                         if not session_found:
+                            print(f"[DEBUG] Session {session_id} not found in sessions.json, checking log.json...")
                             log_data = logger.get_log_data()
                             
                             for session in log_data.get("interview_sessions", []):
@@ -968,21 +1064,54 @@ async def websocket_endpoint(websocket: WebSocket, view: str = "candidate"):
                                     break
                         
                         if not session_found:
+                            # Check if session expired
+                            if session_info:
+                                expires_at_str = session_info.get("expires_at")
+                                if expires_at_str:
+                                    try:
+                                        expires_at = datetime.fromisoformat(expires_at_str)
+                                        if datetime.now() > expires_at:
+                                            print(f"[DEBUG] Session {session_id} has expired (expired at {expires_at_str})")
+                                            await websocket.send_json({
+                                                "type": "error",
+                                                "message": f"Session expired. Please start a new interview from the landing page."
+                                            })
+                                            continue
+                                    except Exception as exp_check:
+                                        print(f"[WARN] Error checking session expiry: {exp_check}")
+                            
+                            print(f"[ERROR] Session {session_id} not found in sessions.json or log.json")
+                            print(f"[DEBUG] Available sessions in sessions.json: {list(sessions_dict.keys())[:10] if sessions_dict else 'None'}")
                             await websocket.send_json({
                                 "type": "error",
                                 "message": f"Session {session_id} not found. Please start a new interview from the landing page."
                             })
+                            # Give client time to receive the error message before closing
+                            await asyncio.sleep(0.5)
                             continue
+                        await asyncio.sleep(0.5)
+                        continue
                     except Exception as e:
                         import traceback
                         error_trace = traceback.format_exc()
                         print(f"[ERROR] Failed to restore session {session_id} for view '{view}': {e}")
                         print(f"[ERROR] Traceback:\n{error_trace}")
+                        debug_logger.error(f"Failed to restore session {session_id}: {e}\n{error_trace}")
                         await websocket.send_json({
                             "type": "error",
-                            "message": f"Could not restore session. Please start a new interview."
+                            "message": f"Could not restore session: {str(e)}. Please start a new interview."
                         })
+                        # Give client time to receive the error message before closing
+                        await asyncio.sleep(0.5)
                         continue
+                
+                # Ensure controller exists in active_interviews after restoration
+                if session_id not in active_interviews:
+                    await websocket.send_json({
+                        "type": "error",
+                        "message": f"Session {session_id} could not be initialized. Please start a new interview."
+                    })
+                    continue
                 
                 controller = active_interviews[session_id]
                 
@@ -992,33 +1121,80 @@ async def websocket_endpoint(websocket: WebSocket, view: str = "candidate"):
                     print(f"Expert mode enabled for session {session_id}")
                 
                 # Send greeting
-                greeting = controller.start_interview()
-                await message_handler.handle_message(greeting, view)
+                try:
+                    print(f"[DEBUG] Sending greeting for session {session_id}, view={view}")
+                    greeting = controller.start_interview()
+                    print(f"[DEBUG] Greeting message: {greeting}")
+                    await message_handler.handle_message(greeting, view)
+                    print(f"[DEBUG] Greeting sent successfully")
+                except Exception as greeting_error:
+                    import traceback
+                    print(f"[ERROR] Error sending greeting: {greeting_error}")
+                    print(traceback.format_exc())
+                    # Continue anyway - greeting is not critical
                 
                 # Send current question if exists (for reconnection), otherwise get next
                 # Always send to both views when reconnecting
-                if controller.current_question:
-                    # Resend current question for reconnection
-                    # Convert to proper format if needed
-                    if isinstance(controller.current_question, dict):
-                        question_data = {
-                            "type": "question",
-                            "question_id": controller.current_question.get("question_id") or controller.current_question.get("id"),
-                            "text": controller.current_question.get("text"),
-                            "question_type": controller.current_question.get("question_type") or controller.current_question.get("type"),
-                            "topic": controller.current_question.get("topic"),
-                            "round_number": controller.current_question.get("round_number", 1)
-                        }
-                        await message_handler.send_question(question_data)
+                try:
+                    if controller.current_question:
+                        print(f"[DEBUG] Resending existing question: {controller.current_question}")
+                        # Resend current question for reconnection
+                        # Convert to proper format if needed
+                        if isinstance(controller.current_question, dict):
+                            question_data = {
+                                "type": "question",
+                                "question_id": controller.current_question.get("question_id") or controller.current_question.get("id"),
+                                "text": controller.current_question.get("text"),
+                                "question_type": controller.current_question.get("question_type") or controller.current_question.get("type"),
+                                "topic": controller.current_question.get("topic"),
+                                "round_number": controller.current_question.get("round_number", 1)
+                            }
+                            await message_handler.send_question(question_data, view)
+                        else:
+                            await message_handler.send_question(controller.current_question, view)
                     else:
-                        await message_handler.send_question(controller.current_question)
-                else:
-                    # Send first question
-                    question = controller.get_next_question()
-                    if question:
-                        await message_handler.send_question(question)
+                        # Send first question
+                        print(f"[DEBUG] Getting next question for session {session_id}")
+                        try:
+                            question = controller.get_next_question()
+                            print(f"[DEBUG] Next question: {question}")
+                            if question:
+                                await message_handler.send_question(question, view)
+                                print(f"[DEBUG] Question sent successfully")
+                            else:
+                                print(f"[ERROR] No question returned from get_next_question()")
+                                # Send error message to client
+                                await websocket.send_json({
+                                    "type": "error",
+                                    "message": "Could not generate question. Please try again."
+                                })
+                        except Exception as question_error:
+                            import traceback
+                            print(f"[ERROR] Error getting/generating question: {question_error}")
+                            print(traceback.format_exc())
+                            # Send error message to client
+                            await websocket.send_json({
+                                "type": "error",
+                                "message": f"Error generating question: {str(question_error)[:100]}"
+                            })
+                except Exception as question_send_error:
+                    import traceback
+                    print(f"[ERROR] Error sending question: {question_send_error}")
+                    print(traceback.format_exc())
+                    await websocket.send_json({
+                        "type": "error",
+                        "message": f"Error sending question: {str(question_send_error)[:100]}"
+                    })
                 
-                await message_handler.send_progress(controller.get_progress())
+                try:
+                    progress = controller.get_progress()
+                    print(f"[DEBUG] Sending progress: {progress}")
+                    await message_handler.send_progress(progress)
+                except Exception as progress_error:
+                    import traceback
+                    print(f"[ERROR] Error sending progress: {progress_error}")
+                    print(traceback.format_exc())
+                    # Progress is not critical, continue
             
             elif message_type == "response":
                 if not controller:
@@ -1086,7 +1262,7 @@ async def websocket_endpoint(websocket: WebSocket, view: str = "candidate"):
                                 "message": transition
                             }, view)
                             
-                            await message_handler.send_question(next_question)
+                            await message_handler.send_question(next_question, view)
                             await message_handler.send_progress(controller.get_progress())
             
             elif message_type == "get_progress":
@@ -1110,12 +1286,24 @@ async def websocket_endpoint(websocket: WebSocket, view: str = "candidate"):
                 })
     
     except WebSocketDisconnect:
+        print(f"[DEBUG] WebSocket disconnected normally, view={view}, session_id={session_id}")
         connection_manager.disconnect(websocket, view)
         if session_id and session_id in active_interviews:
             # Clean up if needed
             pass
     except Exception as e:
-        print(f"WebSocket error: {e}")
+        import traceback
+        error_trace = traceback.format_exc()
+        print(f"[ERROR] WebSocket error: {e}")
+        print(f"[ERROR] Traceback:\n{error_trace}")
+        debug_logger.error(f"WebSocket error: {e}\n{error_trace}")
+        try:
+            await websocket.send_json({
+                "type": "error",
+                "message": f"WebSocket error: {str(e)}"
+            })
+        except:
+            pass
         connection_manager.disconnect(websocket, view)
 
 @app.get("/api/log/{session_id}")

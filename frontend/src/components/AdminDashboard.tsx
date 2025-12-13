@@ -38,10 +38,10 @@ export default function AdminDashboard({ sessionId, language }: AdminDashboardPr
   const [currentQuestion, setCurrentQuestion] = useState<CurrentQuestion | null>(null)
   const [candidateTyping, setCandidateTyping] = useState<string>('')
   const [lastSubmittedAnswer, setLastSubmittedAnswer] = useState<string>('')
-  const [progress, setProgress] = useState({ 
-    rounds_completed: 0, 
-    total_rounds: 3, 
-    percentage: 0, 
+  const [progress, setProgress] = useState({
+    rounds_completed: 0,
+    total_rounds: 3,
+    percentage: 0,
     current_followup: 0,
     max_followups: 10,  // Updated from 2 to 10
     followup_stop_reason: null as string | null,
@@ -64,7 +64,7 @@ export default function AdminDashboard({ sessionId, language }: AdminDashboardPr
     const connect = () => {
       const websocket = new WebSocket(wsUrl('ws?view=admin'))
       wsRef.current = websocket
-      
+
       websocket.onopen = () => {
         console.log('Admin WebSocket connected')
         setWs(websocket)
@@ -79,8 +79,15 @@ export default function AdminDashboard({ sessionId, language }: AdminDashboardPr
         try {
           const message = JSON.parse(event.data)
           console.log('Admin received:', message.type, message.data)
-          
-          if (message.type === 'evaluation') {
+
+          if (message.type === 'error') {
+            console.error('Admin WebSocket error:', message.message)
+            websocket.onclose = null // Prevent reconnection
+            websocket.close(1000, 'Error received')
+            setConnectionStatus('disconnected')
+            alert(`Error: ${message.message}`)
+            return
+          } else if (message.type === 'evaluation') {
             setEvaluation(message.data)
             // Add to response history with proper score
             const score = message.data?.overall_score || 0
@@ -89,7 +96,7 @@ export default function AdminDashboard({ sessionId, language }: AdminDashboardPr
               score: score,
               type: currentQuestion?.isFollowup ? 'followup' : 'initial'
             }])
-            
+
             // Update timing data
             if (currentQuestionStart) {
               setResponseTimings(prev => {
@@ -103,7 +110,7 @@ export default function AdminDashboard({ sessionId, language }: AdminDashboardPr
               })
               setIsAnswering(false)
             }
-            
+
             // Clear typing when evaluation received (answer was submitted)
             setLastSubmittedAnswer(candidateTyping)
             setCandidateTyping('')
@@ -117,15 +124,15 @@ export default function AdminDashboard({ sessionId, language }: AdminDashboardPr
             // NEW main question - use round_number from backend
             const qNum = message.data?.round_number || (progress.rounds_completed + 1)
             const questionId = message.data?.question_id || `q${qNum}`
-            setCurrentQuestion({ 
-              text: message.data?.text || message.text, 
+            setCurrentQuestion({
+              text: message.data?.text || message.text,
               isFollowup: false,
               questionNumber: qNum,
               questionId
             })
             setCandidateTyping('')
             setLastSubmittedAnswer('')
-            
+
             // Start timing for new question
             const startTime = Date.now()
             setCurrentQuestionStart(startTime)
@@ -141,8 +148,8 @@ export default function AdminDashboard({ sessionId, language }: AdminDashboardPr
             const qNum = currentQuestion?.questionNumber || progress.rounds_completed
             const followupNum = message.data?.followup_number || 1
             const questionId = `${currentQuestion?.questionId || 'q'}-f${followupNum}`
-            setCurrentQuestion((prev: CurrentQuestion | null) => ({ 
-              text: message.data?.text || message.text, 
+            setCurrentQuestion((prev: CurrentQuestion | null) => ({
+              text: message.data?.text || message.text,
               isFollowup: true,
               followupNumber: followupNum,
               questionNumber: prev?.questionNumber || progress.rounds_completed,
@@ -150,7 +157,7 @@ export default function AdminDashboard({ sessionId, language }: AdminDashboardPr
             }))
             setCandidateTyping('')
             setLastSubmittedAnswer('')
-            
+
             // Start timing for follow-up
             const startTime = Date.now()
             setCurrentQuestionStart(startTime)
@@ -173,12 +180,12 @@ export default function AdminDashboard({ sessionId, language }: AdminDashboardPr
           console.error('Error parsing WebSocket message:', error)
         }
       }
-      
+
       websocket.onerror = (error) => {
         console.error('Admin WebSocket error:', error)
         setConnectionStatus('disconnected')
       }
-      
+
       websocket.onclose = () => {
         console.log('Admin WebSocket closed')
         setConnectionStatus('disconnected')
@@ -206,7 +213,7 @@ export default function AdminDashboard({ sessionId, language }: AdminDashboardPr
     Math.max(1, progress.rounds_completed + 1),
     progress.total_rounds
   )
-  const avgScore = responseHistory.length > 0 
+  const avgScore = responseHistory.length > 0
     ? Math.round(responseHistory.reduce((a, b) => a + b.score, 0) / responseHistory.length)
     : 0
   const totalResponses = responseHistory.length
@@ -240,16 +247,14 @@ export default function AdminDashboard({ sessionId, language }: AdminDashboardPr
                 <p className="text-xs text-gray-500 font-mono">{sessionId?.slice(0, 12)}...</p>
               </div>
               {/* Connection Status */}
-              <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium ${
-                connectionStatus === 'connected' ? 'bg-[#39FF14]/10 text-[#39FF14]' :
-                connectionStatus === 'connecting' ? 'bg-yellow-500/10 text-yellow-400' :
-                'bg-red-500/10 text-red-400'
-              }`}>
-                <span className={`w-2 h-2 rounded-full ${
-                  connectionStatus === 'connected' ? 'bg-[#39FF14] animate-pulse' :
-                  connectionStatus === 'connecting' ? 'bg-yellow-400 animate-pulse' :
-                  'bg-red-400'
-                }`}></span>
+              <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium ${connectionStatus === 'connected' ? 'bg-[#39FF14]/10 text-[#39FF14]' :
+                  connectionStatus === 'connecting' ? 'bg-yellow-500/10 text-yellow-400' :
+                    'bg-red-500/10 text-red-400'
+                }`}>
+                <span className={`w-2 h-2 rounded-full ${connectionStatus === 'connected' ? 'bg-[#39FF14] animate-pulse' :
+                    connectionStatus === 'connecting' ? 'bg-yellow-400 animate-pulse' :
+                      'bg-red-400'
+                  }`}></span>
                 {connectionStatus === 'connected' ? 'Live' : connectionStatus === 'connecting' ? 'Connecting...' : 'Disconnected'}
               </div>
             </div>
@@ -294,7 +299,7 @@ export default function AdminDashboard({ sessionId, language }: AdminDashboardPr
             <span className="text-sm font-mono text-[#39FF14]">{progress.percentage.toFixed(0)}%</span>
           </div>
           <div className="h-2 bg-gray-800 rounded-full overflow-hidden mb-4">
-            <div 
+            <div
               className="h-full bg-gradient-to-r from-[#39FF14] to-[#7FFF5C] transition-all duration-500"
               style={{ width: `${progress.percentage}%` }}
             />
@@ -303,13 +308,12 @@ export default function AdminDashboard({ sessionId, language }: AdminDashboardPr
           <div className="flex justify-between">
             {Array.from({ length: progress.total_rounds }).map((_, i) => (
               <div key={i} className="flex flex-col items-center">
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-all ${
-                  i < progress.rounds_completed 
-                    ? 'bg-[#39FF14] text-black' 
-                    : i === progress.rounds_completed 
-                      ? 'bg-[#39FF14]/20 text-[#39FF14] ring-2 ring-[#39FF14]' 
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-all ${i < progress.rounds_completed
+                    ? 'bg-[#39FF14] text-black'
+                    : i === progress.rounds_completed
+                      ? 'bg-[#39FF14]/20 text-[#39FF14] ring-2 ring-[#39FF14]'
                       : 'bg-gray-800 text-gray-500'
-                }`}>
+                  }`}>
                   {i < progress.rounds_completed ? (
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
@@ -321,18 +325,17 @@ export default function AdminDashboard({ sessionId, language }: AdminDashboardPr
                 {/* Follow-up progress bar (shows count out of max 10) */}
                 <div className="mt-2">
                   <div className="w-full h-1.5 bg-gray-700 rounded-full overflow-hidden">
-                    <div 
-                      className={`h-full transition-all ${
-                        i < progress.rounds_completed 
-                          ? 'bg-[#39FF14]' 
-                          : i === progress.rounds_completed 
-                            ? 'bg-[#00E5FF]' 
+                    <div
+                      className={`h-full transition-all ${i < progress.rounds_completed
+                          ? 'bg-[#39FF14]'
+                          : i === progress.rounds_completed
+                            ? 'bg-[#00E5FF]'
                             : 'bg-gray-600'
-                      }`}
-                      style={{ 
-                        width: i < progress.rounds_completed 
-                          ? '100%' 
-                          : i === progress.rounds_completed 
+                        }`}
+                      style={{
+                        width: i < progress.rounds_completed
+                          ? '100%'
+                          : i === progress.rounds_completed
                             ? `${(progress.current_followup / (progress.max_followups || 10)) * 100}%`
                             : '0%'
                       }}
@@ -365,18 +368,17 @@ export default function AdminDashboard({ sessionId, language }: AdminDashboardPr
               )}
             </div>
           </div>
-          
+
           {/* Follow-up Decision Metrics (Admin only) */}
           {progress.followup_stop_reason && (
             <div className="mx-5 mt-3 px-3 py-2 bg-gray-800/50 border border-gray-700/50">
               <div className="flex items-center justify-between text-xs">
                 <span className="text-gray-400">AI Decision:</span>
-                <span className={`font-medium ${
-                  progress.followup_stop_reason === 'sufficient_skill' ? 'text-green-400' :
-                  progress.followup_stop_reason === 'no_knowledge' ? 'text-red-400' :
-                  progress.followup_stop_reason === 'partial_continue' ? 'text-yellow-400' :
-                  'text-gray-400'
-                }`}>
+                <span className={`font-medium ${progress.followup_stop_reason === 'sufficient_skill' ? 'text-green-400' :
+                    progress.followup_stop_reason === 'no_knowledge' ? 'text-red-400' :
+                      progress.followup_stop_reason === 'partial_continue' ? 'text-yellow-400' :
+                        'text-gray-400'
+                  }`}>
                   {progress.followup_stop_reason?.replace(/_/g, ' ')}
                 </span>
                 <span className="text-gray-500">
@@ -385,7 +387,7 @@ export default function AdminDashboard({ sessionId, language }: AdminDashboardPr
               </div>
             </div>
           )}
-          
+
           <div className="p-5 space-y-4">
             {/* Question */}
             <div>
@@ -473,11 +475,10 @@ export default function AdminDashboard({ sessionId, language }: AdminDashboardPr
               <div className="flex border-b border-gray-800/50">
                 <button
                   onClick={() => setActiveTab('evaluation')}
-                  className={`flex-1 px-5 py-3 text-sm font-semibold transition-colors ${
-                    activeTab === 'evaluation'
+                  className={`flex-1 px-5 py-3 text-sm font-semibold transition-colors ${activeTab === 'evaluation'
                       ? 'bg-[#39FF14]/5 text-[#39FF14] border-b-2 border-[#39FF14]'
                       : 'text-gray-500 hover:text-gray-300'
-                  }`}
+                    }`}
                 >
                   <div className="flex items-center justify-center gap-2">
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -488,11 +489,10 @@ export default function AdminDashboard({ sessionId, language }: AdminDashboardPr
                 </button>
                 <button
                   onClick={() => setActiveTab('timing')}
-                  className={`flex-1 px-5 py-3 text-sm font-semibold transition-colors ${
-                    activeTab === 'timing'
+                  className={`flex-1 px-5 py-3 text-sm font-semibold transition-colors ${activeTab === 'timing'
                       ? 'bg-[#39FF14]/5 text-[#39FF14] border-b-2 border-[#39FF14]'
                       : 'text-gray-500 hover:text-gray-300'
-                  }`}
+                    }`}
                 >
                   <div className="flex items-center justify-center gap-2">
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -505,7 +505,7 @@ export default function AdminDashboard({ sessionId, language }: AdminDashboardPr
                   </div>
                 </button>
               </div>
-              
+
               <div className="p-5">
                 {activeTab === 'evaluation' ? (
                   <>
@@ -551,7 +551,7 @@ export default function AdminDashboard({ sessionId, language }: AdminDashboardPr
                   </div>
                   <div className="flex items-end gap-2 h-12">
                     {responseHistory.map((r, i) => (
-                      <div 
+                      <div
                         key={i}
                         className="flex-1 bg-gradient-to-t from-[#39FF14] to-[#7FFF5C] rounded-t transition-all duration-300 relative group"
                         style={{ height: `${Math.max(8, r.score)}%` }}

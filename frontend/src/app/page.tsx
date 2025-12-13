@@ -90,7 +90,7 @@ export default function DashboardPage() {
   } | null>(null)
   
   // TTL for interview links
-  const [linkTTL, setLinkTTL] = useState(30) // Default 30 minutes
+  const [linkTTL, setLinkTTL] = useState(60) // Default 1 hour for easier debugging
 
   // Load accounts and all positions on mount
   useEffect(() => {

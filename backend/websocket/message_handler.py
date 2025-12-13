@@ -12,6 +12,8 @@ class MessageHandler:
         """Route message based on type and view"""
         message_type = message.get("type")
         
+        print(f"[DEBUG] handle_message: type={message_type}, view={view}, message={message}")
+        
         # Messages for candidate
         candidate_messages = ["question", "followup", "progress", "session_end", "transition", "greeting"]
         
@@ -19,18 +21,28 @@ class MessageHandler:
         admin_messages = candidate_messages + ["evaluation", "strategy_change", "log_update"]
         
         if message_type in candidate_messages:
+            print(f"[DEBUG] Sending {message_type} to candidate")
             await self.connection_manager.send_to_candidate(message)
         
-        if message_type in admin_messages and view == "admin":
+        if message_type in admin_messages and (view == "admin" or view == "expert"):
+            print(f"[DEBUG] Sending {message_type} to admin/expert")
             await self.connection_manager.send_to_admin(message)
     
-    async def send_question(self, question_data: Dict):
+    async def send_question(self, question_data: Dict, view: str = None):
         """Send question to candidate and admin"""
         message = {
             "type": "question",
             "data": question_data
         }
-        await self.connection_manager.broadcast(message)
+        if view:
+            # Send to specific view
+            if view == "candidate":
+                await self.connection_manager.send_to_candidate(message)
+            elif view == "admin" or view == "expert":
+                await self.connection_manager.send_to_admin(message)
+        else:
+            # Broadcast to all connections
+            await self.connection_manager.broadcast(message)
     
     async def send_followup(self, followup_data: Dict, progress: Dict = None):
         """Send follow-up with view-specific information
