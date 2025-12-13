@@ -370,3 +370,4 @@ def get_activity_risk_flags(activity_data: Dict) -> List[str]:
     
     return flags
 
+

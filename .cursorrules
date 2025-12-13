@@ -151,3 +151,4 @@ npm run lint -- --fix
 - Use `flex-shrink-0` on icons and badges
 - Grid layouts: use responsive breakpoints (sm:, md:, lg:, xl:)
 
+
