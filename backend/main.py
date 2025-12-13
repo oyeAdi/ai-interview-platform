@@ -161,7 +161,7 @@ def initialize_data_files():
         if not os.path.exists(filepath):
             # Create with default structure only if file doesn't exist
             save_json_file(filepath, default_data)
-            print(f"⚠️  Initialized {filepath} with default structure (file was missing)")
+            print(f"[WARN] Initialized {filepath} with default structure (file was missing)")
         else:
             # File exists - verify it's valid JSON but NEVER overwrite it
             # Files from the repo should have data, so if they exist, preserve them
@@ -175,18 +175,18 @@ def initialize_data_files():
                         for v in data.values()
                     )
                     if has_data:
-                        print(f"✓ {filepath} exists with data ({len(data)} keys, preserved)")
+                        print(f"[OK] {filepath} exists with data ({len(data)} keys, preserved)")
                     else:
-                        print(f"ℹ️  {filepath} exists but is empty (preserved from repo)")
+                        print(f"[INFO] {filepath} exists but is empty (preserved from repo)")
                     # NEVER overwrite existing files - they come from the repo
                     continue
                 else:
                     # File exists but is invalid JSON - log warning but don't overwrite
-                    print(f"⚠️  {filepath} exists but has invalid structure (preserved, may need manual fix)")
+                    print(f"[WARN] {filepath} exists but has invalid structure (preserved, may need manual fix)")
                     continue
             except Exception as e:
                 # File exists but can't be read - log error but don't overwrite
-                print(f"⚠️  Error reading {filepath}: {e} (file preserved, may need manual fix)")
+                print(f"[ERROR] Error reading {filepath}: {e} (file preserved, may need manual fix)")
                 continue
 
 # Initialize data files on startup
