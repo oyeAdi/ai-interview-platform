@@ -163,28 +163,31 @@ def initialize_data_files():
             save_json_file(filepath, default_data)
             print(f"⚠️  Initialized {filepath} with default structure (file was missing)")
         else:
-            # Verify file is valid JSON - but DON'T overwrite if it has data
+            # File exists - verify it's valid JSON but NEVER overwrite it
+            # Files from the repo should have data, so if they exist, preserve them
             try:
                 data = load_json_file(filepath)
-                # Only reinitialize if file is completely empty or invalid JSON structure
-                # Don't overwrite files that have actual data from the repo
                 if data and isinstance(data, dict):
-                    # Check if it has meaningful data (not just empty lists/dicts)
+                    # File exists and is valid - check if it has data
                     has_data = any(
                         isinstance(v, list) and len(v) > 0 or 
                         isinstance(v, dict) and len(v) > 0 
                         for v in data.values()
                     )
                     if has_data:
-                        print(f"✓ {filepath} exists with data ({len(data)} keys)")
-                        continue
-                # Only overwrite if truly empty/invalid
-                if not data or not isinstance(data, dict):
-                    save_json_file(filepath, default_data)
-                    print(f"⚠️  Reinitialized {filepath} (file was empty or invalid)")
+                        print(f"✓ {filepath} exists with data ({len(data)} keys, preserved)")
+                    else:
+                        print(f"ℹ️  {filepath} exists but is empty (preserved from repo)")
+                    # NEVER overwrite existing files - they come from the repo
+                    continue
+                else:
+                    # File exists but is invalid JSON - log warning but don't overwrite
+                    print(f"⚠️  {filepath} exists but has invalid structure (preserved, may need manual fix)")
+                    continue
             except Exception as e:
-                print(f"⚠️  Error reading {filepath}: {e}, reinitializing...")
-                save_json_file(filepath, default_data)
+                # File exists but can't be read - log error but don't overwrite
+                print(f"⚠️  Error reading {filepath}: {e} (file preserved, may need manual fix)")
+                continue
 
 # Initialize data files on startup
 initialize_data_files()
