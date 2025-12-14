@@ -208,6 +208,10 @@ export default function QuickStartPage() {
       })
       formData.append('question_categories', JSON.stringify(categoriesWithDifficulty))
 
+      // Default Metadata for Quick Start
+      formData.append('candidate_account', 'INRT-Bench')
+      formData.append('candidate_role', 'Bench-Pool')
+
       const response = await fetch(apiUrl('api/analyze-language'), {
         method: 'POST',
         body: formData,

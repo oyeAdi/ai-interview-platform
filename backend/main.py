@@ -13,6 +13,7 @@ from config import Config
 from websocket.connection_manager import ConnectionManager
 from websocket.message_handler import MessageHandler
 from llm.jd_resume_analyzer import JDResumeAnalyzer
+from llm.feedback_agent import FeedbackGenerator
 import logging
 
 # Configure debug logging
@@ -59,6 +60,15 @@ class PositionUpdate(BaseModel):
     jd_text: Optional[str] = None
     status: Optional[str] = None
 
+class LoginRequest(BaseModel):
+    username: str
+    password: str
+
+class LoginResponse(BaseModel):
+    token: str
+    username: str
+    role: str
+
 # Helper functions for data file operations
 def load_json_file(filepath: str) -> dict:
     """Load JSON file with error handling"""
@@ -92,38 +102,73 @@ CANDIDATE_RESULTS_DIR = os.path.join(os.path.dirname(__file__), "candidate_resul
 # Schema version for candidate result files
 RESULT_SCHEMA_VERSION = "1.0"
 
-def get_candidate_filename(name: str) -> str:
+def get_candidate_filename(name: str, date_str: str = None, candidate_id: str = None) -> str:
     """Sanitize candidate name for use as filename"""
-    # Replace spaces with underscores, remove special characters
+    # Replace spaces with underscores, remove special characters except specific allowed ones
     import re
+    # Allow alphanumeric, spaces, hyphens
     sanitized = re.sub(r'[^\w\s-]', '', name.lower())
     sanitized = re.sub(r'[-\s]+', '_', sanitized)
+    
+    # Validation for Anonymous candidates to ensure unique files
+    if "anonymous" in sanitized and candidate_id:
+        sanitized = f"{sanitized}_{candidate_id[:8]}"
+    
+    if date_str:
+        return f"{sanitized}+{date_str}_result.json"
     return f"{sanitized}_result.json"
 
-def save_candidate_result(candidate_name: str, candidate_id: str, result: dict):
+def save_candidate_result(candidate_name: str, candidate_id: str, result: dict, session_id: str = None):
     """Save result to per-candidate file, merging with existing data"""
     # Ensure directory exists
     os.makedirs(CANDIDATE_RESULTS_DIR, exist_ok=True)
     
-    filename = get_candidate_filename(candidate_name)
+    # Get date for filename
+    date_str = result.get("date") or datetime.now().strftime("%Y-%m-%d")
+    # Ensure simplified date format if it's a full timestamp
+    if "T" in date_str:
+        date_str = date_str.split("T")[0]
+        
+    # Use session_id/candidate_id for uniqueness if name is generic
+    unique_id = session_id or candidate_id
+    filename = get_candidate_filename(candidate_name, date_str, unique_id)
     filepath = os.path.join(CANDIDATE_RESULTS_DIR, filename)
+    print(f"[DEBUG] Saving candidate result to: {filepath} (Name: {candidate_name}, ID: {unique_id})")
     
     # Load existing data or create new
+    candidate_data = {
+        "schema_version": RESULT_SCHEMA_VERSION,
+        "candidate": {
+            "id": candidate_id,
+            "name": candidate_name
+        },
+        "interviews": []
+    }
     if os.path.exists(filepath):
-        with open(filepath, 'r', encoding='utf-8') as f:
-            candidate_data = json.load(f)
-    else:
-        candidate_data = {
-            "schema_version": RESULT_SCHEMA_VERSION,
-            "candidate": {
-                "id": candidate_id,
-                "name": candidate_name
-            },
-            "interviews": []
-        }
+        try:
+            with open(filepath, 'r', encoding='utf-8') as f:
+                candidate_data = json.load(f)
+        except Exception as e:
+            print(f"[WARN] Failed to load existing candidate file {filepath}: {e}")
+            # candidate_data uses default initialized above
+            
+    # If file didn't exist or load failed, ensuring structure is set (which it is by initialization above)
+    # Re-verify critical fields if loaded from file but empty
+    if "interviews" not in candidate_data:
+        candidate_data["interviews"] = []
+
     
     # Add new interview result
-    candidate_data["interviews"].append(result)
+    # Check if this session result already exists to avoid duplicates
+    existing_sessions = [i.get("session_id") for i in candidate_data["interviews"]]
+    if result.get("session_id") not in existing_sessions:
+        candidate_data["interviews"].append(result)
+    else:
+        # Update existing
+        for i, interview in enumerate(candidate_data["interviews"]):
+            if interview.get("session_id") == result.get("session_id"):
+                candidate_data["interviews"][i] = result
+                break
     
     # Save updated file
     with open(filepath, 'w', encoding='utf-8') as f:
@@ -214,6 +259,7 @@ message_handler = MessageHandler(connection_manager)
 jd_analyzer = JDResumeAnalyzer()
 file_parser = FileParser()
 logger = Logger()
+feedback_generator = FeedbackGenerator()
 
 # Store active interviews
 active_interviews: dict = {}
@@ -232,7 +278,9 @@ async def analyze_language(
     jd_id: Optional[str] = Form(None),
     resume_id: Optional[str] = Form(None),
     expert_mode: Optional[str] = Form(None),
-    question_categories: Optional[str] = Form(None)
+    question_categories: Optional[str] = Form(None),
+    candidate_account: Optional[str] = Form(None),
+    candidate_role: Optional[str] = Form(None)
 ):
     """Analyze JD and Resume to determine language"""
     try:
@@ -241,7 +289,6 @@ async def analyze_language(
         resume_content = resume_text or ""
         
         if jd_file:
-            # Save uploaded file temporarily
             import tempfile
             with tempfile.NamedTemporaryFile(delete=False, suffix=os.path.splitext(jd_file.filename)[1]) as tmp:
                 content = await jd_file.read()
@@ -249,7 +296,7 @@ async def analyze_language(
                 temp_path = tmp.name
             jd_content = file_parser.parse_file(temp_path)
             os.remove(temp_path)
-        
+            
         if resume_file:
             import tempfile
             with tempfile.NamedTemporaryFile(delete=False, suffix=os.path.splitext(resume_file.filename)[1]) as tmp:
@@ -261,82 +308,86 @@ async def analyze_language(
         
         if not jd_content and not resume_content:
             raise HTTPException(status_code=400, detail="JD or Resume must be provided")
-        
-        # Analyze language
+
+        # Analyze language and extracting candidate info
         result = jd_analyzer.analyze(
             jd_text=jd_content,
             resume_text=resume_content
         )
         
-        # Create interview controller with expert mode flag
         language = result["language"]
+        candidate_info = result.get("candidate_info", {})
+        candidate_name = candidate_info.get("name", "Anonymous Candidate")
+
+        # Create interview controller with expert mode flag
         is_expert_mode = expert_mode == 'true'
         controller = InterviewController(language, jd_id, expert_mode=is_expert_mode)
         session_id = controller.context_manager.session_id
         
-        # Parse and set question categories if provided (from quick start)
-        calculated_duration = 45  # Default
+        # Calculate duration based on categories if provided
+        calculated_duration = 30 # Default
         if question_categories:
             try:
-                categories_dict = json.loads(question_categories)
-                controller.question_categories = categories_dict
+                cats = json.loads(question_categories)
+                controller.question_categories = cats
                 
-                # Calculate total questions and duration based on difficulty
-                total_questions = 0
-                total_duration = 0
-                difficulty_minutes = {'easy': 10, 'medium': 15, 'hard': 20}
+                total_mins = 0
+                total_q = 0
+                difficulty_map = {"easy": 10, "medium": 15, "hard": 20}
+                for cat_conf in cats.values():
+                    if cat_conf.get("enabled"):
+                        diff = cat_conf.get("difficulty", "medium")
+                        total_mins += difficulty_map.get(diff, 15)
+                        total_q += int(cat_conf.get("count", 0))
                 
-                for cat_name, cfg in categories_dict.items():
-                    if isinstance(cfg, dict) and cfg.get("enabled"):
-                        count = cfg.get("count", 1)
-                        total_questions += count
-                        difficulty = cfg.get("difficulty", "medium")
-                        total_duration += difficulty_minutes.get(difficulty, 15) * count
+                if total_mins > 0:
+                    calculated_duration = total_mins
                 
-                if total_questions > 0:
-                    controller.total_questions = total_questions
-                    print(f"[INFO] Quick start configured with {total_questions} questions")
-                
-                if total_duration > 0:
-                    calculated_duration = total_duration
-                    print(f"[INFO] Quick start duration calculated as {calculated_duration} minutes")
-                    
+                if total_q > 0:
+                    controller.total_questions = total_q
             except json.JSONDecodeError:
                 print(f"Warning: Invalid question_categories JSON: {question_categories}")
         
-        # Attach resume text for personalized first question
+        # Attach resume text to controller
         if resume_content:
             controller.resume_text = resume_content
-        
+
         # Store controller
         active_interviews[session_id] = controller
         
-        # Save session config to persist duration and categories
+        # Save session to file
         try:
             sessions_data = load_json_file(SESSIONS_FILE)
             if "sessions" not in sessions_data:
                 sessions_data["sessions"] = {}
             
+            # Combine all session data into one update
             sessions_data["sessions"][session_id] = {
                 "session_id": session_id,
                 "created_at": datetime.utcnow().isoformat(),
+                "expires_at": (datetime.now() + timedelta(minutes=60)).isoformat(), # Default 1h for QS
                 "status": "pending",
+                "mode": "quick_start",
                 "jd_id": jd_id,
                 "language": language,
                 "duration_minutes": calculated_duration,
                 "expert_mode": is_expert_mode,
-                "question_categories": controller.question_categories
+                "question_categories": json.loads(question_categories) if question_categories else None,
+                "candidate_name": candidate_name,
+                "candidate_info": candidate_info,
+                "candidate_account": candidate_account,
+                "candidate_role": candidate_role
             }
             save_json_file(SESSIONS_FILE, sessions_data)
-            print(f"[INFO] Saved quick start session config: duration={calculated_duration}min")
+            print(f"[INFO] Saved quick start session config: duration={calculated_duration}min, candidate={candidate_name}")
         except Exception as save_e:
             print(f"[WARN] Failed to save session config: {save_e}")
         
         return {
+            "session_id": session_id,
             "language": language,
             "confidence": result["confidence"],
-            "session_id": session_id,
-            "expert_mode": is_expert_mode
+            "candidate_name": candidate_name
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -955,6 +1006,227 @@ async def end_interview(session_id: str):
         
     return {"status": "success", "message": "Interview ended"}
 
+# ==================== Feedback & Results APIs ====================
+
+class FeedbackRequest(BaseModel):
+    session_id: str
+    feedback_type: str = "detailed"  # detailed, short, skill-wise
+
+class FeedbackApproval(BaseModel):
+    session_id: str
+    content: str
+    status: str = "approved"
+
+def get_session_result_path(session_id: str) -> Optional[str]:
+    """Helper to find result file path from session ID"""
+    try:
+        sessions_data = load_json_file(SESSIONS_FILE)
+        session_info = sessions_data.get("sessions", {}).get(session_id)
+        if not session_info:
+            return None
+            
+        candidate_name = session_info.get("candidate_name", "Anonymous Candidate")
+        candidate_id = session_info.get("candidate_id")
+        
+        # We need to reconstruct how the filename would have been generated
+        # This is tricky if date is involved in filename but not stored in session_info
+        # For now, try default pattern
+        filename = get_candidate_filename(candidate_name, candidate_id=session_id) # Using session_id as fallback unique ID
+        
+        # Check if file exists, if not, try with date (heuristic: today)
+        filepath = os.path.join(CANDIDATE_RESULTS_DIR, filename)
+        if os.path.exists(filepath):
+            return filepath
+            
+        # Try finding partial match if date was used
+        base_name = get_candidate_filename(candidate_name, candidate_id=session_id).replace("_result.json", "")
+        for f in os.listdir(CANDIDATE_RESULTS_DIR):
+            if f.startswith(base_name) and f.endswith(".json"):
+                return os.path.join(CANDIDATE_RESULTS_DIR, f)
+                
+        return None
+    except:
+        return None
+
+@app.post("/api/feedback/generate")
+async def generate_feedback_report(request: FeedbackRequest):
+    """Generate a feedback report using the Feedback Agent"""
+    try:
+        # Load Log
+        log_data = logger.get_log_data()
+        session_log = None
+        for session in log_data.get("interview_sessions", []):
+            if session.get("session_id") == request.session_id:
+                session_log = session
+                break
+        
+        if not session_log:
+            raise HTTPException(status_code=404, detail="Session log not found")
+            
+        # Load Calculated Results
+        result_path = get_session_result_path(request.session_id)
+        if not result_path or not os.path.exists(result_path):
+            # It's possible the result file hasn't been created if no questions were answered
+            # or if the save failed. We'll proceed with log data only.
+            result_data = {"candidate": {"name": "Candidate"}, "overall_score": 0}
+        else:
+            # Parse result file (it contains a list of interviews)
+            with open(result_path, 'r', encoding='utf-8') as f:
+                candidate_file_data = json.load(f)
+                
+            # Find the specific result for this session
+            result_data = None
+            for interview in candidate_file_data.get("interviews", []):
+                if interview.get("session_id") == request.session_id:
+                    result_data = interview
+                    break
+                    
+            if not result_data:
+                result_data = {"candidate": {"name": "Candidate"}, "overall_score": 0}
+            
+        # Generate Feedback
+        report = feedback_generator.generate_feedback(session_log, result_data, request.feedback_type)
+        
+        return {"status": "generated", "content": report, "type": request.feedback_type}
+        
+    except Exception as e:
+        print(f"Error generating feedback: {e}")
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/feedback/approve")
+async def approve_feedback_report(approval: FeedbackApproval):
+    """Approve and publish the feedback report"""
+    try:
+        result_path = get_session_result_path(approval.session_id)
+        if not result_path or not os.path.exists(result_path):
+            raise HTTPException(status_code=404, detail="Result file not found")
+            
+        with open(result_path, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+            
+        found = False
+        for interview in data.get("interviews", []):
+            if interview.get("session_id") == approval.session_id:
+                # Update the result entry
+                interview["feedback_report"] = {
+                    "content": approval.content,
+                    "status": "APPROVED",
+                    "approved_at": datetime.utcnow().isoformat()
+                }
+                interview["feedback_summary"] = approval.content
+                found = True
+                break
+        
+        if not found:
+            raise HTTPException(status_code=404, detail="Interview result entry not found")
+            
+        with open(result_path, 'w', encoding='utf-8') as f:
+            json.dump(data, f, indent=2, ensure_ascii=False)
+            
+        return {"status": "published"}
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/results/{session_id}/status")
+async def get_result_status(session_id: str):
+    """Check if feedback is approved for a session"""
+    result_path = get_session_result_path(session_id)
+    if not result_path or not os.path.exists(result_path):
+        return {"status": "PENDING", "message": "Processing"}
+        
+    try:
+        with open(result_path, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+            
+        for interview in data.get("interviews", []):
+            if interview.get("session_id") == session_id:
+                report = interview.get("feedback_report", {})
+                if report.get("status") == "APPROVED":
+                    return {
+                        "status": "APPROVED",
+                        "content": report.get("content"),
+                        "recommendation": report.get("recommendation", "N/A")
+                    }
+    except:
+        pass
+        
+
+        
+    return {"status": "PENDING"}
+
+@app.get("/api/admin/results")
+async def list_interview_results():
+    """List all interview results"""
+    try:
+        results = []
+        results_context_cache = None
+        results_dir = Config.CANDIDATE_RESULTS_DIR
+        
+        if not os.path.exists(results_dir):
+            return {"results": []}
+
+        files = os.listdir(results_dir)
+        
+        # Load context once if needed (lazy loading optimization could be here, but keeping original flow)
+        # Actually original flow checks inside loop. We initialize to None here.
+        
+        for filename in files:
+            if filename.endswith(".json"):
+                path = os.path.join(results_dir, filename)
+                try:
+                    with open(path, 'r', encoding='utf-8') as f:
+                        data = json.load(f)
+                        
+                        # Load positions and accounts context if not populated
+                        if not results_context_cache:
+                            try:
+                                positions = load_json_file(POSITIONS_FILE).get("positions", [])
+                                accounts = load_json_file(ACCOUNTS_FILE).get("accounts", [])
+                                results_context_cache = {
+                                    "positions": {p["id"]: p["title"] for p in positions},
+                                    "accounts": {a["id"]: a["name"] for a in accounts}
+                                }
+                            except Exception:
+                                results_context_cache = {"positions": {}, "accounts": {}}
+
+                        human_readable_name = data.get("candidate", {}).get("name", "Unknown")
+                        
+                        if "interviews" in data:
+                            for interview in data["interviews"]:
+                                # Enrich with context
+                                pos_obj = interview.get("position", {})
+                                pos_title = pos_obj.get("title") or results_context_cache["positions"].get(interview.get("position_id"), "Unknown Position")
+                                
+                                # Account logic: Not explicitly stored in position obj in old records, but maybe in new ones
+                                acc_name = pos_obj.get("account") or results_context_cache["accounts"].get(interview.get("account_id"), "Unknown Account")
+                                
+                                results.append({
+                                    "result_id": interview.get("id") or interview.get("session_id"),
+                                    "session_id": interview.get("session_id"),
+                                    "candidate_name": human_readable_name,
+                                    "position_title": pos_title,
+                                    "account_name": acc_name,
+                                    "main_skill": interview.get("main_skill", "General"),
+                                    "date": interview.get("created_at") or interview.get("timestamp"), # Prefer created_at
+                                    "overall_score": interview.get("overall_metrics", {}).get("total_score", 0), # Correct path
+                                    "status": interview.get("feedback_report", {}).get("status", "PENDING"),
+                                    "recommendation": interview.get("admin_feedback", {}).get("recommendation", "pending"),
+                                    "candidate_file": filename,
+                                    "share_token": interview.get("shareable_link", {}).get("token")
+                                })
+                except Exception:
+                    continue # Skip malformed files
+                    
+        # Sort by date descending
+        results.sort(key=lambda x: x.get("date") or "", reverse=True)
+        return {"results": results}
+    except Exception as e:
+        print(f"[ERROR] listing results: {e}")
+        return {"results": [], "error": str(e)}
+
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket, view: str = "candidate"):
     """WebSocket endpoint for interview communication"""
@@ -1053,6 +1325,23 @@ async def websocket_endpoint(websocket: WebSocket, view: str = "candidate"):
                             print(f"[DEBUG] ✓ Found session {session_id} in sessions.json")
                             print(f"[DEBUG] Found session {session_id} in sessions.json: {session_info.get('status', 'unknown')}")
                             
+                            # CRITICAL: Check if session is already completed
+                            if session_info.get("status") == "completed":
+                                print(f"[INFO] Session {session_id} is completed. Sending completion message.")
+                                await websocket.send_json({
+                                    "type": "session_completed",
+                                    "message": "This interview session has been completed.",
+                                    "redirect": "/results" # Optional
+                                })
+                                # We don't want to start a new controller or resume
+                                # Just keep the socket open for a moment or close it? 
+                                # Closing might trigger reconnect logic in frontend. 
+                                # Better to just return or break loop.
+                                # Wait a bit to ensure message is sent
+                                import asyncio
+                                await asyncio.sleep(1)
+                                return
+
                             if session_info.get("status") == "completed" and view == "candidate":
                                 print(f"[INFO] Session {session_id} is already completed. Preventing restart.")
                                 await websocket.send_json({
@@ -1095,7 +1384,21 @@ async def websocket_endpoint(websocket: WebSocket, view: str = "candidate"):
                                 if session_info.get("question_categories"):
                                     controller.question_categories = session_info["question_categories"]
                                     # Override default question count with configuration
-                                    total_q = sum(int(count) for count in controller.question_categories.values())
+                                    total_q = 0
+                                    try:
+                                        for cfg in controller.question_categories.values():
+                                            if isinstance(cfg, dict):
+                                                if cfg.get("enabled", True):
+                                                    total_q += int(cfg.get("count", 0))
+                                            elif isinstance(cfg, (int, str)):
+                                                # Backward compatibility for old format { "cat": count }
+                                                try:
+                                                    total_q += int(cfg)
+                                                except ValueError:
+                                                    pass # Skip invalid values
+                                    except Exception as e:
+                                        print(f"[WARN] Error calculating total questions on restore: {e}")
+                                    
                                     if total_q > 0:
                                         controller.total_questions = total_q
                                         print(f"[DEBUG] Set total_questions to {total_q} from configuration")
@@ -1416,6 +1719,38 @@ async def websocket_endpoint(websocket: WebSocket, view: str = "candidate"):
                     if controller.is_interview_complete():
                         final_summary = controller.finalize_interview()
                         
+                        # Save detailed candidate result
+                        try:
+                            sessions_data = load_json_file(SESSIONS_FILE)
+                            session_info = sessions_data.get("sessions", {}).get(session_id, {})
+                            
+                            candidate_id = session_info.get("candidate_id", "anonymous")
+                            candidate_name = session_info.get("candidate_name", "Anonymous Candidate")
+                            
+                            # Extract metrics
+                            summary_context = final_summary.get("summary", {})
+                            interview_ctx = summary_context.get("interview_context", {})
+                            overall_metrics = interview_ctx.get("overall_metrics", {})
+                            avg_score = overall_metrics.get("average_score", 0)
+                            
+                            result_data = {
+                                "session_id": session_id,
+                                "timestamp": datetime.utcnow().isoformat(),
+                                "position_id": session_info.get("position_id"),
+                                "overall_score": avg_score,
+                                "status": "Recommended" if avg_score >= 70 else "Not Recommended",
+                                "metrics": overall_metrics,
+                                "rounds_summary": interview_ctx.get("round_summaries", [])
+                            }
+                            
+                            saved_path = save_candidate_result(candidate_name, candidate_id, result_data)
+                            print(f"[INFO] Saved candidate result to {saved_path}")
+                            
+                        except Exception as save_res_err:
+                            print(f"[ERROR] Failed to save candidate result: {save_res_err}")
+                            import traceback
+                            print(traceback.format_exc())
+
                         # Persist completion status to sessions.json
                         try:
                             sessions_data = load_json_file(SESSIONS_FILE)
@@ -1712,6 +2047,7 @@ class CreateSessionRequest(BaseModel):
     position_id: str
     candidate_id: str
     ttl_minutes: int = 30  # Default 30 mins
+    resume_text: Optional[str] = None
 
 @app.post("/api/interview/create-session")
 async def create_interview_session(request: CreateSessionRequest):
@@ -1726,22 +2062,44 @@ async def create_interview_session(request: CreateSessionRequest):
         raise HTTPException(status_code=404, detail="Position not found")
     
     # Validate candidate exists (allow 'custom' for uploaded resumes)
+    # Validate candidate exists (allow 'custom' for uploaded resumes)
     candidate = None
+    candidate_name = "Custom Resume"
+    candidate_info = {}
+    
     if request.candidate_id != 'custom':
         resumes_data = load_json_file(RESUMES_FILE)
         candidate = next((r for r in resumes_data.get("resumes", []) if r["id"] == request.candidate_id), None)
         if not candidate:
             raise HTTPException(status_code=404, detail="Candidate not found")
-    
+        candidate_name = candidate.get("name", "Unknown Candidate")
+    elif request.resume_text:
+        # Extract name from resume
+        try:
+            analyzer = JDResumeAnalyzer()
+            info = analyzer.extract_candidate_info(request.resume_text)
+            candidate_name = info.get("name", "Anonymous Candidate")
+            candidate_info = info
+        except Exception as e:
+            print(f"Error extracting candidate info: {e}")
+            candidate_name = "Anonymous Candidate"
+
     # Generate session ID and links with TTL
     session_id = str(uuid.uuid4())[:8]
     links = generate_interview_links(session_id, request.position_id, request.candidate_id, ttl)
+    
+    # Update session with candidate info
+    sessions = load_json_file(SESSIONS_FILE)
+    if session_id in sessions.get("sessions", {}):
+        sessions["sessions"][session_id]["candidate_name"] = candidate_name
+        sessions["sessions"][session_id]["candidate_info"] = candidate_info
+        save_json_file(SESSIONS_FILE, sessions)
     
     return {
         "status": "created",
         "session_id": session_id,
         "position": {"id": request.position_id, "title": position.get("title")},
-        "candidate": {"id": request.candidate_id, "name": candidate.get("name") if candidate else "Custom Resume"},
+        "candidate": {"id": request.candidate_id, "name": candidate_name},
         "links": {
             "candidate": links["candidate_link"],
             "admin": links["admin_link"]
@@ -2397,12 +2755,13 @@ async def end_interview(session_id: str, request: EndInterviewRequest):
         "session_id": session_id,
         "candidate": {
             "id": session.get("candidate_id", ""),
-            "name": candidate.get("name") if candidate else "Unknown",
-            "experience_level": candidate.get("experience_level") if candidate else "Unknown"
+            "name": candidate.get("name") if candidate else session.get("candidate_name", "Unknown"),
+            "experience_level": candidate.get("experience_level") if candidate else session.get("candidate_info", {}).get("experience_years", "Unknown")
         },
         "position": {
             "id": session.get("position_id", ""),
-            "title": position.get("title") if position else "Unknown"
+            "title": position.get("title") if position else session.get("candidate_role", "Unknown"),
+            "account": position.get("account_id") if position else session.get("candidate_account", "Unknown")
         },
         "created_at": datetime.now().isoformat(),
         "ended_by": request.ended_by,
@@ -2434,6 +2793,7 @@ async def end_interview(session_id: str, request: EndInterviewRequest):
             "added_by": None,
             "added_at": None
         },
+        "feedback_summary": result.get("feedback_report", {}).get("content", ""),
         "shareable_link": {
             "token": None,
             "expires_at": None,
@@ -2442,16 +2802,28 @@ async def end_interview(session_id: str, request: EndInterviewRequest):
     }
     
     # Save result to main results file
-    results_data = load_json_file(RESULTS_FILE)
-    if "results" not in results_data:
-        results_data["results"] = {}
-    results_data["results"][result_id] = result
-    save_json_file(RESULTS_FILE, results_data)
-    
-    # Also save to per-candidate file
-    candidate_name = session.get("candidate_name", "Unknown")
-    candidate_id = session.get("candidate_id", "")
-    save_candidate_result(candidate_name, candidate_id, result)
+    try:
+        results_data = load_json_file(RESULTS_FILE)
+        if "results" not in results_data:
+            results_data["results"] = {}
+        results_data["results"][result_id] = result
+        save_json_file(RESULTS_FILE, results_data)
+        
+        # Also save to per-candidate file
+        candidate_name = session.get("candidate_name", "Unknown")
+        candidate_id = session.get("candidate_id", "")
+        save_candidate_result(candidate_name, candidate_id, result, session_id)
+        
+        # IMPORTANT: Persist session status change
+        save_json_file(SESSIONS_FILE, sessions)
+        print(f"[INFO] Successfully saved interview result {result_id} and updated session {session_id}")
+        
+    except Exception as e:
+        print(f"[ERROR] Failed to save interview results: {e}")
+        # Even if saving result fails, try to save session status so it doesn't get stuck? 
+        # No, if result save fails, maybe we want it to remain pending to retry?
+        # But for now, failure means data loss risk, so logging is key.
+        raise HTTPException(status_code=500, detail=f"Failed to save results: {str(e)}")
     
     return {
         "status": "completed",
@@ -2525,19 +2897,97 @@ async def create_shareable_link(result_id: str):
     result = results_data.get("results", {}).get(result_id)
     
     if not result:
+        # Fallback: Search in candidate files
+        # This handles legacy cases or sync issues where result exists in candidate file but not results.json
+        try:
+            candidate_files = os.listdir(CANDIDATE_RESULTS_DIR)
+            found = False
+            for filename in candidate_files:
+                if not filename.endswith(".json"): continue
+                
+                path = os.path.join(CANDIDATE_RESULTS_DIR, filename)
+                try:
+                    with open(path, 'r', encoding='utf-8') as f:
+                        c_data = json.load(f)
+                    
+                    if "interviews" in c_data:
+                        for interview in c_data["interviews"]:
+                            if interview.get("id") == result_id or interview.get("session_id") == result_id:
+                                result = interview
+                                found = True
+                                break
+                except:
+                    continue
+                
+                if found:
+                    break
+        except Exception as e:
+            print(f"[WARN] Failed fallback search for result {result_id}: {e}")
+            
+    if not result:
         raise HTTPException(status_code=404, detail="Result not found")
     
     share_token = f"share_{uuid.uuid4().hex[:12]}"
-    
-    result["shareable_link"] = {
+    share_data = {
         "token": share_token,
         "created_at": datetime.now().isoformat(),
-        "expires_at": None,  # No expiry for now
-        "views": ["summary"]  # Limited views for candidate
+        "expires_at": None,
+        "views": ["summary"]
     }
     
+    result["shareable_link"] = share_data
+    
+    # Save to global results
     results_data["results"][result_id] = result
     save_json_file(RESULTS_FILE, results_data)
+    
+    # Save to candidate-specific file
+    try:
+        candidate_name = result.get("candidate", {}).get("name")
+        candidate_id = result.get("candidate", {}).get("id")
+        session_id = result.get("session_id")
+        
+        if candidate_name:
+            # We need to find the right file.
+            date_str = result.get("created_at", "").split("T")[0]
+            
+            # Use candidate_id or session_id for unique filename generation
+            # This matches save_candidate_result logic
+            unique_id = session_id or candidate_id
+            
+            filename_unique = get_candidate_filename(candidate_name, date_str, unique_id)
+            filename_legacy = get_candidate_filename(candidate_name, date_str)
+            filename_nodate = get_candidate_filename(candidate_name) # Legacy
+            
+            paths_to_check = [
+                os.path.join(CANDIDATE_RESULTS_DIR, filename_unique),
+                os.path.join(CANDIDATE_RESULTS_DIR, filename_legacy),
+                os.path.join(CANDIDATE_RESULTS_DIR, filename_nodate)
+            ]
+            
+            updated_candidate = False
+            for filepath in paths_to_check:
+                if os.path.exists(filepath):
+                    with open(filepath, 'r', encoding='utf-8') as f:
+                        c_data = json.load(f)
+                    
+                    if "interviews" in c_data:
+                        for i, interview in enumerate(c_data["interviews"]):
+                            if interview.get("id") == result_id or interview.get("session_id") == result.get("session_id"):
+                                c_data["interviews"][i]["shareable_link"] = share_data
+                                with open(filepath, 'w', encoding='utf-8') as f:
+                                    json.dump(c_data, f, indent=2, ensure_ascii=False)
+                                updated_candidate = True
+                                break
+                if updated_candidate:
+                    break
+                    
+            if not updated_candidate:
+                 # Fallback: List all files and search (expensive but necessary if filename mismatch)
+                 pass
+                 
+    except Exception as e:
+        print(f"[WARN] Failed to update candidate file with share link: {e}")
     
     return {
         "share_url": f"/results/shared/{share_token}",
@@ -2546,28 +2996,35 @@ async def create_shareable_link(result_id: str):
 
 @app.get("/api/results/shared/{token}")
 async def get_shared_result(token: str):
-    """Get result via shareable link (limited view for candidates)"""
+    """Retrieve result by share token"""
+    # 1. Check aggregate results first (fastest)
     results_data = load_json_file(RESULTS_FILE)
-    
-    for result_id, result in results_data.get("results", {}).items():
-        if result.get("shareable_link", {}).get("token") == token:
-            # Return limited view for candidate
-            return {
-                "id": result["id"],
-                "position": result["position"],
-                "candidate": {"name": result["candidate"]["name"]},
-                "created_at": result["created_at"],
-                "status": result["status"],
-                "overall_metrics": {
-                    "total_score": result["overall_metrics"]["total_score"],
-                    "questions_asked": result["overall_metrics"]["questions_asked"],
-                    "score_trend": result["overall_metrics"]["score_trend"]
-                },
-                # Only show general summary, not detailed scores
-                "feedback_summary": result["admin_feedback"].get("overall_notes") if result["admin_feedback"].get("overall_notes") else "Your interview results are being reviewed."
-            }
-    
-    raise HTTPException(status_code=404, detail="Invalid or expired share link")
+    if "results" in results_data:
+        for result in results_data["results"].values():
+            if result.get("shareable_link", {}).get("token") == token:
+                return result
+
+    # 2. Fallback: Search candidate files (slower but covers all cases)
+    try:
+        candidate_files = os.listdir(CANDIDATE_RESULTS_DIR)
+        for filename in candidate_files:
+            if not filename.endswith(".json"): continue
+            
+            path = os.path.join(CANDIDATE_RESULTS_DIR, filename)
+            try:
+                with open(path, 'r', encoding='utf-8') as f:
+                    c_data = json.load(f)
+                
+                if "interviews" in c_data:
+                    for interview in c_data["interviews"]:
+                        if interview.get("shareable_link", {}).get("token") == token:
+                            return interview
+            except:
+                continue
+    except Exception as e:
+        print(f"[ERROR] searching share token: {e}")
+        
+    raise HTTPException(status_code=404, detail="Shared result not found or expired")
 
 @app.get("/api/results")
 async def list_all_results(limit: int = 20, offset: int = 0):

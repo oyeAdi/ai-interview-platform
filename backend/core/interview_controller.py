@@ -192,11 +192,16 @@ class InterviewController:
         # Step 1: Find a seed question from the bank
         # If question_categories are set, use the first enabled category
         seed_category = None
+        seed_category = None
         if self.question_categories:
+            enabled_categories = []
             for cat_name, cat_config in self.question_categories.items():
                 if cat_config.get("enabled", False) and cat_config.get("count", 0) > 0:
-                    seed_category = cat_name
-                    break
+                    enabled_categories.append(cat_name)
+            
+            if enabled_categories:
+                import random
+                seed_category = random.choice(enabled_categories)
         else:
             # Default: conceptual for junior, otherwise None (any category)
             seed_category = "conceptual" if experience_level == "junior" else None
@@ -294,7 +299,7 @@ Generate ONLY the personalized question text. Keep it conversational and warm.""
             if seed_question:
                 self.question_manager.questions_asked.append(seed_question["id"])
             
-            return {
+            question_data = {
                 "id": f"personalized_{self.context_manager.session_id[:8]}",
                 "text": question_text,
                 "type": seed_question.get("type", "probing") if seed_question else "probing",
@@ -305,6 +310,19 @@ Generate ONLY the personalized question text. Keep it conversational and warm.""
                 "seed_question_id": seed_question.get("id") if seed_question else None,
                 "experience_level": experience_level
             }
+            
+            # Log the personalized question
+            self.logger.log_question(
+                self.context_manager.session_id,
+                question_data["id"],
+                question_data["text"],
+                question_data["type"],
+                1,  # First question is always round 1
+                seed_category,
+                seed_topic or "experience_based"
+            )
+            
+            return question_data
             
         except Exception as e:
             print(f"Error generating personalized question: {e}")
@@ -448,7 +466,8 @@ Generate ONLY the personalized question text. Keep it conversational and warm.""
                     avg_round_score = evaluation.get("overall_score", 0)
 
                 # Early Exit (Success) - Sustained High Performance
-                if avg_round_score >= 85:
+                # Lowered from 85% to 75% - form opinion faster
+                if avg_round_score >= 80:
                     self.followup_stop_reason = "high_confidence_success"
                     self.followup_confidence = 0.95
                     return None

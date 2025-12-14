@@ -42,3 +42,14 @@ Thumbs.db
 
 
 
+
+# Candidate Data
+backend/candidate_results/*.json
+!backend/candidate_results/.gitkeep
+
+# Temp Scripts
+reproduce_save.py
+backend/regenerate_result.py
+backend/test_calibration.py
+backend/apply_approval.py
+log*.json

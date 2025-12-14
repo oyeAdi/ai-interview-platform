@@ -54,18 +54,28 @@ export default function Header({ showQuickStart = true, showBackToDashboard = fa
               <Link
                 href="/"
                 className={`text-sm font-normal transition-colors ${pathname === '/'
-                    ? 'text-black dark:text-white'
-                    : 'text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white'
+                  ? 'text-black dark:text-white'
+                  : 'text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white'
                   }`}
               >
                 Dashboard
               </Link>
 
               <Link
+                href="/admin/results"
+                className={`text-sm font-normal transition-colors ${pathname === '/admin/results'
+                  ? 'text-black dark:text-white'
+                  : 'text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white'
+                  }`}
+              >
+                Feedback
+              </Link>
+
+              <Link
                 href="/wiki"
                 className={`text-sm font-normal transition-colors flex items-center gap-1.5 ${pathname === '/wiki'
-                    ? 'text-epam-cyan'
-                    : 'text-gray-500 dark:text-gray-400 hover:text-epam-cyan'
+                  ? 'text-epam-cyan'
+                  : 'text-gray-500 dark:text-gray-400 hover:text-epam-cyan'
                   }`}
               >
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -136,6 +146,15 @@ export default function Header({ showQuickStart = true, showBackToDashboard = fa
                 }`}
             >
               Dashboard
+            </Link>
+
+            <Link
+              href="/admin/results"
+              onClick={() => setMobileMenuOpen(false)}
+              className={`block text-2xl font-light ${pathname === '/admin/results' ? 'text-epam-cyan' : 'text-black dark:text-white'
+                }`}
+            >
+              Feedback
             </Link>
 
             <Link

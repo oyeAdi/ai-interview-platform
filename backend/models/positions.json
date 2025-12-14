@@ -9,7 +9,7 @@
       "data_model": {
         "duration_minutes": 30,
         "experience_level": "senior",
-        "expectations": "high",
+        "expectations": "basic",
         "required_skills": [
           {
             "skill": "python",
@@ -109,40 +109,24 @@
       "status": "open",
       "created_at": "2024-12-08",
       "data_model": {
-        "duration_minutes": 45,
+        "duration_minutes": 30,
         "experience_level": "mid",
         "expectations": "medium",
         "required_skills": [
           {
-            "skill": "javascript",
-            "proficiency": "advanced",
-            "weight": 0.25
-          },
-          {
-            "skill": "react",
-            "proficiency": "advanced",
-            "weight": 0.2
-          },
-          {
-            "skill": "nodejs",
-            "proficiency": "intermediate",
-            "weight": 0.2
-          },
-          {
-            "skill": "databases",
-            "proficiency": "intermediate",
-            "weight": 0.15
-          },
-          {
             "skill": "coding",
-            "proficiency": "advanced",
+            "proficiency": "beginner",
             "weight": 0.2
+          },
+          {
+            "skill": "javascript",
+            "proficiency": "intermediate",
+            "weight": 0.1
           }
         ],
         "interview_flow": [
           "coding",
-          "conceptual",
-          "system_design"
+          "conceptual"
         ],
         "question_distribution": {
           "easy": 0.3,
@@ -150,7 +134,8 @@
           "hard": 0.2
         }
       },
-      "jd_text": "Join our team as a Full Stack Engineer. 3-5 years of experience in JavaScript, React, and Node.js required."
+      "jd_text": "Join our team as a Full Stack Engineer. 3-5 years of experience in JavaScript, React, and Node.js required.",
+      "updated_at": "2025-12-13"
     },
     {
       "id": "uber_ios_senior",
@@ -209,40 +194,18 @@
       "status": "open",
       "created_at": "2024-12-09",
       "data_model": {
-        "duration_minutes": 45,
+        "duration_minutes": 30,
         "experience_level": "mid",
         "expectations": "medium",
         "required_skills": [
           {
-            "skill": "kotlin",
-            "proficiency": "advanced",
-            "weight": 0.3
-          },
-          {
-            "skill": "android",
-            "proficiency": "advanced",
-            "weight": 0.25
-          },
-          {
-            "skill": "java",
-            "proficiency": "intermediate",
-            "weight": 0.15
-          },
-          {
             "skill": "coding",
             "proficiency": "advanced",
             "weight": 0.2
-          },
-          {
-            "skill": "testing",
-            "proficiency": "intermediate",
-            "weight": 0.1
           }
         ],
         "interview_flow": [
-          "coding",
-          "conceptual",
-          "problem_solving"
+          "coding"
         ],
         "question_distribution": {
           "easy": 0.3,
@@ -250,7 +213,8 @@
           "hard": 0.2
         }
       },
-      "jd_text": "Join Uber's Android team to build features used by millions daily. 3-5 years Android development experience with Kotlin required. Experience with MVVM architecture and Jetpack Compose preferred."
+      "jd_text": "Join Uber's Android team to build features used by millions daily. 3-5 years Android development experience with Kotlin required. Experience with MVVM architecture and Jetpack Compose preferred.",
+      "updated_at": "2025-12-13"
     },
     {
       "id": "uber_ml_engineer",

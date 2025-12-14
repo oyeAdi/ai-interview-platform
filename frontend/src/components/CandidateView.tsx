@@ -39,6 +39,7 @@ export default function CandidateView({ sessionId, language }: CandidateViewProp
   const [connectionStatus, setConnectionStatus] = useState<'connecting' | 'connected' | 'disconnected'>('connecting')
   const [answerMode, setAnswerMode] = useState<'text' | 'code'>('text')
   const [codeAnswer, setCodeAnswer] = useState('')
+  const [previousQuestionId, setPreviousQuestionId] = useState<string>('')
 
   // End Interview Modal
   const [showEndModal, setShowEndModal] = useState(false)
@@ -47,6 +48,15 @@ export default function CandidateView({ sessionId, language }: CandidateViewProp
 
   // Timer (45 minutes)
   const [timeLeft, setTimeLeft] = useState(45 * 60)
+
+  // Clear code editor when new question arrives
+  useEffect(() => {
+    // Only clear when the main question number changes (not for follow-ups)
+    if (previousQuestionId !== '' && questionNumber.toString() !== previousQuestionId) {
+      setCodeAnswer('')
+    }
+    setPreviousQuestionId(questionNumber.toString())
+  }, [questionNumber, previousQuestionId])
 
   useEffect(() => {
     if (sessionEnded) return
@@ -173,11 +183,13 @@ export default function CandidateView({ sessionId, language }: CandidateViewProp
             const isCoding = data.question_type === 'coding' || data.is_coding === true
             setIsCodingQuestion(isCoding)
             if (isCoding) {
+              // Coding questions use Monaco editor only (no mode switching)
               setAnswerMode('code')
               setCodingLanguage(data.coding_language || language || 'python')
               setStarterCode(data.starter_code || '')
-              setCodeAnswer(data.starter_code || '')
+              // Code editor will be cleared by useEffect when question ID changes
             } else {
+              // Non-coding questions use textarea only
               setAnswerMode('text')
             }
 
@@ -392,66 +404,34 @@ export default function CandidateView({ sessionId, language }: CandidateViewProp
 
         {/* Answer Section */}
         <div className="border border-[#1A1A1A] overflow-hidden">
-          {/* Answer Mode Toggle (for coding questions) */}
-          {isCodingQuestion && (
-            <div className="flex border-b border-[#1A1A1A]">
-              <button
-                type="button"
-                onClick={() => setAnswerMode('code')}
-                className={`flex-1 px-6 py-3 text-sm font-medium transition-colors flex items-center justify-center gap-2 ${answerMode === 'code'
-                  ? 'bg-[#00E5FF]/10 text-[#00E5FF] border-b-2 border-[#00E5FF]'
-                  : 'text-gray-500 hover:text-gray-300'
-                  }`}
-              >
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5" />
-                </svg>
-                Code Editor
-              </button>
-              <button
-                type="button"
-                onClick={() => setAnswerMode('text')}
-                className={`flex-1 px-6 py-3 text-sm font-medium transition-colors flex items-center justify-center gap-2 ${answerMode === 'text'
-                  ? 'bg-[#00E5FF]/10 text-[#00E5FF] border-b-2 border-[#00E5FF]'
-                  : 'text-gray-500 hover:text-gray-300'
-                  }`}
-              >
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25H12" />
-                </svg>
-                Text Answer
-              </button>
-            </div>
-          )}
+          {/* No mode toggle - coding questions use Monaco only, non-coding use textarea only */}
 
           <div className="px-6 py-4 border-b border-[#1A1A1A] bg-[#0A0A0A]">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
               <h3 className="text-xs font-medium text-gray-400 uppercase tracking-wider">
                 {answerMode === 'code' ? 'Your Code' : 'Your Answer'}
               </h3>
-              {answerMode !== 'code' && (
-                <div className="group relative flex items-center gap-1 cursor-help">
-                  <svg className="w-3.5 h-3.5 text-gray-500 group-hover:text-[#00E5FF] transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  <span className="text-[10px] text-gray-500 group-hover:text-[#00E5FF] transition-colors hidden sm:inline">Type faster?</span>
+              <div className="group relative flex items-center gap-1">
+                <span className="text-[10px] text-gray-500 italic">
+                  (Use voice dictation: Win+H on Windows or Fn twice / F5 on Mac)
+                </span>
+                <svg className="w-3 h-3 text-gray-500 group-hover:text-[#00E5FF] transition-colors cursor-help" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
 
-                  {/* Tooltip */}
-                  <div className="absolute bottom-full mb-2 right-0 w-60 p-3 bg-[#1A1A1A] border border-gray-800 rounded-lg shadow-xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
-                    <div className="flex items-start gap-2">
-                      <svg className="w-4 h-4 text-[#00E5FF] mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
-                      </svg>
-                      <div>
-                        <p className="text-xs text-gray-200 font-medium mb-1">Use Voice Typing</p>
-                        <p className="text-[10px] text-gray-400 leading-relaxed">
-                          Press <kbd className="px-1 py-0.5 bg-gray-800 rounded border border-gray-700 font-mono text-gray-300">Win</kbd> + <kbd className="px-1 py-0.5 bg-gray-800 rounded border border-gray-700 font-mono text-gray-300">H</kbd> (Windows) or <kbd className="px-1 py-0.5 bg-gray-800 rounded border border-gray-700 font-mono text-gray-300">Fn</kbd> (Mac) to use system dictation.
-                        </p>
-                      </div>
-                    </div>
-                  </div>
+                {/* Tooltip for Mac setup */}
+                <div className="absolute left-full top-0 ml-2 w-80 p-3 bg-[#1A1A1A] border border-[#333] rounded-lg shadow-xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50">
+                  <p className="text-xs text-[#00E5FF] font-medium mb-2">How to enable Fn twice dictation on Mac:</p>
+                  <ol className="text-[10px] text-gray-300 space-y-1 list-decimal list-inside">
+                    <li>Open System Settings → Keyboard</li>
+                    <li>Click "Dictation" in the sidebar</li>
+                    <li>Turn on "Dictation"</li>
+                    <li>Set shortcut to "Press Fn (Function) Key Twice"</li>
+                    <li>Grant microphone permissions if prompted</li>
+                  </ol>
+                  <p className="text-[10px] text-gray-400 mt-2 italic">Or use F5 if already configured</p>
                 </div>
-              )}
+              </div>
             </div>
           </div>
 
@@ -476,6 +456,7 @@ export default function CandidateView({ sessionId, language }: CandidateViewProp
                   </div>
                 }>
                   <CodeEditor
+                    key={`question-${questionNumber}`}
                     language={codingLanguage}
                     initialCode={starterCode}
                     onChange={(value) => {

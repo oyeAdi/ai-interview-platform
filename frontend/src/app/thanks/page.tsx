@@ -1,21 +1,135 @@
+'use client'
+
+import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { apiUrl } from '@/config/api'
+
 export default function ThanksPage() {
+  const router = useRouter()
+  const [loading, setLoading] = useState(true)
+  const [status, setStatus] = useState<'PENDING' | 'APPROVED'>('PENDING')
+  const [report, setReport] = useState<string | null>(null)
+  const [lastChecked, setLastChecked] = useState<Date>(new Date())
+
+  const checkStatus = async () => {
+    const sessionId = localStorage.getItem('current_session_id')
+    if (!sessionId) {
+      setLoading(false)
+      return
+    }
+
+    try {
+      setLoading(true)
+      const response = await fetch(apiUrl(`api/results/${sessionId}/status`))
+      if (response.ok) {
+        const data = await response.json()
+        setStatus(data.status)
+        if (data.status === 'APPROVED' && data.content) {
+          setReport(data.content)
+        }
+      }
+    } catch (error) {
+      console.error('Failed to checked status:', error)
+    } finally {
+      setLoading(false)
+      setLastChecked(new Date())
+    }
+  }
+
+  useEffect(() => {
+    checkStatus()
+    // Auto-poll every 30 seconds
+    const interval = setInterval(checkStatus, 30000)
+    return () => clearInterval(interval)
+  }, [])
+
   return (
-    <div className="min-h-screen bg-dark-black flex items-center justify-center p-8">
-      <div className="max-w-2xl text-center space-y-6">
-        <h1 className="text-4xl font-bold text-primary-orange">
-          Thank You
-        </h1>
-        <p className="text-xl text-gray-300">
-          Thank you for your time. We'll review your responses and get back to you shortly.
-        </p>
+    <div className="min-h-screen bg-[#0A0A0A] text-white p-8 font-sans">
+      <div className="max-w-4xl mx-auto space-y-8">
+        {/* Header */}
+        <div className="text-center space-y-4">
+          <div className="w-16 h-16 bg-[#00E5FF]/10 rounded-full flex items-center justify-center mx-auto mb-6">
+            <svg className="w-8 h-8 text-[#00E5FF]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">
+            Interview Completed
+          </h1>
+          <p className="text-gray-400">
+            Thank you for your time. Your session has been recorded.
+          </p>
+        </div>
+
+        {/* Content Area */}
+        <div className="bg-[#141414] border border-[#2A2A2A] rounded-2xl p-8 shadow-2xl min-h-[400px] flex flex-col">
+
+          {status === 'PENDING' ? (
+            <div className="flex flex-col items-center justify-center flex-1 space-y-6 text-center">
+              <div className="w-20 h-20 rounded-full bg-[#2A2A2A] flex items-center justify-center animate-pulse">
+                <svg className="w-10 h-10 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <div>
+                <h2 className="text-2xl font-bold text-white mb-2">Results Pending Approval</h2>
+                <p className="text-gray-400 max-w-md mx-auto">
+                  Our team is currently reviewing your interview performance. The detailed feedback report will be available here once approved.
+                </p>
+              </div>
+              <button
+                onClick={checkStatus}
+                disabled={loading}
+                className="px-6 py-2 bg-[#2A2A2A] hover:bg-[#333] text-white rounded-lg transition-colors flex items-center gap-2"
+              >
+                {loading ? (
+                  <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+                ) : (
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                  </svg>
+                )}
+                Check Status
+              </button>
+              <p className="text-xs text-gray-600">
+                Last checked: {lastChecked.toLocaleTimeString()}
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-6 animate-fadeIn">
+              <div className="flex items-center justify-between border-b border-[#2A2A2A] pb-6">
+                <div>
+                  <h2 className="text-2xl font-bold text-[#39FF14]">Feedback Report Approved</h2>
+                  <p className="text-gray-400 text-sm mt-1">
+                    Generated by AI Interview Feedback Assistant
+                  </p>
+                </div>
+                <button
+                  onClick={() => window.print()}
+                  className="px-4 py-2 bg-[#2A2A2A] hover:bg-[#333] text-gray-300 rounded-lg text-sm transition-colors"
+                >
+                  Download / Print
+                </button>
+              </div>
+
+              <div className="prose prose-invert max-w-none">
+                <pre className="whitespace-pre-wrap font-sans text-gray-300 text-base leading-relaxed p-6 bg-[#0A0A0A] rounded-xl border border-[#2A2A2A]">
+                  {report || "Error loading report content."}
+                </pre>
+              </div>
+            </div>
+          )}
+        </div>
+
+        <div className="flex justify-center gap-4">
+          <button
+            onClick={() => router.push('/')}
+            className="px-6 py-3 bg-[#00E5FF] text-black font-semibold rounded-xl hover:bg-[#00E5FF]/90 transition-colors"
+          >
+            Back to Dashboard
+          </button>
+        </div>
       </div>
     </div>
   )
 }
-
-
-
-
-
-
-

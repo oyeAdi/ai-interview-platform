@@ -103,24 +103,99 @@ class Evaluator:
         }
     
     def _get_llm_evaluation(self, question: Dict, response: str, scores: Dict) -> Optional[Dict]:
-        """Get LLM-based qualitative evaluation"""
+        """Get LLM-based qualitative evaluation with dual framework"""
         client = self._get_llm_client()
         if not client:
             return None
         
         try:
-            # Create a simple prompt for LLM evaluation
-            prompt = f"""Evaluate this interview response briefly.
+            # Detect question type
+            question_type = question.get('type', 'open_ended')
+            is_coding = question_type in ['coding', 'code_review'] or question.get('category') == 'coding'
+            
+            # Create evaluation prompt based on question type
+            if is_coding:
+                # CODING QUESTION FRAMEWORK
+                prompt = f"""Evaluate this CODING interview response. Focus on TECHNICAL COMPETENCE.
+BE OBJECTIVE. Do not inflate scores, but recognize valid partial solutions.
 
-Question: {question.get('text', '')[:200]}
-Response: {response[:300]}
-Deterministic Score: {scores.get('overall_score', 0)}/100
+Question: {question.get('text', '')[:300]}
+Response: {response[:500]}
+Deterministic Scores: {scores}
 
-Provide a JSON response with:
-- score: your assessment (0-100)
-- reasoning: one sentence explaining the score
-- strengths: list of 1-2 strengths (short phrases)
-- improvements: list of 1-2 areas to improve (short phrases)
+EVALUATION CRITERIA (Total: 100%):
+1. CODING ABILITY (40%) - Code quality, correctness, efficiency, clean practices, edge cases
+2. TECHNICAL DEPTH (30%) - Understanding of concepts, trade-offs, complexity awareness
+3. PROBLEM-SOLVING (20%) - Approach, logical reasoning, optimization thinking
+4. EXPLANATION QUALITY (5%) - Code explanation clarity
+5. PROFESSIONALISM (5%) - Basic courtesy ONLY
+
+IMPORTANT:
+- Prioritize code quality and technical correctness over communication style
+- Focus on: practical coding skills, algorithm efficiency, clean code
+- Ignore: tone, pleasantries, conversational awareness
+
+Provide JSON response:
+- score: 0-100
+- reasoning: Focus on TECHNICAL assessment (one sentence)
+- strengths: 1-2 TECHNICAL strengths (short phrases)
+- improvements: 1-2 TECHNICAL improvements (short phrases)
+
+Reply with ONLY valid JSON, no markdown."""
+            elif question.get('category') == 'behavioral' or question.get('type') == 'behavioral':
+                # BEHAVIORAL QUESTION FRAMEWORK
+                prompt = f"""Evaluate this BEHAVIORAL/SOFT-SKILL interview response. Focus on COMMUNICATION & SITUATIONAL JUDGMENT.
+BE FAIR. Look for the STAR method (Situation, Task, Action, Result) or clear structured thinking.
+
+Question: {question.get('text', '')[:300]}
+Response: {response[:500]}
+Deterministic Scores: {scores}
+
+EVALUATION CRITERIA (Total: 100%):
+1. COMMUNICATION CLARITY (35%) - Structure, conciseness, articulation
+2. STAR METHOD / STRUCTURE (25%) - Clear progression of thought/story
+3. RELEVANCE (20%) - Directly addressing the questionasked
+4. REFLECTION/IMPACT (15%) - Lesson learned or result achieved
+5. PROFESSIONALISM (5%) - Tone and maturity
+
+IMPORTANT:
+- Value specific examples and clear storytelling
+- Penalize vague or evasive answers
+- Focus on: soft skills, leadership, collaboration, conflict resolution
+
+Provide JSON response:
+- score: 0-100
+- reasoning: Focus on BEHAVIORAL assessment (one sentence)
+- strengths: 1-2 strengths (short phrases)
+- improvements: 1-2 improvements (short phrases)
+
+Reply with ONLY valid JSON, no markdown."""
+            else:
+                # NON-CODING TECHNICAL FRAMEWORK
+                prompt = f"""Evaluate this TECHNICAL CONCEPTUAL interview response. Focus on KNOWLEDGE DEPTH.
+BE BALANCED. Reward deep understanding but accept standard correct answers.
+
+Question: {question.get('text', '')[:300]}
+Response: {response[:500]}
+Deterministic Scores: {scores}
+
+EVALUATION CRITERIA (Total: 100%):
+1. TECHNICAL ACCURACY (40%) - Correctness of facts and concepts
+2. EXPLANATION QUALITY (25%) - Clarity, analogies, ability to teach/explain
+3. PROBLEM-SOLVING (20%) - Application of knowledge
+4. PRACTICAL CONTEXT (10%) - Real-world usage mention
+5. PROFESSIONALISM (5%) - Confidence and tone
+
+IMPORTANT:
+- Prioritize accuracy and clarity
+- Do NOT require "textbook perfect" definitions if the concept is understood
+- Focus on: conceptual grip, ability to explain simply
+
+Provide JSON response:
+- score: 0-100
+- reasoning: Focus on TECHNICAL assessment (one sentence)
+- strengths: 1-2 TECHNICAL strengths (short phrases)
+- improvements: 1-2 TECHNICAL improvements (short phrases)
 
 Reply with ONLY valid JSON, no markdown."""
 
@@ -148,11 +223,21 @@ Reply with ONLY valid JSON, no markdown."""
                 # Clean up potential markdown formatting
                 text = text.replace('```json', '').replace('```', '').strip()
                 result = json.loads(text)
+                
+                llm_score = result.get("score", scores.get("overall_score", 0))
+                
+                # Apply multiplier (optional) - Removed to prevent score inflation
+                if is_coding:
+                    # llm_score = min(100, llm_score * 1.0) 
+                    pass
+                
                 return {
-                    "score": result.get("score", scores.get("overall_score", 0)),
+                    "score": llm_score,
                     "reasoning": result.get("reasoning", ""),
                     "strengths": result.get("strengths", []),
-                    "improvements": result.get("improvements", [])
+                    "improvements": result.get("improvements", []),
+                    "is_coding": is_coding,
+                    "multiplier_applied": 1.0
                 }
         except Exception as e:
             print(f"LLM evaluation failed: {e}")

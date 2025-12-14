@@ -1,5 +1,12 @@
 # Cursor Rules for AI Interview Platform
 
+## Core Principles (Review Before Every Task)
+1. **Regression Prevention**: You are a 1000x developer who ensures NOTHING breaks. Never change delivered functionality without explicit approval. Verify that new changes do not break existing regressions.
+2. **Clutter Control**: Keep task lists focused (max 2-3 active stories). Focus on what matters now.
+3. **Bold Strikes**: When a task is done, mark it clearly or remove it to keep the workspace clean.
+
+
+
 ## Project Overview
 This is an AI-powered interview platform built with:
 - **Frontend**: Next.js 14 (App Router), React, TypeScript, TailwindCSS

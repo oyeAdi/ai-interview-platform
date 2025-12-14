@@ -37,11 +37,46 @@ class JDResumeAnalyzer:
         if not combined_text.strip():
             raise ValueError("Either JD or Resume text/file must be provided")
         
-        # Use Gemini to analyze
-        return self.gemini_client.analyze_language(
+        result = self.gemini_client.analyze_language(
             jd_text or "",
             resume_text or ""
         )
+        
+        # Extract candidate info if resume text is available
+        candidate_info = {}
+        if resume_text:
+            candidate_info = self.extract_candidate_info(resume_text)
+            
+        return {**result, "candidate_info": candidate_info}
+
+    def extract_candidate_info(self, resume_text: str) -> Dict:
+        """
+        Extract candidate detailed info (Name, Email, Experience) from resume regex/LLM
+        """
+        if not resume_text:
+            return {"name": "Anonymous Candidate", "email": ""}
+            
+        prompt = f"""Extract the following details from the Resume text below.
+        
+RESUME:
+{resume_text[:2000]}
+
+RETURN JSON ONLY:
+{{
+  "name": "Full Name",
+  "email": "Email Address",
+  "experience_years": "Number (estimate if not explicit, default 0)"
+}}
+If name not found, use "Anonymous Candidate".
+"""
+        try:
+            response = self.gemini_client.model.generate_content(prompt)
+            import json
+            text = response.text.replace('```json', '').replace('```', '').strip()
+            data = json.loads(text)
+            return data
+        except:
+            return {"name": "Anonymous Candidate", "email": ""}
 
 
 

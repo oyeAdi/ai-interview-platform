@@ -175,7 +175,8 @@ export default function DashboardPage() {
         body: JSON.stringify({
           position_id: selectedPosition,
           candidate_id: selectedCandidate || 'custom',
-          ttl_minutes: linkTTL
+          ttl_minutes: linkTTL,
+          resume_text: resumeText || undefined
         })
       })
 
@@ -537,8 +538,8 @@ export default function DashboardPage() {
                           key={option.value}
                           onClick={() => setLinkTTL(option.value)}
                           className={`px-3 py-1.5 text-xs font-medium transition-colors ${linkTTL === option.value
-                              ? 'bg-[#00E5FF] text-black'
-                              : 'bg-white dark:bg-[#1A1A1A] text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-[#2A2A2A] hover:border-[#00E5FF]'
+                            ? 'bg-[#00E5FF] text-black'
+                            : 'bg-white dark:bg-[#1A1A1A] text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-[#2A2A2A] hover:border-[#00E5FF]'
                             }`}
                         >
                           {option.label}

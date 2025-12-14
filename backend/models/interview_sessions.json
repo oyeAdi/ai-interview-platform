@@ -134,6 +134,586 @@
       "expires_at": "2025-12-13T20:44:05.835309",
       "ttl_minutes": 60,
       "status": "pending"
+    },
+    "4609e6e3": {
+      "session_id": "4609e6e3",
+      "position_id": "uber_senior_python",
+      "candidate_id": "resume1",
+      "candidate_token": "3a1f4aa0-b290-42dc-b7c3-c662b79c4b41",
+      "admin_token": "01bf8ddb-f33a-4873-98aa-5d5d7503c57c",
+      "created_at": "2025-12-13T20:13:35.202552",
+      "expires_at": "2025-12-13T21:13:35.202552",
+      "ttl_minutes": 60,
+      "status": "active"
+    },
+    "1a1a1dc2": {
+      "session_id": "1a1a1dc2",
+      "position_id": "uber_senior_python",
+      "candidate_id": "resume1",
+      "candidate_token": "452f7abb-667d-4a86-af74-bc476eee7c6c",
+      "admin_token": "6f4f7fee-1d5a-4d36-9874-6e077e62a0b1",
+      "created_at": "2025-12-13T20:46:43.871723",
+      "expires_at": "2025-12-13T21:46:43.871723",
+      "ttl_minutes": 60,
+      "status": "active"
+    },
+    "6ba10ab0": {
+      "session_id": "6ba10ab0",
+      "position_id": "uber_senior_python",
+      "candidate_id": "resume1",
+      "candidate_token": "73b91428-24d0-49ba-9ce6-971b3670f4c6",
+      "admin_token": "2de10795-8908-45e1-b60b-ab976cd3025e",
+      "created_at": "2025-12-13T22:05:35.211188",
+      "expires_at": "2025-12-13T22:10:35.211188",
+      "ttl_minutes": 5,
+      "status": "active"
+    },
+    "9eef010b": {
+      "session_id": "9eef010b",
+      "position_id": "uber_senior_python",
+      "candidate_id": "resume18",
+      "candidate_token": "1a1508e9-5276-4703-b96c-05859963c5ca",
+      "admin_token": "b7bc78c0-b382-4d6f-b4e0-194091e7da92",
+      "created_at": "2025-12-13T22:30:17.565151",
+      "expires_at": "2025-12-13T22:32:17.565151",
+      "ttl_minutes": 2,
+      "status": "completed",
+      "ended_at": "2025-12-13T22:54:01.090722",
+      "ended_by": "candidate",
+      "end_reason": "ended_early"
+    },
+    "294fecbc": {
+      "session_id": "294fecbc",
+      "position_id": "uber_android_mid",
+      "candidate_id": "resume16",
+      "candidate_token": "cce20aeb-e0e6-4463-a611-58e50f5811c0",
+      "admin_token": "c3a9f67e-f64e-4185-a16c-586641dde10b",
+      "created_at": "2025-12-13T23:14:09.790425",
+      "expires_at": "2025-12-14T05:14:09.790425",
+      "ttl_minutes": 360,
+      "status": "active"
+    },
+    "0f9efdf7": {
+      "session_id": "0f9efdf7",
+      "position_id": "uber_fullstack",
+      "candidate_id": "resume3",
+      "candidate_token": "9b539042-ff52-473c-babe-030a14650679",
+      "admin_token": "2f5f7b72-1cda-4f7d-af0d-43ccf52bea3e",
+      "created_at": "2025-12-13T23:33:51.429658",
+      "expires_at": "2025-12-13T23:38:51.429658",
+      "ttl_minutes": 5,
+      "status": "expired",
+      "ended_at": "2025-12-13T18:13:54.495683"
+    },
+    "session_20251214_005250": {
+      "session_id": "session_20251214_005250",
+      "created_at": "2025-12-13T19:22:50.073757",
+      "status": "pending",
+      "jd_id": "jd1",
+      "language": "python",
+      "duration_minutes": 40,
+      "expert_mode": false,
+      "question_categories": {
+        "coding": {
+          "enabled": true,
+          "count": 1,
+          "difficulty": "easy"
+        },
+        "conceptual": {
+          "enabled": true,
+          "count": 1,
+          "difficulty": "easy"
+        },
+        "system_design": {
+          "enabled": true,
+          "count": 1,
+          "difficulty": "easy"
+        },
+        "problem_solving": {
+          "enabled": true,
+          "count": 1,
+          "difficulty": "easy"
+        }
+      }
+    },
+    "session_20251214_010853": {
+      "session_id": "session_20251214_010853",
+      "created_at": "2025-12-13T19:38:53.891235",
+      "status": "completed",
+      "jd_id": "jd2",
+      "language": "java",
+      "duration_minutes": 10,
+      "expert_mode": false,
+      "question_categories": {
+        "coding": {
+          "enabled": true,
+          "count": 1,
+          "difficulty": "easy"
+        },
+        "conceptual": {
+          "enabled": false,
+          "count": 1,
+          "difficulty": "medium"
+        },
+        "system_design": {
+          "enabled": false,
+          "count": 1,
+          "difficulty": "medium"
+        },
+        "problem_solving": {
+          "enabled": false,
+          "count": 1,
+          "difficulty": "medium"
+        }
+      },
+      "ended_at": "2025-12-13T19:50:24.401866"
+    },
+    "session_20251214_031809": {
+      "session_id": "session_20251214_031809",
+      "created_at": "2025-12-13T21:48:09.879681",
+      "status": "completed",
+      "jd_id": "jd1",
+      "language": "python",
+      "duration_minutes": 10,
+      "expert_mode": false,
+      "question_categories": {
+        "coding": {
+          "enabled": false,
+          "count": 1,
+          "difficulty": "medium"
+        },
+        "conceptual": {
+          "enabled": false,
+          "count": 1,
+          "difficulty": "medium"
+        },
+        "system_design": {
+          "enabled": false,
+          "count": 1,
+          "difficulty": "medium"
+        },
+        "problem_solving": {
+          "enabled": true,
+          "count": 1,
+          "difficulty": "easy"
+        }
+      },
+      "ended_at": "2025-12-13T22:06:15.985760"
+    },
+    "session_20251214_033650": {
+      "session_id": "session_20251214_033650",
+      "created_at": "2025-12-13T22:06:50.834359",
+      "status": "completed",
+      "jd_id": "jd1",
+      "language": "python",
+      "duration_minutes": 20,
+      "expert_mode": false,
+      "question_categories": {
+        "coding": {
+          "enabled": false,
+          "count": 1,
+          "difficulty": "medium"
+        },
+        "conceptual": {
+          "enabled": false,
+          "count": 1,
+          "difficulty": "medium"
+        },
+        "system_design": {
+          "enabled": false,
+          "count": 1,
+          "difficulty": "medium"
+        },
+        "problem_solving": {
+          "enabled": true,
+          "count": 1,
+          "difficulty": "hard"
+        }
+      },
+      "ended_at": "2025-12-13T22:10:13.865816"
+    },
+    "session_20251214_034205": {
+      "session_id": "session_20251214_034205",
+      "created_at": "2025-12-13T22:12:05.575909",
+      "status": "completed",
+      "jd_id": "jd2",
+      "language": "java",
+      "duration_minutes": 10,
+      "expert_mode": false,
+      "question_categories": {
+        "coding": {
+          "enabled": true,
+          "count": 1,
+          "difficulty": "easy"
+        },
+        "conceptual": {
+          "enabled": false,
+          "count": 1,
+          "difficulty": "medium"
+        },
+        "system_design": {
+          "enabled": false,
+          "count": 1,
+          "difficulty": "medium"
+        },
+        "problem_solving": {
+          "enabled": false,
+          "count": 1,
+          "difficulty": "medium"
+        }
+      },
+      "ended_at": "2025-12-13T22:17:39.991697"
+    },
+    "session_20251214_035939": {
+      "session_id": "session_20251214_035939",
+      "created_at": "2025-12-13T22:29:39.288165",
+      "status": "completed",
+      "jd_id": "jd1",
+      "language": "python",
+      "duration_minutes": 10,
+      "expert_mode": false,
+      "question_categories": {
+        "coding": {
+          "enabled": true,
+          "count": 1,
+          "difficulty": "easy"
+        },
+        "conceptual": {
+          "enabled": false,
+          "count": 1,
+          "difficulty": "medium"
+        },
+        "system_design": {
+          "enabled": false,
+          "count": 1,
+          "difficulty": "medium"
+        },
+        "problem_solving": {
+          "enabled": false,
+          "count": 1,
+          "difficulty": "medium"
+        }
+      },
+      "ended_at": "2025-12-13T22:33:17.996208"
+    },
+    "session_20251214_044000": {
+      "session_id": "session_20251214_044000",
+      "created_at": "2025-12-13T23:10:00.808218",
+      "status": "completed",
+      "jd_id": "jd1",
+      "language": "python",
+      "duration_minutes": 10,
+      "expert_mode": false,
+      "question_categories": {
+        "coding": {
+          "enabled": true,
+          "count": 1,
+          "difficulty": "easy"
+        },
+        "conceptual": {
+          "enabled": false,
+          "count": 1,
+          "difficulty": "medium"
+        },
+        "system_design": {
+          "enabled": false,
+          "count": 1,
+          "difficulty": "medium"
+        },
+        "problem_solving": {
+          "enabled": false,
+          "count": 1,
+          "difficulty": "medium"
+        }
+      },
+      "ended_at": "2025-12-13T23:11:31.762161"
+    },
+    "session_20251214_044714": {
+      "session_id": "session_20251214_044714",
+      "created_at": "2025-12-13T23:17:14.102910",
+      "status": "completed",
+      "jd_id": "jd1",
+      "language": "python",
+      "duration_minutes": 10,
+      "expert_mode": false,
+      "question_categories": {
+        "coding": {
+          "enabled": true,
+          "count": 1,
+          "difficulty": "easy"
+        },
+        "conceptual": {
+          "enabled": false,
+          "count": 1,
+          "difficulty": "medium"
+        },
+        "system_design": {
+          "enabled": false,
+          "count": 1,
+          "difficulty": "medium"
+        },
+        "problem_solving": {
+          "enabled": false,
+          "count": 1,
+          "difficulty": "medium"
+        }
+      },
+      "ended_at": "2025-12-13T23:25:49.822964"
+    },
+    "session_20251214_050327": {
+      "session_id": "session_20251214_050327",
+      "created_at": "2025-12-13T23:33:27.058924",
+      "status": "active",
+      "jd_id": "jd1",
+      "language": "python",
+      "duration_minutes": 10,
+      "expert_mode": false,
+      "question_categories": {
+        "coding": {
+          "enabled": true,
+          "count": 1,
+          "difficulty": "easy"
+        },
+        "conceptual": {
+          "enabled": false,
+          "count": 1,
+          "difficulty": "medium"
+        },
+        "system_design": {
+          "enabled": false,
+          "count": 1,
+          "difficulty": "medium"
+        },
+        "problem_solving": {
+          "enabled": false,
+          "count": 1,
+          "difficulty": "medium"
+        }
+      }
+    },
+    "session_20251214_050629": {
+      "session_id": "session_20251214_050629",
+      "created_at": "2025-12-13T23:36:31.616523",
+      "status": "completed",
+      "jd_id": "jd1",
+      "language": "python",
+      "duration_minutes": 10,
+      "expert_mode": false,
+      "question_categories": {
+        "coding": {
+          "enabled": false,
+          "count": 1,
+          "difficulty": "medium"
+        },
+        "conceptual": {
+          "enabled": false,
+          "count": 1,
+          "difficulty": "medium"
+        },
+        "system_design": {
+          "enabled": false,
+          "count": 1,
+          "difficulty": "medium"
+        },
+        "problem_solving": {
+          "enabled": true,
+          "count": 1,
+          "difficulty": "easy"
+        }
+      },
+      "ended_at": "2025-12-13T23:37:29.571476"
+    },
+    "session_20251214_051059": {
+      "session_id": "session_20251214_051059",
+      "created_at": "2025-12-13T23:41:01.254754",
+      "status": "completed",
+      "jd_id": "jd1",
+      "language": "python",
+      "duration_minutes": 10,
+      "expert_mode": false,
+      "question_categories": {
+        "coding": {
+          "enabled": true,
+          "count": 1,
+          "difficulty": "easy"
+        },
+        "conceptual": {
+          "enabled": false,
+          "count": 1,
+          "difficulty": "medium"
+        },
+        "system_design": {
+          "enabled": false,
+          "count": 1,
+          "difficulty": "medium"
+        },
+        "problem_solving": {
+          "enabled": false,
+          "count": 1,
+          "difficulty": "medium"
+        }
+      },
+      "ended_at": "2025-12-13T23:42:10.513634"
+    },
+    "session_20251214_052454": {
+      "session_id": "session_20251214_052454",
+      "created_at": "2025-12-13T23:54:56.229306",
+      "status": "completed",
+      "jd_id": "jd1",
+      "language": "python",
+      "duration_minutes": 10,
+      "expert_mode": false,
+      "question_categories": {
+        "coding": {
+          "enabled": true,
+          "count": 1,
+          "difficulty": "easy"
+        },
+        "conceptual": {
+          "enabled": false,
+          "count": 1,
+          "difficulty": "medium"
+        },
+        "system_design": {
+          "enabled": false,
+          "count": 1,
+          "difficulty": "medium"
+        },
+        "problem_solving": {
+          "enabled": false,
+          "count": 1,
+          "difficulty": "medium"
+        }
+      },
+      "ended_at": "2025-12-14T00:00:13.265356"
+    },
+    "session_20251214_105943": {
+      "session_id": "session_20251214_105943",
+      "created_at": "2025-12-14T05:29:43.730371",
+      "expires_at": "2025-12-14T11:59:43.730376",
+      "status": "active",
+      "mode": "quick_start",
+      "jd_id": "jd1",
+      "language": "python",
+      "duration_minutes": 10,
+      "expert_mode": false,
+      "question_categories": {
+        "coding": {
+          "enabled": true,
+          "count": 1,
+          "difficulty": "easy"
+        },
+        "conceptual": {
+          "enabled": false,
+          "count": 1,
+          "difficulty": "medium"
+        },
+        "system_design": {
+          "enabled": false,
+          "count": 1,
+          "difficulty": "medium"
+        },
+        "problem_solving": {
+          "enabled": false,
+          "count": 1,
+          "difficulty": "medium"
+        }
+      },
+      "candidate_name": "John Smith",
+      "candidate_info": {
+        "name": "John Smith",
+        "email": "john.smith@email.com",
+        "experience_years": "6"
+      },
+      "candidate_account": "INRT-Bench",
+      "candidate_role": "Bench-Pool",
+      "ended_at": "2025-12-14T05:35:00.968824"
+    },
+    "session_20251214_112327": {
+      "session_id": "session_20251214_112327",
+      "created_at": "2025-12-14T05:53:27.372164",
+      "expires_at": "2025-12-14T12:23:27.372177",
+      "status": "completed",
+      "mode": "quick_start",
+      "jd_id": "jd1",
+      "language": "python",
+      "duration_minutes": 20,
+      "expert_mode": false,
+      "question_categories": {
+        "coding": {
+          "enabled": false,
+          "count": 1,
+          "difficulty": "medium"
+        },
+        "conceptual": {
+          "enabled": true,
+          "count": 1,
+          "difficulty": "hard"
+        },
+        "system_design": {
+          "enabled": false,
+          "count": 1,
+          "difficulty": "medium"
+        },
+        "problem_solving": {
+          "enabled": false,
+          "count": 1,
+          "difficulty": "medium"
+        }
+      },
+      "candidate_name": "John Smith",
+      "candidate_info": {
+        "name": "John Smith",
+        "email": "john.smith@email.com",
+        "experience_years": "6"
+      },
+      "candidate_account": "INRT-Bench",
+      "candidate_role": "Bench-Pool",
+      "ended_at": "2025-12-14T05:56:11.458889"
+    },
+    "session_20251214_112824": {
+      "session_id": "session_20251214_112824",
+      "created_at": "2025-12-14T05:58:24.697075",
+      "expires_at": "2025-12-14T12:28:24.697083",
+      "status": "completed",
+      "mode": "quick_start",
+      "jd_id": "jd2",
+      "language": "java",
+      "duration_minutes": 10,
+      "expert_mode": false,
+      "question_categories": {
+        "coding": {
+          "enabled": false,
+          "count": 1,
+          "difficulty": "medium"
+        },
+        "conceptual": {
+          "enabled": false,
+          "count": 1,
+          "difficulty": "medium"
+        },
+        "system_design": {
+          "enabled": true,
+          "count": 1,
+          "difficulty": "easy"
+        },
+        "problem_solving": {
+          "enabled": false,
+          "count": 1,
+          "difficulty": "medium"
+        }
+      },
+      "candidate_name": "Sarah Johnson",
+      "candidate_info": {
+        "name": "Sarah Johnson",
+        "email": "sarah.johnson@email.com",
+        "experience_years": "5"
+      },
+      "candidate_account": "INRT-Bench",
+      "candidate_role": "Bench-Pool",
+      "ended_at": "2025-12-14T12:08:56.214511",
+      "ended_by": "admin",
+      "end_reason": "completed"
     }
   }
 }

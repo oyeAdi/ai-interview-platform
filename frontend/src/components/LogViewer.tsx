@@ -8,13 +8,13 @@ interface LogViewerProps {
 
 function calculateStats(logData: any): { questions: number; responses: number; avgScore: string } {
   if (!logData) return { questions: 0, responses: 0, avgScore: '--' }
-  
+
   const questions = logData.questions || logData.rounds || []
   if (questions.length === 0) return { questions: 0, responses: 0, avgScore: '--' }
-  
+
   let total = 0
   let count = 0
-  
+
   questions.forEach((question: any) => {
     (question.responses || []).forEach((resp: any) => {
       if (resp.evaluation?.overall_score !== undefined) {
@@ -23,7 +23,7 @@ function calculateStats(logData: any): { questions: number; responses: number; a
       }
     })
   })
-  
+
   return {
     questions: questions.length,
     responses: count,
@@ -36,21 +36,7 @@ export default function LogViewer({ logData }: LogViewerProps) {
 
   return (
     <div className="space-y-4">
-      {/* Summary Stats */}
-      <div className="flex items-center gap-4 text-sm">
-        <div className="flex items-center gap-1.5">
-          <span className="text-gray-500">Questions:</span>
-          <span className="text-white font-medium">{stats.questions}</span>
-        </div>
-        <div className="flex items-center gap-1.5">
-          <span className="text-gray-500">Responses:</span>
-          <span className="text-white font-medium">{stats.responses}</span>
-        </div>
-        <div className="flex items-center gap-1.5">
-          <span className="text-gray-500">Avg:</span>
-          <span className="text-primary-orange font-medium">{stats.avgScore}</span>
-        </div>
-      </div>
+
 
       {/* JSON View */}
       <div className="bg-dark-black rounded-lg border border-gray-700 overflow-hidden">

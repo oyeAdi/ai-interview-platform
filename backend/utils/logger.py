@@ -303,6 +303,14 @@ class Logger:
         
         self._save_log(log_data)
     
+    def get_session_log(self, session_id: str) -> Optional[Dict]:
+        """Get log data for specific session"""
+        log_data = self._load_log()
+        session_idx = self._find_session(session_id, log_data)
+        if session_idx is not None:
+            return log_data["interview_sessions"][session_idx]
+        return None
+
     def get_log_data(self) -> Dict:
         """Get current log data"""
         return self._load_log()
