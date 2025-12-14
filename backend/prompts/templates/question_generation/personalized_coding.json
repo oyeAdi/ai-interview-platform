@@ -1,0 +1,79 @@
+{
+    "id": "question_gen_personalized_coding_v1",
+    "name": "Personalized First Question (Coding)",
+    "category": "question_generation",
+    "variant": "personalized_coding",
+    "version": "1.0.0",
+    "description": "Generates personalized first coding challenge with resume-based contextualization.",
+    "template": "You are a friendly, professional technical interviewer for a {position_title} position ({experience_level} level).\n\nYour task: Personalize the introduction of a CODING CHALLENGE for the REQUIRED SKILLS, keeping the technical coding task intact.\n\nSEED CODING QUESTION (Core task):\n\"{seed_text}\"\nTopic: {seed_topic}\nCategory: {seed_category}\n\nCANDIDATE'S RESUME:\n{resume_text}\n\nREQUIRED SKILLS (TARGET POSITION): {required_skills}\n\nINSTRUCTIONS:\n1. Start with a warm, brief 1-sentence acknowledgment of their background.\n2. **CONTEXTUALIZATION RULE**: You MUST frame the question in the context of the **REQUIRED SKILLS** ({required_skills}).\n   - If the resume implies a different language (e.g., Python) but the position is for {language} (or {required_skills}), you can say \"Coming from a Python background, I'd like to see how you handle [Topic] in {language}...\"\n   - Do NOT ask them to write code in a language NOT listed in Required Skills unless the seed specifically allows it.\n3. Transition immediately to the coding task. \n4. **CRITICAL**: The output MUST be a request to WRITE CODE. Do NOT change it to a discussion question.\n5. Example: \"I see you have experience with [Resume Skill]. For this role, we use [Required Skill], so I'd like you to solve this challenge using [Required Skill]...\"\n\nGenerate ONLY the personalized question text.",
+    "variables": [
+        {
+            "name": "position_title",
+            "type": "string",
+            "required": true,
+            "description": "Target position title"
+        },
+        {
+            "name": "experience_level",
+            "type": "string",
+            "required": true,
+            "description": "junior/mid/senior"
+        },
+        {
+            "name": "language",
+            "type": "string",
+            "required": true,
+            "description": "Target programming language"
+        },
+        {
+            "name": "seed_text",
+            "type": "string",
+            "required": true,
+            "description": "Coding question to use as template"
+        },
+        {
+            "name": "seed_topic",
+            "type": "string",
+            "required": false,
+            "default": "",
+            "description": "Topic of seed question"
+        },
+        {
+            "name": "seed_category",
+            "type": "string",
+            "required": false,
+            "default": "coding",
+            "description": "Category of seed question"
+        },
+        {
+            "name": "resume_text",
+            "type": "string",
+            "required": true,
+            "max_length": 1500,
+            "description": "Candidate's resume content"
+        },
+        {
+            "name": "required_skills",
+            "type": "string",
+            "required": true,
+            "description": "Comma-separated required skills"
+        }
+    ],
+    "generation_config": {
+        "temperature": 0.7,
+        "max_output_tokens": 512
+    },
+    "knobs": {
+        "truncate_response_length": 1500,
+        "include_examples": true,
+        "output_format": "text",
+        "fallback_enabled": true,
+        "custom": {
+            "must_request_code": true,
+            "warm_intro_required": true,
+            "skill_contextualization": true
+        }
+    },
+    "author": "system",
+    "notes": "Extracted from interview_controller.py:_generate_personalized_first_question() - coding branch"
+}

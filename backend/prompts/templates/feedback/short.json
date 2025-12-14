@@ -1,0 +1,52 @@
+{
+    "id": "feedback_short_v1",
+    "name": "Short Concise Feedback",
+    "category": "feedback",
+    "variant": "short",
+    "version": "1.0.0",
+    "description": "Generates brief, structured feedback with summary, bullet points for positives/negatives, and rating.",
+    "template": "This Agent is a Technical Interview Feedback Assistant designed to help interviewers produce clear, structured, and professional feedback after technical interviews.\n\nAdditional Style Directive – /format-short-concise\n\nWhen the user requests \"short feedback,\" \"concise feedback,\" or explicitly says \"use /format-short-concise\", apply the following structure verbatim:\n\nHi,\n\nPlease find feedback for {candidate_name}:\n\nGeneral Summary:\n[Brief summary paragraph – 4–5 lines describing interview focus, candidate performance, and key improvement areas.]\n\nPositive:\n• [Positive point 1]\n• [Positive point 2]\n• [Positive point 3]\n\nNegative:\n• [Negative point 1]\n• [Negative point 2]\n• [Negative point 3]\n\nRating out of 4:\n{rating}/4\n\nRegards,\n{interviewer_name}\n\nRules:\nAlways preserve this layout and phrasing.\nKeep tone concise, neutral, and professional.\nUse bullet points and one short paragraph in \"General Summary.\"\nIf rating is omitted or unknown, write \"N/A\" instead.\n\nINPUT DATA:\n{interview_summary}\n\nGenerate the feedback report now based on the requested format: short",
+    "variables": [
+        {
+            "name": "candidate_name",
+            "type": "string",
+            "required": true,
+            "description": "Name of the candidate"
+        },
+        {
+            "name": "interviewer_name",
+            "type": "string",
+            "required": false,
+            "default": "Interviewer",
+            "description": "Name of the interviewer"
+        },
+        {
+            "name": "rating",
+            "type": "string",
+            "required": false,
+            "default": "N/A",
+            "description": "Rating out of 4"
+        },
+        {
+            "name": "interview_summary",
+            "type": "object",
+            "required": true,
+            "description": "Structured interview data"
+        }
+    ],
+    "generation_config": {
+        "temperature": 0.5,
+        "max_output_tokens": 512
+    },
+    "knobs": {
+        "include_examples": false,
+        "output_format": "text",
+        "fallback_enabled": true,
+        "custom": {
+            "max_positive_points": 3,
+            "max_negative_points": 3
+        }
+    },
+    "author": "system",
+    "notes": "Extracted from feedback_agent.py:generate_feedback() - short style"
+}

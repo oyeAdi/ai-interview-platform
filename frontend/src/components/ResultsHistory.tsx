@@ -18,10 +18,28 @@ interface Result {
     recommendation?: string
 }
 
+import ShareModal from './ShareModal'
+
+interface ActiveSession {
+    session_id: string
+    candidate_name: string
+    language: string
+    created_at: string
+    duration_minutes: number
+    status: string
+    candidate_account: string
+    candidate_role: string
+}
+
 export default function ResultsHistory() {
     const [results, setResults] = useState<Result[]>([])
+    const [activeSessions, setActiveSessions] = useState<ActiveSession[]>([])
     const [loading, setLoading] = useState(true)
     const [selectedResult, setSelectedResult] = useState<Result | null>(null)
+
+    // Share Modal State
+    const [shareModalOpen, setShareModalOpen] = useState(false)
+    const [shareData, setShareData] = useState({ url: '', name: '' })
 
     // Feedback Generation State
     const [generating, setGenerating] = useState(false)
@@ -44,8 +62,60 @@ export default function ResultsHistory() {
         }
     }
 
+    const fetchActiveSessions = async () => {
+        try {
+            const resp = await fetch(apiUrl('api/sessions/active'))
+            if (resp.ok) {
+                const data = await resp.json()
+                setActiveSessions(data.sessions || [])
+            }
+        } catch (e) {
+            console.error(e)
+        }
+    }
+
+    const handleRejoin = (session: ActiveSession) => {
+        // Clear the sessionStorage flag so we can rejoin
+        sessionStorage.removeItem(`admin_session_${session.session_id}`)
+        window.location.href = `/interview?view=admin&session_id=${session.session_id}&lang=${session.language}`
+    }
+
+    const handleAbandon = async (session: ActiveSession) => {
+        if (!confirm(`Abandon session for ${session.candidate_name}?`)) return
+        try {
+            const resp = await fetch(apiUrl(`api/sessions/${session.session_id}/abandon`), {
+                method: 'POST'
+            })
+            if (resp.ok) {
+                setActiveSessions(activeSessions.filter(s => s.session_id !== session.session_id))
+            }
+        } catch (e) {
+            console.error(e)
+        }
+    }
+
+    const handleCleanup = async () => {
+        try {
+            const resp = await fetch(apiUrl('api/sessions/cleanup'), { method: 'POST' })
+            if (resp.ok) {
+                const data = await resp.json()
+                alert(`Cleaned up ${data.cleaned_count} stale sessions`)
+                fetchActiveSessions()
+            }
+        } catch (e) {
+            console.error(e)
+        }
+    }
+
+    // Pagination state
+    const [resultsPage, setResultsPage] = useState(1)
+    const ITEMS_PER_PAGE = 10
+    const totalPages = Math.ceil(results.length / ITEMS_PER_PAGE)
+    const paginatedResults = results.slice((resultsPage - 1) * ITEMS_PER_PAGE, resultsPage * ITEMS_PER_PAGE)
+
     useEffect(() => {
         fetchResults()
+        fetchActiveSessions()
     }, [])
 
     const handleGenerate = async () => {
@@ -96,6 +166,31 @@ export default function ResultsHistory() {
         }
     }
 
+    const handleReject = async () => {
+        if (!selectedResult) return
+        const reason = prompt('Enter rejection reason:')
+        if (!reason) return
+
+        try {
+            const resp = await fetch(apiUrl('api/feedback/reject'), {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    session_id: selectedResult.session_id,
+                    reason: reason
+                })
+            })
+            if (resp.ok) {
+                alert('Feedback rejected')
+                setViewingFeedback(false)
+                setSelectedResult(null)
+                fetchResults()
+            }
+        } catch (e) {
+            alert('Failed to reject')
+        }
+    }
+
     const handleCheckStatus = async (result: Result) => {
         // Determine if we should show existing feedback
         if (result.status === 'APPROVED') {
@@ -140,8 +235,8 @@ export default function ResultsHistory() {
 
         if (token) {
             const shareUrl = `${window.location.origin}/share/${token}`
-            navigator.clipboard.writeText(shareUrl)
-            alert('Public share link copied to clipboard!')
+            setShareData({ url: shareUrl, name: result.candidate_name })
+            setShareModalOpen(true)
         }
     }
 
@@ -158,6 +253,66 @@ export default function ResultsHistory() {
                     </svg>
                 </button>
             </div>
+
+            {/* Active Sessions Section */}
+            {activeSessions.length > 0 && (
+                <div className="mb-6">
+                    <div className="flex items-center justify-between mb-3">
+                        <h3 className="text-sm font-semibold text-[#39FF14] uppercase tracking-wide flex items-center gap-2">
+                            <span className="w-2 h-2 bg-[#39FF14] rounded-full animate-pulse"></span>
+                            Active Sessions ({activeSessions.length})
+                        </h3>
+                        <button
+                            onClick={handleCleanup}
+                            className="text-xs text-gray-400 hover:text-red-400 transition-colors"
+                            title="Clean up stale sessions"
+                        >
+                            🧹 Clean Up Stale
+                        </button>
+                    </div>
+                    <div className="grid gap-3">
+                        {activeSessions.map((session) => (
+                            <div
+                                key={session.session_id}
+                                className="bg-[#1A1A1A] border border-[#39FF14]/30 rounded-xl p-4 flex items-center justify-between"
+                            >
+                                <div className="flex-1">
+                                    <div className="flex items-center gap-3 mb-1">
+                                        <span className="text-white font-medium">{session.candidate_name}</span>
+                                        <span className="px-2 py-0.5 bg-[#39FF14]/10 text-[#39FF14] text-xs rounded-full font-mono uppercase">
+                                            {session.language}
+                                        </span>
+                                        <span className="px-2 py-0.5 bg-yellow-500/10 text-yellow-400 text-xs rounded-full">
+                                            {session.status}
+                                        </span>
+                                    </div>
+                                    <div className="text-xs text-gray-500">
+                                        {session.candidate_role} • {session.candidate_account} • {session.duration_minutes} min
+                                    </div>
+                                </div>
+                                <div className="flex gap-2">
+                                    <button
+                                        onClick={() => handleAbandon(session)}
+                                        className="px-3 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 text-sm rounded-lg transition-colors"
+                                    >
+                                        Abandon
+                                    </button>
+                                    <button
+                                        onClick={() => handleRejoin(session)}
+                                        className="px-4 py-2 bg-[#39FF14] hover:bg-[#32E612] text-black font-bold rounded-lg transition-colors flex items-center gap-2"
+                                    >
+                                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-.274.857-.649 1.666-1.116 2.408" />
+                                        </svg>
+                                        Rejoin
+                                    </button>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
 
             <div className="flex-1 overflow-auto">
                 <table className="w-full text-left border-collapse">
@@ -184,7 +339,7 @@ export default function ResultsHistory() {
                                 </td>
                             </tr>
                         ) : (
-                            results.map((r) => (
+                            paginatedResults.map((r) => (
                                 <tr key={r.result_id || r.session_id} className="border-b border-[#2A2A2A]/50 hover:bg-[#1A1A1A] transition-colors">
                                     <td className="py-3 px-4 font-medium text-white">
                                         {r.candidate_name}
@@ -250,7 +405,43 @@ export default function ResultsHistory() {
                         )}
                     </tbody>
                 </table>
+
+                {/* Pagination Controls */}
+                {totalPages > 1 && (
+                    <div className="flex items-center justify-between mt-4 pt-4 border-t border-[#2A2A2A]">
+                        <div className="text-sm text-gray-500">
+                            Showing {((resultsPage - 1) * ITEMS_PER_PAGE) + 1} - {Math.min(resultsPage * ITEMS_PER_PAGE, results.length)} of {results.length}
+                        </div>
+                        <div className="flex gap-2">
+                            <button
+                                onClick={() => setResultsPage(p => Math.max(1, p - 1))}
+                                disabled={resultsPage === 1}
+                                className="px-3 py-1 bg-[#2A2A2A] hover:bg-[#333] text-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+                            >
+                                Previous
+                            </button>
+                            <span className="px-3 py-1 text-gray-400 text-sm">
+                                Page {resultsPage} of {totalPages}
+                            </span>
+                            <button
+                                onClick={() => setResultsPage(p => Math.min(totalPages, p + 1))}
+                                disabled={resultsPage === totalPages}
+                                className="px-3 py-1 bg-[#2A2A2A] hover:bg-[#333] text-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+                            >
+                                Next
+                            </button>
+                        </div>
+                    </div>
+                )}
             </div>
+
+            {/* Share Modal */}
+            <ShareModal
+                isOpen={shareModalOpen}
+                onClose={() => setShareModalOpen(false)}
+                shareUrl={shareData.url}
+                candidateName={shareData.name}
+            />
 
             {/* Review Modal */}
             {(selectedResult && (viewingFeedback || !selectedResult.status || selectedResult.status !== 'APPROVED')) && (
@@ -345,6 +536,12 @@ export default function ResultsHistory() {
                                                 className="px-4 py-2 hover:bg-[#333] text-gray-300 rounded-lg transition-colors"
                                             >
                                                 Back
+                                            </button>
+                                            <button
+                                                onClick={handleReject}
+                                                className="px-4 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-lg transition-colors"
+                                            >
+                                                Reject
                                             </button>
                                             <button
                                                 onClick={handleApprove}

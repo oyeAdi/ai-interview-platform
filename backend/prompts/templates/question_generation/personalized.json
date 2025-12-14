@@ -1,0 +1,72 @@
+{
+    "id": "question_gen_personalized_v1",
+    "name": "Personalized First Question (General)",
+    "category": "question_generation",
+    "variant": "personalized",
+    "version": "1.0.0",
+    "description": "Generates personalized first interview question based on resume and required skills.",
+    "template": "You are a friendly, professional technical interviewer for a {position_title} position ({experience_level} level).\n\nYour task: Create a personalized first question that tests the **REQUIRED SKILLS**, using the candidate's background as a bridge.\n\nSEED QUESTION (use as structural inspiration):\n\"{seed_text}\"\nTopic: {seed_topic}\nCategory: {seed_category}\n\nCANDIDATE'S RESUME:\n{resume_text}\n\nREQUIRED SKILLS (TARGET POSITION): {required_skills}\n\nINSTRUCTIONS:\n1. Start with a warm, brief acknowledgment of their resume.\n2. **RELEVANCE RULE**: The question MUST be about the **REQUIRED SKILLS**.\n   - If the candidate's resume focuses on irrelevant skills (e.g., they know React but the job is for Android), do NOT ask deep questions about React. Ask about Android, perhaps asking how their React knowledge translates.\n   - **Do NOT ask questions about skills NOT in the Required Skills list.**\n3. Connect the seed question's topic to their experience, but steer it towards the Target Position's technology.\n4. Adjust complexity for {experience_level} level.\n\nEXAMPLE OUTPUT FORMATS:\n- \"I noticed you worked with [Resume Tech]. In this role, we focus on [Required Skill]. How would you compare [Specific Concept] in [Resume Tech] vs [Required Skill]?\"\n- \"Given your background in [Resume Tech], how would you approach [Seed Question Topic] using [Required Skill]?\"\n\nGenerate ONLY the personalized question text. Keep it conversational and warm.",
+    "variables": [
+        {
+            "name": "position_title",
+            "type": "string",
+            "required": true,
+            "description": "Target position title"
+        },
+        {
+            "name": "experience_level",
+            "type": "string",
+            "required": true,
+            "description": "junior/mid/senior"
+        },
+        {
+            "name": "seed_text",
+            "type": "string",
+            "required": true,
+            "description": "Bank question to use as template"
+        },
+        {
+            "name": "seed_topic",
+            "type": "string",
+            "required": false,
+            "default": "",
+            "description": "Topic of seed question"
+        },
+        {
+            "name": "seed_category",
+            "type": "string",
+            "required": false,
+            "default": "conceptual",
+            "description": "Category of seed question"
+        },
+        {
+            "name": "resume_text",
+            "type": "string",
+            "required": true,
+            "max_length": 1500,
+            "description": "Candidate's resume content"
+        },
+        {
+            "name": "required_skills",
+            "type": "string",
+            "required": true,
+            "description": "Comma-separated required skills"
+        }
+    ],
+    "generation_config": {
+        "temperature": 0.7,
+        "max_output_tokens": 512
+    },
+    "knobs": {
+        "truncate_response_length": 1500,
+        "include_examples": true,
+        "output_format": "text",
+        "fallback_enabled": true,
+        "custom": {
+            "warm_intro_required": true,
+            "skill_relevance_check": true
+        }
+    },
+    "author": "system",
+    "notes": "Extracted from interview_controller.py:_generate_personalized_first_question() - general/conceptual branch"
+}

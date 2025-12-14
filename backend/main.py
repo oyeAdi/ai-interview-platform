@@ -974,6 +974,8 @@ async def start_interview_with_position(
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+from result_processor import process_session_results
+
 @app.post("/api/interview/{session_id}/end")
 async def end_interview(session_id: str):
     """End an ongoing interview session"""
@@ -995,6 +997,7 @@ async def end_interview(session_id: str):
             print(f"[ERROR] Failed to broadcast end message: {e}")
             
     # 2. Update sessions.json
+    sessions_data = {}
     try:
         sessions_data = load_json_file(SESSIONS_FILE)
         if "sessions" in sessions_data and session_id in sessions_data["sessions"]:
@@ -1003,8 +1006,33 @@ async def end_interview(session_id: str):
             save_json_file(SESSIONS_FILE, sessions_data)
     except Exception as e:
         print(f"[ERROR] Failed to update session file: {e}")
-        
+    
+    # 3. Process Results & Generate Feedback
+    try:
+        print(f"[INFO] Triggering result processing for {session_id}")
+        # If we couldn't load sessions_data above, try reloading, otherwise pass empty/fail gracefully inside
+        if not sessions_data:
+             sessions_data = load_json_file(SESSIONS_FILE)
+             
+        await process_session_results(session_id, sessions_data, logger, save_candidate_result)
+    except Exception as e:
+        print(f"[ERROR] Result processing in end_interview failed: {e}")
+
     return {"status": "success", "message": "Interview ended"}
+
+@app.post("/api/interview/{session_id}/process-results")
+async def manual_process_results(session_id: str):
+    """Manually trigger result processing for a session"""
+    print(f"[INFO] Manual result processing requested for {session_id}")
+    try:
+        sessions_data = load_json_file(SESSIONS_FILE)
+        result = await process_session_results(session_id, sessions_data, logger, save_candidate_result)
+        if result:
+            return {"status": "success", "result_id": result["id"]}
+        else:
+            raise HTTPException(status_code=404, detail="Session not found or log empty")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 # ==================== Feedback & Results APIs ====================
 
@@ -1130,6 +1158,43 @@ async def approve_feedback_report(approval: FeedbackApproval):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+class FeedbackReject(BaseModel):
+    session_id: str
+    reason: str
+
+@app.post("/api/feedback/reject")
+async def reject_feedback_report(rejection: FeedbackReject):
+    """Reject/cancel feedback publishing with a reason"""
+    try:
+        result_path = get_session_result_path(rejection.session_id)
+        if not result_path or not os.path.exists(result_path):
+            raise HTTPException(status_code=404, detail="Result file not found")
+            
+        with open(result_path, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+            
+        found = False
+        for interview in data.get("interviews", []):
+            if interview.get("session_id") == rejection.session_id:
+                interview["feedback_report"] = {
+                    "status": "REJECTED",
+                    "rejection_reason": rejection.reason,
+                    "rejected_at": datetime.utcnow().isoformat()
+                }
+                found = True
+                break
+        
+        if not found:
+            raise HTTPException(status_code=404, detail="Interview result entry not found")
+            
+        with open(result_path, 'w', encoding='utf-8') as f:
+            json.dump(data, f, indent=2, ensure_ascii=False)
+            
+        return {"status": "rejected", "reason": rejection.reason}
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 @app.get("/api/results/{session_id}/status")
 async def get_result_status(session_id: str):
     """Check if feedback is approved for a session"""
@@ -1226,6 +1291,118 @@ async def list_interview_results():
     except Exception as e:
         print(f"[ERROR] listing results: {e}")
         return {"results": [], "error": str(e)}
+
+@app.get("/api/sessions/active")
+async def get_active_sessions():
+    """Get all active/in-progress interview sessions for admin rejoin"""
+    try:
+        sessions_data = load_json_file(SESSIONS_FILE)
+        sessions = sessions_data.get("sessions", {})
+        
+        # Calculate cutoff time (6 hours ago)
+        from datetime import datetime, timedelta
+        cutoff_time = datetime.now() - timedelta(hours=6)
+        
+        active_sessions = []
+        for session_id, session in sessions.items():
+            status = session.get("status", "")
+            candidate_name = session.get("candidate_name", "Unknown")
+            
+            # Skip if ended, not active/pending, or unknown candidate
+            if session.get("ended_at") or status not in ["active", "pending"]:
+                continue
+            if candidate_name == "Unknown":
+                continue
+                
+            # Skip if older than 6 hours
+            created_at_str = session.get("created_at", "")
+            if created_at_str:
+                try:
+                    created_at = datetime.fromisoformat(created_at_str.replace("Z", "+00:00"))
+                    if created_at.replace(tzinfo=None) < cutoff_time:
+                        continue
+                except:
+                    pass
+            
+            active_sessions.append({
+                "session_id": session_id,
+                "candidate_name": candidate_name,
+                "language": session.get("language", "python"),
+                "created_at": created_at_str,
+                "duration_minutes": session.get("duration_minutes", 30),
+                "status": status,
+                "candidate_account": session.get("candidate_account", "N/A"),
+                "candidate_role": session.get("candidate_role", "N/A"),
+            })
+        
+        # Sort by created_at descending (most recent first)
+        active_sessions.sort(key=lambda x: x.get("created_at") or "", reverse=True)
+        return {"sessions": active_sessions}
+    except Exception as e:
+        print(f"[ERROR] get_active_sessions: {e}")
+        return {"sessions": [], "error": str(e)}
+
+@app.post("/api/sessions/cleanup")
+async def cleanup_stale_sessions():
+    """Mark stale sessions as expired (older than 2 hours with no activity)"""
+    try:
+        from datetime import datetime, timedelta
+        sessions_data = load_json_file(SESSIONS_FILE)
+        sessions = sessions_data.get("sessions", {})
+        
+        cutoff_time = datetime.now() - timedelta(hours=2)
+        cleaned_count = 0
+        
+        for session_id, session in sessions.items():
+            status = session.get("status", "")
+            if status not in ["active", "pending"]:
+                continue
+            if session.get("ended_at"):
+                continue
+                
+            # Check if older than cutoff
+            created_at_str = session.get("created_at", "")
+            if created_at_str:
+                try:
+                    created_at = datetime.fromisoformat(created_at_str.replace("Z", "+00:00"))
+                    if created_at.replace(tzinfo=None) < cutoff_time:
+                        sessions[session_id]["status"] = "expired"
+                        sessions[session_id]["ended_at"] = datetime.now().isoformat()
+                        sessions[session_id]["end_reason"] = "auto_cleanup"
+                        cleaned_count += 1
+                except:
+                    pass
+        
+        if cleaned_count > 0:
+            save_json_file(SESSIONS_FILE, sessions_data)
+        
+        return {"status": "success", "cleaned_count": cleaned_count}
+    except Exception as e:
+        print(f"[ERROR] cleanup_stale_sessions: {e}")
+        return {"status": "error", "error": str(e)}
+
+@app.post("/api/sessions/{session_id}/abandon")
+async def abandon_session(session_id: str):
+    """Abandon a specific session"""
+    try:
+        from datetime import datetime
+        sessions_data = load_json_file(SESSIONS_FILE)
+        sessions = sessions_data.get("sessions", {})
+        
+        if session_id not in sessions:
+            raise HTTPException(status_code=404, detail="Session not found")
+        
+        sessions[session_id]["status"] = "abandoned"
+        sessions[session_id]["ended_at"] = datetime.now().isoformat()
+        sessions[session_id]["end_reason"] = "admin_abandoned"
+        
+        save_json_file(SESSIONS_FILE, sessions_data)
+        return {"status": "success", "session_id": session_id}
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"[ERROR] abandon_session: {e}")
+        return {"status": "error", "error": str(e)}
 
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket, view: str = "candidate"):
@@ -2217,22 +2394,92 @@ def calculate_similarity(text1: str, text2: str) -> float:
     union = words1 | words2
     return len(intersection) / len(union)
 
+def normalize_query(query: str) -> str:
+    """Normalize query by removing punctuation and lowercasing"""
+    import re
+    # Remove punctuation except apostrophes, lowercase
+    normalized = re.sub(r'[^\w\s\']', '', query.lower())
+    # Remove common filler words
+    fillers = {'how', 'do', 'i', 'can', 'we', 'you', 'the', 'a', 'an', 'is', 'are', 'what', 'where', 'when', 'why', 'which', 'to', 'get', 'and', 'or', 'of', 'for', 'in', 'on', 'at', 'by'}
+    words = [w for w in normalized.split() if w not in fillers]
+    return ' '.join(words)
+
+def expand_query_with_semantics(query: str, semantic_index: dict) -> set:
+    """Expand query terms using semantic index synonyms and shortforms"""
+    query_lower = query.lower()
+    expanded_terms = set(query_lower.split())
+    
+    # Expand shortforms (e.g., 'ws' -> 'websocket')
+    shortforms = semantic_index.get('shortform_mappings', {})
+    for short, full in shortforms.items():
+        if short in query_lower or short in expanded_terms:
+            expanded_terms.add(full)
+            # Also add synonyms for the expanded term
+            synonym_mappings = semantic_index.get('synonym_mappings', {})
+            if full in synonym_mappings:
+                expanded_terms.update(synonym_mappings[full][:5])  # Top 5 synonyms
+    
+    # Expand using synonym mappings (bidirectional)
+    synonym_mappings = semantic_index.get('synonym_mappings', {})
+    for concept, synonyms in synonym_mappings.items():
+        # If query contains any synonym, add the concept
+        for syn in synonyms:
+            if syn in query_lower:
+                expanded_terms.add(concept)
+                break
+        # If query contains the concept, add key synonyms
+        if concept in query_lower:
+            expanded_terms.update(synonyms[:3])
+    
+    return expanded_terms
+
 def search_wiki_cache(question: str, wiki_data: dict, threshold: float = 0.5) -> Optional[dict]:
-    """Search wiki cache for similar questions"""
+    """Search wiki cache for similar questions using semantic matching"""
     best_match = None
     best_score = 0.0
     
+    # Get semantic index
+    semantic_index = wiki_data.get("semantic_index", {})
+    
+    # Normalize and expand query
+    normalized_query = normalize_query(question)
+    expanded_terms = expand_query_with_semantics(question, semantic_index)
+    query_words = set(question.lower().split()) | expanded_terms
+    
     for entry in wiki_data.get("entries", []):
-        # Check question similarity
-        q_score = calculate_similarity(question, entry.get("question", ""))
-        # Check keyword match
-        k_score = sum(1 for kw in entry.get("keywords", []) if kw.lower() in question.lower()) / max(len(entry.get("keywords", [])), 1)
+        entry_question = entry.get("question", "")
+        entry_keywords = set(kw.lower() for kw in entry.get("keywords", []))
+        entry_answer = entry.get("answer", "")[:200].lower()  # First 200 chars of answer
         
-        score = (q_score * 0.7) + (k_score * 0.3)
+        # 1. Direct question similarity
+        q_score = calculate_similarity(question, entry_question)
+        
+        # 2. Normalized question similarity (ignoring filler words)
+        normalized_entry = normalize_query(entry_question)
+        n_score = calculate_similarity(normalized_query, normalized_entry)
+        
+        # 3. Keyword overlap with expanded terms
+        keyword_matches = len(query_words & entry_keywords)
+        k_score = keyword_matches / max(len(entry_keywords), 1)
+        
+        # 4. Check if key query terms appear in entry keywords
+        normalized_words = set(normalized_query.split())
+        key_term_match = len(normalized_words & entry_keywords) / max(len(normalized_words), 1)
+        
+        # 5. Check answer text for query terms
+        answer_match = sum(1 for term in normalized_words if term in entry_answer) / max(len(normalized_words), 1)
+        
+        # Weighted combination (more weight on normalized match and keywords)
+        score = (q_score * 0.2) + (n_score * 0.35) + (k_score * 0.25) + (key_term_match * 0.15) + (answer_match * 0.05)
         
         if score > best_score and score >= threshold:
             best_score = score
             best_match = entry
+            best_match['_match_score'] = score
+    
+    # Lower threshold for very short queries (retry once at 0.35 if threshold was 0.6)
+    if not best_match and threshold >= 0.5:
+        return search_wiki_cache(question, wiki_data, threshold=0.35)
     
     return best_match
 
@@ -2546,6 +2793,59 @@ async def get_wiki_stats():
         "last_indexed": metadata.get("last_indexed"),
         "categories": len(wiki_data.get("categories", []))
     }
+
+@app.get("/api/wiki/semantic-index")
+async def get_wiki_semantic_index():
+    """Get semantic index data for display in wiki UI"""
+    wiki_data = load_json_file(WIKI_FILE)
+    semantic_index = wiki_data.get("semantic_index", {})
+    
+    return {
+        "synonym_mappings": semantic_index.get("synonym_mappings", {}),
+        "shortform_mappings": semantic_index.get("shortform_mappings", {}),
+        "topic_aliases": semantic_index.get("topic_aliases", {}),
+        "layman_patterns": semantic_index.get("layman_patterns", []),
+        "indexed_topics": semantic_index.get("indexed_topics", []),
+        "scoring_weights": semantic_index.get("scoring_weights", {}),
+        "version": semantic_index.get("version", "1.0"),
+        "last_indexed": semantic_index.get("last_indexed")
+    }
+
+DIAGRAMS_FILE = os.path.join(os.path.dirname(__file__), "docs", "diagrams", "diagrams.json")
+
+@app.get("/api/wiki/diagrams")
+async def get_wiki_diagrams(category: Optional[str] = None):
+    """Get architecture diagrams for wiki visualization"""
+    try:
+        # Load diagrams from JSON file
+        diagrams_path = os.path.join(os.path.dirname(__file__), "..", "docs", "diagrams", "diagrams.json")
+        if not os.path.exists(diagrams_path):
+            diagrams_path = os.path.join(os.path.dirname(__file__), "docs", "diagrams", "diagrams.json")
+        
+        if os.path.exists(diagrams_path):
+            with open(diagrams_path, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+        else:
+            return {"diagrams": [], "categories": [], "error": "Diagrams file not found"}
+        
+        diagrams = data.get("diagrams", [])
+        
+        # Get unique categories
+        categories = list(set(d.get("category", "General") for d in diagrams))
+        categories.sort()
+        
+        # Filter by category if provided
+        if category:
+            diagrams = [d for d in diagrams if d.get("category") == category]
+        
+        return {
+            "diagrams": diagrams,
+            "categories": categories,
+            "total": len(diagrams),
+            "version": data.get("version", "1.0")
+        }
+    except Exception as e:
+        return {"diagrams": [], "categories": [], "error": str(e)}
 
 class ReindexRequest(BaseModel):
     use_llm: bool = False

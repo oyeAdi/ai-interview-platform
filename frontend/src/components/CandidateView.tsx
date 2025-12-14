@@ -372,13 +372,18 @@ export default function CandidateView({ sessionId, language }: CandidateViewProp
                 }`}>
                 {isFollowup ? 'Follow-up Question' : `Question ${questionNumber}`}
               </span>
-              {questionType && (
-                <span className="text-xs text-gray-500 capitalize">{questionType.replace(/_/g, ' ')}</span>
-              )}
-              {isCodingQuestion && (
-                <span className="px-2 py-0.5 text-xs bg-purple-500/20 text-purple-400 uppercase tracking-wide">
-                  Coding
-                </span>
+
+              {!isFollowup && (
+                <>
+                  {questionType && !isCodingQuestion && (
+                    <span className="text-xs text-gray-500 capitalize">{questionType.replace(/_/g, ' ')}</span>
+                  )}
+                  {isCodingQuestion && (
+                    <span className="px-2 py-0.5 text-xs bg-purple-500/20 text-purple-400 uppercase tracking-wide">
+                      Coding
+                    </span>
+                  )}
+                </>
               )}
             </div>
             <span className="text-xs text-gray-600 uppercase tracking-wider">{language}</span>

@@ -1,9 +1,13 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import dynamic from 'next/dynamic'
 import { apiUrl } from '@/config/api'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
+
+// Dynamic import for Mermaid (no SSR)
+const DiagramViewer = dynamic(() => import('@/components/DiagramViewer'), { ssr: false })
 
 interface WikiEntry {
   id: string
@@ -30,6 +34,14 @@ interface WikiStats {
   last_indexed: string | null
 }
 
+interface SemanticIndex {
+  synonym_mappings: Record<string, string[]>
+  shortform_mappings: Record<string, string>
+  topic_aliases: Record<string, string[]>
+  version: string
+  last_indexed: string
+}
+
 export default function WikiPage() {
   const [categories, setCategories] = useState<Category[]>([])
   const [entries, setEntries] = useState<WikiEntry[]>([])
@@ -43,9 +55,50 @@ export default function WikiPage() {
   const [askLoading, setAskLoading] = useState(false)
   const [askAnswer, setAskAnswer] = useState<any>(null)
 
+  // New states for pagination, sort, and semantic index
+  const [currentPage, setCurrentPage] = useState(1)
+  const [sortBy, setSortBy] = useState<'date' | 'alpha' | 'category'>('date')
+  const [semanticIndex, setSemanticIndex] = useState<SemanticIndex | null>(null)
+  const [showSemanticIndex, setShowSemanticIndex] = useState(false)
+  const ITEMS_PER_PAGE = 20
+
+  // Diagrams state
+  const [diagrams, setDiagrams] = useState<any[]>([])
+  const [diagramCategories, setDiagramCategories] = useState<string[]>([])
+
+  // Load persisted askAnswer from localStorage on mount
+  useEffect(() => {
+    const savedAnswer = localStorage.getItem('wiki_last_answer')
+    const savedQuestion = localStorage.getItem('wiki_last_question')
+    if (savedAnswer) {
+      try {
+        setAskAnswer(JSON.parse(savedAnswer))
+      } catch (e) { }
+    }
+    if (savedQuestion) {
+      setAskQuestion(savedQuestion)
+    }
+  }, [])
+
+  // Persist askAnswer to localStorage when it changes
+  useEffect(() => {
+    if (askAnswer) {
+      localStorage.setItem('wiki_last_answer', JSON.stringify(askAnswer))
+    }
+  }, [askAnswer])
+
+  // Persist askQuestion to localStorage when user types
+  useEffect(() => {
+    if (askQuestion) {
+      localStorage.setItem('wiki_last_question', askQuestion)
+    }
+  }, [askQuestion])
+
   useEffect(() => {
     fetchCategories()
     fetchStats()
+    fetchSemanticIndex()
+    fetchDiagrams()
   }, [])
 
   useEffect(() => {
@@ -54,6 +107,7 @@ export default function WikiPage() {
     } else {
       fetchEntries()
     }
+    setCurrentPage(1) // Reset page when category changes
   }, [selectedCategory])
 
   const fetchCategories = async () => {
@@ -69,9 +123,9 @@ export default function WikiPage() {
   const fetchEntries = async (category?: string) => {
     setLoading(true)
     try {
-      const url = category 
-        ? apiUrl(`api/wiki/entries?category=${encodeURIComponent(category)}&limit=50`)
-        : apiUrl('api/wiki/entries?limit=50')
+      const url = category
+        ? apiUrl(`api/wiki/entries?category=${encodeURIComponent(category)}&limit=200`)
+        : apiUrl('api/wiki/entries?limit=200')
       const res = await fetch(url)
       const data = await res.json()
       setEntries(data.entries || [])
@@ -89,6 +143,27 @@ export default function WikiPage() {
       setStats(data)
     } catch (err) {
       console.error('Failed to fetch stats:', err)
+    }
+  }
+
+  const fetchSemanticIndex = async () => {
+    try {
+      const res = await fetch(apiUrl('api/wiki/semantic-index'))
+      const data = await res.json()
+      setSemanticIndex(data)
+    } catch (err) {
+      console.error('Failed to fetch semantic index:', err)
+    }
+  }
+
+  const fetchDiagrams = async () => {
+    try {
+      const res = await fetch(apiUrl('api/wiki/diagrams'))
+      const data = await res.json()
+      setDiagrams(data.diagrams || [])
+      setDiagramCategories(data.categories || [])
+    } catch (err) {
+      console.error('Failed to fetch diagrams:', err)
     }
   }
 
@@ -150,7 +225,27 @@ export default function WikiPage() {
     }
   }
 
-  const displayEntries = searchQuery && searchResults.length > 0 ? searchResults : entries
+  // Sorting and pagination logic
+  const baseEntries = searchQuery && searchResults.length > 0 ? searchResults : entries
+
+  const sortedEntries = [...baseEntries].sort((a, b) => {
+    switch (sortBy) {
+      case 'alpha':
+        return a.question.localeCompare(b.question)
+      case 'category':
+        return a.category.localeCompare(b.category)
+      case 'date':
+      default:
+        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+    }
+  })
+
+  const totalPages = Math.ceil(sortedEntries.length / ITEMS_PER_PAGE)
+  const paginatedEntries = sortedEntries.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  )
+  const displayEntries = paginatedEntries
 
   return (
     <div className="min-h-screen bg-white dark:bg-black flex flex-col">
@@ -222,12 +317,29 @@ export default function WikiPage() {
           {/* Answer Display */}
           {askAnswer && (
             <div className="mt-4 p-4 bg-white dark:bg-[#0A0A0A] border border-gray-200 dark:border-[#2A2A2A]">
-              <div className="flex items-center gap-2 mb-2">
-                <span className={`text-[10px] px-2 py-0.5 ${askAnswer.source === 'cache' ? 'bg-green-500/10 text-green-500' : 'bg-yellow-500/10 text-yellow-500'}`}>
-                  {askAnswer.source === 'cache' ? 'CACHED' : 'PENDING LLM'}
-                </span>
-                <span className="text-[10px] text-gray-500">{askAnswer.category}</span>
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2">
+                  <span className={`text-[10px] px-2 py-0.5 ${askAnswer.source === 'cache' ? 'bg-green-500/10 text-green-500' : 'bg-yellow-500/10 text-yellow-500'}`}>
+                    {askAnswer.source === 'cache' ? 'CACHED' : 'LLM GENERATED'}
+                  </span>
+                  <span className="text-[10px] text-gray-500">{askAnswer.category}</span>
+                </div>
+                <button
+                  onClick={() => {
+                    setAskAnswer(null)
+                    setAskQuestion('')
+                    localStorage.removeItem('wiki_last_answer')
+                    localStorage.removeItem('wiki_last_question')
+                  }}
+                  className="text-xs text-gray-400 hover:text-red-500 transition-colors"
+                  title="Clear answer"
+                >
+                  ✕ Clear
+                </button>
               </div>
+              {askAnswer.question && (
+                <p className="text-xs text-gray-500 mb-2 italic">Q: {askAnswer.question}</p>
+              )}
               <p className="text-sm text-black dark:text-white leading-relaxed">{askAnswer.answer}</p>
               {askAnswer.followup_suggestion && (
                 <button
@@ -249,11 +361,10 @@ export default function WikiPage() {
               <div className="space-y-1">
                 <button
                   onClick={() => { setSelectedCategory(null); setSearchQuery(''); setSearchResults([]); }}
-                  className={`w-full text-left px-3 py-2 text-sm transition-colors ${
-                    !selectedCategory
-                      ? 'bg-[#00E5FF]/10 text-[#00E5FF] border-l-2 border-[#00E5FF]'
-                      : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-[#1A1A1A]'
-                  }`}
+                  className={`w-full text-left px-3 py-2 text-sm transition-colors ${!selectedCategory
+                    ? 'bg-[#00E5FF]/10 text-[#00E5FF] border-l-2 border-[#00E5FF]'
+                    : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-[#1A1A1A]'
+                    }`}
                 >
                   All Entries
                   <span className="float-right text-xs text-gray-400">{stats?.total_entries || 0}</span>
@@ -262,11 +373,10 @@ export default function WikiPage() {
                   <button
                     key={cat.name}
                     onClick={() => { setSelectedCategory(cat.name); setSearchQuery(''); setSearchResults([]); }}
-                    className={`w-full text-left px-3 py-2 text-sm transition-colors ${
-                      selectedCategory === cat.name
-                        ? 'bg-[#00E5FF]/10 text-[#00E5FF] border-l-2 border-[#00E5FF]'
-                        : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-[#1A1A1A]'
-                    }`}
+                    className={`w-full text-left px-3 py-2 text-sm transition-colors ${selectedCategory === cat.name
+                      ? 'bg-[#00E5FF]/10 text-[#00E5FF] border-l-2 border-[#00E5FF]'
+                      : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-[#1A1A1A]'
+                      }`}
                   >
                     {cat.name}
                     <span className="float-right text-xs text-gray-400">{cat.entry_count}</span>
@@ -301,11 +411,25 @@ export default function WikiPage() {
 
           {/* Main Content */}
           <div className="flex-1 min-w-0">
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center justify-between mb-4 gap-4">
               <h2 className="text-lg font-medium text-black dark:text-white">
                 {searchQuery ? `Search: "${searchQuery}"` : selectedCategory || 'All Entries'}
               </h2>
-              <span className="text-sm text-gray-500">{displayEntries.length} entries</span>
+              <div className="flex items-center gap-3">
+                {/* Sort Dropdown */}
+                <select
+                  value={sortBy}
+                  onChange={(e) => { setSortBy(e.target.value as 'date' | 'alpha' | 'category'); setCurrentPage(1); }}
+                  className="text-xs px-2 py-1.5 bg-gray-50 dark:bg-[#0A0A0A] border border-gray-200 dark:border-[#2A2A2A] text-black dark:text-white focus:outline-none focus:border-[#00E5FF]"
+                >
+                  <option value="date">Sort: Newest First</option>
+                  <option value="alpha">Sort: A-Z</option>
+                  <option value="category">Sort: Category</option>
+                </select>
+                <span className="text-sm text-gray-500">
+                  {sortedEntries.length} entries | Page {currentPage} of {totalPages || 1}
+                </span>
+              </div>
             </div>
 
             {loading ? (
@@ -325,11 +449,10 @@ export default function WikiPage() {
                 {displayEntries.map((entry) => (
                   <div
                     key={entry.id}
-                    className={`p-4 border transition-colors cursor-pointer ${
-                      selectedEntry?.id === entry.id
-                        ? 'border-[#00E5FF] bg-[#00E5FF]/5'
-                        : 'border-gray-200 dark:border-[#2A2A2A] hover:border-gray-300 dark:hover:border-[#3A3A3A]'
-                    }`}
+                    className={`p-4 border transition-colors cursor-pointer ${selectedEntry?.id === entry.id
+                      ? 'border-[#00E5FF] bg-[#00E5FF]/5'
+                      : 'border-gray-200 dark:border-[#2A2A2A] hover:border-gray-300 dark:hover:border-[#3A3A3A]'
+                      }`}
                     onClick={() => setSelectedEntry(selectedEntry?.id === entry.id ? null : entry)}
                   >
                     <div className="flex items-start justify-between gap-4">
@@ -391,8 +514,106 @@ export default function WikiPage() {
                 ))}
               </div>
             )}
+
+            {/* Pagination Controls */}
+            {totalPages > 1 && (
+              <div className="flex items-center justify-center gap-2 mt-6 pt-4 border-t border-gray-200 dark:border-[#2A2A2A]">
+                <button
+                  onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                  disabled={currentPage === 1}
+                  className="px-3 py-1.5 text-sm bg-gray-100 dark:bg-[#1A1A1A] border border-gray-200 dark:border-[#2A2A2A] text-black dark:text-white disabled:opacity-40 hover:border-[#00E5FF] transition-colors"
+                >
+                  ← Previous
+                </button>
+                <span className="px-4 py-1.5 text-sm text-gray-600 dark:text-gray-400">
+                  Page {currentPage} of {totalPages}
+                </span>
+                <button
+                  onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                  disabled={currentPage === totalPages}
+                  className="px-3 py-1.5 text-sm bg-gray-100 dark:bg-[#1A1A1A] border border-gray-200 dark:border-[#2A2A2A] text-black dark:text-white disabled:opacity-40 hover:border-[#00E5FF] transition-colors"
+                >
+                  Next →
+                </button>
+              </div>
+            )}
           </div>
         </div>
+
+        {/* Semantic Index Panel */}
+        <div className="mt-8 border border-gray-200 dark:border-[#2A2A2A]">
+          <button
+            onClick={() => setShowSemanticIndex(!showSemanticIndex)}
+            className="w-full p-4 flex items-center justify-between bg-gray-50 dark:bg-[#0A0A0A] hover:bg-gray-100 dark:hover:bg-[#1A1A1A] transition-colors"
+          >
+            <div className="flex items-center gap-3">
+              <span className="text-lg">🧠</span>
+              <div className="text-left">
+                <p className="text-sm font-medium text-black dark:text-white">Semantic Index v{semanticIndex?.version || '...'}</p>
+                <p className="text-xs text-gray-500">Synonym mappings, shortforms, and patterns for smart search</p>
+              </div>
+            </div>
+            <svg className={`w-5 h-5 text-gray-400 transition-transform ${showSemanticIndex ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+
+          {showSemanticIndex && semanticIndex && (
+            <div className="p-4 border-t border-gray-200 dark:border-[#2A2A2A] space-y-4">
+              {/* Synonym Mappings */}
+              <div>
+                <h4 className="text-xs text-gray-500 uppercase tracking-wider mb-2">Synonym Mappings ({Object.keys(semanticIndex.synonym_mappings).length})</h4>
+                <div className="flex flex-wrap gap-2 max-h-40 overflow-y-auto">
+                  {Object.entries(semanticIndex.synonym_mappings).map(([key, values]) => (
+                    <div key={key} className="text-xs bg-gray-100 dark:bg-[#1A1A1A] px-2 py-1 rounded">
+                      <span className="font-medium text-[#00E5FF]">{key}</span>
+                      <span className="text-gray-500"> → </span>
+                      <span className="text-gray-600 dark:text-gray-400">{values.slice(0, 4).join(', ')}{values.length > 4 ? '...' : ''}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Shortform Mappings */}
+              <div>
+                <h4 className="text-xs text-gray-500 uppercase tracking-wider mb-2">Shortform Mappings ({Object.keys(semanticIndex.shortform_mappings).length})</h4>
+                <div className="flex flex-wrap gap-2">
+                  {Object.entries(semanticIndex.shortform_mappings).map(([short, full]) => (
+                    <div key={short} className="text-xs bg-[#00E5FF]/10 text-[#00E5FF] px-2 py-1 rounded">
+                      <span className="font-mono font-medium">{short}</span>
+                      <span className="text-gray-500"> = </span>
+                      <span>{full}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Topic Aliases */}
+              <div>
+                <h4 className="text-xs text-gray-500 uppercase tracking-wider mb-2">Topic Aliases ({Object.keys(semanticIndex.topic_aliases).length})</h4>
+                <div className="flex flex-wrap gap-2">
+                  {Object.entries(semanticIndex.topic_aliases).map(([topic, aliases]) => (
+                    <div key={topic} className="text-xs bg-purple-500/10 text-purple-400 px-2 py-1 rounded">
+                      <span className="font-medium">"{topic}"</span>
+                      <span className="text-gray-500"> → </span>
+                      <span>{aliases.join(', ')}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Last Indexed */}
+              <p className="text-[10px] text-gray-400">
+                Last indexed: {semanticIndex.last_indexed ? new Date(semanticIndex.last_indexed).toLocaleString() : 'Never'}
+              </p>
+            </div>
+          )}
+        </div>
+
+        {/* Architecture Diagrams */}
+        {diagrams.length > 0 && (
+          <DiagramViewer diagrams={diagrams} categories={diagramCategories} />
+        )}
       </main>
 
       <Footer />

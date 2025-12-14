@@ -1,44 +1,52 @@
 {
   "questions": [
     {
-      "id": "q1",
+      "id": "py_qs_001",
       "type": "true_false_with_explanation",
-      "text": "True or False: In Python, lists are mutable and tuples are immutable. Explain your answer and provide examples.",
+      "text": "True or False: In Python, lists are mutable and tuples are immutable. Explain your answer with examples.",
       "topic": "python_fundamentals",
-      "difficulty": "medium",
+      "difficulty": "easy",
       "deterministic_answer": {
         "type": "boolean",
         "correct_value": true,
         "weight": 0.65
       },
-      "expected_keywords": ["mutable", "immutable", "list", "tuple", "modification"],
+      "expected_keywords": [
+        "mutable",
+        "immutable",
+        "list",
+        "tuple",
+        "modification",
+        "append",
+        "index"
+      ],
       "evaluation_rubric": {
         "factual_correctness": {
           "weight": 0.65,
-          "criteria": "True/False answer must be correct (binary: 0 or 100)"
+          "criteria": "True/False answer must be correct"
         },
         "completeness": {
           "weight": 0.15,
-          "criteria": "Should mention both lists and tuples, explain mutability concept"
+          "criteria": "Should explain both lists and tuples"
         },
         "technical_accuracy": {
           "weight": 0.10,
-          "criteria": "Technical details about mutability must be accurate"
+          "criteria": "Correct explanation of mutability"
         },
         "depth": {
           "weight": 0.05,
-          "criteria": "Should provide examples demonstrating the concept"
+          "criteria": "Examples demonstrating the concept"
         },
         "clarity": {
           "weight": 0.05,
-          "criteria": "Explanation should be clear and well-structured"
+          "criteria": "Clear explanation"
         }
       }
     },
     {
-      "id": "q2",
+      "id": "py_qs_002",
       "type": "yes_no_with_explanation",
-      "text": "Can you use a for loop to iterate over a dictionary in Python? Yes or No. If yes, explain how. If no, explain why not.",
+      "text": "Can you use a for loop to iterate over a dictionary in Python? If yes, explain the different ways to do it.",
       "topic": "python_control_flow",
       "difficulty": "easy",
       "deterministic_answer": {
@@ -46,98 +54,285 @@
         "correct_value": true,
         "weight": 0.65
       },
-      "expected_keywords": ["for loop", "dictionary", "iterate", "keys", "values", "items"],
+      "expected_keywords": [
+        "for loop",
+        "dictionary",
+        "keys",
+        "values",
+        "items",
+        "iterate"
+      ],
       "evaluation_rubric": {
         "factual_correctness": {
           "weight": 0.65,
           "criteria": "Yes/No must be correct"
         },
         "completeness": {
+          "weight": 0.20,
+          "criteria": "Mentions keys(), values(), items()"
+        },
+        "technical_accuracy": {
           "weight": 0.15,
-          "criteria": "Should explain iteration methods"
-        },
-        "technical_accuracy": {
-          "weight": 0.10,
-          "criteria": "Technical explanation must be accurate"
-        },
-        "depth": {
-          "weight": 0.05,
-          "criteria": "Should mention keys(), values(), items()"
-        },
-        "clarity": {
-          "weight": 0.05,
-          "criteria": "Clear explanation"
+          "criteria": "Correct syntax"
         }
       }
     },
     {
-      "id": "q3",
-      "type": "multiple_choice_with_explanation",
-      "text": "Which of the following statements about Python decorators are correct? (Select all that apply)\nA) Decorators are functions that modify other functions\nB) Decorators can only be applied to functions\nC) The @ symbol is syntactic sugar for decorator application\nD) Decorators must return a function\n\nExplain why you selected your answer(s).",
-      "topic": "python_advanced",
-      "difficulty": "hard",
-      "deterministic_answer": {
-        "type": "multiple_choice",
-        "correct_options": ["A", "C", "D"],
-        "weight": 0.70
-      },
-      "expected_keywords": ["decorator", "function", "modify", "syntactic sugar", "@ symbol", "wrapper"],
-      "evaluation_rubric": {
-        "factual_correctness": {
-          "weight": 0.70,
-          "criteria": "Calculate: (correct_selected - incorrect_selected) / total_correct * 100. All correct options must be selected, no incorrect ones."
-        },
-        "completeness": {
-          "weight": 0.12,
-          "criteria": "Should explain each selected option"
-        },
-        "technical_accuracy": {
-          "weight": 0.10,
-          "criteria": "Technical details about decorators must be accurate"
-        },
-        "depth": {
-          "weight": 0.05,
-          "criteria": "Should explain why B is incorrect"
-        },
-        "clarity": {
-          "weight": 0.03,
-          "criteria": "Clear explanation"
-        }
-      }
-    },
-    {
-      "id": "q4",
+      "id": "py_qs_003",
       "type": "open_ended",
-      "text": "Explain the difference between shallow copy and deep copy in Python. Provide examples.",
-      "topic": "python_memory_management",
-      "difficulty": "medium",
-      "deterministic_answer": {
-        "type": "concept_check",
-        "required_concepts": ["shallow copy", "deep copy", "reference", "nested objects"],
-        "weight": 0.30
-      },
-      "expected_keywords": ["copy", "shallow", "deep", "reference", "nested", "copy.copy", "copy.deepcopy"],
+      "text": "What are *args and **kwargs in Python? Provide examples of when you would use each.",
+      "topic": "python_functions",
+      "difficulty": "easy",
+      "expected_keywords": [
+        "args",
+        "kwargs",
+        "positional",
+        "keyword",
+        "arguments",
+        "unpacking",
+        "flexible"
+      ],
       "evaluation_rubric": {
         "completeness": {
-          "weight": 0.30,
-          "criteria": "Must explain both shallow and deep copy"
+          "weight": 0.35,
+          "criteria": "Explains both *args and **kwargs"
         },
         "technical_accuracy": {
-          "weight": 0.30,
-          "criteria": "Technical explanation must be accurate"
+          "weight": 0.35,
+          "criteria": "Correct understanding"
         },
         "depth": {
           "weight": 0.20,
-          "criteria": "Should provide examples, explain nested object behavior"
+          "criteria": "Good practical examples"
         },
         "clarity": {
+          "weight": 0.10,
+          "criteria": "Clear explanation"
+        }
+      }
+    },
+    {
+      "id": "py_qs_004",
+      "type": "open_ended",
+      "text": "Explain the difference between == and 'is' in Python. When should you use each?",
+      "topic": "python_fundamentals",
+      "difficulty": "easy",
+      "expected_keywords": [
+        "equality",
+        "identity",
+        "value",
+        "reference",
+        "object",
+        "comparison",
+        "None"
+      ],
+      "evaluation_rubric": {
+        "completeness": {
+          "weight": 0.40,
+          "criteria": "Covers both operators"
+        },
+        "technical_accuracy": {
+          "weight": 0.40,
+          "criteria": "Correct understanding"
+        },
+        "depth": {
           "weight": 0.20,
-          "criteria": "Clear, well-structured explanation"
+          "criteria": "Mentions None comparison best practice"
+        }
+      }
+    },
+    {
+      "id": "py_qs_005",
+      "type": "open_ended",
+      "text": "What is a decorator in Python? Write a simple example of a decorator that logs when a function is called.",
+      "topic": "python_advanced",
+      "difficulty": "medium",
+      "expected_keywords": [
+        "decorator",
+        "wrapper",
+        "@",
+        "function",
+        "higher-order",
+        "closure",
+        "functools"
+      ],
+      "evaluation_rubric": {
+        "completeness": {
+          "weight": 0.30,
+          "criteria": "Explains concept and provides example"
+        },
+        "technical_accuracy": {
+          "weight": 0.40,
+          "criteria": "Correct decorator syntax"
+        },
+        "depth": {
+          "weight": 0.30,
+          "criteria": "Working example with explanation"
+        }
+      }
+    },
+    {
+      "id": "py_qs_006",
+      "type": "open_ended",
+      "text": "Explain the difference between shallow copy and deep copy in Python. When would you use each?",
+      "topic": "python_memory",
+      "difficulty": "medium",
+      "expected_keywords": [
+        "copy",
+        "shallow",
+        "deep",
+        "reference",
+        "nested",
+        "copy.copy",
+        "copy.deepcopy"
+      ],
+      "evaluation_rubric": {
+        "completeness": {
+          "weight": 0.35,
+          "criteria": "Explains both types"
+        },
+        "technical_accuracy": {
+          "weight": 0.35,
+          "criteria": "Correct understanding of behavior"
+        },
+        "depth": {
+          "weight": 0.30,
+          "criteria": "Explains nested object behavior"
+        }
+      }
+    },
+    {
+      "id": "py_qs_007",
+      "type": "open_ended",
+      "text": "What are generators in Python? How do they differ from regular functions, and when would you use them?",
+      "topic": "python_advanced",
+      "difficulty": "medium",
+      "expected_keywords": [
+        "generator",
+        "yield",
+        "iterator",
+        "lazy",
+        "memory",
+        "efficient",
+        "next"
+      ],
+      "evaluation_rubric": {
+        "completeness": {
+          "weight": 0.35,
+          "criteria": "Explains yield and iteration"
+        },
+        "technical_accuracy": {
+          "weight": 0.35,
+          "criteria": "Correct understanding"
+        },
+        "depth": {
+          "weight": 0.30,
+          "criteria": "Good use cases"
+        }
+      }
+    },
+    {
+      "id": "py_qs_008",
+      "type": "open_ended",
+      "text": "Explain Python's Global Interpreter Lock (GIL). What are its implications for multi-threaded applications?",
+      "topic": "python_concurrency",
+      "difficulty": "hard",
+      "expected_keywords": [
+        "GIL",
+        "thread",
+        "multiprocessing",
+        "CPU-bound",
+        "I/O-bound",
+        "asyncio",
+        "lock"
+      ],
+      "evaluation_rubric": {
+        "completeness": {
+          "weight": 0.30,
+          "criteria": "Covers implications and workarounds"
+        },
+        "technical_accuracy": {
+          "weight": 0.40,
+          "criteria": "Correct understanding of GIL"
+        },
+        "depth": {
+          "weight": 0.30,
+          "criteria": "Discusses when GIL matters"
+        }
+      }
+    },
+    {
+      "id": "py_qs_009",
+      "type": "open_ended",
+      "text": "Explain list comprehension in Python. Convert this loop to a list comprehension: result = []; for x in range(10): if x % 2 == 0: result.append(x * 2)",
+      "topic": "python_fundamentals",
+      "difficulty": "easy",
+      "expected_keywords": [
+        "comprehension",
+        "list",
+        "filter",
+        "map",
+        "concise",
+        "readable"
+      ],
+      "evaluation_rubric": {
+        "completeness": {
+          "weight": 0.40,
+          "criteria": "Provides converted comprehension"
+        },
+        "technical_accuracy": {
+          "weight": 0.40,
+          "criteria": "Correct syntax"
+        },
+        "depth": {
+          "weight": 0.20,
+          "criteria": "Explains benefits"
+        }
+      }
+    },
+    {
+      "id": "py_qs_010",
+      "type": "open_ended",
+      "text": "What is the difference between a class method, static method, and instance method in Python?",
+      "topic": "python_oop",
+      "difficulty": "medium",
+      "expected_keywords": [
+        "classmethod",
+        "staticmethod",
+        "self",
+        "cls",
+        "instance",
+        "decorator",
+        "@"
+      ],
+      "evaluation_rubric": {
+        "completeness": {
+          "weight": 0.40,
+          "criteria": "Explains all three types"
+        },
+        "technical_accuracy": {
+          "weight": 0.40,
+          "criteria": "Correct understanding"
+        },
+        "depth": {
+          "weight": 0.20,
+          "criteria": "Use case examples"
         }
       }
     }
   ],
-  "topics": ["python_fundamentals", "python_control_flow", "python_advanced", "python_memory_management"],
-  "difficulty_levels": ["easy", "medium", "hard"]
+  "topics": [
+    "python_fundamentals",
+    "python_control_flow",
+    "python_functions",
+    "python_advanced",
+    "python_memory",
+    "python_concurrency",
+    "python_oop"
+  ],
+  "difficulty_levels": [
+    "easy",
+    "medium",
+    "hard"
+  ]
 }
-

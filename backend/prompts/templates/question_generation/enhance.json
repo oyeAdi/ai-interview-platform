@@ -1,0 +1,66 @@
+{
+    "id": "question_gen_enhance_v1",
+    "name": "Question Enhancement",
+    "category": "question_generation",
+    "variant": "enhance",
+    "version": "1.0.0",
+    "description": "Enhances a bank question based on interview context and previous topics covered.",
+    "template": "You are enhancing an interview question based on the interview context.\n\nSEED QUESTION:\n\"{seed_text}\"\nTopic: {seed_topic}\nCategory: {seed_category}\n\nINTERVIEW CONTEXT:\n- Experience Level: {experience_level}\n- Topics Already Covered: {previous_topics}\n- Number of Questions Asked: {question_count}\n\nTASK:\n1. Keep the core concept from the seed question\n2. Adapt the phrasing to feel natural in the interview flow\n3. If topics have been covered, you may connect this question to previous discussions\n4. Adjust complexity for {experience_level} level\n5. Make it conversational and engaging\n\nGenerate ONLY the enhanced question text. Keep it concise (1-3 sentences).",
+    "variables": [
+        {
+            "name": "seed_text",
+            "type": "string",
+            "required": true,
+            "description": "Original bank question"
+        },
+        {
+            "name": "seed_topic",
+            "type": "string",
+            "required": false,
+            "default": "",
+            "description": "Topic of seed question"
+        },
+        {
+            "name": "seed_category",
+            "type": "string",
+            "required": false,
+            "default": "conceptual",
+            "description": "Category of seed question"
+        },
+        {
+            "name": "experience_level",
+            "type": "string",
+            "required": true,
+            "description": "junior/mid/senior"
+        },
+        {
+            "name": "previous_topics",
+            "type": "string",
+            "required": false,
+            "default": "None yet",
+            "description": "Comma-separated previously covered topics"
+        },
+        {
+            "name": "question_count",
+            "type": "int",
+            "required": false,
+            "default": 0,
+            "description": "Number of questions already asked"
+        }
+    ],
+    "generation_config": {
+        "temperature": 0.4,
+        "max_output_tokens": 300
+    },
+    "knobs": {
+        "include_examples": false,
+        "output_format": "text",
+        "fallback_enabled": true,
+        "custom": {
+            "maintain_core_concept": true,
+            "connect_to_previous": true
+        }
+    },
+    "author": "system",
+    "notes": "Extracted from gemini_client.py:enhance_question() - context-aware question enhancement"
+}

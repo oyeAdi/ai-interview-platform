@@ -126,7 +126,29 @@ Before committing:
 
 ## Build Verification Before Push
 
-**CRITICAL: Always verify builds before pushing to remote**
+**CRITICAL: Always verify builds and restart servers before pushing to remote**
+
+We do not push until verified it build and restart is fine no server issues.
+
+**Strict Port Policy:**
+- **Frontend MUST run on Port 3000**
+- **Backend MUST run on Port 8000**
+- If these ports are in use, **KILL** the existing blocking processes. Do not accept fallback ports (e.g., 3001).
+
+**Port Kill Commands (PowerShell):**
+> [!TIP]
+> Child processes can sometimes persist. Use `/F /T` to kill process trees.
+```powershell
+# Check ports
+Get-NetTCPConnection -LocalPort 3000,8000 | Select-Object LocalPort,OwningProcess,State
+
+# Kill specific PID (and children)
+taskkill /PID <PID> /F /T
+
+# Aggressive cleanup (Kill by name)
+taskkill /IM node.exe /F /T
+taskkill /IM python.exe /F /T
+```
 
 Before pushing any changes:
 1. **Frontend Build Check:**

@@ -107,13 +107,17 @@ class InterviewController:
                 questions_by_category[cat] = questions_by_category.get(cat, 0) + 1
             
             # Find a category that still has quota
-            selected_category = None
+            eligible_categories = []
             for cat_name, cat_config in self.question_categories.items():
                 if cat_config.get("enabled", False):
                     asked_count = questions_by_category.get(cat_name, 0)
                     if asked_count < cat_config.get("count", 0):
-                        selected_category = cat_name
-                        break
+                        eligible_categories.append(cat_name)
+            
+            selected_category = None
+            if eligible_categories:
+                import random
+                selected_category = random.choice(eligible_categories)
             
             if selected_category:
                 # Filter questions by this category

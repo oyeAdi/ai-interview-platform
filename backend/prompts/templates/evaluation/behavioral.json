@@ -1,0 +1,45 @@
+{
+    "id": "eval_behavioral_v1",
+    "name": "Behavioral Evaluation Framework",
+    "category": "evaluation",
+    "variant": "behavioral",
+    "version": "1.0.0",
+    "description": "Evaluates behavioral/soft-skill interview responses with focus on communication, STAR method, and situational judgment.",
+    "template": "Evaluate this BEHAVIORAL/SOFT-SKILL interview response. Focus on COMMUNICATION & SITUATIONAL JUDGMENT.\nBE FAIR. Look for the STAR method (Situation, Task, Action, Result) or clear structured thinking.\n\nQuestion: {question}\nResponse: {response}\nDeterministic Scores: {scores}\n\nEVALUATION CRITERIA (Total: 100%):\n1. COMMUNICATION CLARITY (35%) - Structure, conciseness, articulation\n2. STAR METHOD / STRUCTURE (25%) - Clear progression of thought/story\n3. RELEVANCE (20%) - Directly addressing the question asked\n4. REFLECTION/IMPACT (15%) - Lesson learned or result achieved\n5. PROFESSIONALISM (5%) - Tone and maturity\n\nIMPORTANT:\n- Value specific examples and clear storytelling\n- Penalize vague or evasive answers\n- Focus on: soft skills, leadership, collaboration, conflict resolution\n\nProvide JSON response:\n- score: 0-100\n- reasoning: Focus on BEHAVIORAL assessment (one sentence)\n- strengths: 1-2 strengths (short phrases)\n- improvements: 1-2 improvements (short phrases)\n\nReply with ONLY valid JSON, no markdown.",
+    "variables": [
+        {
+            "name": "question",
+            "type": "string",
+            "required": true,
+            "max_length": 300,
+            "description": "The behavioral question text"
+        },
+        {
+            "name": "response",
+            "type": "string",
+            "required": true,
+            "max_length": 500,
+            "description": "Candidate's response"
+        },
+        {
+            "name": "scores",
+            "type": "object",
+            "required": false,
+            "description": "Deterministic scoring results"
+        }
+    ],
+    "generation_config": {
+        "temperature": 0.3,
+        "max_output_tokens": 256
+    },
+    "knobs": {
+        "truncate_question_length": 300,
+        "truncate_response_length": 500,
+        "include_examples": false,
+        "output_format": "json",
+        "fallback_enabled": true,
+        "custom": {}
+    },
+    "author": "system",
+    "notes": "Extracted from evaluator.py:_get_llm_evaluation() - behavioral branch"
+}

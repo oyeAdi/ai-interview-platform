@@ -85,19 +85,13 @@ export default function Header({ showQuickStart = true, showBackToDashboard = fa
               </Link>
 
               <Link
-                href="https://www.epam.com/about"
-                target="_blank"
-                className="text-sm font-normal text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white transition-colors"
+                href="/docs"
+                className={`text-sm font-normal transition-colors flex items-center gap-1.5 ${pathname === '/docs'
+                  ? 'text-epam-cyan'
+                  : 'text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white'
+                  }`}
               >
-                About
-              </Link>
-
-              <Link
-                href="https://www.epam.com/careers"
-                target="_blank"
-                className="text-sm font-normal text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white transition-colors"
-              >
-                Careers
+                Docs
               </Link>
             </nav>
 
@@ -178,19 +172,12 @@ export default function Header({ showQuickStart = true, showBackToDashboard = fa
             )}
 
             <Link
-              href="https://www.epam.com/about"
-              target="_blank"
-              className="block text-2xl font-light text-black dark:text-white"
+              href="/docs"
+              onClick={() => setMobileMenuOpen(false)}
+              className={`block text-2xl font-light ${pathname === '/docs' ? 'text-epam-cyan' : 'text-black dark:text-white'
+                }`}
             >
-              About
-            </Link>
-
-            <Link
-              href="https://www.epam.com/careers"
-              target="_blank"
-              className="block text-2xl font-light text-black dark:text-white"
-            >
-              Careers
+              Docs
             </Link>
 
             <div className="pt-6 border-t border-gray-200 dark:border-[#2A2A2A]">

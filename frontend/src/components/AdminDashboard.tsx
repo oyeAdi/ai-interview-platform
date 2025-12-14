@@ -63,6 +63,40 @@ export default function AdminDashboard({ sessionId, language }: AdminDashboardPr
       return
     }
 
+    // RELOAD PROTECTION: If admin was already viewing this session, redirect to home
+    const sessionKey = `admin_session_${sessionId}`
+    const wasViewing = sessionStorage.getItem(sessionKey)
+
+    if (wasViewing) {
+      // This is a reload - redirect to home to prevent session restart
+      console.log('[AdminDashboard] Reload detected, redirecting to home')
+      sessionStorage.removeItem(sessionKey)
+      window.location.href = '/'
+      return
+    }
+
+    // Mark that we're now viewing this session
+    sessionStorage.setItem(sessionKey, 'true')
+
+    // Prevent accidental reload during active session (shows browser warning)
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (!isEnded) {
+        e.preventDefault()
+        e.returnValue = ''
+        return ''
+      }
+    }
+    window.addEventListener('beforeunload', handleBeforeUnload)
+
+    // Cleanup on unmount (not on reload)
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload)
+      // Only clear if navigating away normally (not reload)
+      if (!window.performance.getEntriesByType('navigation').some((nav: any) => nav.type === 'reload')) {
+        sessionStorage.removeItem(sessionKey)
+      }
+    }
+
     const connect = () => {
       const websocket = new WebSocket(wsUrl('ws?view=admin'))
       wsRef.current = websocket
@@ -220,11 +254,12 @@ export default function AdminDashboard({ sessionId, language }: AdminDashboardPr
           } else if (message.type === 'response') {
             setLastSubmittedAnswer(message.data?.text || '')
             setCandidateTyping('')
-          } else if (message.type === 'session_end') {
+          } else if (message.type === 'session_end' || message.type === 'session_completed') {
             setIsEnded(true)
             setIsAnswering(false)
             setConnectionStatus('disconnected')
             if (wsRef.current) {
+              wsRef.current.onclose = null // Prevent reconnect loop
               wsRef.current.close()
             }
           }
@@ -435,9 +470,43 @@ export default function AdminDashboard({ sessionId, language }: AdminDashboardPr
                   </svg>
                 </div>
                 <h2 className="text-3xl font-bold text-white mb-3">Test Completed</h2>
-                <p className="text-gray-400 text-lg max-w-md mx-auto">
+                <p className="text-gray-400 text-lg max-w-md mx-auto mb-6">
                   The interview session has concluded. System is processing final results and generating the summary report.
                 </p>
+                <div className="flex justify-center gap-4">
+                  <button
+                    onClick={async () => {
+                      if (!sessionId) return
+                      try {
+                        const btn = document.getElementById('process-btn') as HTMLButtonElement
+                        if (btn) btn.disabled = true
+                        if (btn) btn.innerText = 'Processing...'
+
+                        const res = await fetch(apiUrl(`api/interview/${sessionId}/process-results`), { method: 'POST' })
+                        if (res.ok) {
+                          alert('Results processed successfully! Switching to Results tab.')
+                          setActiveTab('results')
+                        } else {
+                          alert('Failed to process results. Please try again.')
+                        }
+                      } catch (e) {
+                        console.error(e)
+                        alert('Error processing results')
+                      } finally {
+                        const btn = document.getElementById('process-btn') as HTMLButtonElement
+                        if (btn) btn.disabled = false
+                        if (btn) btn.innerText = 'Process Results / Refresh'
+                      }
+                    }}
+                    id="process-btn"
+                    className="px-6 py-3 bg-[#39FF14] text-black font-bold rounded-lg hover:bg-[#32CD32] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                  >
+                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                    Process Results / Refresh
+                  </button>
+                </div>
               </div>
             ) : (
               <div className="bg-[#141414] rounded-2xl border border-gray-800/50 overflow-hidden">

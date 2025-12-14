@@ -1,0 +1,61 @@
+{
+    "id": "followup_should_continue_v1",
+    "name": "Follow-up Continuation Decision",
+    "category": "followup",
+    "variant": "should_continue",
+    "version": "1.0.0",
+    "description": "Determines whether to continue asking follow-up questions based on candidate's demonstrated understanding.",
+    "template": "You are assessing a technical interview candidate's response.\n\nQuestion: {question}\nCandidate's Response: {response}\nCurrent Score: {overall_score}/100\nExperience Level Expected: {experience_level}\nFollow-ups Asked So Far: {followup_count}\n\nAnalyze if we should continue with more follow-up questions.\n\nSTOP CONDITIONS (respond \"STOP\"):\n1. Candidate demonstrates strong, comprehensive understanding (score >= 80 and response shows depth)\n2. Candidate explicitly says \"I don't know\" or similar\n3. Response is incoherent or clearly shows no understanding of the topic\n4. Candidate keeps repeating the same answer without new information\n\nCONTINUE CONDITIONS (respond \"CONTINUE\"):\n1. Candidate shows partial understanding but could be probed deeper\n2. Response indicates \"I've read about it\" or similar surface knowledge\n3. Good answer but missing key details relevant to the role\n4. Candidate seems nervous but knowledgeable - needs more probing\n\nBased on the response, decide: STOP or CONTINUE?\n\nFormat your response as:\nDECISION: [STOP or CONTINUE]\nREASON: [one of: sufficient_skill, no_knowledge, incoherent, repetitive, partial_understanding, surface_knowledge, needs_probing]\nCONFIDENCE: [0.0 to 1.0]",
+    "variables": [
+        {
+            "name": "question",
+            "type": "string",
+            "required": true,
+            "max_length": 200,
+            "description": "Question text"
+        },
+        {
+            "name": "response",
+            "type": "string",
+            "required": true,
+            "max_length": 500,
+            "description": "Candidate's response"
+        },
+        {
+            "name": "overall_score",
+            "type": "int",
+            "required": true,
+            "description": "Current score 0-100"
+        },
+        {
+            "name": "experience_level",
+            "type": "string",
+            "required": true,
+            "description": "Expected experience level (junior/mid/senior)"
+        },
+        {
+            "name": "followup_count",
+            "type": "int",
+            "required": true,
+            "description": "Number of follow-ups already asked"
+        }
+    ],
+    "generation_config": {
+        "temperature": 0.2,
+        "max_output_tokens": 100
+    },
+    "knobs": {
+        "truncate_question_length": 200,
+        "truncate_response_length": 500,
+        "include_examples": false,
+        "output_format": "structured",
+        "fallback_enabled": true,
+        "custom": {
+            "max_followups": 10,
+            "high_score_threshold": 85,
+            "low_score_threshold": 25
+        }
+    },
+    "author": "system",
+    "notes": "Extracted from gemini_client.py:should_continue_followup() - AI decision maker for follow-up continuation"
+}

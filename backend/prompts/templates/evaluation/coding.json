@@ -1,0 +1,47 @@
+{
+    "id": "eval_coding_v1",
+    "name": "Coding Evaluation Framework",
+    "category": "evaluation",
+    "variant": "coding",
+    "version": "1.0.0",
+    "description": "Evaluates coding interview responses with focus on technical competence, code quality, problem-solving, and efficiency.",
+    "template": "Evaluate this CODING interview response. Focus on TECHNICAL COMPETENCE.\nBE OBJECTIVE. Do not inflate scores, but recognize valid partial solutions.\n\nQuestion: {question}\nResponse: {response}\nDeterministic Scores: {scores}\n\nEVALUATION CRITERIA (Total: 100%):\n1. CODING ABILITY (40%) - Code quality, correctness, efficiency, clean practices, edge cases\n2. TECHNICAL DEPTH (30%) - Understanding of concepts, trade-offs, complexity awareness\n3. PROBLEM-SOLVING (20%) - Approach, logical reasoning, optimization thinking\n4. EXPLANATION QUALITY (5%) - Code explanation clarity\n5. PROFESSIONALISM (5%) - Basic courtesy ONLY\n\nIMPORTANT:\n- Prioritize code quality and technical correctness over communication style\n- Focus on: practical coding skills, algorithm efficiency, clean code\n- Ignore: tone, pleasantries, conversational awareness\n\nProvide JSON response:\n- score: 0-100\n- reasoning: Focus on TECHNICAL assessment (one sentence)\n- strengths: 1-2 TECHNICAL strengths (short phrases)\n- improvements: 1-2 TECHNICAL improvements (short phrases)\n\nReply with ONLY valid JSON, no markdown.",
+    "variables": [
+        {
+            "name": "question",
+            "type": "string",
+            "required": true,
+            "max_length": 300,
+            "description": "The coding question text"
+        },
+        {
+            "name": "response",
+            "type": "string",
+            "required": true,
+            "max_length": 500,
+            "description": "Candidate's response/code"
+        },
+        {
+            "name": "scores",
+            "type": "object",
+            "required": false,
+            "description": "Deterministic scoring results"
+        }
+    ],
+    "generation_config": {
+        "temperature": 0.3,
+        "max_output_tokens": 256
+    },
+    "knobs": {
+        "truncate_question_length": 300,
+        "truncate_response_length": 500,
+        "include_examples": false,
+        "output_format": "json",
+        "fallback_enabled": true,
+        "custom": {
+            "coding_multiplier": 1.0
+        }
+    },
+    "author": "system",
+    "notes": "Extracted from evaluator.py:_get_llm_evaluation() - coding branch"
+}

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
+import ReactMarkdown from 'react-markdown'
 import { apiUrl } from '@/config/api'
 
 export default function SharedResultPage() {
@@ -47,6 +48,20 @@ export default function SharedResultPage() {
         )
     }
 
+
+
+    // Helper for safe date formatting
+    const formatDate = (dateString: string) => {
+        try {
+            if (!dateString || dateString === 'Invalid Date') return new Date().toLocaleDateString()
+            return new Date(dateString).toLocaleDateString('en-US', {
+                year: 'numeric', month: 'long', day: 'numeric'
+            })
+        } catch (e) {
+            return new Date().toLocaleDateString()
+        }
+    }
+
     if (!result) return null
 
     return (
@@ -85,25 +100,23 @@ export default function SharedResultPage() {
                     <section className="grid grid-cols-2 gap-y-6 gap-x-12 mb-12">
                         <div>
                             <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Candidate</label>
-                            <div className="text-xl font-medium text-gray-900">{result.candidate?.name || 'Unknown'}</div>
+                            <div className="text-xl font-medium text-gray-900">{result.candidate?.name || 'Unknown Candidate'}</div>
                         </div>
                         <div>
                             <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Position</label>
-                            <div className="text-xl font-medium text-gray-900">{result.position?.title || 'Unknown'}</div>
+                            <div className="text-xl font-medium text-gray-900">{result.position?.title || 'General Evaluation'}</div>
                         </div>
                         <div>
                             <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Date</label>
                             <div className="text-lg text-gray-900">
-                                {new Date(result.created_at).toLocaleDateString('en-US', {
-                                    year: 'numeric', month: 'long', day: 'numeric'
-                                })}
+                                {formatDate(result.created_at || result.date)}
                             </div>
                         </div>
                         <div>
                             <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Status</label>
                             <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium
                 ${result.status === 'completed' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
-                                {result.status?.charAt(0).toUpperCase() + result.status?.slice(1)}
+                                {result.status ? (result.status.charAt(0).toUpperCase() + result.status.slice(1)) : 'Completed'}
                             </span>
                         </div>
                     </section>
@@ -129,8 +142,10 @@ export default function SharedResultPage() {
                         <h3 className="text-md font-bold text-gray-900 uppercase border-b border-gray-200 pb-2 mb-4">
                             Assessment Summary
                         </h3>
-                        <div className="prose prose-gray max-w-none text-gray-700 leading-relaxed">
-                            <p>{result.feedback_summary || "No specific feedback provided."}</p>
+                        <div className="prose prose-gray max-w-none text-gray-700 leading-relaxed text-sm">
+                            <ReactMarkdown>
+                                {result.feedback_summary || "No specific feedback provided."}
+                            </ReactMarkdown>
                         </div>
                     </section>
 

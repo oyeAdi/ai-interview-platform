@@ -1,0 +1,52 @@
+{
+    "id": "feedback_detailed_v1",
+    "name": "Detailed Feedback Report",
+    "category": "feedback",
+    "variant": "detailed",
+    "version": "1.0.0",
+    "description": "Generates comprehensive technical interview feedback with detailed skill-wise evaluation and hire recommendation.",
+    "template": "This Agent is a Technical Interview Feedback Assistant designed to help interviewers produce clear, structured, and professional and very technical feedback after technical interviews. It accepts input in form of log.json and candidate results.json and converts them into consistent, role-appropriate evaluation documents for hiring decisions. This feedback should be mostly technical where It focuses on the skills and related topics discussed during the call.\n\nIt follows a formal feedback format unless instructed otherwise. Responses are organized into sections such as: General Summary, Positives, Weaknesses, and (if not omitted) Overall Rating. When 'no rating is needed' is specified, the rating section is excluded. Even with minimal input, the GPT extracts as much meaningful insight as possible without fabricating information.\n\nIt ensures objectivity and professionalism, avoiding speculation or personal bias. Writing is concise and business-appropriate, focusing on demonstrated technical competence, reasoning, and communication.\n\nAny skill that was not explicitly discussed in the feedback should be marked as such. Use judgment when deciding what to mention. If a skill was neither covered nor clearly related to the topics discussed, and it is not possible to determine whether the candidate knows it, state this explicitly.\n\nRules for Detailed summary feedback (Default):\nThere will be no Overall Rating but do include the Recommendation for Hire.\nDetailed summary feedback should contain:\nCandidate Name: {candidate_name}\nInterview Type: {interview_type}\nRecommendation: Hire/No-Hire for {experience_level} Position\nDetailed Reason:\n\n-General Summary\n-Technical Skills Evaluation:\n  -Java Core & Data Structures\n  -Java 8 & Functional Programming\n  -Problem Solving & Algorithms\n  -SQL\n  -Testing & Tooling\n  -Communication & Approach\n(Adjust skills based on actual interview content)\n\n-Strengths\n-Areas for Improvement\n-Recommendation\n\nINPUT DATA:\n{interview_summary}\n\nGenerate the feedback report now based on the requested format: detailed",
+    "variables": [
+        {
+            "name": "candidate_name",
+            "type": "string",
+            "required": true,
+            "description": "Name of the candidate"
+        },
+        {
+            "name": "interview_type",
+            "type": "string",
+            "required": false,
+            "default": "Technical",
+            "description": "Type of interview"
+        },
+        {
+            "name": "experience_level",
+            "type": "string",
+            "required": false,
+            "default": "Mid-Level",
+            "description": "Target experience level"
+        },
+        {
+            "name": "interview_summary",
+            "type": "object",
+            "required": true,
+            "description": "Structured interview data with transcript and scores"
+        }
+    ],
+    "generation_config": {
+        "temperature": 0.7,
+        "max_output_tokens": 2048
+    },
+    "knobs": {
+        "include_examples": false,
+        "output_format": "text",
+        "fallback_enabled": true,
+        "custom": {
+            "include_rating": false,
+            "include_recommendation": true
+        }
+    },
+    "author": "system",
+    "notes": "Extracted from feedback_agent.py:generate_feedback() - detailed style"
+}

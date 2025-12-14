@@ -318,6 +318,144 @@
           "summary"
         ]
       }
+    },
+    "session_20251214_131719": {
+      "session_id": "session_20251214_131719",
+      "timestamp": "2025-12-14T07:49:28.530667",
+      "position_id": null,
+      "overall_score": 26.933333333333334,
+      "status": "Not Recommended",
+      "metrics": {
+        "average_score": 26.933333333333334,
+        "score_trend": "stable",
+        "topics_covered": [
+          "experience_based"
+        ],
+        "topics_pending": [],
+        "overall_gaps": [],
+        "overall_strengths": [],
+        "overall_weaknesses": []
+      },
+      "rounds_summary": [
+        {
+          "round_number": 1,
+          "question_id": "personalized_session_",
+          "question_text": "Hi John, great to meet you! Your resume shows a really solid 6 years of Python experience, particularly with building scalable web applications and a specific mention of memory management – that’s fantastic.\n\nGiven your work on the high-throughput payment gateway and your experience with optimization projects, let's dive a little deeper into that. Could you describe a scenario where you’ve had to actively consider Python’s memory usage in a production environment, and what strategies you employed – perhaps relating to data structures or object lifecycles – to ensure efficient resource utilization? I'm interested in hearing about how you'd approach identifying and resolving potential memory leaks or performance bottlenecks in a long-running Python process.",
+          "topic": "experience_based",
+          "responses": [
+            {
+              "response_number": 0,
+              "type": "followup",
+              "text": "Apologies I do not know ",
+              "scores": {
+                "factual_correctness": 100.0,
+                "completeness": 73.45,
+                "technical_accuracy": 90.0,
+                "depth": 7.666666666666666,
+                "clarity": 20.0,
+                "keyword_coverage": 100.0
+              },
+              "timestamp": "2025-12-14T13:18:20.705885"
+            },
+            {
+              "response_number": 1,
+              "type": "followup",
+              "text": "Python is very slow due to its interpretation I'm not sure how memory works in Python",
+              "scores": {
+                "factual_correctness": 100.0,
+                "completeness": 82.75,
+                "technical_accuracy": 90.0,
+                "depth": 28.333333333333332,
+                "clarity": 20.0,
+                "keyword_coverage": 100.0
+              },
+              "timestamp": "2025-12-14T13:19:02.339157"
+            },
+            {
+              "response_number": 2,
+              "type": "followup",
+              "text": "sorry I do not know",
+              "scores": {
+                "factual_correctness": 100.0,
+                "completeness": 72.85,
+                "technical_accuracy": 90.0,
+                "depth": 6.333333333333334,
+                "clarity": 20.0,
+                "keyword_coverage": 100.0
+              },
+              "timestamp": "2025-12-14T13:19:28.366424"
+            }
+          ],
+          "score_trend": [
+            20.9,
+            39.0,
+            20.9
+          ],
+          "topics_covered": [],
+          "gaps_identified": [],
+          "strengths": [],
+          "weaknesses": [],
+          "followup_history": [
+            {
+              "number": 1,
+              "text": "Okay, no worries at all – memory management can be a really deep topic! Since you don’t have a specific example immediately coming to mind, let’s zoom out a bit. Could you describe a situation where *not* paying attention to memory usage in a Python web application could lead to noticeable performance issues or even crashes for users?",
+              "strategy": "depth_focused",
+              "reason": "Response shows good understanding but could benefit from deeper exploration. Depth: 7.666666666666666, Completeness: 73.45"
+            },
+            {
+              "number": 2,
+              "text": "I see what you mean about Python’s interpretation potentially impacting speed. Since you mentioned being unsure about how memory works in Python, could you walk me through how you might approach optimizing memory usage in a scenario where you’re processing a very large list of objects – perhaps reading data from a large file – and you only need to perform a single operation on each object? What tools or techniques would you consider, and why?",
+              "strategy": "depth_focused",
+              "reason": "Response shows good understanding but could benefit from deeper exploration. Depth: 28.333333333333332, Completeness: 82.75"
+            }
+          ],
+          "initial_score": 20.9,
+          "final_score": 20.9,
+          "score_improvement": 0.0
+        }
+      ],
+      "feedback_report": {
+        "content": "Hi,\n\nPlease find feedback for Candidate:\n\nGeneral Summary:\nThe interview focused on assessing the candidate's technical experience. The candidate demonstrated significant gaps in fundamental knowledge, repeatedly stating unfamiliarity with core concepts. Performance indicates a need for substantial improvement in foundational technical skills. The candidate struggled to articulate understanding of Python's performance characteristics and memory management.\n\nPositive:\n• None observed during this interview.\n\nNegative:\n• Demonstrated a lack of knowledge regarding fundamental Python concepts.\n• Unable to explain Python's performance characteristics.\n• Repeatedly stated unfamiliarity with basic technical questions.\n\nRating out of 4:\n1.0/4\n\nRegards,\nAditya",
+        "status": "APPROVED",
+        "approved_at": "2025-12-14T07:50:29.208011"
+      },
+      "feedback_summary": "Hi,\n\nPlease find feedback for Candidate:\n\nGeneral Summary:\nThe interview focused on assessing the candidate's technical experience. The candidate demonstrated significant gaps in fundamental knowledge, repeatedly stating unfamiliarity with core concepts. Performance indicates a need for substantial improvement in foundational technical skills. The candidate struggled to articulate understanding of Python's performance characteristics and memory management.\n\nPositive:\n• None observed during this interview.\n\nNegative:\n• Demonstrated a lack of knowledge regarding fundamental Python concepts.\n• Unable to explain Python's performance characteristics.\n• Repeatedly stated unfamiliarity with basic technical questions.\n\nRating out of 4:\n1.0/4\n\nRegards,\nAditya",
+      "shareable_link": {
+        "token": "share_a5a36e9a0783",
+        "created_at": "2025-12-14T13:20:33.946421",
+        "expires_at": null,
+        "views": [
+          "summary"
+        ]
+      }
+    },
+    "res_19d8a711": {
+      "id": "res_19d8a711",
+      "session_id": "session_20251214_131719",
+      "date": "2025-12-14T13:55:12.024308",
+      "position": {
+        "id": null,
+        "title": "Unknown Position"
+      },
+      "overall_metrics": {
+        "total_score": 21,
+        "questions_asked": 1
+      },
+      "feedback_report": {
+        "content": "## Candidate Feedback Report\n\n**Candidate Name:** Candidate\n**Interview Type:** Unknown Position\n**Recommendation:** No-Hire for Unknown Position\n**Detailed Reason:** The candidate demonstrated significant gaps in fundamental technical knowledge, particularly regarding core programming concepts and language specifics. This raises concerns about their ability to perform the required tasks for this role.\n\n---\n\n**General Summary:**\n\nThe interview revealed a limited understanding of core technical concepts. The candidate repeatedly stated a lack of knowledge when presented with basic questions. While a willingness to acknowledge gaps was present, the extent of these gaps is substantial and impacts confidence in their ability to contribute effectively.\n\n**Technical Skills Evaluation:**\n\n*   **Java Core & Data Structures:** Not Covered - No discussion related to Java or fundamental data structures occurred during the interview.\n*   **Java 8 & Functional Programming:** Not Covered - No discussion related to Java 8 features or functional programming paradigms occurred during the interview.\n*   **Problem Solving & Algorithms:** Weak - The candidate was unable to demonstrate problem-solving skills or algorithmic thinking. Responses indicated a lack of understanding of basic computational concepts.\n*   **SQL:** Not Covered - No discussion related to SQL occurred during the interview.\n*   **Testing & Tooling:** Not Covered - No discussion related to testing methodologies or development tooling occurred during the interview.\n*   **Communication & Approach:** Fair - The candidate was able to communicate their lack of knowledge clearly and politely. However, this does not compensate for the significant technical deficiencies.\n\n**Strengths:**\n\n*   Willingness to admit lack of knowledge.\n\n**Areas for Improvement:**\n\n*   Fundamental programming concepts (e.g., memory management, language internals).\n*   Problem-solving and algorithmic thinking.\n*   Core technical skills relevant to software development.\n*   Broaden technical knowledge base.\n\n**Recommendation:**\n\nBased on the interview performance, we recommend **not** moving forward with this candidate for the Unknown Position. The demonstrated lack of foundational technical knowledge presents a significant risk.",
+        "status": "APPROVED",
+        "approved_at": "2025-12-14T08:47:25.924946"
+      },
+      "status": "completed",
+      "feedback_summary": "## Candidate Feedback Report\n\n**Candidate Name:** Candidate\n**Interview Type:** Unknown Position\n**Recommendation:** No-Hire for Unknown Position\n**Detailed Reason:** The candidate demonstrated significant gaps in fundamental technical knowledge, particularly regarding core programming concepts and language specifics. This raises concerns about their ability to perform the required tasks for this role.\n\n---\n\n**General Summary:**\n\nThe interview revealed a limited understanding of core technical concepts. The candidate repeatedly stated a lack of knowledge when presented with basic questions. While a willingness to acknowledge gaps was present, the extent of these gaps is substantial and impacts confidence in their ability to contribute effectively.\n\n**Technical Skills Evaluation:**\n\n*   **Java Core & Data Structures:** Not Covered - No discussion related to Java or fundamental data structures occurred during the interview.\n*   **Java 8 & Functional Programming:** Not Covered - No discussion related to Java 8 features or functional programming paradigms occurred during the interview.\n*   **Problem Solving & Algorithms:** Weak - The candidate was unable to demonstrate problem-solving skills or algorithmic thinking. Responses indicated a lack of understanding of basic computational concepts.\n*   **SQL:** Not Covered - No discussion related to SQL occurred during the interview.\n*   **Testing & Tooling:** Not Covered - No discussion related to testing methodologies or development tooling occurred during the interview.\n*   **Communication & Approach:** Fair - The candidate was able to communicate their lack of knowledge clearly and politely. However, this does not compensate for the significant technical deficiencies.\n\n**Strengths:**\n\n*   Willingness to admit lack of knowledge.\n\n**Areas for Improvement:**\n\n*   Fundamental programming concepts (e.g., memory management, language internals).\n*   Problem-solving and algorithmic thinking.\n*   Core technical skills relevant to software development.\n*   Broaden technical knowledge base.\n\n**Recommendation:**\n\nBased on the interview performance, we recommend **not** moving forward with this candidate for the Unknown Position. The demonstrated lack of foundational technical knowledge presents a significant risk.",
+      "shareable_link": {
+        "token": "share_423073e654b4",
+        "created_at": "2025-12-14T14:17:38.578663",
+        "expires_at": null,
+        "views": [
+          "summary"
+        ]
+      }
     }
   }
 }

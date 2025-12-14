@@ -1,0 +1,136 @@
+{
+    "version": "1.0",
+    "last_updated": "2025-12-14T15:45:00.000000",
+    "diagrams": [
+        {
+            "id": "system_overview",
+            "title": "System Overview",
+            "category": "System",
+            "description": "High-level architecture showing all major components and their interactions",
+            "mermaid": "graph TB\n    subgraph Frontend[\"Frontend (Next.js)\"]\n        UI[Web UI]\n        Admin[Admin Dashboard]\n        Candidate[Candidate View]\n        Wiki[Wiki Page]\n    end\n    \n    subgraph Backend[\"Backend (FastAPI)\"]\n        API[REST API]\n        WS[WebSocket Server]\n        IC[Interview Controller]\n        Eval[Evaluator]\n        QM[Question Manager]\n        FB[Feedback Agent]\n    end\n    \n    subgraph LLM[\"LLM Layer\"]\n        Gemini[Gemini API]\n    end\n    \n    subgraph Storage[\"Data Storage\"]\n        Sessions[(interview_sessions.json)]\n        QBank[(question_bank.json)]\n        WikiDB[(wiki.json)]\n        Results[(candidate_results/)]\n    end\n    \n    UI --> API\n    Admin --> WS\n    Candidate --> WS\n    Wiki --> API\n    \n    API --> IC\n    WS --> IC\n    IC --> Eval\n    IC --> QM\n    IC --> FB\n    \n    Eval --> Gemini\n    FB --> Gemini\n    QM --> Gemini\n    \n    IC --> Sessions\n    QM --> QBank\n    API --> WikiDB\n    IC --> Results",
+            "related_entries": [
+                "wiki_arch_001",
+                "wiki_frontend_001"
+            ]
+        },
+        {
+            "id": "tech_stack",
+            "title": "Technology Stack",
+            "category": "System",
+            "description": "Technologies used across frontend, backend, and infrastructure",
+            "mermaid": "graph LR\n    subgraph Frontend\n        Next[Next.js 14]\n        React[React 18]\n        TS[TypeScript]\n        TW[Tailwind CSS]\n        Monaco[Monaco Editor]\n    end\n    \n    subgraph Backend\n        FastAPI[FastAPI]\n        Python[Python 3.11]\n        Uvicorn[Uvicorn ASGI]\n        Pydantic[Pydantic]\n    end\n    \n    subgraph AI\n        Gemini[Google Gemini]\n        Model[gemma-3-27b-it]\n    end\n    \n    subgraph Storage\n        JSON[JSON Files]\n        FS[File System]\n    end\n    \n    Next --> React\n    React --> TS\n    TS --> TW\n    FastAPI --> Python\n    Python --> Uvicorn\n    FastAPI --> Pydantic\n    Backend --> AI\n    Backend --> Storage",
+            "related_entries": [
+                "wiki_arch_001"
+            ]
+        },
+        {
+            "id": "interview_flow",
+            "title": "Interview Flow",
+            "category": "Flows",
+            "description": "Complete interview lifecycle from start to finish",
+            "mermaid": "sequenceDiagram\n    participant A as Admin\n    participant F as Frontend\n    participant B as Backend\n    participant G as Gemini AI\n    participant C as Candidate\n    \n    A->>F: Start Interview (Quick Start)\n    F->>B: POST /api/interviews/quick-start\n    B->>B: Create session in JSON\n    B-->>F: session_id + links\n    F-->>A: Show admin dashboard\n    \n    C->>F: Open candidate link\n    F->>B: WebSocket connect\n    B->>B: Load first question\n    B-->>C: send_question\n    B-->>A: sync_question\n    \n    loop Each Question\n        C->>B: submit_answer\n        B->>G: Evaluate response\n        G-->>B: score + analysis\n        B->>G: Generate follow-up\n        G-->>B: follow-up question\n        B-->>A: sync_answer + score\n        alt Expert Mode ON\n            A->>B: approve/override\n        end\n        B-->>C: send_question\n    end\n    \n    A->>B: end_interview\n    B->>B: Save to candidate_results\n    B-->>A: Complete\n    B-->>C: Complete",
+            "related_entries": [
+                "wiki_interview_001",
+                "wiki_quickstart_001"
+            ]
+        },
+        {
+            "id": "evaluation_flow",
+            "title": "Evaluation Flow",
+            "category": "Flows",
+            "description": "How candidate answers are scored using rubrics and LLM",
+            "mermaid": "flowchart TD\n    A[Candidate Answer] --> B{Question Type?}\n    B -->|Coding| C[Code Analysis]\n    B -->|Conceptual| D[Semantic Match]\n    B -->|True/False| E[Deterministic Check]\n    \n    C --> F[Extract Keywords]\n    D --> F\n    E --> G[Boolean Score]\n    \n    F --> H[Load Rubric]\n    H --> I[LLM Evaluation]\n    I --> J[Score per Criterion]\n    \n    J --> K[Weighted Average]\n    G --> K\n    \n    K --> L[Final Score 0-100]\n    L --> M[Store in Session]\n    M --> N[Sync to Admin]",
+            "related_entries": [
+                "wiki_evaluation_001",
+                "wiki_scoring_algorithms"
+            ]
+        },
+        {
+            "id": "feedback_flow",
+            "title": "Feedback Generation Flow",
+            "category": "Flows",
+            "description": "How final interview feedback is generated and published",
+            "mermaid": "flowchart LR\n    A[Interview Complete] --> B[Admin: Generate Report]\n    B --> C[Load Transcript]\n    C --> D[Build Context]\n    D --> E[FeedbackAgent]\n    E --> F[LLM: Gemini]\n    F --> G[Draft Feedback]\n    G --> H{Admin Review}\n    H -->|Edit| I[Modify Text]\n    I --> H\n    H -->|Approve| J[Save to Result]\n    H -->|Reject| K[Mark Rejected]\n    J --> L[Status: Published]\n    L --> M[Generate Share Link]\n    M --> N[QR Code Available]",
+            "related_entries": [
+                "wiki_feedback_001",
+                "wiki_api_feedback_approve"
+            ]
+        },
+        {
+            "id": "wiki_search_flow",
+            "title": "Wiki Search Flow",
+            "category": "Flows",
+            "description": "How wiki questions are answered with semantic search and LLM fallback",
+            "mermaid": "flowchart TD\n    A[User Question] --> B[Normalize Query]\n    B --> C[Expand Synonyms]\n    C --> D[Search Cache]\n    D --> E{Match Found?}\n    \n    E -->|Yes| F[Return Cached]\n    E -->|No| G[Try Lower Threshold]\n    G --> H{Match Found?}\n    \n    H -->|Yes| F\n    H -->|No| I[LLM Generation]\n    I --> J[Gemini API]\n    J --> K[Extract Answer]\n    K --> L[Save to Wiki]\n    L --> M[Return New Entry]\n    \n    F --> N[Update Stats]\n    M --> N\n    N --> O[Display Answer]",
+            "related_entries": [
+                "wiki_search_algorithm",
+                "wiki_api_wiki_ask"
+            ]
+        },
+        {
+            "id": "data_models",
+            "title": "Data Models",
+            "category": "Data",
+            "description": "Core data structures used across the system",
+            "mermaid": "classDiagram\n    class Session {\n        +String id\n        +String status\n        +Candidate candidate\n        +Config interview_config\n        +Question[] questions\n        +DateTime started_at\n    }\n    \n    class Candidate {\n        +String name\n        +String email\n        +String[] skills\n    }\n    \n    class Question {\n        +String id\n        +String type\n        +String text\n        +String[] keywords\n        +Rubric rubric\n    }\n    \n    class Response {\n        +String question_id\n        +String answer\n        +String code\n        +Number score\n        +DateTime timestamp\n    }\n    \n    class Result {\n        +String candidate_name\n        +Interview[] interviews\n        +String feedback_status\n        +String feedback_content\n    }\n    \n    Session --> Candidate\n    Session --> Question\n    Session --> Response\n    Result --> Session",
+            "related_entries": [
+                "wiki_data_models_overview",
+                "wiki_data_session_structure"
+            ]
+        },
+        {
+            "id": "storage_architecture",
+            "title": "Storage Architecture",
+            "category": "Data",
+            "description": "File-based storage structure and data flow",
+            "mermaid": "graph TB\n    subgraph Models[\"backend/models/\"]\n        IS[interview_sessions.json]\n        QB[question_bank.json]\n        WK[wiki.json]\n        ORG[organizations.json]\n        ACC[accounts.json]\n        POS[positions.json]\n    end\n    \n    subgraph Questions[\"backend/questions/\"]\n        PY[python.json]\n        JV[java.json]\n    end\n    \n    subgraph Results[\"backend/candidate_results/\"]\n        R1[name+date_result.json]\n        R2[...]\n    end\n    \n    subgraph Prompts[\"backend/prompts/templates/\"]\n        P1[evaluation_*.json]\n        P2[feedback_*.json]\n        P3[followup_*.json]\n    end\n    \n    API[FastAPI] --> Models\n    API --> Questions\n    API --> Results\n    LLM[Gemini Client] --> Prompts",
+            "related_entries": [
+                "wiki_storage_001",
+                "wiki_data_models_overview"
+            ]
+        },
+        {
+            "id": "api_endpoints",
+            "title": "API Endpoints Map",
+            "category": "Data",
+            "description": "All REST API endpoints grouped by functionality",
+            "mermaid": "graph LR\n    subgraph Interview\n        I1[\"POST /api/interviews/quick-start\"]\n        I2[\"GET /api/sessions/active\"]\n        I3[\"POST /api/sessions/cleanup\"]\n        I4[\"POST /api/sessions/{id}/abandon\"]\n    end\n    \n    subgraph Results\n        R1[\"GET /api/admin/results\"]\n        R2[\"POST /api/feedback/generate\"]\n        R3[\"POST /api/feedback/approve\"]\n        R4[\"POST /api/feedback/reject\"]\n    end\n    \n    subgraph Sharing\n        S1[\"POST /api/results/{id}/share\"]\n        S2[\"GET /api/results/shared/{token}\"]\n    end\n    \n    subgraph Wiki\n        W1[\"POST /api/wiki/ask\"]\n        W2[\"GET /api/wiki/search\"]\n        W3[\"GET /api/wiki/entries\"]\n        W4[\"GET /api/wiki/diagrams\"]\n    end\n    \n    subgraph CRUD\n        C1[\"/api/organizations\"]\n        C2[\"/api/accounts\"]\n        C3[\"/api/positions\"]\n    end",
+            "related_entries": [
+                "wiki_api_001"
+            ]
+        },
+        {
+            "id": "frontend_components",
+            "title": "Frontend Components",
+            "category": "Components",
+            "description": "React component hierarchy and page structure",
+            "mermaid": "graph TD\n    subgraph Pages\n        HP[HomePage]\n        IP[InterviewPage]\n        RP[ResultsPage]\n        WP[WikiPage]\n        SP[SharePage]\n    end\n    \n    subgraph Shared\n        HD[Header]\n        FT[Footer]\n        LM[LinksModal]\n    end\n    \n    subgraph Interview\n        AD[AdminDashboard]\n        CV[CandidateView]\n        CE[CodeEditor]\n        TM[Timer]\n    end\n    \n    subgraph Results\n        RH[ResultsHistory]\n        FM[FeedbackModal]\n        SM[ShareModal]\n    end\n    \n    subgraph Wiki\n        WW[WikiWidget]\n        DV[DiagramViewer]\n    end\n    \n    HP --> HD\n    HP --> FT\n    IP --> AD\n    IP --> CV\n    AD --> CE\n    AD --> TM\n    RP --> RH\n    RH --> FM\n    RH --> SM\n    WP --> WW\n    WP --> DV",
+            "related_entries": [
+                "wiki_frontend_dashboard",
+                "wiki_frontend_interview_page"
+            ]
+        },
+        {
+            "id": "backend_modules",
+            "title": "Backend Modules",
+            "category": "Components",
+            "description": "Python module organization and dependencies",
+            "mermaid": "graph TD\n    subgraph Core\n        IC[interview_controller.py]\n        QM[question_manager.py]\n        CM[context_manager.py]\n    end\n    \n    subgraph Evaluation\n        EV[evaluator.py]\n        RB[rubric_loader.py]\n    end\n    \n    subgraph Strategies\n        SF[strategy_factory.py]\n        DF[depth_focused.py]\n        BF[breadth_focused.py]\n    end\n    \n    subgraph LLM\n        GC[gemini_client.py]\n        FA[feedback_agent.py]\n    end\n    \n    subgraph Prompts\n        PS[prompt_service.py]\n        PM[models.py]\n    end\n    \n    IC --> QM\n    IC --> CM\n    IC --> EV\n    IC --> SF\n    EV --> GC\n    FA --> GC\n    SF --> DF\n    SF --> BF\n    GC --> PS",
+            "related_entries": [
+                "wiki_core_interview_controller",
+                "wiki_core_evaluator"
+            ]
+        },
+        {
+            "id": "llm_integration",
+            "title": "LLM Integration",
+            "category": "Components",
+            "description": "How Gemini AI is integrated for various tasks",
+            "mermaid": "flowchart TB\n    subgraph Clients\n        GC[GeminiClient]\n        FA[FeedbackAgent]\n    end\n    \n    subgraph Tasks\n        T1[Evaluate Answer]\n        T2[Generate Follow-up]\n        T3[Generate Feedback]\n        T4[Answer Wiki Question]\n    end\n    \n    subgraph Prompts\n        P1[evaluation_standard.json]\n        P2[followup_depth.json]\n        P3[feedback_comprehensive.json]\n        P4[wiki_answer.json]\n    end\n    \n    subgraph Knobs\n        K1[temperature: 0.4-0.7]\n        K2[max_tokens: 1024-4096]\n        K3[top_p: 0.9]\n    end\n    \n    T1 --> GC\n    T2 --> GC\n    T3 --> FA\n    T4 --> GC\n    \n    GC --> P1\n    GC --> P2\n    FA --> P3\n    GC --> P4\n    \n    P1 --> K1\n    P2 --> K1\n    P3 --> K2\n    P4 --> K3\n    \n    GC --> API[Gemini API]\n    FA --> API",
+            "related_entries": [
+                "wiki_core_gemini_client",
+                "wiki_core_feedback_agent"
+            ]
+        }
+    ]
+}

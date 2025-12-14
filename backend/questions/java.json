@@ -1,143 +1,321 @@
 {
   "questions": [
     {
-      "id": "j1",
-      "type": "true_false_with_explanation",
-      "text": "True or False: In Java, String objects are immutable. Explain your answer and provide examples.",
-      "topic": "java_fundamentals",
-      "difficulty": "medium",
-      "deterministic_answer": {
-        "type": "boolean",
-        "correct_value": true,
-        "weight": 0.65
-      },
-      "expected_keywords": ["immutable", "String", "StringBuilder", "StringBuffer", "modification"],
+      "id": "java_qs_001",
+      "type": "open_ended",
+      "text": "What is the difference between an interface and an abstract class in Java? When would you use each?",
+      "topic": "java_oop",
+      "difficulty": "easy",
+      "expected_keywords": [
+        "interface",
+        "abstract",
+        "multiple inheritance",
+        "implementation",
+        "contract",
+        "extends",
+        "implements"
+      ],
       "evaluation_rubric": {
-        "factual_correctness": {
-          "weight": 0.65,
-          "criteria": "True/False answer must be correct (binary: 0 or 100)"
-        },
         "completeness": {
-          "weight": 0.15,
-          "criteria": "Should explain immutability and mention alternatives like StringBuilder"
+          "weight": 0.40,
+          "criteria": "Covers key differences"
         },
         "technical_accuracy": {
-          "weight": 0.10,
-          "criteria": "Technical details about String immutability must be accurate"
+          "weight": 0.40,
+          "criteria": "Correct understanding"
         },
         "depth": {
-          "weight": 0.05,
-          "criteria": "Should provide examples demonstrating the concept"
-        },
-        "clarity": {
-          "weight": 0.05,
-          "criteria": "Explanation should be clear and well-structured"
+          "weight": 0.20,
+          "criteria": "Use case examples"
         }
       }
     },
     {
-      "id": "j2",
-      "type": "yes_no_with_explanation",
-      "text": "Can you use a for-each loop to iterate over a HashMap in Java? Yes or No. If yes, explain how. If no, explain why not.",
-      "topic": "java_control_flow",
+      "id": "java_qs_002",
+      "type": "open_ended",
+      "text": "Explain the Java memory model. What are the heap and stack, and what is stored in each?",
+      "topic": "java_memory",
+      "difficulty": "easy",
+      "expected_keywords": [
+        "heap",
+        "stack",
+        "objects",
+        "primitives",
+        "references",
+        "memory",
+        "allocation"
+      ],
+      "evaluation_rubric": {
+        "completeness": {
+          "weight": 0.40,
+          "criteria": "Covers both areas"
+        },
+        "technical_accuracy": {
+          "weight": 0.40,
+          "criteria": "Correct understanding"
+        },
+        "depth": {
+          "weight": 0.20,
+          "criteria": "Object vs primitive storage"
+        }
+      }
+    },
+    {
+      "id": "java_qs_003",
+      "type": "open_ended",
+      "text": "What is the difference between HashMap and ConcurrentHashMap in Java? When would you use each?",
+      "topic": "java_collections",
+      "difficulty": "medium",
+      "expected_keywords": [
+        "HashMap",
+        "ConcurrentHashMap",
+        "thread-safe",
+        "synchronized",
+        "segment",
+        "lock",
+        "performance"
+      ],
+      "evaluation_rubric": {
+        "completeness": {
+          "weight": 0.35,
+          "criteria": "Covers both data structures"
+        },
+        "technical_accuracy": {
+          "weight": 0.35,
+          "criteria": "Correct technical understanding"
+        },
+        "depth": {
+          "weight": 0.30,
+          "criteria": "Concurrency implications"
+        }
+      }
+    },
+    {
+      "id": "java_qs_004",
+      "type": "open_ended",
+      "text": "Explain Java's garbage collection. What are the different generations and how does the GC work?",
+      "topic": "java_memory",
+      "difficulty": "medium",
+      "expected_keywords": [
+        "garbage collection",
+        "young",
+        "old",
+        "eden",
+        "survivor",
+        "G1",
+        "generation"
+      ],
+      "evaluation_rubric": {
+        "completeness": {
+          "weight": 0.35,
+          "criteria": "Covers generational model"
+        },
+        "technical_accuracy": {
+          "weight": 0.35,
+          "criteria": "Correct understanding"
+        },
+        "depth": {
+          "weight": 0.30,
+          "criteria": "GC algorithms mentioned"
+        }
+      }
+    },
+    {
+      "id": "java_qs_005",
+      "type": "open_ended",
+      "text": "What are Java Streams? Provide an example of filtering and mapping a list of integers.",
+      "topic": "java_streams",
+      "difficulty": "easy",
+      "expected_keywords": [
+        "stream",
+        "filter",
+        "map",
+        "collect",
+        "functional",
+        "lambda",
+        "pipeline"
+      ],
+      "evaluation_rubric": {
+        "completeness": {
+          "weight": 0.35,
+          "criteria": "Explains and provides example"
+        },
+        "technical_accuracy": {
+          "weight": 0.40,
+          "criteria": "Correct stream syntax"
+        },
+        "depth": {
+          "weight": 0.25,
+          "criteria": "Practical example with explanation"
+        }
+      }
+    },
+    {
+      "id": "java_qs_006",
+      "type": "open_ended",
+      "text": "Explain the volatile keyword in Java. When and why would you use it?",
+      "topic": "java_concurrency",
+      "difficulty": "hard",
+      "expected_keywords": [
+        "volatile",
+        "visibility",
+        "thread",
+        "memory barrier",
+        "happens-before",
+        "cache"
+      ],
+      "evaluation_rubric": {
+        "completeness": {
+          "weight": 0.35,
+          "criteria": "Covers visibility and ordering"
+        },
+        "technical_accuracy": {
+          "weight": 0.40,
+          "criteria": "Correct understanding"
+        },
+        "depth": {
+          "weight": 0.25,
+          "criteria": "When volatile is/isn't sufficient"
+        }
+      }
+    },
+    {
+      "id": "java_qs_007",
+      "type": "true_false_with_explanation",
+      "text": "True or False: String objects in Java are immutable. Explain what this means and its implications.",
+      "topic": "java_fundamentals",
       "difficulty": "easy",
       "deterministic_answer": {
         "type": "boolean",
         "correct_value": true,
         "weight": 0.65
       },
-      "expected_keywords": ["for-each", "HashMap", "entrySet", "keySet", "values", "iterate"],
+      "expected_keywords": [
+        "immutable",
+        "String",
+        "StringBuilder",
+        "pool",
+        "thread-safe",
+        "concatenation"
+      ],
       "evaluation_rubric": {
         "factual_correctness": {
           "weight": 0.65,
-          "criteria": "Yes/No must be correct"
+          "criteria": "True/False must be correct"
         },
         "completeness": {
+          "weight": 0.20,
+          "criteria": "Explains implications"
+        },
+        "technical_accuracy": {
           "weight": 0.15,
-          "criteria": "Should explain iteration methods"
-        },
-        "technical_accuracy": {
-          "weight": 0.10,
-          "criteria": "Technical explanation must be accurate"
-        },
-        "depth": {
-          "weight": 0.05,
-          "criteria": "Should mention entrySet(), keySet(), values()"
-        },
-        "clarity": {
-          "weight": 0.05,
-          "criteria": "Clear explanation"
+          "criteria": "Mentions StringBuilder alternative"
         }
       }
     },
     {
-      "id": "j3",
-      "type": "multiple_choice_with_explanation",
-      "text": "Which of the following statements about Java interfaces are correct? (Select all that apply)\nA) Interfaces can contain method implementations in Java 8+\nB) Interfaces can have instance variables\nC) A class can implement multiple interfaces\nD) Interfaces can be instantiated directly\n\nExplain why you selected your answer(s).",
-      "topic": "java_advanced",
-      "difficulty": "hard",
-      "deterministic_answer": {
-        "type": "multiple_choice",
-        "correct_options": ["A", "C"],
-        "weight": 0.70
-      },
-      "expected_keywords": ["interface", "default method", "static method", "implement", "multiple inheritance"],
-      "evaluation_rubric": {
-        "factual_correctness": {
-          "weight": 0.70,
-          "criteria": "Calculate: (correct_selected - incorrect_selected) / total_correct * 100. All correct options must be selected, no incorrect ones."
-        },
-        "completeness": {
-          "weight": 0.12,
-          "criteria": "Should explain each selected option"
-        },
-        "technical_accuracy": {
-          "weight": 0.10,
-          "criteria": "Technical details about interfaces must be accurate"
-        },
-        "depth": {
-          "weight": 0.05,
-          "criteria": "Should explain why B and D are incorrect"
-        },
-        "clarity": {
-          "weight": 0.03,
-          "criteria": "Clear explanation"
-        }
-      }
-    },
-    {
-      "id": "j4",
+      "id": "java_qs_008",
       "type": "open_ended",
-      "text": "Explain the difference between checked and unchecked exceptions in Java. Provide examples.",
+      "text": "What is the difference between checked and unchecked exceptions in Java? Give examples of each.",
       "topic": "java_exceptions",
-      "difficulty": "medium",
-      "deterministic_answer": {
-        "type": "concept_check",
-        "required_concepts": ["checked exception", "unchecked exception", "compile-time", "runtime", "throws"],
-        "weight": 0.30
-      },
-      "expected_keywords": ["exception", "checked", "unchecked", "RuntimeException", "IOException", "try-catch", "throws"],
+      "difficulty": "easy",
+      "expected_keywords": [
+        "checked",
+        "unchecked",
+        "RuntimeException",
+        "IOException",
+        "throws",
+        "compile-time"
+      ],
       "evaluation_rubric": {
         "completeness": {
-          "weight": 0.30,
-          "criteria": "Must explain both checked and unchecked exceptions"
+          "weight": 0.40,
+          "criteria": "Explains both types with examples"
         },
         "technical_accuracy": {
-          "weight": 0.30,
-          "criteria": "Technical explanation must be accurate"
+          "weight": 0.40,
+          "criteria": "Correct classification"
         },
         "depth": {
           "weight": 0.20,
-          "criteria": "Should provide examples, explain when to use each"
+          "criteria": "When to use each"
+        }
+      }
+    },
+    {
+      "id": "java_qs_009",
+      "type": "open_ended",
+      "text": "Explain the synchronized keyword in Java. What are the different ways to achieve thread synchronization?",
+      "topic": "java_concurrency",
+      "difficulty": "medium",
+      "expected_keywords": [
+        "synchronized",
+        "lock",
+        "monitor",
+        "mutex",
+        "ReentrantLock",
+        "thread-safe",
+        "critical section"
+      ],
+      "evaluation_rubric": {
+        "completeness": {
+          "weight": 0.35,
+          "criteria": "Covers synchronized and alternatives"
         },
-        "clarity": {
-          "weight": 0.20,
-          "criteria": "Clear, well-structured explanation"
+        "technical_accuracy": {
+          "weight": 0.40,
+          "criteria": "Correct understanding"
+        },
+        "depth": {
+          "weight": 0.25,
+          "criteria": "Lock vs synchronized comparison"
+        }
+      }
+    },
+    {
+      "id": "java_qs_010",
+      "type": "open_ended",
+      "text": "What is dependency injection in Java? Explain with a simple example.",
+      "topic": "java_design",
+      "difficulty": "medium",
+      "expected_keywords": [
+        "dependency injection",
+        "DI",
+        "IoC",
+        "constructor",
+        "setter",
+        "Spring",
+        "decoupling"
+      ],
+      "evaluation_rubric": {
+        "completeness": {
+          "weight": 0.35,
+          "criteria": "Explains concept with example"
+        },
+        "technical_accuracy": {
+          "weight": 0.40,
+          "criteria": "Correct understanding of DI"
+        },
+        "depth": {
+          "weight": 0.25,
+          "criteria": "Benefits and use cases"
         }
       }
     }
   ],
-  "topics": ["java_fundamentals", "java_control_flow", "java_advanced", "java_exceptions"],
-  "difficulty_levels": ["easy", "medium", "hard"]
+  "topics": [
+    "java_oop",
+    "java_memory",
+    "java_collections",
+    "java_streams",
+    "java_concurrency",
+    "java_fundamentals",
+    "java_exceptions",
+    "java_design"
+  ],
+  "difficulty_levels": [
+    "easy",
+    "medium",
+    "hard"
+  ]
 }
-

@@ -1,0 +1,39 @@
+{
+    "id": "followup_transition_v1",
+    "name": "Question Transition Generator",
+    "category": "followup",
+    "variant": "transition",
+    "version": "1.0.0",
+    "description": "Generates natural, warm transition messages between interview questions.",
+    "template": "Generate a brief, warm transition message for moving to the next interview question.\n\nPrevious topic discussed: {topic}\nTone to use: {tone_hint}\n\nGenerate a 1-2 sentence transition that:\n1. Starts with a brief, warm acknowledgment (e.g., \"Great insights!\", \"I appreciate you explaining that\", \"That's helpful context\")\n2. Smoothly transitions to the next topic\n3. Sounds like a friendly human interviewer, not a robot\n4. Avoids generic phrases like \"Let's move on\" or \"Next question\"\n\nGOOD examples:\n- \"I really appreciate you walking me through that. Let me shift gears a bit and ask about something else.\"\n- \"That's a great perspective! There's another area I'm curious about.\"\n- \"Thanks for that detailed explanation. I'd love to explore a different topic with you.\"\n\nBAD examples (avoid these):\n- \"Moving on to the next question.\"\n- \"Let's discuss something else.\"\n- \"Now I will ask about...\"\n\nRespond with ONLY the transition message, nothing else.",
+    "variables": [
+        {
+            "name": "topic",
+            "type": "string",
+            "required": true,
+            "description": "Previous topic discussed"
+        },
+        {
+            "name": "tone_hint",
+            "type": "string",
+            "required": true,
+            "description": "Tone guidance (positive, supportive, neutral, encouraging)"
+        }
+    ],
+    "generation_config": {
+        "temperature": 0.7,
+        "max_output_tokens": 150
+    },
+    "knobs": {
+        "include_examples": true,
+        "output_format": "text",
+        "fallback_enabled": true,
+        "custom": {
+            "score_based_tone": true,
+            "high_score_threshold": 75,
+            "mid_score_threshold": 50
+        }
+    },
+    "author": "system",
+    "notes": "Extracted from gemini_client.py:generate_transition() - smooth transitions between topics"
+}

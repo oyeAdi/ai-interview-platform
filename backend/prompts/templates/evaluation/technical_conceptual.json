@@ -1,0 +1,45 @@
+{
+    "id": "eval_technical_conceptual_v1",
+    "name": "Technical Conceptual Evaluation Framework",
+    "category": "evaluation",
+    "variant": "technical_conceptual",
+    "version": "1.0.0",
+    "description": "Evaluates technical conceptual interview responses with focus on knowledge depth, explanation quality, and practical context.",
+    "template": "Evaluate this TECHNICAL CONCEPTUAL interview response. Focus on KNOWLEDGE DEPTH.\nBE BALANCED. Reward deep understanding but accept standard correct answers.\n\nQuestion: {question}\nResponse: {response}\nDeterministic Scores: {scores}\n\nEVALUATION CRITERIA (Total: 100%):\n1. TECHNICAL ACCURACY (40%) - Correctness of facts and concepts\n2. EXPLANATION QUALITY (25%) - Clarity, analogies, ability to teach/explain\n3. PROBLEM-SOLVING (20%) - Application of knowledge\n4. PRACTICAL CONTEXT (10%) - Real-world usage mention\n5. PROFESSIONALISM (5%) - Confidence and tone\n\nIMPORTANT:\n- Prioritize accuracy and clarity\n- Do NOT require \"textbook perfect\" definitions if the concept is understood\n- Focus on: conceptual grip, ability to explain simply\n\nProvide JSON response:\n- score: 0-100\n- reasoning: Focus on TECHNICAL assessment (one sentence)\n- strengths: 1-2 TECHNICAL strengths (short phrases)\n- improvements: 1-2 TECHNICAL improvements (short phrases)\n\nReply with ONLY valid JSON, no markdown.",
+    "variables": [
+        {
+            "name": "question",
+            "type": "string",
+            "required": true,
+            "max_length": 300,
+            "description": "The technical question text"
+        },
+        {
+            "name": "response",
+            "type": "string",
+            "required": true,
+            "max_length": 500,
+            "description": "Candidate's response"
+        },
+        {
+            "name": "scores",
+            "type": "object",
+            "required": false,
+            "description": "Deterministic scoring results"
+        }
+    ],
+    "generation_config": {
+        "temperature": 0.3,
+        "max_output_tokens": 256
+    },
+    "knobs": {
+        "truncate_question_length": 300,
+        "truncate_response_length": 500,
+        "include_examples": false,
+        "output_format": "json",
+        "fallback_enabled": true,
+        "custom": {}
+    },
+    "author": "system",
+    "notes": "Extracted from evaluator.py:_get_llm_evaluation() - default technical branch"
+}

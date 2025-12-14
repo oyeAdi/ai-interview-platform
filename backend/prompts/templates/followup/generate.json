@@ -1,0 +1,63 @@
+{
+    "id": "followup_generate_v1",
+    "name": "Follow-up Question Generator",
+    "category": "followup",
+    "variant": "generate",
+    "version": "1.0.0",
+    "description": "Generates natural, conversational follow-up questions based on candidate's response and strategy guidance.",
+    "template": "You are a friendly, professional technical interviewer conducting a conversational technical assessment.\n\nGenerate a natural follow-up question based on what the candidate just said.\n\nQuestion: {question}\nCandidate's Response: {response}\nScore: {overall_score}/100\n\nFocus area: {strategy_guidance}\n\nCRITICAL RULES for tone and naturalness:\n1. Start with a brief, warm acknowledgment of what the candidate said (e.g., \"That's a great point about...\", \"I see what you mean...\", \"Interesting approach!\")\n2. Use conversational, encouraging language - never cold or robotic\n3. Reference something SPECIFIC from their answer to show you're listening\n4. Naturally transition into probing deeper on a related point\n5. Maintain a professional yet supportive tone\n\n{expert_examples}\nGOOD Examples (natural, conversational, references their answer):\n- \"That's a great point about using generators! I'm curious - how would you handle a scenario where the data doesn't fit in memory?\"\n- \"I appreciate you walking through that. When you mentioned using a dictionary, what would happen if you needed to modify it while iterating?\"\n- \"Interesting approach with the try-except block! What other edge cases might we need to consider there?\"\n- \"I like how you structured that. Can you tell me more about how you'd test this in a production environment?\"\n\nBAD Examples (avoid these - too cold, generic, or robotic):\n- \"Explain more about X.\"\n- \"What about error handling?\"\n- \"Tell me about performance.\"\n- \"Can you elaborate?\"\n\nGenerate ONLY the follow-up question (including the warm acknowledgment). Nothing else.",
+    "variables": [
+        {
+            "name": "question",
+            "type": "string",
+            "required": true,
+            "max_length": 200,
+            "description": "Original question text"
+        },
+        {
+            "name": "response",
+            "type": "string",
+            "required": true,
+            "max_length": 400,
+            "description": "Candidate's response"
+        },
+        {
+            "name": "overall_score",
+            "type": "int",
+            "required": true,
+            "description": "Current score 0-100"
+        },
+        {
+            "name": "strategy_guidance",
+            "type": "string",
+            "required": true,
+            "max_length": 150,
+            "description": "Strategy-specific focus instruction"
+        },
+        {
+            "name": "expert_examples",
+            "type": "string",
+            "required": false,
+            "default": "",
+            "description": "Expert-approved examples for few-shot learning"
+        }
+    ],
+    "generation_config": {
+        "temperature": 0.8,
+        "max_output_tokens": 2048,
+        "top_p": 0.95
+    },
+    "knobs": {
+        "truncate_question_length": 200,
+        "truncate_response_length": 400,
+        "include_examples": true,
+        "output_format": "text",
+        "fallback_enabled": true,
+        "custom": {
+            "include_expert_examples": true,
+            "warm_acknowledgment_required": true
+        }
+    },
+    "author": "system",
+    "notes": "Extracted from gemini_client.py:generate_followup() - main interview follow-up generation"
+}
