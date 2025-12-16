@@ -1,0 +1,342 @@
+{
+  "id": "demo_eval_20251216_110936",
+  "version": "3.0.0",
+  "created_at": "2025-12-16T11:09:36.376286",
+  "updated_at": "2025-12-16T11:09:36.376411",
+  "state": {
+    "current": "planning",
+    "phase": "planning",
+    "status": "active",
+    "state_history": [
+      {
+        "state": "planning",
+        "entered_at": "2025-12-16T11:09:36.376286",
+        "exited_at": null,
+        "duration_seconds": null
+      }
+    ],
+    "reason_needed": "To track interview progress, enable pause/resume, and ensure phase transitions are valid"
+  },
+  "participants": {
+    "expert": {
+      "id": "demo_expert",
+      "name": "Demo Expert",
+      "email": "demo@example.com",
+      "role": "expert",
+      "logged_in_at": "2025-12-16T11:09:36.376286",
+      "last_activity_at": "2025-12-16T11:09:36.376286",
+      "is_active": true,
+      "reason_needed": "To track who created the interview and enable HITL workflows"
+    },
+    "admin": {
+      "id": null,
+      "name": null,
+      "email": null,
+      "role": "admin",
+      "logged_in_at": null,
+      "last_activity_at": null,
+      "is_active": false,
+      "reason_needed": "To enable admin monitoring and intervention capabilities"
+    },
+    "candidate": {
+      "id": null,
+      "name": null,
+      "email": null,
+      "phone": null,
+      "joined_at": null,
+      "left_at": null,
+      "ip_address": null,
+      "browser": null,
+      "device": null,
+      "is_active": false,
+      "reason_needed": "To track candidate participation and enable reconnection"
+    }
+  },
+  "company_metadata": {
+    "company_id": null,
+    "company_name": "TechCorp Inc",
+    "department": null,
+    "hiring_manager": {
+      "name": null,
+      "email": null
+    },
+    "interview_preferences": {
+      "preferred_question_style": "practical_scenario_based",
+      "focus_areas": [],
+      "red_flags_to_probe": [],
+      "reason_needed": "To align questions with company culture and hiring priorities"
+    },
+    "context": {
+      "tech_stack": [],
+      "team_size": null,
+      "team_structure": null,
+      "reason_needed": "To ask relevant technical questions about company's actual stack"
+    }
+  },
+  "job_metadata": {
+    "position_id": null,
+    "job_title": "Senior Python Developer",
+    "experience_level": null,
+    "seniority": null,
+    "job_description": {
+      "full_text": "",
+      "required_skills": [],
+      "responsibilities": [],
+      "nice_to_have": [],
+      "reason_needed": "To generate questions that assess JD requirements and identify skill gaps"
+    },
+    "salary_range": {
+      "min": null,
+      "max": null,
+      "currency": "USD"
+    }
+  },
+  "candidate_metadata": {
+    "profile": {
+      "experience_years": null,
+      "current_company": null,
+      "current_role": null,
+      "notice_period_days": null,
+      "expected_salary": null,
+      "reason_needed": "To set appropriate difficulty level and personalize questions"
+    },
+    "resume": {
+      "resume_id": null,
+      "uploaded_at": null,
+      "full_text": "",
+      "parsed_data": {
+        "work_experience": [],
+        "projects": [],
+        "education": [],
+        "certifications": [],
+        "skills_claimed": {
+          "languages": [],
+          "frameworks": [],
+          "databases": [],
+          "cloud": [],
+          "tools": []
+        }
+      },
+      "reason_needed": "To personalize questions, probe specific experiences, and identify resume-JD alignment"
+    },
+    "resume_jd_alignment": {
+      "overall_score": null,
+      "strong_matches": [],
+      "gaps": [],
+      "overqualifications": [],
+      "recommendations": "",
+      "reason_needed": "To identify what to assess deeply vs. what to skip"
+    }
+  },
+  "interview_metadata": {
+    "config": {
+      "mode": "quick_start",
+      "total_duration_minutes": 45,
+      "duration_calculation": {
+        "base_minutes": 45,
+        "buffer_percentage": 10,
+        "breakdown": {},
+        "reason_needed": "To pace interview and ensure all topics are covered"
+      },
+      "total_questions_planned": 3,
+      "max_followups_per_question": 10,
+      "question_distribution": {},
+      "difficulty_distribution": {},
+      "enable_adaptive_difficulty": true,
+      "enable_dynamic_followups": true,
+      "enable_expert_mode": false,
+      "reason_needed": "To guide question generation and maintain interview structure"
+    },
+    "round_info": {
+      "round_type": "TI2",
+      "round_number": 1,
+      "round_name": "Technical Interview",
+      "round_objectives": [],
+      "expected_outcomes": [],
+      "reason_needed": "To adapt question style and depth for this specific round type"
+    },
+    "round_rules": {
+      "allowed_categories": [
+        "coding",
+        "conceptual",
+        "system_design"
+      ],
+      "forbidden_topics": [],
+      "min_questions": 3,
+      "max_questions": 6,
+      "time_per_category": {},
+      "coding_required": true,
+      "system_design_required": false,
+      "reason_needed": "To ensure plan respects round-specific constraints"
+    },
+    "time_tracking": {
+      "start_time": null,
+      "end_time": null,
+      "time_elapsed_seconds": 0,
+      "time_remaining_seconds": 2700,
+      "is_running_behind": false,
+      "is_ahead_of_schedule": false,
+      "reason_needed": "To manage pacing and decide on followup depth"
+    }
+  },
+  "multi_round_context": {
+    "is_multi_round_interview": false,
+    "current_round_number": 1,
+    "total_rounds_planned": 1,
+    "previous_rounds": [],
+    "next_rounds_planned": [],
+    "reason_needed": "To maintain context across rounds and ensure progressive assessment"
+  },
+  "planning_phase": {
+    "started_at": null,
+    "completed_at": null,
+    "duration_seconds": null,
+    "llm_plan_generation": {},
+    "planning_phase_output": {
+      "interview_template": {},
+      "interview_plan": {},
+      "personalization_insights": {},
+      "metadata": {}
+    },
+    "critique_feedback": {},
+    "hitl_feedback": {},
+    "observer_insights": {},
+    "history": [],
+    "stats": {
+      "total_plans_generated": 0,
+      "total_regenerations": 0,
+      "average_plan_quality_score": null,
+      "average_generation_time_ms": null,
+      "hitl_approval_rate": null
+    },
+    "reason_needed": "To store all planning outputs for execution phase and enable learning"
+  },
+  "execution_phase": {
+    "started_at": null,
+    "ended_at": null,
+    "current_state": {
+      "phase": "greeting",
+      "current_question_id": null,
+      "current_question_number": 0,
+      "is_followup": false,
+      "followup_number": 0,
+      "awaiting_response": false,
+      "last_question_asked_at": null,
+      "candidate_typing": false,
+      "candidate_last_activity": null,
+      "expert_pending_approval": false,
+      "pending_followup_id": null,
+      "reason_needed": "To enable pause/resume and reconnection"
+    },
+    "context": {
+      "current_question_index": 0,
+      "total_questions_planned": 3,
+      "questions_completed": 0,
+      "questions_remaining": 3,
+      "time_elapsed_seconds": 0,
+      "time_remaining_seconds": 2700,
+      "topics_covered": [],
+      "topics_remaining": [],
+      "current_difficulty_level": null,
+      "conversation_flow_state": "not_started",
+      "reason_needed": "To manage pacing and topic transitions"
+    },
+    "transcript": [],
+    "behavioral_analytics": {
+      "typing_patterns": [],
+      "pause_patterns": [],
+      "edit_patterns": [],
+      "code_submission_patterns": [],
+      "reason_needed": "To detect cheating and assess problem-solving approach"
+    },
+    "skills_assessment": {
+      "skills_tested": [],
+      "skills_validated": [],
+      "skills_gaps_identified": [],
+      "reason_needed": "To track what has been assessed"
+    },
+    "live_metrics": {
+      "total_questions_asked": 0,
+      "total_followups_asked": 0,
+      "average_response_time_seconds": null,
+      "average_score": null,
+      "topics_covered_count": 0,
+      "reason_needed": "To provide real-time feedback to admin"
+    },
+    "reason_needed": "To track real-time interview execution",
+    "questions_asked": [
+      {
+        "question_id": "q1",
+        "question_text": "Can you walk me through your experience with Django and FastAPI? What are the key differences you've noticed?",
+        "category": "Backend Frameworks",
+        "difficulty": "easy",
+        "candidate_response": "I've worked with both Django and FastAPI extensively. Django is great for full-featured applications with its ORM and admin panel, while FastAPI is faster and better for APIs with automatic OpenAPI docs. FastAPI uses async/await natively which Django added later.",
+        "response_time_seconds": 45
+      },
+      {
+        "question_id": "q2",
+        "question_text": "Tell me about a time you used asyncio or Celery. What challenges did you face?",
+        "category": "Async Programming",
+        "difficulty": "medium",
+        "candidate_response": "I used asyncio to build a real-time analytics pipeline that processed events from multiple sources. The main challenge was handling backpressure when one source was faster than others. I solved it using asyncio.Queue with maxsize to prevent memory issues.",
+        "response_time_seconds": 60
+      },
+      {
+        "question_id": "q3",
+        "question_text": "How do you approach database schema design for complex applications? Can you give an example?",
+        "category": "Database Design",
+        "difficulty": "medium",
+        "candidate_response": "I start by identifying entities and relationships, then normalize to 3NF. For a recent e-commerce project, I designed tables for users, products, orders, and order_items with proper foreign keys and indexes on frequently queried columns.",
+        "response_time_seconds": 55
+      }
+    ]
+  },
+  "evaluation_phase": {
+    "started_at": null,
+    "completed_at": null,
+    "duration_seconds": null,
+    "llm_evaluation": {},
+    "critique_feedback": {},
+    "hitl_evaluation": {},
+    "observer_insights": {},
+    "final_report": {},
+    "stats": {
+      "total_evaluations_generated": 0,
+      "average_evaluation_time_ms": null,
+      "hitl_approval_rate": null
+    },
+    "reason_needed": "To store comprehensive evaluation and enable learning"
+  },
+  "events": [
+    {
+      "event_id": "evt_001",
+      "timestamp": "2025-12-16T11:09:36.376286",
+      "event_type": "session_created",
+      "actor": "expert",
+      "actor_id": "demo_expert",
+      "details": {
+        "mode": "quick_start",
+        "round_type": "TI2"
+      }
+    }
+  ],
+  "metadata": {
+    "schema_version": "3.0.0",
+    "created_by": "demo_expert",
+    "last_modified_by": "demo_expert",
+    "tags": [],
+    "notes": "",
+    "is_test_session": false,
+    "reason_needed": "To enable filtering, searching, and debugging"
+  },
+  "stats": {
+    "total_duration_seconds": null,
+    "total_questions_asked": 0,
+    "total_followups_asked": 0,
+    "total_responses_received": 0,
+    "average_response_time_seconds": null,
+    "overall_score": null,
+    "pass_status": null,
+    "reason_needed": "To provide quick summary metrics"
+  }
+}
