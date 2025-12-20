@@ -71,9 +71,22 @@ export default async function middleware(request: NextRequest) {
     let subdomain = '';
     if (hostname.includes('.')) {
         const parts = hostname.split('.');
-        if (hostname.endsWith('.swarmhire.ai')) subdomain = parts[0];
-        else if (hostname.endsWith('.lvh.me:3000')) subdomain = parts[0];
-        else if (hostname.endsWith('.vercel.app') && parts.length > 2) subdomain = parts[0];
+
+        // Only extract subdomain for actual custom domains, not Vercel deployment URLs
+        if (hostname.endsWith('.swarmhire.ai')) {
+            subdomain = parts[0];
+        } else if (hostname.endsWith('.lvh.me:3000')) {
+            subdomain = parts[0];
+        } else if (hostname.endsWith('.vercel.app')) {
+            // Skip Vercel's auto-generated deployment URLs (e.g., project-hash-user-org.vercel.app)
+            // Only treat it as a tenant if it's a custom subdomain like tenant.swarmhire.vercel.app
+            // Vercel deployment URLs typically have hyphens and long names, so skip them
+            const firstPart = parts[0];
+            const isVercelDeployment = firstPart.includes('-') || parts.length === 2;
+            if (!isVercelDeployment && parts.length > 2) {
+                subdomain = firstPart;
+            }
+        }
     }
 
     const reservedSubdomains = ['www', 'app', 'api', 'admin'];
