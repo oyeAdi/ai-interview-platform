@@ -11,7 +11,7 @@ interface InterviewLinksModalProps {
     position: { id: string; title: string }
     candidate: { id: string; name: string }
     links: {
-      candidate: string
+      candidate?: string
       admin?: string  // Backend still uses 'admin' key for backward compatibility
       expert?: string  // New key
       candidate_link?: string  // Alternative format
