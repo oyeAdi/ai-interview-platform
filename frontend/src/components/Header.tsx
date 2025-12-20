@@ -1,18 +1,64 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import ThemeToggle from './ThemeToggle'
+import { createClient } from '@/utils/supabase/client'
+import { User } from '@supabase/supabase-js'
 
 interface HeaderProps {
   showQuickStart?: boolean
   showBackToDashboard?: boolean
+  title?: string
 }
 
-export default function Header({ showQuickStart = true, showBackToDashboard = false }: HeaderProps) {
+export default function Header({ showQuickStart = true, showBackToDashboard = false, title }: HeaderProps) {
   const pathname = usePathname()
+  const router = useRouter()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [user, setUser] = useState<User | null>(null)
+  const [userRole, setUserRole] = useState<string>('user')
+  const [userProfile, setUserProfile] = useState<{ email: string, role: string, preferred_vision: string } | null>(null)
+  const supabase = createClient()
+
+  useEffect(() => {
+    const getUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      setUser(user)
+
+      // Fetch user role from profiles table
+      if (user) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('role, preferred_vision')
+          .eq('id', user.id)
+          .single()
+
+        if (profile) {
+          setUserRole(profile.role || 'user')
+          setUserProfile({
+            email: user.email || '',
+            role: profile.role || 'user',
+            preferred_vision: profile.preferred_vision || 'B2B'
+          })
+        }
+      }
+    }
+    getUser()
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null)
+    })
+
+    return () => subscription.unsubscribe()
+  }, [])
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut()
+    router.push('/')
+    router.refresh()
+  }
 
   return (
     <>
@@ -37,10 +83,15 @@ export default function Header({ showQuickStart = true, showBackToDashboard = fa
               </button>
 
               {/* SwarmHire Logo */}
-              <Link href="/" className="flex items-center">
+              <Link href="/" className="flex items-center gap-3">
                 <span className="text-xl font-bold tracking-tight text-black dark:text-white">
                   Swarm<span className="text-brand-primary">Hire</span>
                 </span>
+                {title && (
+                  <div className="flex items-center gap-2 border-l border-gray-200 dark:border-[#2A2A2A] pl-3 ml-1">
+                    <span className="text-xs font-medium text-gray-500 dark:text-gray-400 whitespace-nowrap">/ {title}</span>
+                  </div>
+                )}
               </Link>
 
               {/* Theme Toggle */}
@@ -79,15 +130,19 @@ export default function Header({ showQuickStart = true, showBackToDashboard = fa
                 About
               </Link>
 
-              <Link
-                href="/resources"
-                className={`text-sm font-normal transition-colors ${pathname === '/resources'
-                  ? 'text-black dark:text-white'
-                  : 'text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white'
-                  }`}
-              >
-                Resources
-              </Link>
+
+              {/* Wiki & Docs - Only for super_admin */}
+              {userRole === 'super_admin' && (
+                <Link
+                  href="/wiki"
+                  className={`text-sm font-normal transition-colors ${pathname === '/wiki'
+                    ? 'text-black dark:text-white'
+                    : 'text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white'
+                    }`}
+                >
+                  Wiki & Docs
+                </Link>
+              )}
             </nav>
 
             {/* Right Side - CTA & Login */}
@@ -104,29 +159,84 @@ export default function Header({ showQuickStart = true, showBackToDashboard = fa
                 </Link>
               )}
 
-              {/* Login Link */}
-              <Link
-                href="/dashboard"
-                className="hidden sm:block text-sm font-normal text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white transition-colors"
-              >
-                Login
-              </Link>
+              {/* Auth Section */}
+              {user ? (
+                <button
+                  onClick={handleLogout}
+                  className="hidden sm:block text-sm font-medium text-gray-500 hover:text-red-600 transition-colors"
+                >
+                  Logout
+                </button>
+              ) : (
+                <Link
+                  href="/login"
+                  className="hidden sm:block text-sm font-normal text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white transition-colors"
+                >
+                  Login
+                </Link>
+              )}
 
               {/* Get Started CTA */}
-              {showQuickStart && pathname !== '/quick-start' && (
+              {showQuickStart && pathname !== '/quick-start' && !user && (
                 <Link
-                  href="/quick-start"
+                  href="/signup"
                   className="hidden sm:block px-6 py-2.5 text-sm font-medium bg-black dark:bg-white text-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-100 transition-colors rounded-lg"
                 >
                   Get Started
                 </Link>
               )}
 
-              {/* Global - Static Text */}
-              <span className="hidden sm:flex items-center gap-1 text-sm text-gray-500 dark:text-gray-400">
-                Global
-                <span className="text-gray-400 dark:text-gray-500">(EN)</span>
-              </span>
+              {/* Vision Switcher (Desktop) */}
+              <div className="hidden lg:flex items-center gap-2 border-l border-gray-200 dark:border-[#2A2A2A] ml-2 pl-4">
+                <div className="relative group">
+                  <button className="flex items-center gap-2 text-xs font-medium text-gray-500 hover:text-black dark:hover:text-white transition-colors py-1 px-2 rounded-md hover:bg-gray-100 dark:hover:bg-[#1A1A1A]">
+                    <span className="w-1.5 h-1.5 rounded-full bg-brand-primary"></span>
+                    Switch Vision
+                    <svg className="w-3 h-3 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+                  <div className="absolute top-full left-0 mt-1 w-48 bg-white dark:bg-[#0A0A0A] border border-gray-200 dark:border-[#2A2A2A] rounded-xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-[60] py-2 overflow-hidden">
+                    <div className="flex flex-col">
+                      <VisionLink
+                        href="/dashboard"
+                        label="Enterprise Hub"
+                        icon="🏢"
+                        userVision={user?.user_metadata?.preferred_vision}
+                        userRole={userRole}
+                        targetVision="B2B"
+                      />
+                      <VisionLink
+                        href="/expert/studio"
+                        label="Expert Studio"
+                        icon="👤"
+                        userVision={user?.user_metadata?.preferred_vision}
+                        userRole={userRole}
+                        targetVision="B2C"
+                      />
+                      <VisionLink
+                        href="/private/circle"
+                        label="Private Circle"
+                        icon="🏠"
+                        userVision={user?.user_metadata?.preferred_vision}
+                        userRole={userRole}
+                        targetVision="C2C"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* User Profile Debug Indicator */}
+              {userProfile && (
+                <div className="hidden sm:flex flex-col items-end gap-0.5 text-[9px] font-mono text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-[#2A2A2A] px-2 py-1 rounded">
+                  <div className="font-bold">{userProfile.email}</div>
+                  <div className="flex gap-2">
+                    <span className="text-blue-600 dark:text-blue-400">Role: {userProfile.role}</span>
+                    <span className="text-purple-600 dark:text-purple-400">Vision: {userProfile.preferred_vision}</span>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -164,12 +274,12 @@ export default function Header({ showQuickStart = true, showBackToDashboard = fa
             </Link>
 
             <Link
-              href="/resources"
+              href="/wiki"
               onClick={() => setMobileMenuOpen(false)}
-              className={`block text-2xl font-light ${pathname === '/resources' ? 'text-brand-primary' : 'text-black dark:text-white'
+              className={`block text-2xl font-light ${pathname === '/wiki' ? 'text-brand-primary' : 'text-black dark:text-white'
                 }`}
             >
-              Resources
+              Wiki & Docs
             </Link>
 
             <div className="pt-6 border-t border-gray-200 dark:border-[#2A2A2A] space-y-4">
@@ -195,5 +305,46 @@ export default function Header({ showQuickStart = true, showBackToDashboard = fa
         </div>
       )}
     </>
+  )
+}
+interface VisionLinkProps {
+  href: string
+  label: string
+  icon: string
+  userVision: string | undefined
+  userRole: string
+  targetVision: string
+}
+
+function VisionLink({ href, label, icon, userVision, userRole, targetVision }: VisionLinkProps) {
+  // Super admins have unrestricted access to all visions
+  const isSuperAdmin = userRole === 'super_admin'
+  const isLocked = !isSuperAdmin && userVision && userVision !== targetVision
+  const isActive = userVision === targetVision
+
+  if (isLocked) {
+    return (
+      <div className="flex items-center justify-between px-4 py-2 text-xs text-gray-400 cursor-not-allowed opacity-60">
+        <div className="flex items-center gap-3">
+          <span>{icon}</span> {label}
+        </div>
+        <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+        </svg>
+      </div>
+    )
+  }
+
+  return (
+    <Link
+      href={href}
+      className={`flex items-center justify-between px-4 py-2 text-xs transition-colors hover:bg-gray-50 dark:hover:bg-[#111111] ${isActive ? 'text-brand-primary font-bold' : 'text-gray-600 dark:text-gray-400 hover:text-black dark:hover:text-white'
+        }`}
+    >
+      <div className="flex items-center gap-3">
+        <span>{icon}</span> {label}
+      </div>
+      {isActive && <div className="w-1 h-1 rounded-full bg-brand-primary"></div>}
+    </Link>
   )
 }

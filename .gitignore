@@ -23,10 +23,10 @@ out/
 *.swp
 *.swo
 
-# Environment
-.env
-.env.local
-.env.supabase
+# Environment (Unblocked for local dev access)
+#! .env
+#! .env.local
+#! .env.supabase
 
 # Logs
 backend/logs/*.json

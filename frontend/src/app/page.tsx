@@ -181,85 +181,61 @@ export default function LandingV2() {
                         </p>
 
                         <div className="grid md:grid-cols-3 gap-6">
-                            {/* B2B */}
-                            <div className="p-8 bg-white rounded-xl border-2 border-blue-200 hover:border-blue-400 transition-all shadow-md">
+                            {/* B2B: Enterprise Hub */}
+                            <div className="p-8 bg-white dark:bg-[#0A0A0A] rounded-xl border-2 border-blue-200 dark:border-blue-900/30 hover:border-blue-400 transition-all shadow-md group">
                                 <div className="flex items-center gap-3 mb-4">
-                                    <div className="w-12 h-12 bg-blue-500 rounded-lg flex items-center justify-center text-white text-2xl font-bold">
-                                        B2B
-                                    </div>
-                                    <h3 className="text-xl font-bold text-gray-900">Enterprise Hiring</h3>
+                                    <div className="w-12 h-12 bg-blue-500 rounded-lg flex items-center justify-center text-white text-2xl">🏢</div>
+                                    <h3 className="text-xl font-bold text-gray-900 dark:text-white">Enterprise Hub (B2B)</h3>
                                 </div>
-                                <p className="text-gray-600 mb-4">
-                                    Companies hire for themselves
+                                <p className="text-gray-600 dark:text-gray-400 mb-4 text-sm">
+                                    Strategic hiring for companies & teams at scale.
                                 </p>
-                                <div className="space-y-2 text-sm text-gray-700">
-                                    <div className="flex items-start gap-2">
-                                        <span className="text-blue-500 mt-1">→</span>
-                                        <span><strong>EPAM</strong> uses SwarmHire to interview candidates</span>
-                                    </div>
-                                    <div className="flex items-start gap-2">
-                                        <span className="text-blue-500 mt-1">→</span>
-                                        <span>Company pays subscription</span>
-                                    </div>
-                                    <div className="flex items-start gap-2">
-                                        <span className="text-blue-500 mt-1">→</span>
-                                        <span>Full control over hiring process</span>
-                                    </div>
+                                <div className="space-y-3 mb-8 text-xs text-gray-700 dark:text-gray-400">
+                                    <div className="flex items-start gap-2 italic">"EPAM uses this to manage 1000s of candidates."</div>
+                                    <div className="flex items-center gap-2">✓ Dynamic JD Analysis</div>
+                                    <div className="flex items-center gap-2">✓ Multi-Stage Pipelines</div>
                                 </div>
+                                <Link href="/dashboard" className="block w-full text-center py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                                    Enter Hub →
+                                </Link>
                             </div>
 
-                            {/* B2C */}
-                            <div className="p-8 bg-white rounded-xl border-2 border-green-200 hover:border-green-400 transition-all shadow-md">
+                            {/* B2C: Expert Studio */}
+                            <div className="p-8 bg-white dark:bg-[#0A0A0A] rounded-xl border-2 border-green-200 dark:border-green-900/30 hover:border-green-400 transition-all shadow-md group">
                                 <div className="flex items-center gap-3 mb-4">
-                                    <div className="w-12 h-12 bg-green-500 rounded-lg flex items-center justify-center text-white text-2xl font-bold">
-                                        B2C
-                                    </div>
-                                    <h3 className="text-xl font-bold text-gray-900">Interview Practice</h3>
+                                    <div className="w-12 h-12 bg-green-500 rounded-lg flex items-center justify-center text-white text-2xl">👤</div>
+                                    <h3 className="text-xl font-bold text-gray-900 dark:text-white">Expert Studio (B2C)</h3>
                                 </div>
-                                <p className="text-gray-600 mb-4">
-                                    Candidates practice & improve
+                                <p className="text-gray-600 dark:text-gray-400 mb-4 text-sm">
+                                    Sell your expertise. Coach & vet students.
                                 </p>
-                                <div className="space-y-2 text-sm text-gray-700">
-                                    <div className="flex items-start gap-2">
-                                        <span className="text-green-500 mt-1">→</span>
-                                        <span>Candidate pays per interview ($10)</span>
-                                    </div>
-                                    <div className="flex items-start gap-2">
-                                        <span className="text-green-500 mt-1">→</span>
-                                        <span>AI-only interviews (no human)</span>
-                                    </div>
-                                    <div className="flex items-start gap-2">
-                                        <span className="text-green-500 mt-1">→</span>
-                                        <span>Instant feedback & skill reports</span>
-                                    </div>
+                                <div className="space-y-3 mb-8 text-xs text-gray-700 dark:text-gray-400">
+                                    <div className="flex items-start gap-2 italic">"Teach Soft Skills or Tech with your own Bar."</div>
+                                    <div className="flex items-center gap-2">✓ Personal Review Queue</div>
+                                    <div className="flex items-center gap-2">✓ Monetized Lab Packages</div>
                                 </div>
+                                <Link href="/expert/studio" className="block w-full text-center py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+                                    Open Studio →
+                                </Link>
                             </div>
 
-                            {/* C2C */}
-                            <div className="p-8 bg-white rounded-xl border-2 border-purple-200 hover:border-purple-400 transition-all shadow-md">
+                            {/* C2C: Private Circle */}
+                            <div className="p-8 bg-white dark:bg-[#0A0A0A] rounded-xl border-2 border-purple-200 dark:border-purple-900/30 hover:border-purple-400 transition-all shadow-md group">
                                 <div className="flex items-center gap-3 mb-4">
-                                    <div className="w-12 h-12 bg-purple-500 rounded-lg flex items-center justify-center text-white text-2xl font-bold">
-                                        C2C
-                                    </div>
-                                    <h3 className="text-xl font-bold text-gray-900">Expert Marketplace</h3>
+                                    <div className="w-12 h-12 bg-purple-500 rounded-lg flex items-center justify-center text-white text-2xl">🏠</div>
+                                    <h3 className="text-xl font-bold text-gray-900 dark:text-white">Private Circle (C2C)</h3>
                                 </div>
-                                <p className="text-gray-600 mb-4">
-                                    Connect experts with candidates
+                                <p className="text-gray-600 dark:text-gray-400 mb-4 text-sm">
+                                    Trust-based hiring for your private life.
                                 </p>
-                                <div className="space-y-2 text-sm text-gray-700">
-                                    <div className="flex items-start gap-2">
-                                        <span className="text-purple-500 mt-1">→</span>
-                                        <span>Freelance experts offer mock interviews</span>
-                                    </div>
-                                    <div className="flex items-start gap-2">
-                                        <span className="text-purple-500 mt-1">→</span>
-                                        <span>Candidate pays expert ($100)</span>
-                                    </div>
-                                    <div className="flex items-start gap-2">
-                                        <span className="text-purple-500 mt-1">→</span>
-                                        <span>Platform takes 15% commission</span>
-                                    </div>
+                                <div className="space-y-3 mb-8 text-xs text-gray-700 dark:text-gray-400">
+                                    <div className="flex items-start gap-2 italic">"Hire a Nanny or Roommate with Vibe-Checks."</div>
+                                    <div className="flex items-center gap-2">✓ Anti-Leak Privacy</div>
+                                    <div className="flex items-center gap-2">✓ ID & Safety Verification</div>
                                 </div>
+                                <Link href="/private/circle" className="block w-full text-center py-2.5 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
+                                    Access Circle →
+                                </Link>
                             </div>
                         </div>
 

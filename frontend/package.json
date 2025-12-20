@@ -13,6 +13,8 @@
   },
   "dependencies": {
     "@monaco-editor/react": "^4.7.0",
+    "@supabase/ssr": "^0.8.0",
+    "@supabase/supabase-js": "^2.89.0",
     "autoprefixer": "^10.4.16",
     "mermaid": "^11.12.2",
     "next": "^14.0.0",
@@ -38,5 +40,3 @@
     "typescript": "^5.2.0"
   }
 }
-
-

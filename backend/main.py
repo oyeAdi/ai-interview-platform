@@ -1,5 +1,5 @@
 """FastAPI server with WebSocket support"""
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException, UploadFile, File, Form, Body
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException, UploadFile, File, Form, Body, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from typing import Optional, List, Any
@@ -14,12 +14,8 @@ from dotenv import load_dotenv
 # Load environment variables from backend/.env
 load_dotenv(os.path.join(os.path.dirname(__file__), '.env'))
 
-from config import Config
-from websocket.connection_manager import ConnectionManager
-from websocket.message_handler import MessageHandler
-from llm.jd_resume_analyzer import JDResumeAnalyzer
-from llm.feedback_agent import FeedbackGenerator
 import logging
+from supabase_config import supabase_admin, supabase
 
 # Configure debug logging
 debug_logger = logging.getLogger("debug_logger")
@@ -31,8 +27,27 @@ debug_logger.addHandler(handler)
 from core.interview_controller import InterviewController
 from utils.file_parser import FileParser
 from utils.logger import Logger
+from websocket.connection_manager import ConnectionManager
+from websocket.message_handler import MessageHandler
+from llm.jd_resume_analyzer import JDResumeAnalyzer
+from llm.feedback_agent import FeedbackGenerator
+
+# Import admin router
+from api.admin import router as admin_router
 
 app = FastAPI(title="AI Interviewer API")
+
+# Configure CORS to allow frontend requests
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000", "http://localhost:3001"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Register admin router
+app.include_router(admin_router)
 
 # Pydantic models for request/response
 class SkillRequirement(BaseModel):
@@ -202,79 +217,61 @@ def save_candidate_result(candidate_name: str, candidate_id: str, result: dict, 
     
     return filepath
 
-# CORS middleware
+# CORS middleware - allow all subdomains of swarmhire.ai and local dev
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # In production, specify actual origins
+    allow_origin_regex=os.getenv("CORS_ORIGIN_REGEX", r"https://.*\.swarmhire\.ai|http://localhost:3000|http://.*\.lvh\.me:3000"),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
+def get_tenant_from_session(session_id: str) -> str:
+    """Helper to get tenant_id from session metadata in Supabase"""
+    try:
+        # Check Supabase first (interview_sessions table should be in 002/003 migrations)
+        # For now, we might fall back to JSON if table doesn't exist yet
+        response = supabase_admin.table('interviews').select('tenant_id').eq('id', session_id).execute()
+        if response.data:
+            return str(response.data[0]['tenant_id'])
+    except Exception as e:
+        # Fallback to local file during migration
+        try:
+            sessions_data = load_json_file(SESSIONS_FILE)
+            session = sessions_data.get("sessions", {}).get(session_id)
+            if session:
+                return session.get("tenant_id", "global")
+        except:
+            pass
+    return "global"
 def initialize_data_files():
-    """Initialize all required JSON files with proper structure if they don't exist.
+    """Ensure all required data files exist with proper initial structure"""
+    if not os.path.exists(MODELS_DIR):
+        os.makedirs(MODELS_DIR)
     
-    NOTE: On Render, the filesystem is ephemeral. Data written during runtime will be lost
-    on restart. For production, consider migrating to a database (PostgreSQL, MongoDB, etc.)
-    """
-    # Ensure directories exist
-    os.makedirs(MODELS_DIR, exist_ok=True)
-    os.makedirs(CANDIDATE_RESULTS_DIR, exist_ok=True)
-    os.makedirs(Config.JDS_DIR, exist_ok=True)
-    os.makedirs(Config.RESUMES_DIR, exist_ok=True)
-    os.makedirs(Config.LOGS_DIR, exist_ok=True)
-    
-    # Initialize files with default structure if they don't exist
-    # Note: Files from the repo should already exist, but we ensure they're initialized
-    files_to_init = {
-        ORGANIZATIONS_FILE: {"organizations": []},
-        ACCOUNTS_FILE: {"accounts": []},
-        POSITIONS_FILE: {"positions": [], "experience_levels": ["junior", "mid", "senior", "lead"], "expectation_levels": ["basic", "medium", "high"], "status_options": ["open", "closed", "on_hold"]},
-        QUESTION_BANK_FILE: {"questions": []},
-        WIKI_FILE: {"entries": [], "categories": []},
+    if not os.path.exists(CANDIDATE_RESULTS_DIR):
+        os.makedirs(CANDIDATE_RESULTS_DIR)
+        
+    data_files = {
+        ORGANIZATIONS_FILE: {"organizations": {}},
+        ACCOUNTS_FILE: {"accounts": {}},
+        POSITIONS_FILE: {"positions": {}},
+        QUESTION_BANK_FILE: {"questions": {}},
+        WIKI_FILE: {"articles": {}},
         SESSIONS_FILE: {"sessions": {}},
-        RESULTS_FILE: {"results": []},
-        os.path.join(Config.JDS_DIR, "jds.json"): {"jds": []},
-        os.path.join(Config.RESUMES_DIR, "resumes.json"): {"resumes": []},
+        RESULTS_FILE: {"results": {}}
     }
     
-    for filepath, default_data in files_to_init.items():
+    for filepath, default_data in data_files.items():
         if not os.path.exists(filepath):
-            # Create with default structure only if file doesn't exist
             save_json_file(filepath, default_data)
-            print(f"[WARN] Initialized {filepath} with default structure (file was missing)")
         else:
-            # File exists - verify it's valid JSON
-            # On Render, files can become empty/corrupted, so we fix them
             try:
                 data = load_json_file(filepath)
-                if data and isinstance(data, dict):
-                    # File exists and is valid - check if it has data
-                    has_data = any(
-                        isinstance(v, list) and len(v) > 0 or 
-                        isinstance(v, dict) and len(v) > 0 
-                        for v in data.values()
-                    )
-                    if has_data:
-                        print(f"[OK] {filepath} exists with data ({len(data)} keys, preserved)")
-                    else:
-                        # File exists but is empty - this is OK, preserve it
-                        print(f"[INFO] {filepath} exists but is empty (preserved)")
-                    continue
-                else:
-                    # File exists but has invalid structure (not a dict) - fix it
-                    print(f"[WARN] {filepath} exists but has invalid structure (not a dict), initializing with default")
+                if not data or not isinstance(data, dict):
                     save_json_file(filepath, default_data)
-                    continue
-            except (json.JSONDecodeError, ValueError) as e:
-                # File exists but is empty or corrupted JSON - fix it
-                print(f"[WARN] {filepath} exists but is empty/corrupted ({e}), initializing with default structure")
+            except:
                 save_json_file(filepath, default_data)
-                continue
-            except Exception as e:
-                # Other errors (permissions, etc.) - log but don't overwrite
-                print(f"[ERROR] Error reading {filepath}: {e} (file preserved, may need manual fix)")
-                continue
 
 # Initialize data files on startup
 initialize_data_files()
@@ -568,48 +565,82 @@ async def get_organization(org_id: str):
 
 @app.get("/api/organizations/{org_id}/accounts")
 async def get_organization_accounts(org_id: str):
-    """Get all accounts for an organization"""
-    data = load_json_file(ACCOUNTS_FILE)
-    accounts = [acc for acc in data.get("accounts", []) if acc.get("org_id") == org_id]
-    return {"accounts": accounts}
+    """Get all accounts for an organization from Supabase"""
+    try:
+        # We store org_id in settings for now in our Supabase schema
+        response = supabase_admin.table('tenants').select('*').contains('settings', {"org_id": org_id}).execute()
+        return {"accounts": response.data}
+    except Exception as e:
+        print(f"[ERROR] Failed to fetch organization {org_id} accounts: {e}")
+        data = load_json_file(ACCOUNTS_FILE)
+        accounts = [acc for acc in data.get("accounts", []) if acc.get("org_id") == org_id]
+        return {"accounts": accounts}
 
 @app.get("/api/accounts")
-async def get_all_accounts():
-    """Get all accounts"""
-    data = load_json_file(ACCOUNTS_FILE)
-    return {"accounts": data.get("accounts", [])}
+async def get_all_accounts(request: Request):
+    """Get all accounts (tenants) from Supabase, filtered by parent_tenant_id"""
+    try:
+        # Extract tenant context from header (set by middleware)
+        tenant_slug = request.headers.get('X-Tenant-Slug', 'global')
+        
+        # Get the current tenant ID from slug
+        tenant_response = supabase_admin.table('tenants').select('id').eq('slug', tenant_slug).single().execute()
+        current_tenant_id = tenant_response.data['id'] if tenant_response.data else None
+        
+        if not current_tenant_id:
+            # Fallback: return all top-level tenants (parent_tenant_id is NULL)
+            response = supabase_admin.table('tenants').select('*').is_('parent_tenant_id', 'null').execute()
+        else:
+            # Return only child accounts of the current tenant
+            response = supabase_admin.table('tenants').select('*').eq('parent_tenant_id', current_tenant_id).execute()
+        
+        return {"accounts": response.data}
+    except Exception as e:
+        print(f"[ERROR] Failed to fetch accounts from Supabase: {e}")
+        # Fallback to local file during transition
+        data = load_json_file(ACCOUNTS_FILE)
+        return {"accounts": data.get("accounts", [])}
+
 
 class AccountCreate(BaseModel):
     name: str
     description: str = ""
-    org_id: str = "epam"
+    org_id: str = "epam"  # Legacy field, kept for compatibility
+    parent_tenant_id: Optional[str] = None  # UUID of parent tenant for hierarchical isolation
+
 
 @app.post("/api/accounts")
-async def create_account(account: AccountCreate):
-    """Create a new account"""
-    data = load_json_file(ACCOUNTS_FILE)
-    if "accounts" not in data:
-        data["accounts"] = []
-    
-    # Generate unique ID from name
-    account_id = account.name.lower().replace(" ", "_").replace("-", "_")
-    
-    # Check if account already exists
-    if any(acc["id"] == account_id for acc in data["accounts"]):
-        raise HTTPException(status_code=400, detail="Account with this name already exists")
-    
-    new_account = {
-        "id": account_id,
-        "name": account.name,
-        "org_id": account.org_id,
-        "description": account.description,
-        "positions": []
-    }
-    
-    data["accounts"].append(new_account)
-    save_json_file(ACCOUNTS_FILE, data)
-    
-    return {"status": "created", "account": new_account}
+async def create_account(account: AccountCreate, request: Request):
+    """Create a new account (tenant) in Supabase with hierarchical support"""
+    try:
+        # Generate slug from name
+        slug = account.name.lower().replace(" ", "-").replace("_", "-")
+        
+        # Determine parent_tenant_id
+        parent_id = None
+        if account.parent_tenant_id:
+            parent_id = account.parent_tenant_id
+        else:
+            # Auto-assign parent based on current tenant context
+            tenant_slug = request.headers.get('X-Tenant-Slug', 'global')
+            if tenant_slug != 'global':
+                tenant_response = supabase_admin.table('tenants').select('id').eq('slug', tenant_slug).single().execute()
+                parent_id = tenant_response.data['id'] if tenant_response.data else None
+        
+        new_account = {
+            "name": account.name,
+            "slug": slug,
+            "description": account.description,
+            "parent_tenant_id": parent_id,
+            "settings": {"org_id": account.org_id}
+        }
+        
+        response = supabase_admin.table('tenants').insert(new_account).execute()
+        return {"status": "created", "account": response.data[0]}
+    except Exception as e:
+        print(f"[ERROR] Failed to create account in Supabase: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 
 class AccountUpdate(BaseModel):
     name: Optional[str] = None
@@ -654,12 +685,25 @@ async def delete_account(account_id: str):
 
 @app.get("/api/accounts/{account_id}")
 async def get_account(account_id: str):
-    """Get specific account details"""
-    data = load_json_file(ACCOUNTS_FILE)
-    for acc in data.get("accounts", []):
-        if acc["id"] == account_id:
-            return acc
-    raise HTTPException(status_code=404, detail="Account not found")
+    """Get specific account (tenant) details from Supabase"""
+    try:
+        # account_id could be UUID or slug
+        query = supabase_admin.table('tenants').select('*')
+        if len(account_id) == 36: # Likely UUID
+            query = query.eq('id', account_id)
+        else:
+            query = query.eq('slug', account_id)
+            
+        response = query.single().execute()
+        return response.data
+    except Exception as e:
+        print(f"[ERROR] Failed to fetch account {account_id} from Supabase: {e}")
+        # Fallback
+        data = load_json_file(ACCOUNTS_FILE)
+        for acc in data.get("accounts", []):
+            if acc["id"] == account_id:
+                return acc
+        raise HTTPException(status_code=404, detail="Account not found")
 
 @app.get("/api/accounts/{account_id}/positions")
 async def get_account_positions(account_id: str, status: Optional[str] = None):
@@ -674,61 +718,79 @@ async def get_account_positions(account_id: str, status: Optional[str] = None):
 
 @app.post("/api/accounts/{account_id}/positions")
 async def create_position(account_id: str, position: PositionCreate):
-    """Create a new position under an account"""
-    # Verify account exists
-    accounts_data = load_json_file(ACCOUNTS_FILE)
-    account = next((acc for acc in accounts_data.get("accounts", []) if acc["id"] == account_id), None)
-    if not account:
-        raise HTTPException(status_code=404, detail="Account not found")
-    
-    # Load positions
-    positions_data = load_json_file(POSITIONS_FILE)
-    if "positions" not in positions_data:
-        positions_data["positions"] = []
-    
-    # Generate unique ID
-    position_id = f"{account_id}_{uuid.uuid4().hex[:8]}"
-    
-    # Create new position
-    new_position = {
-        "id": position_id,
-        "title": position.title,
-        "account_id": account_id,
-        "status": position.status,
-        "created_at": datetime.now().strftime("%Y-%m-%d"),
-        "data_model": position.data_model.dict(),
-        "jd_text": position.jd_text
-    }
-    
-    positions_data["positions"].append(new_position)
-    save_json_file(POSITIONS_FILE, positions_data)
-    
-    # Update account's positions list
-    if position_id not in account.get("positions", []):
-        account.setdefault("positions", []).append(position_id)
-        save_json_file(ACCOUNTS_FILE, accounts_data)
-    
-    return {"status": "created", "position": new_position}
+    """Create a new position (job_description) under an account in Supabase"""
+    try:
+        # Get tenant UUID if slug provided
+        tenant_id = account_id
+        if len(account_id) != 36:
+            tenant_res = supabase_admin.table('tenants').select('id').eq('slug', account_id).single().execute()
+            tenant_id = tenant_res.data['id']
+            
+        new_pos = {
+            "tenant_id": tenant_id,
+            "title": position.title,
+            "description": position.jd_text,
+            "analyst_output": position.data_model.dict(),
+            "status": position.status
+        }
+        
+        response = supabase_admin.table('job_descriptions').insert(new_pos).execute()
+        return {"status": "created", "position": response.data[0]}
+    except Exception as e:
+        print(f"[ERROR] Failed to create position in Supabase: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/api/positions")
 async def get_all_positions(status: Optional[str] = None):
-    """Get all positions, optionally filtered by status"""
-    data = load_json_file(POSITIONS_FILE)
-    positions = data.get("positions", [])
-    
-    if status:
-        positions = [pos for pos in positions if pos.get("status") == status]
-    
-    return {"positions": positions}
+    """Get all positions (job_descriptions) from Supabase"""
+    try:
+        query = supabase_admin.table('job_descriptions').select('*')
+        if status:
+            query = query.eq('status', status)
+        response = query.execute()
+        # Map DB fields to expected frontend fields
+        positions = []
+        for row in response.data:
+            positions.append({
+                "id": str(row['id']),
+                "title": row['title'],
+                "account_id": str(row.get('tenant_id')),
+                "status": row.get('status', 'open'),
+                "created_at": row.get('created_at'),
+                "jd_text": row.get('description', ''),
+                "data_model": row.get('analyst_output', row.get('settings', {}))
+            })
+        return {"positions": positions}
+    except Exception as e:
+        print(f"[ERROR] Failed to fetch positions from Supabase: {e}")
+        data = load_json_file(POSITIONS_FILE)
+        positions = data.get("positions", [])
+        if status:
+            positions = [pos for pos in positions if pos.get("status") == status]
+        return {"positions": positions}
 
 @app.get("/api/positions/{position_id}")
 async def get_position(position_id: str):
-    """Get specific position details with data model"""
-    data = load_json_file(POSITIONS_FILE)
-    for pos in data.get("positions", []):
-        if pos["id"] == position_id:
-            return pos
-    raise HTTPException(status_code=404, detail="Position not found")
+    """Get specific position details from Supabase"""
+    try:
+        response = supabase_admin.table('job_descriptions').select('*').eq('id', position_id).single().execute()
+        row = response.data
+        return {
+            "id": str(row['id']),
+            "title": row['title'],
+            "account_id": str(row.get('tenant_id')),
+            "status": row.get('status', 'open'),
+            "created_at": row.get('created_at'),
+            "jd_text": row.get('description', ''),
+            "data_model": row.get('analyst_output', row.get('settings', {}))
+        }
+    except Exception as e:
+        print(f"[ERROR] Failed to fetch position {position_id} from Supabase: {e}")
+        data = load_json_file(POSITIONS_FILE)
+        for pos in data.get("positions", []):
+            if pos["id"] == position_id:
+                return pos
+        raise HTTPException(status_code=404, detail="Position not found")
 
 @app.put("/api/positions/{position_id}")
 async def update_position(position_id: str, update: PositionUpdate):
@@ -1350,11 +1412,12 @@ async def end_interview(session_id: str, request: EndInterviewRequest = None):
         
         # Broadcast end message to ALL connections (expert + candidate)
         try:
+            tenant_id = get_tenant_from_session(session_id)
             await connection_manager.broadcast({
                 "type": "session_end",
                 "message": "The interview has been concluded.",
                 "ended_by": ended_by
-            })
+            }, tenant_id=tenant_id)
         except Exception as e:
             print(f"[ERROR] Failed to broadcast end message: {e}")
             
@@ -2093,18 +2156,18 @@ async def abandon_session(session_id: str):
         return {"status": "error", "error": str(e)}
 
 @app.websocket("/ws")
-async def websocket_endpoint(websocket: WebSocket, view: str = "candidate"):
-    """WebSocket endpoint for interview communication"""
+async def websocket_endpoint(websocket: WebSocket, view: str = "candidate", tenant_id: str = "global"):
+    """WebSocket endpoint for interview communication with tenant isolation"""
     # Backward compatibility: normalize admin → expert
     if view == "admin":
         view = "expert"
         print(f"[INFO] Redirected admin view to expert view for backward compatibility")
     try:
-        print(f"[DEBUG] WebSocket connection attempt, view={view}")
-        debug_logger.info(f"WebSocket connection attempt, view={view}")
-        await connection_manager.connect(websocket, view)
-        print(f"[DEBUG] WebSocket connected successfully, view={view}")
-        debug_logger.info(f"WebSocket connected successfully, view={view}")
+        print(f"[DEBUG] WebSocket connection attempt, view={view}, tenant={tenant_id}")
+        debug_logger.info(f"WebSocket connection attempt, view={view}, tenant={tenant_id}")
+        await connection_manager.connect(websocket, view, tenant_id=tenant_id)
+        print(f"[DEBUG] WebSocket connected successfully, view={view}, tenant={tenant_id}")
+        debug_logger.info(f"WebSocket connected successfully, view={view}, tenant={tenant_id}")
     except Exception as connect_error:
         import traceback
         error_msg = f"Failed to accept WebSocket connection: {connect_error}\n{traceback.format_exc()}"
@@ -2672,12 +2735,13 @@ async def websocket_endpoint(websocket: WebSocket, view: str = "candidate"):
                 
                 # Broadcast to ALL connections (expert + candidate)
                 try:
+                    tenant_id = get_tenant_from_session(session_id)
                     await connection_manager.broadcast({
                         "type": "session_end",
                         "message": "The interview has been concluded.",
                         "ended_by": ended_by
-                    })
-                    print(f"[INFO] Broadcasted session_end to all connections")
+                    }, tenant_id=tenant_id)
+                    print(f"[INFO] Broadcasted session_end to all connections in tenant {tenant_id}")
                 except Exception as e:
                     print(f"[ERROR] Failed to broadcast session_end: {e}")
                 
@@ -2705,8 +2769,8 @@ async def websocket_endpoint(websocket: WebSocket, view: str = "candidate"):
                 })
     
     except WebSocketDisconnect:
-        print(f"[DEBUG] WebSocket disconnected normally, view={view}, session_id={session_id}")
-        connection_manager.disconnect(websocket, view)
+        print(f"[DEBUG] WebSocket disconnected normally, view={view}, tenant={tenant_id}, session_id={session_id}")
+        connection_manager.disconnect(websocket, view, tenant_id=tenant_id)
         if session_id and session_id in active_interviews:
             # Clean up if needed
             pass
@@ -2723,7 +2787,7 @@ async def websocket_endpoint(websocket: WebSocket, view: str = "candidate"):
             })
         except:
             pass
-        connection_manager.disconnect(websocket, view)
+        connection_manager.disconnect(websocket, view, tenant_id=tenant_id)
 
 @app.get("/api/log/{session_id}")
 async def get_log(session_id: str):
@@ -2855,10 +2919,11 @@ async def expert_edit_followup(data: dict):
         raise HTTPException(status_code=400, detail="No pending followup to edit")
     
     # Broadcast the edited followup to candidate
+    tenant_id = get_tenant_from_session(session_id)
     await connection_manager.broadcast({
         "type": "followup",
         "data": followup
-    })
+    }, tenant_id=tenant_id)
     
     return {"status": "edited", "followup": followup}
 
@@ -2883,10 +2948,11 @@ async def expert_override_followup(data: dict):
     followup = controller.override_followup(custom_text, rating)
     
     # Broadcast the custom followup to candidate
+    tenant_id = get_tenant_from_session(session_id)
     await connection_manager.broadcast({
         "type": "followup",
         "data": followup
-    })
+    }, tenant_id=tenant_id)
     
     return {"status": "overridden", "followup": followup}
 
@@ -2997,6 +3063,15 @@ async def create_interview_session(request: CreateSessionRequest):
 
     # Generate session ID and links with TTL
     session_id = str(uuid.uuid4())[:8]
+    
+    # Extract tenant_id from headers
+    tenant_id = "global"
+    if "X-Tenant-Slug" in request_headers:
+        tenant_id = request_headers["X-Tenant-Slug"]
+    elif "x-tenant-slug" in request_headers:
+        tenant_id = request_headers["x-tenant-slug"]
+
+    # Store tenant_id in links for convenience or metadata
     links = generate_interview_links(session_id, request.position_id, request.candidate_id, ttl)
     
     # Update session with candidate info

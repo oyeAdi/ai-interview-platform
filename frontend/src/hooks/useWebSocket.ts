@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { getTenantSlug } from '@/config/api'
 
 export function useWebSocket(url: string, view: string) {
   const [ws, setWs] = useState<WebSocket | null>(null)
@@ -6,8 +7,14 @@ export function useWebSocket(url: string, view: string) {
   const wsRef = useRef<WebSocket | null>(null)
 
   useEffect(() => {
-    const websocket = new WebSocket(`${url}?view=${view}`)
-    
+    const tenant = getTenantSlug()
+    const queryParams = new URLSearchParams({
+      view,
+      tenant_id: tenant || 'global'
+    })
+
+    const websocket = new WebSocket(`${url}?${queryParams.toString()}`)
+
     websocket.onopen = () => {
       setWs(websocket)
       wsRef.current = websocket

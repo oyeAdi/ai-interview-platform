@@ -25,3 +25,45 @@ export const wsUrl = (path: string) => {
   return `${baseUrl}/${cleanPath}`;
 };
 
+/**
+ * Detects the current tenant from the hostname
+ * @returns Tenant slug or null if on a base domain
+ */
+export const getTenantSlug = () => {
+  if (typeof window === 'undefined') return null;
+  const hostname = window.location.hostname;
+
+  // Ignore base domains and reserved subdomains
+  const baseDomains = ['swarmhire.ai', 'localhost', 'lvh.me', 'vercel.app'];
+  const parts = hostname.split('.');
+
+  if (parts.length > 1) {
+    const firstPart = parts[0].toLowerCase();
+    const reserved = ['www', 'app', 'api', 'admin'];
+
+    // Simple check: if the hostname ends with a base domain and has a prefix that isn't reserved
+    const isBase = baseDomains.some(domain => hostname.endsWith(domain));
+    if (isBase && !reserved.includes(firstPart)) {
+      return firstPart;
+    }
+  }
+  return null;
+};
+
+/**
+ * Gets the standard headers for tenant-aware API calls
+ * @returns Headers object with X-Tenant-Slug if applicable
+ */
+export const getHeaders = (extraHeaders: Record<string, string> = {}) => {
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    ...extraHeaders,
+  };
+
+  const tenant = getTenantSlug();
+  if (tenant) {
+    headers['X-Tenant-Slug'] = tenant;
+  }
+
+  return headers;
+};
