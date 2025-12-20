@@ -44,16 +44,180 @@
       "ended_by": "admin",
       "end_reason": "completed"
     },
-    "session_20251214_131719": {
-      "session_id": "session_20251214_131719",
-      "created_at": "2025-12-14T07:47:19.848397",
-      "expires_at": "2025-12-14T14:17:19.848413",
+    "session_20251216_222006": {
+      "session_id": "session_20251216_222006",
+      "created_at": "2025-12-16T16:50:06.962066",
+      "expires_at": "2025-12-16T23:20:06.962081",
       "status": "completed",
       "mode": "quick_start",
       "jd_id": "jd1",
       "language": "python",
-      "duration_minutes": 10,
+      "duration_minutes": 60,
       "expert_mode": false,
+      "question_categories": {
+        "coding": {
+          "enabled": true,
+          "count": 1,
+          "difficulty": "medium"
+        },
+        "conceptual": {
+          "enabled": true,
+          "count": 1,
+          "difficulty": "medium"
+        },
+        "system_design": {
+          "enabled": true,
+          "count": 1,
+          "difficulty": "medium"
+        },
+        "problem_solving": {
+          "enabled": true,
+          "count": 1,
+          "difficulty": "medium"
+        }
+      },
+      "candidate_name": "Sarah Johnson",
+      "candidate_info": {
+        "name": "Sarah Johnson",
+        "email": "sarah.johnson@email.com",
+        "experience_years": "5"
+      },
+      "candidate_account": "INRT-Bench",
+      "candidate_role": "Bench-Pool",
+      "ended_at": "2025-12-16T16:53:38.322298"
+    },
+    "9f54f483": {
+      "session_id": "9f54f483",
+      "position_id": "uber_product_manager",
+      "candidate_id": "resume11",
+      "candidate_token": "f856537e-9777-4317-a02f-28209e5f9dd5",
+      "admin_token": "63863de8-bc14-4cce-b473-52fbe3fa2a74",
+      "created_at": "2025-12-18T20:57:34.892653",
+      "expires_at": "2025-12-18T20:59:34.892653",
+      "ttl_minutes": 2,
+      "status": "completed",
+      "candidate_name": "Divya Menon - Product Manager",
+      "candidate_info": {},
+      "ended_at": "2025-12-18T16:01:00.621987",
+      "ended_by": "expert",
+      "end_reason": "ended_early"
+    },
+    "3efd6a7a": {
+      "session_id": "3efd6a7a",
+      "position_id": "uber_sales_manager",
+      "candidate_id": "resume6",
+      "candidate_token": "78e2594a-0971-4382-ad04-7486e9ffa8e4",
+      "admin_token": "6bae9d69-8462-4e96-bb63-fc46744ee3b4",
+      "created_at": "2025-12-18T21:45:53.408340",
+      "expires_at": "2025-12-18T21:47:53.408340",
+      "ttl_minutes": 2,
+      "status": "abandoned",
+      "candidate_name": "Sarah Johnson - Sales Manager",
+      "candidate_info": {},
+      "ended_at": "2025-12-19T00:03:14.231370",
+      "end_reason": "admin_abandoned"
+    },
+    "c40c070f": {
+      "session_id": "c40c070f",
+      "position_id": "uber_hr_manager",
+      "candidate_id": "resume1",
+      "candidate_token": "8764532d-12c5-46b9-af9b-b8917d47137a",
+      "admin_token": "1ef1275d-ff76-4807-b9e9-ce2588ddeaed",
+      "created_at": "2025-12-18T22:51:40.588775",
+      "expires_at": "2025-12-18T22:53:40.588775",
+      "ttl_minutes": 2,
+      "status": "abandoned",
+      "candidate_name": "Venkat Ramakrishnan - Python Developer",
+      "candidate_info": {},
+      "ended_at": "2025-12-19T00:03:12.636041",
+      "end_reason": "admin_abandoned"
+    },
+    "ee669770": {
+      "session_id": "ee669770",
+      "position_id": "uber_hr_manager",
+      "candidate_id": "resume1",
+      "candidate_token": "c17dfe7a-0221-4050-8aad-346d62651cec",
+      "admin_token": "82e0fdba-a08b-4579-b904-480754cc5462",
+      "created_at": "2025-12-18T22:57:30.331180",
+      "expires_at": "2025-12-18T22:59:30.331180",
+      "ttl_minutes": 2,
+      "status": "abandoned",
+      "candidate_name": "Venkat Ramakrishnan - Python Developer",
+      "candidate_info": {},
+      "ended_at": "2025-12-19T00:03:10.733592",
+      "end_reason": "admin_abandoned"
+    },
+    "8cfa3b04": {
+      "session_id": "8cfa3b04",
+      "position_id": "uber_product_manager",
+      "candidate_id": "resume11",
+      "candidate_token": "215d0172-87e3-4066-b687-8f1a0f119f25",
+      "admin_token": "a8de42c9-adb3-4def-b3d9-df6ef003f33d",
+      "created_at": "2025-12-19T00:06:37.333708",
+      "expires_at": "2025-12-19T00:08:37.333708",
+      "ttl_minutes": 2,
+      "status": "expired",
+      "candidate_name": "Divya Menon - Product Manager",
+      "candidate_info": {}
+    },
+    "fa375973": {
+      "session_id": "fa375973",
+      "position_id": "uber_product_manager",
+      "candidate_id": "resume11",
+      "candidate_token": "81acdfb6-3854-4007-87e1-9c9deaaa6ad6",
+      "admin_token": "933b8140-3903-4b66-811d-f83c7ad135c8",
+      "created_at": "2025-12-19T00:25:47.394110",
+      "expires_at": "2025-12-19T00:30:47.394110",
+      "ttl_minutes": 5,
+      "status": "completed",
+      "candidate_name": "Divya Menon - Product Manager",
+      "candidate_info": {},
+      "ended_at": "2025-12-18T21:03:37.971830",
+      "ended_by": "expert",
+      "end_reason": "ended_early"
+    },
+    "7e01de8f": {
+      "session_id": "7e01de8f",
+      "position_id": "uber_hr_manager",
+      "candidate_id": "resume1",
+      "candidate_token": "dcb02f02-5d5e-41e9-a278-56dfb6cce742",
+      "admin_token": "8a3f6c74-3128-407e-a68e-e2045654bfe8",
+      "created_at": "2025-12-19T02:53:15.466483",
+      "expires_at": "2025-12-19T02:55:15.466483",
+      "ttl_minutes": 2,
+      "status": "completed",
+      "candidate_name": "Venkat Ramakrishnan - Python Developer",
+      "candidate_info": {},
+      "ended_at": "2025-12-18T21:42:59.419388",
+      "ended_by": "expert",
+      "end_reason": "ended_early"
+    },
+    "fde1d972": {
+      "session_id": "fde1d972",
+      "position_id": "meta_react_engineer",
+      "candidate_id": "resume3",
+      "candidate_token": "df345a59-a846-4ba4-8013-14a20556ebeb",
+      "admin_token": "64228301-284b-40a7-a58d-83e8ec62f88e",
+      "created_at": "2025-12-19T03:15:27.324316",
+      "expires_at": "2025-12-19T03:20:27.324316",
+      "ttl_minutes": 5,
+      "status": "completed",
+      "candidate_name": "Michael Chen - Full Stack Developer",
+      "candidate_info": {},
+      "ended_at": "2025-12-18T22:12:21.096896",
+      "ended_by": "expert",
+      "end_reason": "ended_early"
+    },
+    "session_20251219_034452": {
+      "session_id": "session_20251219_034452",
+      "created_at": "2025-12-18T22:14:52.157479",
+      "expires_at": "2025-12-19T04:44:52.157492",
+      "status": "completed",
+      "mode": "quick_start",
+      "jd_id": null,
+      "language": "python",
+      "duration_minutes": 10,
+      "expert_mode": true,
       "question_categories": {
         "coding": {
           "enabled": false,
@@ -66,25 +230,570 @@
           "difficulty": "medium"
         },
         "system_design": {
-          "enabled": true,
+          "enabled": false,
           "count": 1,
-          "difficulty": "easy"
+          "difficulty": "medium"
         },
         "problem_solving": {
           "enabled": false,
           "count": 1,
           "difficulty": "medium"
+        },
+        "behavioral": {
+          "enabled": true,
+          "count": 1,
+          "difficulty": "easy"
+        },
+        "communication": {
+          "enabled": false,
+          "count": 1,
+          "difficulty": "medium"
         }
       },
-      "candidate_name": "John Smith",
+      "candidate_name": "Anonymous Candidate",
       "candidate_info": {
-        "name": "John Smith",
-        "email": "john.smith@email.com",
-        "experience_years": "6"
+        "name": "Anonymous Candidate",
+        "email": null,
+        "experience_years": 0
       },
       "candidate_account": "INRT-Bench",
       "candidate_role": "Bench-Pool",
-      "ended_at": "2025-12-14T08:14:06.391867"
+      "ended_at": "2025-12-18T22:17:25.585495",
+      "ended_by": "expert",
+      "end_reason": "ended_early"
+    },
+    "session_20251219_035154": {
+      "session_id": "session_20251219_035154",
+      "created_at": "2025-12-18T22:21:54.810251",
+      "expires_at": "2025-12-19T04:51:54.810257",
+      "status": "completed",
+      "mode": "quick_start",
+      "jd_id": null,
+      "language": "java",
+      "duration_minutes": 25,
+      "expert_mode": true,
+      "question_categories": {
+        "coding": {
+          "enabled": false,
+          "count": 1,
+          "difficulty": "medium"
+        },
+        "conceptual": {
+          "enabled": false,
+          "count": 1,
+          "difficulty": "medium"
+        },
+        "system_design": {
+          "enabled": false,
+          "count": 1,
+          "difficulty": "medium"
+        },
+        "problem_solving": {
+          "enabled": false,
+          "count": 1,
+          "difficulty": "medium"
+        },
+        "behavioral": {
+          "enabled": true,
+          "count": 1,
+          "difficulty": "easy"
+        },
+        "communication": {
+          "enabled": true,
+          "count": 1,
+          "difficulty": "medium"
+        }
+      },
+      "candidate_name": "XYZ",
+      "candidate_info": {
+        "name": "XYZ",
+        "email": "Email Address",
+        "experience_years": "10"
+      },
+      "candidate_account": "INRT-Bench",
+      "candidate_role": "Bench-Pool",
+      "ended_at": "2025-12-18T22:45:05.440493",
+      "ended_by": "expert",
+      "end_reason": "ended_early"
+    },
+    "session_20251219_035818": {
+      "session_id": "session_20251219_035818",
+      "created_at": "2025-12-18T22:28:18.472658",
+      "expires_at": "2025-12-19T04:58:18.472675",
+      "status": "active",
+      "mode": "quick_start",
+      "jd_id": null,
+      "language": "python",
+      "duration_minutes": 10,
+      "expert_mode": true,
+      "question_categories": {
+        "coding": {
+          "enabled": false,
+          "count": 1,
+          "difficulty": "medium"
+        },
+        "conceptual": {
+          "enabled": false,
+          "count": 1,
+          "difficulty": "medium"
+        },
+        "system_design": {
+          "enabled": false,
+          "count": 1,
+          "difficulty": "medium"
+        },
+        "problem_solving": {
+          "enabled": false,
+          "count": 1,
+          "difficulty": "medium"
+        },
+        "behavioral": {
+          "enabled": true,
+          "count": 1,
+          "difficulty": "easy"
+        },
+        "communication": {
+          "enabled": false,
+          "count": 1,
+          "difficulty": "medium"
+        }
+      },
+      "candidate_name": "XYZ",
+      "candidate_info": {
+        "name": "XYZ",
+        "email": "Email Address",
+        "experience_years": "13"
+      },
+      "candidate_account": "INRT-Bench",
+      "candidate_role": "Bench-Pool"
+    },
+    "session_20251219_041708": {
+      "session_id": "session_20251219_041708",
+      "created_at": "2025-12-18T22:47:08.177197",
+      "expires_at": "2025-12-19T05:17:08.177207",
+      "status": "active",
+      "mode": "quick_start",
+      "jd_id": null,
+      "language": "java",
+      "duration_minutes": 15,
+      "expert_mode": true,
+      "question_categories": {
+        "coding": {
+          "enabled": false,
+          "count": 1,
+          "difficulty": "medium"
+        },
+        "conceptual": {
+          "enabled": false,
+          "count": 1,
+          "difficulty": "medium"
+        },
+        "system_design": {
+          "enabled": false,
+          "count": 1,
+          "difficulty": "medium"
+        },
+        "problem_solving": {
+          "enabled": false,
+          "count": 1,
+          "difficulty": "medium"
+        },
+        "behavioral": {
+          "enabled": true,
+          "count": 1,
+          "difficulty": "medium"
+        },
+        "communication": {
+          "enabled": false,
+          "count": 1,
+          "difficulty": "medium"
+        }
+      },
+      "candidate_name": "XYZ",
+      "candidate_info": {
+        "name": "XYZ",
+        "email": "Email Address",
+        "experience_years": "10"
+      },
+      "candidate_account": "INRT-Bench",
+      "candidate_role": "Bench-Pool"
+    },
+    "session_20251219_044401": {
+      "session_id": "session_20251219_044401",
+      "created_at": "2025-12-18T23:14:01.434772",
+      "expires_at": "2025-12-19T05:44:01.434788",
+      "status": "completed",
+      "mode": "quick_start",
+      "jd_id": null,
+      "language": "General",
+      "duration_minutes": 10,
+      "expert_mode": true,
+      "question_categories": {
+        "coding": {
+          "enabled": false,
+          "count": 1,
+          "difficulty": "medium"
+        },
+        "conceptual": {
+          "enabled": false,
+          "count": 1,
+          "difficulty": "medium"
+        },
+        "system_design": {
+          "enabled": false,
+          "count": 1,
+          "difficulty": "medium"
+        },
+        "problem_solving": {
+          "enabled": false,
+          "count": 1,
+          "difficulty": "medium"
+        },
+        "behavioral": {
+          "enabled": true,
+          "count": 1,
+          "difficulty": "easy"
+        },
+        "communication": {
+          "enabled": false,
+          "count": 1,
+          "difficulty": "medium"
+        }
+      },
+      "candidate_name": "XYZ",
+      "candidate_info": {
+        "name": "XYZ",
+        "email": "Email Address",
+        "experience_years": "10"
+      },
+      "candidate_account": "INRT-Bench",
+      "candidate_role": "Bench-Pool",
+      "ended_at": "2025-12-18T23:20:25.063316",
+      "ended_by": "expert",
+      "end_reason": "ended_early"
+    },
+    "session_20251219_054045": {
+      "session_id": "session_20251219_054045",
+      "created_at": "2025-12-19T00:10:45.989720",
+      "expires_at": "2025-12-19T06:40:45.989735",
+      "status": "completed",
+      "mode": "quick_start",
+      "jd_id": null,
+      "language": "General",
+      "duration_minutes": 30,
+      "expert_mode": true,
+      "question_categories": {
+        "coding": {
+          "enabled": false,
+          "count": 1,
+          "difficulty": "medium"
+        },
+        "conceptual": {
+          "enabled": false,
+          "count": 1,
+          "difficulty": "medium"
+        },
+        "system_design": {
+          "enabled": false,
+          "count": 1,
+          "difficulty": "medium"
+        },
+        "problem_solving": {
+          "enabled": false,
+          "count": 1,
+          "difficulty": "medium"
+        },
+        "behavioral": {
+          "enabled": true,
+          "count": 1,
+          "difficulty": "medium"
+        },
+        "communication": {
+          "enabled": true,
+          "count": 1,
+          "difficulty": "medium"
+        }
+      },
+      "candidate_name": "xyz",
+      "candidate_info": {
+        "name": "xyz",
+        "email": "Email Address",
+        "experience_years": "12"
+      },
+      "candidate_account": "INRT-Bench",
+      "candidate_role": "Bench-Pool",
+      "ended_at": "2025-12-19T00:13:57.900717",
+      "ended_by": "expert",
+      "end_reason": "ended_early"
+    },
+    "session_20251219_054856": {
+      "session_id": "session_20251219_054856",
+      "created_at": "2025-12-19T00:18:56.303166",
+      "expires_at": "2025-12-19T06:48:56.303180",
+      "status": "abandoned",
+      "mode": "quick_start",
+      "jd_id": null,
+      "language": "General",
+      "duration_minutes": 10,
+      "expert_mode": true,
+      "question_categories": {
+        "coding": {
+          "enabled": false,
+          "count": 1,
+          "difficulty": "medium"
+        },
+        "conceptual": {
+          "enabled": false,
+          "count": 1,
+          "difficulty": "medium"
+        },
+        "system_design": {
+          "enabled": false,
+          "count": 1,
+          "difficulty": "medium"
+        },
+        "problem_solving": {
+          "enabled": false,
+          "count": 1,
+          "difficulty": "medium"
+        },
+        "behavioral": {
+          "enabled": false,
+          "count": 1,
+          "difficulty": "medium"
+        },
+        "communication": {
+          "enabled": true,
+          "count": 1,
+          "difficulty": "easy"
+        }
+      },
+      "candidate_name": "Aanchal",
+      "candidate_info": {
+        "name": "Aanchal",
+        "email": "Email Address",
+        "experience_years": "10"
+      },
+      "candidate_account": "INRT-Bench",
+      "candidate_role": "Bench-Pool",
+      "ended_at": "2025-12-19T06:00:21.666147",
+      "end_reason": "admin_abandoned"
+    },
+    "session_20251219_055730": {
+      "session_id": "session_20251219_055730",
+      "created_at": "2025-12-19T00:27:31.036034",
+      "expires_at": "2025-12-19T06:57:31.036044",
+      "status": "completed",
+      "mode": "quick_start",
+      "jd_id": null,
+      "language": "General",
+      "duration_minutes": 15,
+      "expert_mode": true,
+      "question_categories": {
+        "coding": {
+          "enabled": false,
+          "count": 1,
+          "difficulty": "medium"
+        },
+        "conceptual": {
+          "enabled": false,
+          "count": 1,
+          "difficulty": "medium"
+        },
+        "system_design": {
+          "enabled": false,
+          "count": 1,
+          "difficulty": "medium"
+        },
+        "problem_solving": {
+          "enabled": false,
+          "count": 1,
+          "difficulty": "medium"
+        },
+        "behavioral": {
+          "enabled": true,
+          "count": 1,
+          "difficulty": "medium"
+        },
+        "communication": {
+          "enabled": false,
+          "count": 1,
+          "difficulty": "medium"
+        }
+      },
+      "candidate_name": "xyz",
+      "candidate_info": {
+        "name": "xyz",
+        "email": "Email Address",
+        "experience_years": "10"
+      },
+      "candidate_account": "INRT-Bench",
+      "candidate_role": "Bench-Pool",
+      "ended_at": "2025-12-19T00:29:52.076424",
+      "ended_by": "expert",
+      "end_reason": "ended_early"
+    },
+    "session_20251219_061126": {
+      "session_id": "session_20251219_061126",
+      "created_at": "2025-12-19T00:41:26.760135",
+      "expires_at": "2025-12-19T07:11:26.760149",
+      "status": "completed",
+      "mode": "quick_start",
+      "jd_id": null,
+      "language": "General",
+      "duration_minutes": 15,
+      "expert_mode": true,
+      "question_categories": {
+        "coding": {
+          "enabled": false,
+          "count": 1,
+          "difficulty": "medium"
+        },
+        "conceptual": {
+          "enabled": false,
+          "count": 1,
+          "difficulty": "medium"
+        },
+        "system_design": {
+          "enabled": false,
+          "count": 1,
+          "difficulty": "medium"
+        },
+        "problem_solving": {
+          "enabled": false,
+          "count": 1,
+          "difficulty": "medium"
+        },
+        "behavioral": {
+          "enabled": true,
+          "count": 1,
+          "difficulty": "medium"
+        },
+        "communication": {
+          "enabled": false,
+          "count": 1,
+          "difficulty": "medium"
+        }
+      },
+      "candidate_name": "Sarah Williams",
+      "candidate_info": {
+        "name": "Sarah Williams",
+        "email": "sarah.w@email.com",
+        "experience_years": "4"
+      },
+      "candidate_account": "INRT-Bench",
+      "candidate_role": "Bench-Pool",
+      "ended_at": "2025-12-19T00:44:57.819809",
+      "ended_by": "expert",
+      "end_reason": "ended_early"
+    },
+    "session_20251219_162957": {
+      "session_id": "session_20251219_162957",
+      "created_at": "2025-12-19T10:59:57.525917",
+      "expires_at": "2025-12-19T17:29:57.525929",
+      "status": "completed",
+      "mode": "quick_start",
+      "jd_id": "jd2",
+      "language": "java",
+      "duration_minutes": 30,
+      "expert_mode": true,
+      "question_categories": {
+        "coding": {
+          "enabled": false,
+          "count": 1,
+          "difficulty": "medium"
+        },
+        "conceptual": {
+          "enabled": false,
+          "count": 1,
+          "difficulty": "medium"
+        },
+        "system_design": {
+          "enabled": false,
+          "count": 1,
+          "difficulty": "medium"
+        },
+        "problem_solving": {
+          "enabled": false,
+          "count": 1,
+          "difficulty": "medium"
+        },
+        "behavioral": {
+          "enabled": true,
+          "count": 1,
+          "difficulty": "medium"
+        },
+        "communication": {
+          "enabled": true,
+          "count": 1,
+          "difficulty": "medium"
+        }
+      },
+      "candidate_name": "Gotta Reddy",
+      "candidate_info": {
+        "name": "Gotta Reddy",
+        "email": "gotta.reddy@email.com",
+        "experience_years": "5"
+      },
+      "candidate_account": "INRT-Bench",
+      "candidate_role": "Bench-Pool",
+      "ended_at": "2025-12-19T11:47:08.067383",
+      "ended_by": "candidate",
+      "end_reason": "check_feedback"
+    },
+    "session_20251219_173620": {
+      "session_id": "session_20251219_173620",
+      "created_at": "2025-12-19T12:06:20.815248",
+      "expires_at": "2025-12-19T18:36:20.815262",
+      "status": "completed",
+      "mode": "quick_start",
+      "jd_id": "jd2",
+      "language": "java",
+      "duration_minutes": 15,
+      "expert_mode": true,
+      "question_categories": {
+        "coding": {
+          "enabled": false,
+          "count": 1,
+          "difficulty": "medium"
+        },
+        "conceptual": {
+          "enabled": false,
+          "count": 1,
+          "difficulty": "medium"
+        },
+        "system_design": {
+          "enabled": false,
+          "count": 1,
+          "difficulty": "medium"
+        },
+        "problem_solving": {
+          "enabled": false,
+          "count": 1,
+          "difficulty": "medium"
+        },
+        "behavioral": {
+          "enabled": true,
+          "count": 1,
+          "difficulty": "medium"
+        },
+        "communication": {
+          "enabled": false,
+          "count": 1,
+          "difficulty": "medium"
+        }
+      },
+      "candidate_name": "Rajesh Patel",
+      "candidate_info": {
+        "name": "Rajesh Patel",
+        "email": "rajesh.patel@email.com",
+        "experience_years": 9
+      },
+      "candidate_account": "INRT-Bench",
+      "candidate_role": "Bench-Pool",
+      "ended_at": "2025-12-19T12:17:23.108251",
+      "ended_by": "system",
+      "end_reason": "session_completed"
     }
   }
 }

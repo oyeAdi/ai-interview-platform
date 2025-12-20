@@ -36,21 +36,18 @@
             "proficiency": "expert",
             "weight": 0.1
           }
-        ],
-        "interview_flow": [
-          "coding",
-          "problem_solving",
-          "system_design",
-          "conceptual"
-        ],
-        "question_distribution": {
-          "easy": 1.0,
-          "medium": 0.0,
-          "hard": 0.0
-        }
+        ]
       },
-      "jd_text": "We are looking for a Senior Python Developer with 5+ years of experience. The ideal candidate should have strong knowledge of Python fundamentals, system design, microservices architecture, and database management.",
-      "updated_at": "2025-12-13"
+      "jd_text": "We are looking for a Senior Python Developer with 5+ years of experience. The ideal candidate should have strong knowledge of Python fundamentals, system design, microservices architecture, and database management.\n\n**URGENCY**: High\n\n**EXPERIENCE LEVEL**: Senior\n\n**EXPECTATIONS**: We expect candidates to demonstrate basic-level performance in technical assessments and interviews.\n\n\n**MUST-HAVE SKILLS**:\n• Python\n• System Design\n• Microservices\n\n**NICE-TO-HAVE SKILLS**:\n• Databases\n• Coding\n\n**INTERVIEW DURATION**: 30 minutes",
+      "updated_at": "2025-12-13",
+      "posted_by": "Mike Chen",
+      "project_code": "UBER-7419",
+      "work_location": "hybrid",
+      "billable": false,
+      "published_date": "12/16/2025",
+      "timeline": "6 months",
+      "employment_type": "contract",
+      "role_type": "software_engineer"
     },
     {
       "id": "uber_java_lead",
@@ -88,19 +85,17 @@
             "proficiency": "expert",
             "weight": 0.1
           }
-        ],
-        "interview_flow": [
-          "system_design",
-          "coding",
-          "conceptual"
-        ],
-        "question_distribution": {
-          "easy": 0.1,
-          "medium": 0.4,
-          "hard": 0.5
-        }
+        ]
       },
-      "jd_text": "We are seeking a Java Tech Lead to drive technical excellence in our backend services. 8+ years of experience with Java, Spring Boot, and distributed systems required."
+      "jd_text": "We are seeking a Java Tech Lead to drive technical excellence in our backend services. 8+ years of experience with Java, Spring Boot, and distributed systems required.\n\n**URGENCY**: High\n\n**EXPERIENCE LEVEL**: Lead\n\n**EXPECTATIONS**: We expect candidates to demonstrate high-level performance in technical assessments and interviews.\n\n\n**MUST-HAVE SKILLS**:\n• Java\n• System Design\n• Microservices\n\n**NICE-TO-HAVE SKILLS**:\n• Leadership\n• Coding\n\n**INTERVIEW DURATION**: 60 minutes",
+      "posted_by": "David Kim",
+      "project_code": "UBER-3459",
+      "work_location": "hybrid",
+      "billable": false,
+      "published_date": "12/14/2025",
+      "timeline": "6 months",
+      "employment_type": "fulltime",
+      "role_type": "software_engineer"
     },
     {
       "id": "uber_fullstack",
@@ -123,19 +118,18 @@
             "proficiency": "intermediate",
             "weight": 0.1
           }
-        ],
-        "interview_flow": [
-          "coding",
-          "conceptual"
-        ],
-        "question_distribution": {
-          "easy": 0.3,
-          "medium": 0.5,
-          "hard": 0.2
-        }
+        ]
       },
-      "jd_text": "Join our team as a Full Stack Engineer. 3-5 years of experience in JavaScript, React, and Node.js required.",
-      "updated_at": "2025-12-13"
+      "jd_text": "Join our team as a Full Stack Engineer. 3-5 years of experience in JavaScript, React, and Node.js required.\n\n**URGENCY**: High\n\n**EXPERIENCE LEVEL**: Mid\n\n**EXPECTATIONS**: We expect candidates to demonstrate medium-level performance in technical assessments and interviews.\n\n\n**MUST-HAVE SKILLS**:\n• Coding\n\n**NICE-TO-HAVE SKILLS**:\n• Javascript\n\n**INTERVIEW DURATION**: 30 minutes",
+      "updated_at": "2025-12-13",
+      "posted_by": "Mike Chen",
+      "project_code": "UBER-1538",
+      "work_location": "remote",
+      "billable": true,
+      "published_date": "11/29/2025",
+      "timeline": "3 months",
+      "employment_type": "contract",
+      "role_type": "software_engineer"
     },
     {
       "id": "uber_ios_senior",
@@ -173,19 +167,17 @@
             "proficiency": "advanced",
             "weight": 0.1
           }
-        ],
-        "interview_flow": [
-          "coding",
-          "system_design",
-          "conceptual"
-        ],
-        "question_distribution": {
-          "easy": 0.2,
-          "medium": 0.5,
-          "hard": 0.3
-        }
+        ]
       },
-      "jd_text": "We're looking for a Senior iOS Engineer to build world-class mobile experiences for millions of riders and drivers. Strong Swift expertise, UIKit/SwiftUI knowledge, and experience with large-scale iOS apps required."
+      "jd_text": "We're looking for a Senior iOS Engineer to build world-class mobile experiences for millions of riders and drivers. Strong Swift expertise, UIKit/SwiftUI knowledge, and experience with large-scale iOS apps required.\n\n**URGENCY**: High\n\n**EXPERIENCE LEVEL**: Senior\n\n**EXPECTATIONS**: We expect candidates to demonstrate high-level performance in technical assessments and interviews.\n\n\n**MUST-HAVE SKILLS**:\n• Swift\n• Ios\n• System Design\n\n**NICE-TO-HAVE SKILLS**:\n• Coding\n• Testing\n\n**INTERVIEW DURATION**: 45 minutes",
+      "posted_by": "Lisa Patel",
+      "project_code": "UBER-2715",
+      "work_location": "office",
+      "billable": false,
+      "published_date": "11/28/2025",
+      "timeline": "2 years",
+      "employment_type": "contract",
+      "role_type": "software_engineer"
     },
     {
       "id": "uber_android_mid",
@@ -203,18 +195,18 @@
             "proficiency": "advanced",
             "weight": 0.2
           }
-        ],
-        "interview_flow": [
-          "coding"
-        ],
-        "question_distribution": {
-          "easy": 0.3,
-          "medium": 0.5,
-          "hard": 0.2
-        }
+        ]
       },
-      "jd_text": "Join Uber's Android team to build features used by millions daily. 3-5 years Android development experience with Kotlin required. Experience with MVVM architecture and Jetpack Compose preferred.",
-      "updated_at": "2025-12-13"
+      "jd_text": "Join Uber's Android team to build features used by millions daily. 3-5 years Android development experience with Kotlin required. Experience with MVVM architecture and Jetpack Compose preferred.\n\n**URGENCY**: High\n\n**EXPERIENCE LEVEL**: Mid\n\n**EXPECTATIONS**: We expect candidates to demonstrate medium-level performance in technical assessments and interviews.\n\n\n**MUST-HAVE SKILLS**:\n• Coding\n\n**INTERVIEW DURATION**: 30 minutes",
+      "updated_at": "2025-12-13",
+      "posted_by": "Mike Chen",
+      "project_code": "UBER-9446",
+      "work_location": "office",
+      "billable": true,
+      "published_date": "12/10/2025",
+      "timeline": "2 years",
+      "employment_type": "contract",
+      "role_type": "software_engineer"
     },
     {
       "id": "uber_ml_engineer",
@@ -252,19 +244,17 @@
             "proficiency": "expert",
             "weight": 0.1
           }
-        ],
-        "interview_flow": [
-          "coding",
-          "system_design",
-          "conceptual"
-        ],
-        "question_distribution": {
-          "easy": 0.15,
-          "medium": 0.45,
-          "hard": 0.4
-        }
+        ]
       },
-      "jd_text": "Build ML models that power Uber's dynamic pricing, ETA predictions, and fraud detection. 5+ years experience with ML/AI, strong Python skills, and experience deploying models at scale required."
+      "jd_text": "Build ML models that power Uber's dynamic pricing, ETA predictions, and fraud detection. 5+ years experience with ML/AI, strong Python skills, and experience deploying models at scale required.\n\n**URGENCY**: High\n\n**EXPERIENCE LEVEL**: Senior\n\n**EXPECTATIONS**: We expect candidates to demonstrate high-level performance in technical assessments and interviews.\n\n\n**MUST-HAVE SKILLS**:\n• Python\n• Machine Learning\n• System Design\n\n**NICE-TO-HAVE SKILLS**:\n• Tensorflow\n• Coding\n\n**INTERVIEW DURATION**: 60 minutes",
+      "posted_by": "Lisa Patel",
+      "project_code": "UBER-9839",
+      "work_location": "office",
+      "billable": true,
+      "published_date": "12/09/2025",
+      "timeline": "1 year",
+      "employment_type": "contract",
+      "role_type": "software_engineer"
     },
     {
       "id": "uber_sre",
@@ -302,19 +292,17 @@
             "proficiency": "advanced",
             "weight": 0.15
           }
-        ],
-        "interview_flow": [
-          "problem_solving",
-          "system_design",
-          "coding"
-        ],
-        "question_distribution": {
-          "easy": 0.2,
-          "medium": 0.5,
-          "hard": 0.3
-        }
+        ]
       },
-      "jd_text": "Ensure Uber's services run reliably at massive scale. Experience with Kubernetes, observability tools, incident management, and automation required. On-call rotation expected."
+      "jd_text": "Ensure Uber's services run reliably at massive scale. Experience with Kubernetes, observability tools, incident management, and automation required. On-call rotation expected.\n\n**URGENCY**: High\n\n**EXPERIENCE LEVEL**: Senior\n\n**EXPECTATIONS**: We expect candidates to demonstrate high-level performance in technical assessments and interviews.\n\n\n**MUST-HAVE SKILLS**:\n• Linux\n• Kubernetes\n• Distributed Systems\n\n**NICE-TO-HAVE SKILLS**:\n• Python\n• Coding\n\n**INTERVIEW DURATION**: 45 minutes",
+      "posted_by": "Lisa Patel",
+      "project_code": "UBER-4524",
+      "work_location": "remote",
+      "billable": true,
+      "published_date": "11/25/2025",
+      "timeline": "Ongoing",
+      "employment_type": "fulltime",
+      "role_type": "software_engineer"
     },
     {
       "id": "uber_data_engineer",
@@ -352,19 +340,17 @@
             "proficiency": "advanced",
             "weight": 0.15
           }
-        ],
-        "interview_flow": [
-          "coding",
-          "conceptual",
-          "problem_solving"
-        ],
-        "question_distribution": {
-          "easy": 0.25,
-          "medium": 0.5,
-          "hard": 0.25
-        }
+        ]
       },
-      "jd_text": "Build data pipelines that process petabytes of ride data. Experience with Spark, Hive, Kafka, and data warehousing required. SQL expertise essential."
+      "jd_text": "Build data pipelines that process petabytes of ride data. Experience with Spark, Hive, Kafka, and data warehousing required. SQL expertise essential.\n\n**URGENCY**: High\n\n**EXPERIENCE LEVEL**: Mid\n\n**EXPECTATIONS**: We expect candidates to demonstrate medium-level performance in technical assessments and interviews.\n\n\n**MUST-HAVE SKILLS**:\n• Python\n• Spark\n• Sql\n\n**NICE-TO-HAVE SKILLS**:\n• Databases\n• Coding\n\n**INTERVIEW DURATION**: 45 minutes",
+      "posted_by": "Lisa Patel",
+      "project_code": "UBER-7950",
+      "work_location": "remote",
+      "billable": false,
+      "published_date": "12/04/2025",
+      "timeline": "3 months",
+      "employment_type": "fulltime",
+      "role_type": "software_engineer"
     },
     {
       "id": "uber_security_engineer",
@@ -402,19 +388,17 @@
             "proficiency": "advanced",
             "weight": 0.1
           }
-        ],
-        "interview_flow": [
-          "conceptual",
-          "problem_solving",
-          "coding"
-        ],
-        "question_distribution": {
-          "easy": 0.2,
-          "medium": 0.5,
-          "hard": 0.3
-        }
+        ]
       },
-      "jd_text": "Protect Uber's platform and user data from threats. Experience with application security, penetration testing, and security architecture required. CISSP or similar certification preferred."
+      "jd_text": "Protect Uber's platform and user data from threats. Experience with application security, penetration testing, and security architecture required. CISSP or similar certification preferred.\n\n**URGENCY**: High\n\n**EXPERIENCE LEVEL**: Senior\n\n**EXPECTATIONS**: We expect candidates to demonstrate high-level performance in technical assessments and interviews.\n\n\n**MUST-HAVE SKILLS**:\n• Security\n• Python\n• Networking\n• Cloud Security\n\n**NICE-TO-HAVE SKILLS**:\n• Coding\n\n**INTERVIEW DURATION**: 45 minutes",
+      "posted_by": "David Kim",
+      "project_code": "UBER-9495",
+      "work_location": "hybrid",
+      "billable": true,
+      "published_date": "12/15/2025",
+      "timeline": "3 months",
+      "employment_type": "fulltime",
+      "role_type": "software_engineer"
     },
     {
       "id": "uber_backend_maps",
@@ -452,19 +436,17 @@
             "proficiency": "expert",
             "weight": 0.1
           }
-        ],
-        "interview_flow": [
-          "coding",
-          "system_design",
-          "conceptual"
-        ],
-        "question_distribution": {
-          "easy": 0.15,
-          "medium": 0.45,
-          "hard": 0.4
-        }
+        ]
       },
-      "jd_text": "Build the routing engine that powers millions of trips. Strong algorithms background, experience with geospatial data, and Go/C++ expertise required. Knowledge of graph algorithms essential."
+      "jd_text": "Build the routing engine that powers millions of trips. Strong algorithms background, experience with geospatial data, and Go/C++ expertise required. Knowledge of graph algorithms essential.\n\n**URGENCY**: High\n\n**EXPERIENCE LEVEL**: Senior\n\n**EXPECTATIONS**: We expect candidates to demonstrate high-level performance in technical assessments and interviews.\n\n\n**MUST-HAVE SKILLS**:\n• Go\n• Algorithms\n• Distributed Systems\n• System Design\n\n**NICE-TO-HAVE SKILLS**:\n• Coding\n\n**INTERVIEW DURATION**: 45 minutes",
+      "posted_by": "Emily Rodriguez",
+      "project_code": "UBER-2923",
+      "work_location": "office",
+      "billable": false,
+      "published_date": "11/25/2025",
+      "timeline": "1 year",
+      "employment_type": "contract",
+      "role_type": "software_engineer"
     },
     {
       "id": "uber_frontend_senior",
@@ -502,19 +484,505 @@
             "proficiency": "expert",
             "weight": 0.1
           }
+        ]
+      },
+      "jd_text": "Lead frontend development for Uber's web platform. 5+ years React/TypeScript experience, deep understanding of web performance, and experience with design systems required.\n\n**URGENCY**: High\n\n**EXPERIENCE LEVEL**: Senior\n\n**EXPECTATIONS**: We expect candidates to demonstrate high-level performance in technical assessments and interviews.\n\n\n**MUST-HAVE SKILLS**:\n• React\n• Typescript\n• System Design\n\n**NICE-TO-HAVE SKILLS**:\n• Javascript\n• Coding\n\n**INTERVIEW DURATION**: 45 minutes",
+      "posted_by": "Emily Rodriguez",
+      "project_code": "UBER-9793",
+      "work_location": "remote",
+      "billable": false,
+      "published_date": "12/05/2025",
+      "timeline": "3 months",
+      "employment_type": "contract",
+      "role_type": "software_engineer"
+    },
+    {
+      "id": "uber_product_manager",
+      "title": "Product Manager - Rider Experience",
+      "account_id": "uber",
+      "status": "open",
+      "created_at": "2024-12-15",
+      "data_model": {
+        "duration_minutes": 50,
+        "experience_level": "senior",
+        "expectations": "high",
+        "required_skills": [
+          {
+            "skill": "product_strategy",
+            "proficiency": "intermediate",
+            "weight": 0.3
+          },
+          {
+            "skill": "product_sense",
+            "proficiency": "expert",
+            "weight": 0.25
+          },
+          {
+            "skill": "metrics_analytics",
+            "proficiency": "advanced",
+            "weight": 0.2
+          },
+          {
+            "skill": "stakeholder_management",
+            "proficiency": "advanced",
+            "weight": 0.15
+          },
+          {
+            "skill": "user_research",
+            "proficiency": "advanced",
+            "weight": 0.1
+          }
         ],
         "interview_flow": [
+          "conceptual",
           "coding",
           "system_design",
+          "problem_solving"
+        ],
+        "question_distribution": {
+          "easy": 0.3,
+          "medium": 0.5,
+          "hard": 0.2
+        }
+      },
+      "jd_text": "Uber is hiring a Product Manager for Rider Experience. Define product vision for our rider app, analyze metrics, and drive user growth. 6+ years of product management experience in consumer tech required. Experience with marketplace products preferred.\n\n**URGENCY**: High\n\n**EXPERIENCE LEVEL**: Senior\n\n**EXPECTATIONS**: We expect candidates to demonstrate high-level performance in technical assessments and interviews.\n\n\n**MUST-HAVE SKILLS**:\n• Product Strategy\n• Product Sense\n• Metrics Analytics\n\n**NICE-TO-HAVE SKILLS**:\n• Stakeholder Management\n• User Research\n\n**INTERVIEW DURATION**: 50 minutes",
+      "posted_by": "Mike Chen",
+      "project_code": "UBER-6437",
+      "work_location": "office",
+      "billable": true,
+      "published_date": "12/10/2025",
+      "timeline": "3 months",
+      "employment_type": "fulltime",
+      "updated_at": "2025-12-19",
+      "role_type": "product_manager"
+    },
+    {
+      "id": "uber_data_analyst",
+      "title": "Senior Data Analyst - Marketplace",
+      "account_id": "uber",
+      "status": "open",
+      "created_at": "2024-12-15",
+      "data_model": {
+        "duration_minutes": 45,
+        "experience_level": "senior",
+        "expectations": "high",
+        "required_skills": [
+          {
+            "skill": "sql",
+            "proficiency": "expert",
+            "weight": 0.3
+          },
+          {
+            "skill": "data_analysis",
+            "proficiency": "expert",
+            "weight": 0.25
+          },
+          {
+            "skill": "python",
+            "proficiency": "advanced",
+            "weight": 0.2
+          },
+          {
+            "skill": "metrics_analytics",
+            "proficiency": "expert",
+            "weight": 0.15
+          },
+          {
+            "skill": "business_acumen",
+            "proficiency": "advanced",
+            "weight": 0.1
+          }
+        ]
+      },
+      "jd_text": "Analyze Uber's marketplace dynamics, driver-rider matching, and pricing strategies. Build dashboards, conduct A/B tests, and provide insights to leadership. 5+ years of data analysis experience required. SQL and Python expertise essential.\n\n**URGENCY**: High\n\n**EXPERIENCE LEVEL**: Senior\n\n**EXPECTATIONS**: We expect candidates to demonstrate high-level performance in technical assessments and interviews.\n\n\n**MUST-HAVE SKILLS**:\n• Sql\n• Data Analysis\n• Python\n\n**NICE-TO-HAVE SKILLS**:\n• Metrics Analytics\n• Business Acumen\n\n**INTERVIEW DURATION**: 45 minutes",
+      "posted_by": "Mike Chen",
+      "project_code": "UBER-1220",
+      "work_location": "office",
+      "billable": false,
+      "published_date": "11/20/2025",
+      "timeline": "3 months",
+      "employment_type": "contract",
+      "role_type": "software_engineer"
+    },
+    {
+      "id": "uber_operations_manager",
+      "title": "Operations Manager - City Operations",
+      "account_id": "uber",
+      "status": "open",
+      "created_at": "2024-12-15",
+      "data_model": {
+        "duration_minutes": 45,
+        "experience_level": "senior",
+        "expectations": "high",
+        "required_skills": [
+          {
+            "skill": "operations",
+            "proficiency": "expert",
+            "weight": 0.3
+          },
+          {
+            "skill": "process_optimization",
+            "proficiency": "advanced",
+            "weight": 0.25
+          },
+          {
+            "skill": "stakeholder_management",
+            "proficiency": "advanced",
+            "weight": 0.2
+          },
+          {
+            "skill": "leadership",
+            "proficiency": "advanced",
+            "weight": 0.15
+          },
+          {
+            "skill": "problem_solving",
+            "proficiency": "expert",
+            "weight": 0.1
+          }
+        ]
+      },
+      "jd_text": "Lead city operations for Uber in a major metropolitan area. Manage driver onboarding, optimize supply-demand balance, and work with local teams. 7+ years of operations experience required. Marketplace or logistics background preferred.\n\n**URGENCY**: High\n\n**EXPERIENCE LEVEL**: Senior\n\n**EXPECTATIONS**: We expect candidates to demonstrate high-level performance in technical assessments and interviews.\n\n\n**MUST-HAVE SKILLS**:\n• Operations\n• Process Optimization\n• Stakeholder Management\n\n**NICE-TO-HAVE SKILLS**:\n• Leadership\n• Problem Solving\n\n**INTERVIEW DURATION**: 45 minutes",
+      "posted_by": "David Kim",
+      "project_code": "UBER-1644",
+      "work_location": "remote",
+      "billable": true,
+      "published_date": "12/01/2025",
+      "timeline": "3 months",
+      "employment_type": "contract",
+      "role_type": "operations_manager"
+    },
+    {
+      "id": "uber_marketing_manager",
+      "title": "Marketing Manager - Growth",
+      "account_id": "uber",
+      "status": "open",
+      "created_at": "2024-12-15",
+      "data_model": {
+        "duration_minutes": 45,
+        "experience_level": "senior",
+        "expectations": "high",
+        "required_skills": [
+          {
+            "skill": "marketing_strategy",
+            "proficiency": "expert",
+            "weight": 0.3
+          },
+          {
+            "skill": "growth_hacking",
+            "proficiency": "expert",
+            "weight": 0.25
+          },
+          {
+            "skill": "metrics_analytics",
+            "proficiency": "advanced",
+            "weight": 0.2
+          },
+          {
+            "skill": "digital_marketing",
+            "proficiency": "advanced",
+            "weight": 0.15
+          },
+          {
+            "skill": "creativity",
+            "proficiency": "advanced",
+            "weight": 0.1
+          }
+        ]
+      },
+      "jd_text": "Drive rider and driver acquisition for Uber. Run growth experiments, optimize marketing channels, and scale campaigns globally. 6+ years of growth marketing experience in consumer tech required. Experience with two-sided marketplaces preferred.\n\n**URGENCY**: High\n\n**EXPERIENCE LEVEL**: Senior\n\n**EXPECTATIONS**: We expect candidates to demonstrate high-level performance in technical assessments and interviews.\n\n\n**MUST-HAVE SKILLS**:\n• Marketing Strategy\n• Growth Hacking\n• Metrics Analytics\n\n**NICE-TO-HAVE SKILLS**:\n• Digital Marketing\n• Creativity\n\n**INTERVIEW DURATION**: 45 minutes",
+      "posted_by": "Emily Rodriguez",
+      "project_code": "UBER-8738",
+      "work_location": "office",
+      "billable": false,
+      "published_date": "11/22/2025",
+      "timeline": "2 years",
+      "employment_type": "fulltime",
+      "role_type": "software_engineer"
+    },
+    {
+      "id": "uber_hr_manager",
+      "title": "HR Manager - Talent Acquisition",
+      "account_id": "uber",
+      "status": "open",
+      "created_at": "2024-12-15",
+      "data_model": {
+        "duration_minutes": 45,
+        "experience_level": "senior",
+        "expectations": "high",
+        "required_skills": [],
+        "interview_flow": [
+          "coding",
           "conceptual"
         ],
         "question_distribution": {
-          "easy": 0.2,
+          "easy": 0.3,
           "medium": 0.5,
-          "hard": 0.3
+          "hard": 0.2
         }
       },
-      "jd_text": "Lead frontend development for Uber's web platform. 5+ years React/TypeScript experience, deep understanding of web performance, and experience with design systems required."
+      "jd_text": "Lead technical recruiting for Uber's engineering teams. Build hiring strategies, manage recruiters, and partner with engineering leadership. 8+ years of technical recruiting experience required. Experience hiring at scale essential.\n\n**URGENCY**: High\n\n**EXPERIENCE LEVEL**: Senior\n\n**EXPECTATIONS**: We expect candidates to demonstrate high-level performance in technical assessments and interviews.\n\n\n**MUST-HAVE SKILLS**:\n• Recruitment\n• Stakeholder Management\n• Leadership\n\n**NICE-TO-HAVE SKILLS**:\n• Communication\n• Hr Policies\n\n**INTERVIEW DURATION**: 45 minutes",
+      "updated_at": "2025-12-18",
+      "posted_by": "Sarah Johnson",
+      "project_code": "UBER-9393",
+      "work_location": "hybrid",
+      "billable": false,
+      "published_date": "11/30/2025",
+      "timeline": "3 months",
+      "employment_type": "fulltime",
+      "role_type": "product_designer"
+    },
+    {
+      "id": "uber_financial_analyst",
+      "title": "Financial Analyst - FP&A",
+      "account_id": "uber",
+      "status": "open",
+      "created_at": "2024-12-15",
+      "data_model": {
+        "duration_minutes": 45,
+        "experience_level": "mid",
+        "expectations": "high",
+        "required_skills": [
+          {
+            "skill": "financial_analysis",
+            "proficiency": "expert",
+            "weight": 0.3
+          },
+          {
+            "skill": "forecasting",
+            "proficiency": "expert",
+            "weight": 0.25
+          },
+          {
+            "skill": "excel",
+            "proficiency": "expert",
+            "weight": 0.2
+          },
+          {
+            "skill": "business_acumen",
+            "proficiency": "advanced",
+            "weight": 0.15
+          },
+          {
+            "skill": "communication",
+            "proficiency": "advanced",
+            "weight": 0.1
+          }
+        ]
+      },
+      "jd_text": "Support financial planning and analysis for Uber's Rides business. Build financial models, prepare forecasts, and analyze business performance. 4+ years of FP&A experience required. MBA or CFA preferred.\n\n**URGENCY**: High\n\n**EXPERIENCE LEVEL**: Mid\n\n**EXPECTATIONS**: We expect candidates to demonstrate high-level performance in technical assessments and interviews.\n\n\n**MUST-HAVE SKILLS**:\n• Financial Analysis\n• Forecasting\n• Excel\n\n**NICE-TO-HAVE SKILLS**:\n• Business Acumen\n• Communication\n\n**INTERVIEW DURATION**: 45 minutes",
+      "posted_by": "Emily Rodriguez",
+      "project_code": "UBER-5896",
+      "work_location": "hybrid",
+      "billable": false,
+      "published_date": "11/23/2025",
+      "timeline": "2 years",
+      "employment_type": "contract",
+      "role_type": "financial_analyst"
+    },
+    {
+      "id": "uber_ux_designer",
+      "title": "Senior UX Designer - Driver App",
+      "account_id": "uber",
+      "status": "open",
+      "created_at": "2024-12-15",
+      "data_model": {
+        "duration_minutes": 45,
+        "experience_level": "senior",
+        "expectations": "high",
+        "required_skills": [
+          {
+            "skill": "ux_design",
+            "proficiency": "expert",
+            "weight": 0.3
+          },
+          {
+            "skill": "user_research",
+            "proficiency": "expert",
+            "weight": 0.25
+          },
+          {
+            "skill": "prototyping",
+            "proficiency": "advanced",
+            "weight": 0.2
+          },
+          {
+            "skill": "product_sense",
+            "proficiency": "advanced",
+            "weight": 0.15
+          },
+          {
+            "skill": "creativity",
+            "proficiency": "expert",
+            "weight": 0.1
+          }
+        ]
+      },
+      "jd_text": "Design the driver experience for Uber's driver app. Conduct user research with drivers, create prototypes, and collaborate with product and engineering teams. 7+ years of UX design experience required. Mobile app design expertise essential.\n\n**URGENCY**: High\n\n**EXPERIENCE LEVEL**: Senior\n\n**EXPECTATIONS**: We expect candidates to demonstrate high-level performance in technical assessments and interviews.\n\n\n**MUST-HAVE SKILLS**:\n• Ux Design\n• User Research\n• Prototyping\n\n**NICE-TO-HAVE SKILLS**:\n• Product Sense\n• Creativity\n\n**INTERVIEW DURATION**: 45 minutes",
+      "posted_by": "David Kim",
+      "project_code": "UBER-2349",
+      "work_location": "office",
+      "billable": false,
+      "published_date": "12/06/2025",
+      "timeline": "1 year",
+      "employment_type": "fulltime",
+      "role_type": "product_designer"
+    },
+    {
+      "id": "uber_sales_manager",
+      "title": "Sales Manager - Uber for Business",
+      "account_id": "uber",
+      "status": "open",
+      "created_at": "2024-12-15",
+      "data_model": {
+        "duration_minutes": 45,
+        "experience_level": "senior",
+        "expectations": "high",
+        "required_skills": [
+          {
+            "skill": "sales_strategy",
+            "proficiency": "expert",
+            "weight": 0.3
+          },
+          {
+            "skill": "negotiation",
+            "proficiency": "expert",
+            "weight": 0.25
+          },
+          {
+            "skill": "customer_success",
+            "proficiency": "advanced",
+            "weight": 0.2
+          },
+          {
+            "skill": "leadership",
+            "proficiency": "advanced",
+            "weight": 0.15
+          },
+          {
+            "skill": "communication",
+            "proficiency": "expert",
+            "weight": 0.1
+          }
+        ],
+        "interview_flow": [
+          "system_design",
+          "conceptual",
+          "coding",
+          "problem_solving"
+        ],
+        "question_distribution": {
+          "easy": 0.3,
+          "medium": 0.5,
+          "hard": 0.2
+        }
+      },
+      "jd_text": "Lead enterprise sales for Uber for Business. Sell corporate ride programs to Fortune 500 companies, manage sales team, and drive revenue growth. 8+ years of B2B sales experience required. SaaS or marketplace sales background preferred.\n\n**URGENCY**: High\n\n**EXPERIENCE LEVEL**: Senior\n\n**EXPECTATIONS**: We expect candidates to demonstrate high-level performance in technical assessments and interviews.\n\n\n**MUST-HAVE SKILLS**:\n• Sales Strategy\n• Negotiation\n• Customer Success\n\n**NICE-TO-HAVE SKILLS**:\n• Leadership\n• Communication\n\n**INTERVIEW DURATION**: 45 minutes",
+      "posted_by": "David Kim",
+      "project_code": "UBER-6065",
+      "work_location": "hybrid",
+      "billable": true,
+      "published_date": "12/09/2025",
+      "timeline": "6 months",
+      "employment_type": "contract",
+      "updated_at": "2025-12-17",
+      "role_type": "sales_representative"
+    },
+    {
+      "id": "uber_community_manager",
+      "title": "Community Manager - Driver Relations",
+      "account_id": "uber",
+      "status": "open",
+      "created_at": "2024-12-15",
+      "data_model": {
+        "duration_minutes": 40,
+        "experience_level": "mid",
+        "expectations": "medium",
+        "required_skills": [
+          {
+            "skill": "community_management",
+            "proficiency": "expert",
+            "weight": 0.3
+          },
+          {
+            "skill": "communication",
+            "proficiency": "expert",
+            "weight": 0.25
+          },
+          {
+            "skill": "conflict_resolution",
+            "proficiency": "advanced",
+            "weight": 0.2
+          },
+          {
+            "skill": "emotional_intelligence",
+            "proficiency": "advanced",
+            "weight": 0.15
+          },
+          {
+            "skill": "problem_solving",
+            "proficiency": "advanced",
+            "weight": 0.1
+          }
+        ]
+      },
+      "jd_text": "Manage relationships with Uber's driver community. Organize driver events, gather feedback, resolve issues, and improve driver satisfaction. 4+ years of community management experience required. Experience with gig economy or marketplace platforms preferred.\n\n**URGENCY**: High\n\n**EXPERIENCE LEVEL**: Mid\n\n**EXPECTATIONS**: We expect candidates to demonstrate medium-level performance in technical assessments and interviews.\n\n\n**MUST-HAVE SKILLS**:\n• Community Management\n• Communication\n• Conflict Resolution\n\n**NICE-TO-HAVE SKILLS**:\n• Emotional Intelligence\n• Problem Solving\n\n**INTERVIEW DURATION**: 40 minutes",
+      "posted_by": "Sarah Johnson",
+      "project_code": "UBER-6076",
+      "work_location": "remote",
+      "billable": false,
+      "published_date": "11/29/2025",
+      "timeline": "2 years",
+      "employment_type": "fulltime",
+      "role_type": "software_engineer"
+    },
+    {
+      "id": "uber_content_marketing",
+      "title": "Content Marketing Manager",
+      "account_id": "uber",
+      "status": "open",
+      "created_at": "2024-12-15",
+      "data_model": {
+        "duration_minutes": 40,
+        "experience_level": "senior",
+        "expectations": "high",
+        "required_skills": [
+          {
+            "skill": "content_marketing",
+            "proficiency": "expert",
+            "weight": 0.3
+          },
+          {
+            "skill": "copywriting",
+            "proficiency": "expert",
+            "weight": 0.25
+          },
+          {
+            "skill": "seo",
+            "proficiency": "advanced",
+            "weight": 0.2
+          },
+          {
+            "skill": "creativity",
+            "proficiency": "advanced",
+            "weight": 0.15
+          },
+          {
+            "skill": "marketing_strategy",
+            "proficiency": "advanced",
+            "weight": 0.1
+          }
+        ]
+      },
+      "jd_text": "Lead content marketing for Uber's blog, social media, and campaigns. Create compelling stories about riders and drivers, manage editorial calendar, and grow organic reach. 6+ years of content marketing experience required. Consumer tech background preferred.\n\n**URGENCY**: High\n\n**EXPERIENCE LEVEL**: Senior\n\n**EXPECTATIONS**: We expect candidates to demonstrate high-level performance in technical assessments and interviews.\n\n\n**MUST-HAVE SKILLS**:\n• Content Marketing\n• Copywriting\n• Seo\n\n**NICE-TO-HAVE SKILLS**:\n• Creativity\n• Marketing Strategy\n\n**INTERVIEW DURATION**: 40 minutes",
+      "posted_by": "Lisa Patel",
+      "project_code": "UBER-3546",
+      "work_location": "office",
+      "billable": true,
+      "published_date": "12/09/2025",
+      "timeline": "1 year",
+      "employment_type": "fulltime",
+      "role_type": "software_engineer"
     },
     {
       "id": "snow_senior_java",
@@ -552,19 +1020,17 @@
             "proficiency": "expert",
             "weight": 0.1
           }
-        ],
-        "interview_flow": [
-          "coding",
-          "system_design",
-          "conceptual"
-        ],
-        "question_distribution": {
-          "easy": 0.2,
-          "medium": 0.5,
-          "hard": 0.3
-        }
+        ]
       },
-      "jd_text": "ServiceNow is looking for a Senior Java Developer with expertise in Spring Boot, microservices, and cloud-native development."
+      "jd_text": "ServiceNow is looking for a Senior Java Developer with expertise in Spring Boot, microservices, and cloud-native development.\n\n**URGENCY**: High\n\n**EXPERIENCE LEVEL**: Senior\n\n**EXPECTATIONS**: We expect candidates to demonstrate high-level performance in technical assessments and interviews.\n\n\n**MUST-HAVE SKILLS**:\n• Java\n• Spring\n• Microservices\n\n**NICE-TO-HAVE SKILLS**:\n• Databases\n• Coding\n\n**INTERVIEW DURATION**: 45 minutes",
+      "posted_by": "David Kim",
+      "project_code": "NOW-2245",
+      "work_location": "remote",
+      "billable": false,
+      "published_date": "11/26/2025",
+      "timeline": "6 months",
+      "employment_type": "fulltime",
+      "role_type": "software_engineer"
     },
     {
       "id": "snow_devops",
@@ -602,19 +1068,17 @@
             "proficiency": "intermediate",
             "weight": 0.15
           }
-        ],
-        "interview_flow": [
-          "conceptual",
-          "problem_solving",
-          "system_design"
-        ],
-        "question_distribution": {
-          "easy": 0.3,
-          "medium": 0.5,
-          "hard": 0.2
-        }
+        ]
       },
-      "jd_text": "We need a DevOps Engineer with strong experience in Kubernetes, Docker, and CI/CD pipelines."
+      "jd_text": "We need a DevOps Engineer with strong experience in Kubernetes, Docker, and CI/CD pipelines.\n\n**URGENCY**: High\n\n**EXPERIENCE LEVEL**: Mid\n\n**EXPECTATIONS**: We expect candidates to demonstrate medium-level performance in technical assessments and interviews.\n\n\n**MUST-HAVE SKILLS**:\n• Kubernetes\n• Docker\n• Ci Cd\n• Cloud\n\n**NICE-TO-HAVE SKILLS**:\n• Scripting\n\n**INTERVIEW DURATION**: 40 minutes",
+      "posted_by": "Emily Rodriguez",
+      "project_code": "NOW-3590",
+      "work_location": "hybrid",
+      "billable": false,
+      "published_date": "11/21/2025",
+      "timeline": "1 year",
+      "employment_type": "fulltime",
+      "role_type": "software_engineer"
     },
     {
       "id": "amz_sde2",
@@ -647,20 +1111,17 @@
             "proficiency": "expert",
             "weight": 0.25
           }
-        ],
-        "interview_flow": [
-          "coding",
-          "coding",
-          "system_design",
-          "conceptual"
-        ],
-        "question_distribution": {
-          "easy": 0.1,
-          "medium": 0.5,
-          "hard": 0.4
-        }
+        ]
       },
-      "jd_text": "Amazon is hiring SDE II engineers. Strong problem-solving skills and 3-5 years of experience required."
+      "jd_text": "Amazon is hiring SDE II engineers. Strong problem-solving skills and 3-5 years of experience required.\n\n**URGENCY**: High\n\n**EXPERIENCE LEVEL**: Mid\n\n**EXPECTATIONS**: We expect candidates to demonstrate high-level performance in technical assessments and interviews.\n\n\n**MUST-HAVE SKILLS**:\n• Java\n• Coding\n• System Design\n• Data Structures\n\n**INTERVIEW DURATION**: 50 minutes",
+      "posted_by": "David Kim",
+      "project_code": "AMZ-9236",
+      "work_location": "office",
+      "billable": false,
+      "published_date": "11/17/2025",
+      "timeline": "Ongoing",
+      "employment_type": "contract",
+      "role_type": "software_engineer"
     },
     {
       "id": "amz_backend",
@@ -698,19 +1159,17 @@
             "proficiency": "expert",
             "weight": 0.15
           }
-        ],
-        "interview_flow": [
-          "system_design",
-          "coding",
-          "conceptual"
-        ],
-        "question_distribution": {
-          "easy": 0.15,
-          "medium": 0.5,
-          "hard": 0.35
-        }
+        ]
       },
-      "jd_text": "Backend Engineer position at Amazon. 5+ years experience with Python and AWS services required."
+      "jd_text": "Backend Engineer position at Amazon. 5+ years experience with Python and AWS services required.\n\n**URGENCY**: High\n\n**EXPERIENCE LEVEL**: Senior\n\n**EXPECTATIONS**: We expect candidates to demonstrate high-level performance in technical assessments and interviews.\n\n\n**MUST-HAVE SKILLS**:\n• Python\n• Aws\n• Microservices\n\n**NICE-TO-HAVE SKILLS**:\n• Databases\n• Coding\n\n**INTERVIEW DURATION**: 45 minutes",
+      "posted_by": "Lisa Patel",
+      "project_code": "AMZ-3434",
+      "work_location": "remote",
+      "billable": true,
+      "published_date": "12/04/2025",
+      "timeline": "6 months",
+      "employment_type": "contract",
+      "role_type": "software_engineer"
     },
     {
       "id": "exp_fullstack",
@@ -748,19 +1207,17 @@
             "proficiency": "advanced",
             "weight": 0.15
           }
-        ],
-        "interview_flow": [
-          "coding",
-          "conceptual",
-          "system_design"
-        ],
-        "question_distribution": {
-          "easy": 0.25,
-          "medium": 0.5,
-          "hard": 0.25
-        }
+        ]
       },
-      "jd_text": "Expedia is looking for a Full Stack Developer with Java backend and React frontend experience."
+      "jd_text": "Expedia is looking for a Full Stack Developer with Java backend and React frontend experience.\n\n**URGENCY**: High\n\n**EXPERIENCE LEVEL**: Mid\n\n**EXPECTATIONS**: We expect candidates to demonstrate medium-level performance in technical assessments and interviews.\n\n\n**MUST-HAVE SKILLS**:\n• Java\n• React\n• Spring\n\n**NICE-TO-HAVE SKILLS**:\n• Databases\n• Coding\n\n**INTERVIEW DURATION**: 45 minutes",
+      "posted_by": "Mike Chen",
+      "project_code": "PROJ-9537",
+      "work_location": "office",
+      "billable": true,
+      "published_date": "12/13/2025",
+      "timeline": "6 months",
+      "employment_type": "fulltime",
+      "role_type": "software_engineer"
     },
     {
       "id": "google_swe3",
@@ -793,20 +1250,17 @@
             "proficiency": "intermediate",
             "weight": 0.2
           }
-        ],
-        "interview_flow": [
-          "coding",
-          "coding",
-          "system_design",
-          "behavioral"
-        ],
-        "question_distribution": {
-          "easy": 0.1,
-          "medium": 0.4,
-          "hard": 0.5
-        }
+        ]
       },
-      "jd_text": "Google is hiring L3 Software Engineers. Strong algorithmic skills and problem-solving ability required. 2-4 years of industry experience."
+      "jd_text": "Google is hiring L3 Software Engineers. Strong algorithmic skills and problem-solving ability required. 2-4 years of industry experience.\n\n**URGENCY**: High\n\n**EXPERIENCE LEVEL**: Mid\n\n**EXPECTATIONS**: We expect candidates to demonstrate high-level performance in technical assessments and interviews.\n\n\n**MUST-HAVE SKILLS**:\n• Python\n• Coding\n• Data Structures\n• System Design\n\n**INTERVIEW DURATION**: 45 minutes",
+      "posted_by": "Lisa Patel",
+      "project_code": "GOOG-2786",
+      "work_location": "office",
+      "billable": true,
+      "published_date": "11/30/2025",
+      "timeline": "Ongoing",
+      "employment_type": "fulltime",
+      "role_type": "software_engineer"
     },
     {
       "id": "google_ml_engineer",
@@ -844,20 +1298,17 @@
             "proficiency": "intermediate",
             "weight": 0.1
           }
-        ],
-        "interview_flow": [
-          "coding",
-          "ml_design",
-          "system_design",
-          "conceptual"
-        ],
-        "question_distribution": {
-          "easy": 0.1,
-          "medium": 0.5,
-          "hard": 0.4
-        }
+        ]
       },
-      "jd_text": "Join Google as an ML Engineer. Experience with TensorFlow, PyTorch, and large-scale ML systems required. 5+ years in ML."
+      "jd_text": "Join Google as an ML Engineer. Experience with TensorFlow, PyTorch, and large-scale ML systems required. 5+ years in ML.\n\n**URGENCY**: High\n\n**EXPERIENCE LEVEL**: Senior\n\n**EXPECTATIONS**: We expect candidates to demonstrate high-level performance in technical assessments and interviews.\n\n\n**MUST-HAVE SKILLS**:\n• Python\n• Machine Learning\n• Tensorflow\n\n**NICE-TO-HAVE SKILLS**:\n• Data Structures\n• System Design\n\n**INTERVIEW DURATION**: 60 minutes",
+      "posted_by": "Mike Chen",
+      "project_code": "GOOG-1595",
+      "work_location": "office",
+      "billable": false,
+      "published_date": "11/21/2025",
+      "timeline": "2 years",
+      "employment_type": "fulltime",
+      "role_type": "software_engineer"
     },
     {
       "id": "google_frontend",
@@ -895,19 +1346,17 @@
             "proficiency": "advanced",
             "weight": 0.15
           }
-        ],
-        "interview_flow": [
-          "coding",
-          "frontend_design",
-          "conceptual"
-        ],
-        "question_distribution": {
-          "easy": 0.3,
-          "medium": 0.5,
-          "hard": 0.2
-        }
+        ]
       },
-      "jd_text": "Entry-level Frontend Engineer position at Google. Strong JavaScript skills and knowledge of modern frameworks required."
+      "jd_text": "Entry-level Frontend Engineer position at Google. Strong JavaScript skills and knowledge of modern frameworks required.\n\n**URGENCY**: High\n\n**EXPERIENCE LEVEL**: Junior\n\n**EXPECTATIONS**: We expect candidates to demonstrate medium-level performance in technical assessments and interviews.\n\n\n**MUST-HAVE SKILLS**:\n• Javascript\n• Typescript\n• React\n\n**NICE-TO-HAVE SKILLS**:\n• Css\n• Coding\n\n**INTERVIEW DURATION**: 45 minutes",
+      "posted_by": "David Kim",
+      "project_code": "GOOG-2666",
+      "work_location": "remote",
+      "billable": true,
+      "published_date": "12/01/2025",
+      "timeline": "2 years",
+      "employment_type": "fulltime",
+      "role_type": "software_engineer"
     },
     {
       "id": "msft_azure_dev",
@@ -945,19 +1394,17 @@
             "proficiency": "advanced",
             "weight": 0.1
           }
-        ],
-        "interview_flow": [
-          "coding",
-          "cloud_design",
-          "conceptual"
-        ],
-        "question_distribution": {
-          "easy": 0.2,
-          "medium": 0.5,
-          "hard": 0.3
-        }
+        ]
       },
-      "jd_text": "Microsoft is hiring Azure Cloud Developers. Experience with Azure services, C#, and cloud architecture patterns required."
+      "jd_text": "Microsoft is hiring Azure Cloud Developers. Experience with Azure services, C#, and cloud architecture patterns required.\n\n**URGENCY**: High\n\n**EXPERIENCE LEVEL**: Mid\n\n**EXPECTATIONS**: We expect candidates to demonstrate medium-level performance in technical assessments and interviews.\n\n\n**MUST-HAVE SKILLS**:\n• Azure\n• Csharp\n• Cloud Architecture\n\n**NICE-TO-HAVE SKILLS**:\n• Databases\n• Coding\n\n**INTERVIEW DURATION**: 50 minutes",
+      "posted_by": "Mike Chen",
+      "project_code": "MSFT-5144",
+      "work_location": "hybrid",
+      "billable": false,
+      "published_date": "11/17/2025",
+      "timeline": "6 months",
+      "employment_type": "contract",
+      "role_type": "software_engineer"
     },
     {
       "id": "msft_dotnet_lead",
@@ -995,20 +1442,17 @@
             "proficiency": "advanced",
             "weight": 0.1
           }
-        ],
-        "interview_flow": [
-          "system_design",
-          "coding",
-          "leadership",
-          "conceptual"
-        ],
-        "question_distribution": {
-          "easy": 0.1,
-          "medium": 0.4,
-          "hard": 0.5
-        }
+        ]
       },
-      "jd_text": "Lead a team of .NET developers at Microsoft. 8+ years experience with C#, .NET Core, and enterprise architecture required."
+      "jd_text": "Lead a team of .NET developers at Microsoft. 8+ years experience with C#, .NET Core, and enterprise architecture required.\n\n**URGENCY**: High\n\n**EXPERIENCE LEVEL**: Lead\n\n**EXPECTATIONS**: We expect candidates to demonstrate high-level performance in technical assessments and interviews.\n\n\n**MUST-HAVE SKILLS**:\n• Csharp\n• Dotnet\n• System Design\n\n**NICE-TO-HAVE SKILLS**:\n• Leadership\n• Azure\n\n**INTERVIEW DURATION**: 60 minutes",
+      "posted_by": "Emily Rodriguez",
+      "project_code": "MSFT-4005",
+      "work_location": "office",
+      "billable": false,
+      "published_date": "11/27/2025",
+      "timeline": "3 months",
+      "employment_type": "fulltime",
+      "role_type": "software_engineer"
     },
     {
       "id": "meta_react_engineer",
@@ -1046,19 +1490,17 @@
             "proficiency": "advanced",
             "weight": 0.1
           }
-        ],
-        "interview_flow": [
-          "coding",
-          "frontend_design",
-          "system_design"
-        ],
-        "question_distribution": {
-          "easy": 0.2,
-          "medium": 0.5,
-          "hard": 0.3
-        }
+        ]
       },
-      "jd_text": "Meta is hiring React Engineers to build next-gen social experiences. Deep React expertise and 3-5 years experience required."
+      "jd_text": "Meta is hiring React Engineers to build next-gen social experiences. Deep React expertise and 3-5 years experience required.\n\n**URGENCY**: High\n\n**EXPERIENCE LEVEL**: Mid\n\n**EXPECTATIONS**: We expect candidates to demonstrate high-level performance in technical assessments and interviews.\n\n\n**MUST-HAVE SKILLS**:\n• React\n• Javascript\n• Typescript\n\n**NICE-TO-HAVE SKILLS**:\n• Graphql\n• Coding\n\n**INTERVIEW DURATION**: 45 minutes",
+      "posted_by": "Lisa Patel",
+      "project_code": "META-4344",
+      "work_location": "office",
+      "billable": true,
+      "published_date": "11/17/2025",
+      "timeline": "6 months",
+      "employment_type": "fulltime",
+      "role_type": "software_engineer"
     },
     {
       "id": "meta_infra",
@@ -1096,20 +1538,17 @@
             "proficiency": "advanced",
             "weight": 0.15
           }
-        ],
-        "interview_flow": [
-          "system_design",
-          "coding",
-          "infra_design",
-          "conceptual"
-        ],
-        "question_distribution": {
-          "easy": 0.15,
-          "medium": 0.45,
-          "hard": 0.4
-        }
+        ]
       },
-      "jd_text": "Join Meta's Infrastructure team. Experience with large-scale distributed systems and 5+ years in infrastructure engineering."
+      "jd_text": "Join Meta's Infrastructure team. Experience with large-scale distributed systems and 5+ years in infrastructure engineering.\n\n**URGENCY**: High\n\n**EXPERIENCE LEVEL**: Senior\n\n**EXPECTATIONS**: We expect candidates to demonstrate high-level performance in technical assessments and interviews.\n\n\n**MUST-HAVE SKILLS**:\n• Python\n• Linux\n• Distributed Systems\n\n**NICE-TO-HAVE SKILLS**:\n• Networking\n• Coding\n\n**INTERVIEW DURATION**: 55 minutes",
+      "posted_by": "Sarah Johnson",
+      "project_code": "META-8102",
+      "work_location": "office",
+      "billable": true,
+      "published_date": "11/22/2025",
+      "timeline": "Ongoing",
+      "employment_type": "fulltime",
+      "role_type": "software_engineer"
     },
     {
       "id": "spotify_backend",
@@ -1147,19 +1586,17 @@
             "proficiency": "advanced",
             "weight": 0.15
           }
-        ],
-        "interview_flow": [
-          "coding",
-          "system_design",
-          "conceptual"
-        ],
-        "question_distribution": {
-          "easy": 0.25,
-          "medium": 0.5,
-          "hard": 0.25
-        }
+        ]
       },
-      "jd_text": "Spotify Backend Engineer position. Build scalable music streaming services with Java and GCP. 3-5 years experience."
+      "jd_text": "Spotify Backend Engineer position. Build scalable music streaming services with Java and GCP. 3-5 years experience.\n\n**URGENCY**: High\n\n**EXPERIENCE LEVEL**: Mid\n\n**EXPECTATIONS**: We expect candidates to demonstrate medium-level performance in technical assessments and interviews.\n\n\n**MUST-HAVE SKILLS**:\n• Java\n• Python\n• Microservices\n• Gcp\n\n**NICE-TO-HAVE SKILLS**:\n• Coding\n\n**INTERVIEW DURATION**: 45 minutes",
+      "posted_by": "Lisa Patel",
+      "project_code": "PROJ-5606",
+      "work_location": "hybrid",
+      "billable": false,
+      "published_date": "11/27/2025",
+      "timeline": "1 year",
+      "employment_type": "fulltime",
+      "role_type": "software_engineer"
     },
     {
       "id": "spotify_data",
@@ -1197,20 +1634,785 @@
             "proficiency": "advanced",
             "weight": 0.1
           }
-        ],
-        "interview_flow": [
-          "coding",
-          "data_design",
-          "system_design",
-          "conceptual"
-        ],
-        "question_distribution": {
-          "easy": 0.15,
-          "medium": 0.5,
-          "hard": 0.35
-        }
+        ]
       },
-      "jd_text": "Senior Data Engineer at Spotify. Build data pipelines processing billions of events. Spark, Python, and SQL expertise required."
+      "jd_text": "Senior Data Engineer at Spotify. Build data pipelines processing billions of events. Spark, Python, and SQL expertise required.\n\n**URGENCY**: High\n\n**EXPERIENCE LEVEL**: Senior\n\n**EXPECTATIONS**: We expect candidates to demonstrate high-level performance in technical assessments and interviews.\n\n\n**MUST-HAVE SKILLS**:\n• Python\n• Spark\n• Sql\n• Data Modeling\n\n**NICE-TO-HAVE SKILLS**:\n• Coding\n\n**INTERVIEW DURATION**: 50 minutes",
+      "posted_by": "Sarah Johnson",
+      "project_code": "PROJ-2211",
+      "work_location": "hybrid",
+      "billable": true,
+      "published_date": "12/10/2025",
+      "timeline": "2 years",
+      "employment_type": "fulltime",
+      "role_type": "software_engineer"
+    },
+    {
+      "id": "techcorp_hr_manager",
+      "title": "HR Manager",
+      "account_id": "techcorp",
+      "status": "open",
+      "created_at": "2024-12-15",
+      "data_model": {
+        "duration_minutes": 45,
+        "experience_level": "senior",
+        "expectations": "high",
+        "required_skills": [
+          {
+            "skill": "recruitment",
+            "proficiency": "expert",
+            "weight": 0.25
+          },
+          {
+            "skill": "employee_relations",
+            "proficiency": "advanced",
+            "weight": 0.2
+          },
+          {
+            "skill": "compensation",
+            "proficiency": "advanced",
+            "weight": 0.15
+          },
+          {
+            "skill": "hr_policies",
+            "proficiency": "expert",
+            "weight": 0.2
+          },
+          {
+            "skill": "leadership",
+            "proficiency": "advanced",
+            "weight": 0.2
+          }
+        ]
+      },
+      "jd_text": "We're looking for an experienced HR Manager to lead talent acquisition, employee relations, and HR policy development. 8+ years of HR experience required. Expertise in recruitment, compensation, and HRIS systems essential.\n\n**URGENCY**: High\n\n**EXPERIENCE LEVEL**: Senior\n\n**EXPECTATIONS**: We expect candidates to demonstrate high-level performance in technical assessments and interviews.\n\n\n**MUST-HAVE SKILLS**:\n• Recruitment\n• Employee Relations\n• Hr Policies\n• Leadership\n\n**NICE-TO-HAVE SKILLS**:\n• Compensation\n\n**INTERVIEW DURATION**: 45 minutes",
+      "posted_by": "Sarah Johnson",
+      "project_code": "PROJ-7166",
+      "work_location": "remote",
+      "billable": false,
+      "published_date": "11/24/2025",
+      "timeline": "2 years",
+      "employment_type": "fulltime",
+      "role_type": "hr_business_partner"
+    },
+    {
+      "id": "epic_game_designer",
+      "title": "Senior Game Designer",
+      "account_id": "epic_games",
+      "status": "open",
+      "created_at": "2024-12-15",
+      "data_model": {
+        "duration_minutes": 50,
+        "experience_level": "senior",
+        "expectations": "high",
+        "required_skills": [
+          {
+            "skill": "game_design",
+            "proficiency": "expert",
+            "weight": 0.3
+          },
+          {
+            "skill": "gameplay",
+            "proficiency": "expert",
+            "weight": 0.25
+          },
+          {
+            "skill": "monetization",
+            "proficiency": "advanced",
+            "weight": 0.2
+          },
+          {
+            "skill": "game_analytics",
+            "proficiency": "advanced",
+            "weight": 0.15
+          },
+          {
+            "skill": "creativity",
+            "proficiency": "expert",
+            "weight": 0.1
+          }
+        ]
+      },
+      "jd_text": "Epic Games is seeking a Senior Game Designer for Fortnite. Design engaging gameplay systems, monetization strategies, and live events. 7+ years of game design experience required. Free-to-play and live service expertise essential.\n\n**URGENCY**: High\n\n**EXPERIENCE LEVEL**: Senior\n\n**EXPECTATIONS**: We expect candidates to demonstrate high-level performance in technical assessments and interviews.\n\n\n**MUST-HAVE SKILLS**:\n• Game Design\n• Gameplay\n• Monetization\n\n**NICE-TO-HAVE SKILLS**:\n• Game Analytics\n• Creativity\n\n**INTERVIEW DURATION**: 50 minutes",
+      "posted_by": "Lisa Patel",
+      "project_code": "PROJ-6151",
+      "work_location": "remote",
+      "billable": false,
+      "published_date": "11/20/2025",
+      "timeline": "3 months",
+      "employment_type": "contract",
+      "role_type": "software_engineer"
+    },
+    {
+      "id": "salesforce_sales_manager",
+      "title": "Enterprise Sales Manager",
+      "account_id": "salesforce",
+      "status": "open",
+      "created_at": "2024-12-15",
+      "data_model": {
+        "duration_minutes": 45,
+        "experience_level": "senior",
+        "expectations": "high",
+        "required_skills": [
+          {
+            "skill": "sales_strategy",
+            "proficiency": "expert",
+            "weight": 0.3
+          },
+          {
+            "skill": "negotiation",
+            "proficiency": "expert",
+            "weight": 0.25
+          },
+          {
+            "skill": "crm",
+            "proficiency": "advanced",
+            "weight": 0.15
+          },
+          {
+            "skill": "customer_success",
+            "proficiency": "advanced",
+            "weight": 0.2
+          },
+          {
+            "skill": "leadership",
+            "proficiency": "advanced",
+            "weight": 0.1
+          }
+        ]
+      },
+      "jd_text": "Salesforce is hiring an Enterprise Sales Manager to lead B2B SaaS sales. Manage enterprise accounts, close $10M+ deals, and build high-performing sales teams. 9+ years of enterprise sales experience required.\n\n**URGENCY**: High\n\n**EXPERIENCE LEVEL**: Senior\n\n**EXPECTATIONS**: We expect candidates to demonstrate high-level performance in technical assessments and interviews.\n\n\n**MUST-HAVE SKILLS**:\n• Sales Strategy\n• Negotiation\n• Customer Success\n\n**NICE-TO-HAVE SKILLS**:\n• Crm\n• Leadership\n\n**INTERVIEW DURATION**: 45 minutes",
+      "posted_by": "Emily Rodriguez",
+      "project_code": "SFDC-5885",
+      "work_location": "hybrid",
+      "billable": false,
+      "published_date": "12/16/2025",
+      "timeline": "1 year",
+      "employment_type": "contract",
+      "role_type": "sales_representative"
+    },
+    {
+      "id": "meta_marketing_manager",
+      "title": "Digital Marketing Manager",
+      "account_id": "meta",
+      "status": "open",
+      "created_at": "2024-12-15",
+      "data_model": {
+        "duration_minutes": 40,
+        "experience_level": "senior",
+        "expectations": "high",
+        "required_skills": [
+          {
+            "skill": "marketing_strategy",
+            "proficiency": "expert",
+            "weight": 0.25
+          },
+          {
+            "skill": "digital_marketing",
+            "proficiency": "expert",
+            "weight": 0.25
+          },
+          {
+            "skill": "seo",
+            "proficiency": "advanced",
+            "weight": 0.2
+          },
+          {
+            "skill": "content_marketing",
+            "proficiency": "advanced",
+            "weight": 0.15
+          },
+          {
+            "skill": "metrics_analytics",
+            "proficiency": "advanced",
+            "weight": 0.15
+          }
+        ]
+      },
+      "jd_text": "Meta is looking for a Digital Marketing Manager to drive growth for our products. Lead SEO, content marketing, and paid acquisition strategies. 8+ years of digital marketing experience in tech required.\n\n**URGENCY**: High\n\n**EXPERIENCE LEVEL**: Senior\n\n**EXPECTATIONS**: We expect candidates to demonstrate high-level performance in technical assessments and interviews.\n\n\n**MUST-HAVE SKILLS**:\n• Marketing Strategy\n• Digital Marketing\n• Seo\n\n**NICE-TO-HAVE SKILLS**:\n• Content Marketing\n• Metrics Analytics\n\n**INTERVIEW DURATION**: 40 minutes",
+      "posted_by": "Mike Chen",
+      "project_code": "META-1858",
+      "work_location": "remote",
+      "billable": true,
+      "published_date": "11/20/2025",
+      "timeline": "2 years",
+      "employment_type": "fulltime",
+      "role_type": "software_engineer"
+    },
+    {
+      "id": "goldman_financial_analyst",
+      "title": "Senior Financial Analyst",
+      "account_id": "goldman_sachs",
+      "status": "open",
+      "created_at": "2024-12-15",
+      "data_model": {
+        "duration_minutes": 45,
+        "experience_level": "senior",
+        "expectations": "high",
+        "required_skills": [
+          {
+            "skill": "financial_analysis",
+            "proficiency": "expert",
+            "weight": 0.3
+          },
+          {
+            "skill": "forecasting",
+            "proficiency": "expert",
+            "weight": 0.25
+          },
+          {
+            "skill": "excel",
+            "proficiency": "expert",
+            "weight": 0.2
+          },
+          {
+            "skill": "business_acumen",
+            "proficiency": "advanced",
+            "weight": 0.15
+          },
+          {
+            "skill": "communication",
+            "proficiency": "advanced",
+            "weight": 0.1
+          }
+        ]
+      },
+      "jd_text": "Goldman Sachs is seeking a Senior Financial Analyst for our Investment Banking division. Perform financial modeling, valuation, and M&A analysis. CFA or MBA preferred. 6+ years of experience in finance required.\n\n**URGENCY**: High\n\n**EXPERIENCE LEVEL**: Senior\n\n**EXPECTATIONS**: We expect candidates to demonstrate high-level performance in technical assessments and interviews.\n\n\n**MUST-HAVE SKILLS**:\n• Financial Analysis\n• Forecasting\n• Excel\n\n**NICE-TO-HAVE SKILLS**:\n• Business Acumen\n• Communication\n\n**INTERVIEW DURATION**: 45 minutes",
+      "posted_by": "Sarah Johnson",
+      "project_code": "GS-1899",
+      "work_location": "office",
+      "billable": true,
+      "published_date": "12/07/2025",
+      "timeline": "6 months",
+      "employment_type": "fulltime",
+      "role_type": "financial_analyst"
+    },
+    {
+      "id": "figma_ux_designer",
+      "title": "Senior UX Designer",
+      "account_id": "figma",
+      "status": "open",
+      "created_at": "2024-12-15",
+      "data_model": {
+        "duration_minutes": 45,
+        "experience_level": "senior",
+        "expectations": "high",
+        "required_skills": [
+          {
+            "skill": "ux_design",
+            "proficiency": "expert",
+            "weight": 0.3
+          },
+          {
+            "skill": "user_research",
+            "proficiency": "expert",
+            "weight": 0.25
+          },
+          {
+            "skill": "prototyping",
+            "proficiency": "advanced",
+            "weight": 0.2
+          },
+          {
+            "skill": "design_systems",
+            "proficiency": "advanced",
+            "weight": 0.15
+          },
+          {
+            "skill": "creativity",
+            "proficiency": "expert",
+            "weight": 0.1
+          }
+        ]
+      },
+      "jd_text": "Figma is hiring a Senior UX Designer to shape the future of design tools. Conduct user research, create prototypes, and build design systems. 7+ years of UX design experience required. Portfolio showcasing complex product work essential.\n\n**URGENCY**: High\n\n**EXPERIENCE LEVEL**: Senior\n\n**EXPECTATIONS**: We expect candidates to demonstrate high-level performance in technical assessments and interviews.\n\n\n**MUST-HAVE SKILLS**:\n• Ux Design\n• User Research\n• Prototyping\n\n**NICE-TO-HAVE SKILLS**:\n• Design Systems\n• Creativity\n\n**INTERVIEW DURATION**: 45 minutes",
+      "posted_by": "Lisa Patel",
+      "project_code": "PROJ-7793",
+      "work_location": "office",
+      "billable": true,
+      "published_date": "11/25/2025",
+      "timeline": "Ongoing",
+      "employment_type": "fulltime",
+      "role_type": "product_designer"
+    },
+    {
+      "id": "riot_esports_manager",
+      "title": "Esports Manager",
+      "account_id": "riot_games",
+      "status": "open",
+      "created_at": "2024-12-15",
+      "data_model": {
+        "duration_minutes": 40,
+        "experience_level": "mid",
+        "expectations": "high",
+        "required_skills": [
+          {
+            "skill": "esports",
+            "proficiency": "expert",
+            "weight": 0.3
+          },
+          {
+            "skill": "event_management",
+            "proficiency": "advanced",
+            "weight": 0.25
+          },
+          {
+            "skill": "stakeholder_management",
+            "proficiency": "advanced",
+            "weight": 0.2
+          },
+          {
+            "skill": "communication",
+            "proficiency": "advanced",
+            "weight": 0.15
+          },
+          {
+            "skill": "strategic_thinking",
+            "proficiency": "advanced",
+            "weight": 0.1
+          }
+        ]
+      },
+      "jd_text": "Riot Games is looking for an Esports Manager for League of Legends. Manage tournaments, coordinate with teams, and grow the esports ecosystem. 5+ years of esports or event management experience required.\n\n**URGENCY**: High\n\n**EXPERIENCE LEVEL**: Mid\n\n**EXPECTATIONS**: We expect candidates to demonstrate high-level performance in technical assessments and interviews.\n\n\n**MUST-HAVE SKILLS**:\n• Esports\n• Event Management\n• Stakeholder Management\n\n**NICE-TO-HAVE SKILLS**:\n• Communication\n• Strategic Thinking\n\n**INTERVIEW DURATION**: 40 minutes",
+      "posted_by": "Sarah Johnson",
+      "project_code": "PROJ-7812",
+      "work_location": "remote",
+      "billable": true,
+      "published_date": "11/20/2025",
+      "timeline": "Ongoing",
+      "employment_type": "contract",
+      "role_type": "software_engineer"
+    },
+    {
+      "id": "stripe_growth_hacker",
+      "title": "Growth Marketing Manager",
+      "account_id": "stripe",
+      "status": "open",
+      "created_at": "2024-12-15",
+      "data_model": {
+        "duration_minutes": 40,
+        "experience_level": "mid",
+        "expectations": "high",
+        "required_skills": [
+          {
+            "skill": "growth_hacking",
+            "proficiency": "expert",
+            "weight": 0.3
+          },
+          {
+            "skill": "metrics_analytics",
+            "proficiency": "expert",
+            "weight": 0.25
+          },
+          {
+            "skill": "marketing_strategy",
+            "proficiency": "advanced",
+            "weight": 0.2
+          },
+          {
+            "skill": "experimentation",
+            "proficiency": "advanced",
+            "weight": 0.15
+          },
+          {
+            "skill": "creativity",
+            "proficiency": "advanced",
+            "weight": 0.1
+          }
+        ]
+      },
+      "jd_text": "Stripe is hiring a Growth Marketing Manager to drive user acquisition and activation. Run experiments, analyze metrics, and optimize conversion funnels. 4+ years of growth marketing experience in B2B SaaS required.\n\n**URGENCY**: High\n\n**EXPERIENCE LEVEL**: Mid\n\n**EXPECTATIONS**: We expect candidates to demonstrate high-level performance in technical assessments and interviews.\n\n\n**MUST-HAVE SKILLS**:\n• Growth Hacking\n• Metrics Analytics\n• Marketing Strategy\n\n**NICE-TO-HAVE SKILLS**:\n• Experimentation\n• Creativity\n\n**INTERVIEW DURATION**: 40 minutes",
+      "posted_by": "Sarah Johnson",
+      "project_code": "PROJ-4617",
+      "work_location": "remote",
+      "billable": false,
+      "published_date": "12/13/2025",
+      "timeline": "2 years",
+      "employment_type": "fulltime",
+      "role_type": "software_engineer"
+    },
+    {
+      "id": "netflix_data_analyst",
+      "title": "Senior Data Analyst",
+      "account_id": "netflix",
+      "status": "open",
+      "created_at": "2024-12-15",
+      "data_model": {
+        "duration_minutes": 45,
+        "experience_level": "senior",
+        "expectations": "high",
+        "required_skills": [
+          {
+            "skill": "sql",
+            "proficiency": "expert",
+            "weight": 0.3
+          },
+          {
+            "skill": "data_analysis",
+            "proficiency": "expert",
+            "weight": 0.25
+          },
+          {
+            "skill": "python",
+            "proficiency": "advanced",
+            "weight": 0.2
+          },
+          {
+            "skill": "metrics_analytics",
+            "proficiency": "expert",
+            "weight": 0.15
+          },
+          {
+            "skill": "communication",
+            "proficiency": "advanced",
+            "weight": 0.1
+          }
+        ]
+      },
+      "jd_text": "Netflix is seeking a Senior Data Analyst to drive insights for content and product decisions. Analyze user behavior, build dashboards, and present findings to leadership. 6+ years of data analysis experience required. SQL and Python expertise essential.\n\n**URGENCY**: High\n\n**EXPERIENCE LEVEL**: Senior\n\n**EXPECTATIONS**: We expect candidates to demonstrate high-level performance in technical assessments and interviews.\n\n\n**MUST-HAVE SKILLS**:\n• Sql\n• Data Analysis\n• Python\n\n**NICE-TO-HAVE SKILLS**:\n• Metrics Analytics\n• Communication\n\n**INTERVIEW DURATION**: 45 minutes",
+      "posted_by": "Mike Chen",
+      "project_code": "NFLX-1955",
+      "work_location": "office",
+      "billable": true,
+      "published_date": "12/16/2025",
+      "timeline": "6 months",
+      "employment_type": "contract",
+      "role_type": "software_engineer"
+    },
+    {
+      "id": "adobe_graphic_designer",
+      "title": "Senior Graphic Designer",
+      "account_id": "adobe",
+      "status": "open",
+      "created_at": "2024-12-15",
+      "data_model": {
+        "duration_minutes": 40,
+        "experience_level": "senior",
+        "expectations": "high",
+        "required_skills": [
+          {
+            "skill": "graphic_design",
+            "proficiency": "expert",
+            "weight": 0.3
+          },
+          {
+            "skill": "creativity",
+            "proficiency": "expert",
+            "weight": 0.25
+          },
+          {
+            "skill": "branding",
+            "proficiency": "advanced",
+            "weight": 0.2
+          },
+          {
+            "skill": "communication",
+            "proficiency": "advanced",
+            "weight": 0.15
+          },
+          {
+            "skill": "collaboration",
+            "proficiency": "advanced",
+            "weight": 0.1
+          }
+        ]
+      },
+      "jd_text": "Adobe is hiring a Senior Graphic Designer for our Creative Cloud marketing team. Create stunning visuals for campaigns, product launches, and brand initiatives. 7+ years of graphic design experience required. Expert in Adobe Creative Suite.\n\n**URGENCY**: High\n\n**EXPERIENCE LEVEL**: Senior\n\n**EXPECTATIONS**: We expect candidates to demonstrate high-level performance in technical assessments and interviews.\n\n\n**MUST-HAVE SKILLS**:\n• Graphic Design\n• Creativity\n• Branding\n\n**NICE-TO-HAVE SKILLS**:\n• Communication\n• Collaboration\n\n**INTERVIEW DURATION**: 40 minutes",
+      "posted_by": "David Kim",
+      "project_code": "ADBE-3230",
+      "work_location": "office",
+      "billable": true,
+      "published_date": "12/03/2025",
+      "timeline": "1 year",
+      "employment_type": "contract",
+      "role_type": "graphic_designer"
+    },
+    {
+      "id": "walmart_supply_chain",
+      "title": "Supply Chain Manager",
+      "account_id": "walmart",
+      "status": "open",
+      "created_at": "2024-12-15",
+      "data_model": {
+        "duration_minutes": 45,
+        "experience_level": "senior",
+        "expectations": "high",
+        "required_skills": [
+          {
+            "skill": "supply_chain",
+            "proficiency": "expert",
+            "weight": 0.3
+          },
+          {
+            "skill": "operations",
+            "proficiency": "advanced",
+            "weight": 0.25
+          },
+          {
+            "skill": "vendor_management",
+            "proficiency": "advanced",
+            "weight": 0.2
+          },
+          {
+            "skill": "process_optimization",
+            "proficiency": "advanced",
+            "weight": 0.15
+          },
+          {
+            "skill": "leadership",
+            "proficiency": "advanced",
+            "weight": 0.1
+          }
+        ]
+      },
+      "jd_text": "Walmart is seeking a Supply Chain Manager to optimize our logistics network. Manage vendor relationships, improve processes, and reduce costs. 8+ years of supply chain experience required. Six Sigma certification preferred.\n\n**URGENCY**: High\n\n**EXPERIENCE LEVEL**: Senior\n\n**EXPECTATIONS**: We expect candidates to demonstrate high-level performance in technical assessments and interviews.\n\n\n**MUST-HAVE SKILLS**:\n• Supply Chain\n• Operations\n• Vendor Management\n\n**NICE-TO-HAVE SKILLS**:\n• Process Optimization\n• Leadership\n\n**INTERVIEW DURATION**: 45 minutes",
+      "posted_by": "Sarah Johnson",
+      "project_code": "PROJ-1597",
+      "work_location": "remote",
+      "billable": true,
+      "published_date": "11/22/2025",
+      "timeline": "2 years",
+      "employment_type": "fulltime",
+      "role_type": "supply_chain"
+    },
+    {
+      "id": "atlassian_product_manager",
+      "title": "Senior Technical Product Manager",
+      "account_id": "atlassian",
+      "status": "open",
+      "created_at": "2024-12-15",
+      "data_model": {
+        "duration_minutes": 50,
+        "experience_level": "senior",
+        "expectations": "high",
+        "required_skills": [
+          {
+            "skill": "product_strategy",
+            "proficiency": "expert",
+            "weight": 0.3
+          },
+          {
+            "skill": "product_sense",
+            "proficiency": "expert",
+            "weight": 0.25
+          },
+          {
+            "skill": "technical_depth",
+            "proficiency": "advanced",
+            "weight": 0.2
+          },
+          {
+            "skill": "stakeholder_management",
+            "proficiency": "advanced",
+            "weight": 0.15
+          },
+          {
+            "skill": "metrics_analytics",
+            "proficiency": "advanced",
+            "weight": 0.1
+          }
+        ]
+      },
+      "jd_text": "Atlassian is hiring a Senior Technical Product Manager for Jira. Define product vision, work with engineering teams, and drive adoption. 7+ years of product management experience required. Technical background essential.\n\n**URGENCY**: High\n\n**EXPERIENCE LEVEL**: Senior\n\n**EXPECTATIONS**: We expect candidates to demonstrate high-level performance in technical assessments and interviews.\n\n\n**MUST-HAVE SKILLS**:\n• Product Strategy\n• Product Sense\n• Technical Depth\n\n**NICE-TO-HAVE SKILLS**:\n• Stakeholder Management\n• Metrics Analytics\n\n**INTERVIEW DURATION**: 50 minutes",
+      "posted_by": "Emily Rodriguez",
+      "project_code": "PROJ-8589",
+      "work_location": "remote",
+      "billable": true,
+      "published_date": "11/30/2025",
+      "timeline": "Ongoing",
+      "employment_type": "contract",
+      "role_type": "product_manager"
+    },
+    {
+      "id": "hubspot_content_marketing",
+      "title": "Content Marketing Lead",
+      "account_id": "hubspot",
+      "status": "open",
+      "created_at": "2024-12-15",
+      "data_model": {
+        "duration_minutes": 40,
+        "experience_level": "senior",
+        "expectations": "high",
+        "required_skills": [
+          {
+            "skill": "content_marketing",
+            "proficiency": "expert",
+            "weight": 0.3
+          },
+          {
+            "skill": "seo",
+            "proficiency": "expert",
+            "weight": 0.25
+          },
+          {
+            "skill": "copywriting",
+            "proficiency": "advanced",
+            "weight": 0.2
+          },
+          {
+            "skill": "marketing_strategy",
+            "proficiency": "advanced",
+            "weight": 0.15
+          },
+          {
+            "skill": "creativity",
+            "proficiency": "advanced",
+            "weight": 0.1
+          }
+        ]
+      },
+      "jd_text": "HubSpot is looking for a Content Marketing Lead to drive our inbound marketing strategy. Create SEO-optimized content, manage editorial calendar, and grow organic traffic. 6+ years of content marketing experience in B2B SaaS required.\n\n**URGENCY**: High\n\n**EXPERIENCE LEVEL**: Senior\n\n**EXPECTATIONS**: We expect candidates to demonstrate high-level performance in technical assessments and interviews.\n\n\n**MUST-HAVE SKILLS**:\n• Content Marketing\n• Seo\n• Copywriting\n\n**NICE-TO-HAVE SKILLS**:\n• Marketing Strategy\n• Creativity\n\n**INTERVIEW DURATION**: 40 minutes",
+      "posted_by": "Mike Chen",
+      "project_code": "PROJ-1454",
+      "work_location": "office",
+      "billable": false,
+      "published_date": "12/02/2025",
+      "timeline": "2 years",
+      "employment_type": "fulltime",
+      "role_type": "software_engineer"
+    },
+    {
+      "id": "discord_community_manager",
+      "title": "Community Manager",
+      "account_id": "discord",
+      "status": "open",
+      "created_at": "2024-12-15",
+      "data_model": {
+        "duration_minutes": 40,
+        "experience_level": "mid",
+        "expectations": "medium",
+        "required_skills": [
+          {
+            "skill": "community_management",
+            "proficiency": "expert",
+            "weight": 0.3
+          },
+          {
+            "skill": "communication",
+            "proficiency": "expert",
+            "weight": 0.25
+          },
+          {
+            "skill": "social_media",
+            "proficiency": "advanced",
+            "weight": 0.2
+          },
+          {
+            "skill": "conflict_resolution",
+            "proficiency": "advanced",
+            "weight": 0.15
+          },
+          {
+            "skill": "emotional_intelligence",
+            "proficiency": "advanced",
+            "weight": 0.1
+          }
+        ]
+      },
+      "jd_text": "Discord is hiring a Community Manager to engage with our gaming communities. Moderate discussions, organize events, and gather feedback. 4+ years of community management experience required. Gaming industry background preferred.\n\n**URGENCY**: High\n\n**EXPERIENCE LEVEL**: Mid\n\n**EXPECTATIONS**: We expect candidates to demonstrate medium-level performance in technical assessments and interviews.\n\n\n**MUST-HAVE SKILLS**:\n• Community Management\n• Communication\n• Social Media\n\n**NICE-TO-HAVE SKILLS**:\n• Conflict Resolution\n• Emotional Intelligence\n\n**INTERVIEW DURATION**: 40 minutes",
+      "posted_by": "Mike Chen",
+      "project_code": "PROJ-6955",
+      "work_location": "remote",
+      "billable": false,
+      "published_date": "11/30/2025",
+      "timeline": "Ongoing",
+      "employment_type": "contract",
+      "role_type": "software_engineer"
+    },
+    {
+      "id": "youtube_video_editor",
+      "title": "Senior Video Editor",
+      "account_id": "youtube",
+      "status": "open",
+      "created_at": "2024-12-15",
+      "data_model": {
+        "duration_minutes": 40,
+        "experience_level": "senior",
+        "expectations": "high",
+        "required_skills": [
+          {
+            "skill": "video_editing",
+            "proficiency": "expert",
+            "weight": 0.35
+          },
+          {
+            "skill": "creativity",
+            "proficiency": "expert",
+            "weight": 0.25
+          },
+          {
+            "skill": "storytelling",
+            "proficiency": "advanced",
+            "weight": 0.2
+          },
+          {
+            "skill": "communication",
+            "proficiency": "advanced",
+            "weight": 0.1
+          },
+          {
+            "skill": "time_management",
+            "proficiency": "advanced",
+            "weight": 0.1
+          }
+        ]
+      },
+      "jd_text": "YouTube is seeking a Senior Video Editor for our Creator Studio team. Edit high-quality videos, create motion graphics, and tell compelling stories. 7+ years of video editing experience required. Expert in Adobe Premiere Pro and After Effects.\n\n**URGENCY**: High\n\n**EXPERIENCE LEVEL**: Senior\n\n**EXPECTATIONS**: We expect candidates to demonstrate high-level performance in technical assessments and interviews.\n\n\n**MUST-HAVE SKILLS**:\n• Video Editing\n• Creativity\n• Storytelling\n\n**NICE-TO-HAVE SKILLS**:\n• Communication\n• Time Management\n\n**INTERVIEW DURATION**: 40 minutes",
+      "posted_by": "Lisa Patel",
+      "project_code": "PROJ-9963",
+      "work_location": "hybrid",
+      "billable": false,
+      "published_date": "12/01/2025",
+      "timeline": "2 years",
+      "employment_type": "fulltime",
+      "role_type": "video_editor"
+    },
+    {
+      "id": "zoom_revenue_ops",
+      "title": "Revenue Operations Manager",
+      "account_id": "zoom",
+      "status": "open",
+      "created_at": "2024-12-15",
+      "data_model": {
+        "duration_minutes": 45,
+        "experience_level": "senior",
+        "expectations": "high",
+        "required_skills": [
+          {
+            "skill": "revenue_operations",
+            "proficiency": "expert",
+            "weight": 0.3
+          },
+          {
+            "skill": "crm",
+            "proficiency": "expert",
+            "weight": 0.25
+          },
+          {
+            "skill": "metrics_analytics",
+            "proficiency": "advanced",
+            "weight": 0.2
+          },
+          {
+            "skill": "process_optimization",
+            "proficiency": "advanced",
+            "weight": 0.15
+          },
+          {
+            "skill": "stakeholder_management",
+            "proficiency": "advanced",
+            "weight": 0.1
+          }
+        ]
+      },
+      "jd_text": "Zoom is hiring a Revenue Operations Manager to optimize our sales processes. Manage Salesforce, analyze revenue metrics, and improve sales efficiency. 6+ years of RevOps experience in B2B SaaS required.\n\n**URGENCY**: High\n\n**EXPERIENCE LEVEL**: Senior\n\n**EXPECTATIONS**: We expect candidates to demonstrate high-level performance in technical assessments and interviews.\n\n\n**MUST-HAVE SKILLS**:\n• Revenue Operations\n• Crm\n• Metrics Analytics\n\n**NICE-TO-HAVE SKILLS**:\n• Process Optimization\n• Stakeholder Management\n\n**INTERVIEW DURATION**: 45 minutes",
+      "posted_by": "Lisa Patel",
+      "project_code": "PROJ-9105",
+      "work_location": "office",
+      "billable": true,
+      "published_date": "12/13/2025",
+      "timeline": "Ongoing",
+      "employment_type": "fulltime",
+      "role_type": "operations_manager"
     }
   ],
   "experience_levels": [

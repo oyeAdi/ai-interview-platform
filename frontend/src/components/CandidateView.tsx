@@ -208,9 +208,28 @@ export default function CandidateView({ sessionId, language }: CandidateViewProp
           } else if (message.type === 'session_end') {
             setIsSubmitting(false)
             setSessionEnded(true)
-            setTimeout(() => {
-              router.push('/thanks')
-            }, 2000)
+
+            // Get thank you URL from backend before redirecting
+            fetch(apiUrl(`api/interview/${sessionId}/end`), {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                ended_by: 'system',
+                reason: 'session_completed'
+              })
+            })
+              .then(res => res.json())
+              .then(data => {
+                if (data.redirect_urls?.candidate) {
+                  localStorage.setItem('candidate_thank_you_url', data.redirect_urls.candidate)
+                }
+              })
+              .catch(err => console.error('Failed to get thank you URL:', err))
+              .finally(() => {
+                setTimeout(() => {
+                  router.push('/thanks')
+                }, 2000)
+              })
           }
         } catch (error) {
           console.error('Error parsing WebSocket message:', error)
@@ -274,6 +293,11 @@ export default function CandidateView({ sessionId, language }: CandidateViewProp
         console.log('Interview ended:', data)
         setSessionEnded(true)
         setShowEndModal(false)
+
+        // Store thank you URL for redirect
+        if (data.redirect_urls?.candidate) {
+          localStorage.setItem('candidate_thank_you_url', data.redirect_urls.candidate)
+        }
 
         // Notify through WebSocket
         if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {

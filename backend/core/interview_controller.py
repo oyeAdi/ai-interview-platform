@@ -12,17 +12,17 @@ from config import Config
 class InterviewController:
     """Orchestrates the entire interview flow"""
     
-    def __init__(self, language: str, jd_id: Optional[str] = None, expert_mode: bool = False):
+    def __init__(self, language: str, jd_id: Optional[str] = None, expert_mode: bool = False, session_id: Optional[str] = None):
         self.language = language
         self.expert_mode = expert_mode
         self.question_manager = QuestionManager(language)
-        self.context_manager = ContextManager(language, jd_id)
+        self.context_manager = ContextManager(language, jd_id, session_id=session_id)
         self.evaluator = Evaluator()
         self.strategy_factory = StrategyFactory()
         self.gemini_client = GeminiClient()
         self.logger = Logger()
         
-        # Initialize session in log
+        # Initialize session in log with correct session_id
         self.logger.initialize_session(
             self.context_manager.session_id,
             language,
@@ -47,6 +47,7 @@ class InterviewController:
         self.data_model: Optional[Dict] = None
         self.resume_text: str = ""
         self.first_question_generated: bool = False
+        self.role_type: Optional[str] = None  # NEW: For role-based question selection
         
         # Question categories for filtering (from quick start or position data model)
         self.question_categories: Optional[Dict] = None
@@ -116,8 +117,40 @@ class InterviewController:
             
             selected_category = None
             if eligible_categories:
-                import random
-                selected_category = random.choice(eligible_categories)
+                # ⭐ INTELLIGENT SELECTION: Use role-based flow instead of random
+                try:
+                    from config.role_categories import get_next_category_in_flow, get_excluded_categories
+                    
+                    # Get asked categories
+                    asked_categories = list(questions_by_category.keys())
+                    
+                    # Try to get next category from role flow
+                    if self.role_type:
+                        # Filter out excluded categories
+                        excluded = get_excluded_categories(self.role_type)
+                        safe_categories = [c for c in eligible_categories if c not in excluded]
+                        
+                        if safe_categories:
+                            # Build enabled categories dict for flow function
+                            enabled_dict = {cat: self.question_categories[cat] for cat in safe_categories}
+                            
+                            # Get next category following role flow
+                            selected_category = get_next_category_in_flow(
+                                self.role_type, asked_categories, enabled_dict
+                            )
+                            
+                            # If flow complete, pick first safe category
+                            if not selected_category and safe_categories:
+                                selected_category = safe_categories[0]
+                        else:
+                            selected_category = None
+                    else:
+                        # Fallback: pick first eligible (no role specified)
+                        selected_category = eligible_categories[0]
+                except ImportError:
+                    # Fallback if role_categories not available
+                    import random
+                    selected_category = random.choice(eligible_categories)
             
             if selected_category:
                 # Filter questions by this category
@@ -178,6 +211,38 @@ class InterviewController:
             "category": question_category
         }
     
+    def generate_transition_message(self, reason: str = "neutral") -> Dict:
+        """
+        Generate smooth transition message to next question.
+        
+        Args:
+            reason: Transition reason (success, struggle, drop, neutral, max_reached)
+        
+        Returns:
+            Dict with type='transition', text, and reason
+        """
+        current_topic = "this area"
+        if self.current_question:
+            current_topic = self.current_question.get("topic", "this topic")
+            if not current_topic or current_topic == "unknown":
+                category = self.current_question.get("category", "this area")
+                current_topic = category.replace("_", " ")
+        
+        transitions = {
+            "success": f"Excellent work on {current_topic}! You've demonstrated strong understanding. Let's explore a different aspect...",
+            "struggle": f"I can see {current_topic} is challenging. Let's shift to a related area that might be more aligned with your experience...",
+            "drop": f"You've shown good insights on {current_topic}. Let's move to the next topic...",
+            "neutral": f"Thank you for your thoughts on {current_topic}. Let's continue with the next question...",
+            "max_reached": f"We've explored {current_topic} thoroughly. Let's move forward to the next topic..."
+        }
+        
+        return {
+            "type": "transition",
+            "text": transitions.get(reason, transitions["neutral"]),
+            "reason": reason
+        }
+    
+    
     def _generate_personalized_first_question(self) -> Optional[Dict]:
         """
         Generate a personalized first question using:
@@ -186,7 +251,17 @@ class InterviewController:
         3. AI enhancement for natural conversation
         """
         experience_level = "mid"  # default
-        position_title = self.language.title() + " Developer"
+        
+        # Determine if this is a technical or non-technical role
+        is_technical_role = self.language.lower() not in ["general", "non-technical"]
+        
+        # Set appropriate position title
+        if is_technical_role:
+            position_title = self.language.title() + " Developer"
+        else:
+            # For non-technical roles, use generic title or extract from resume
+            position_title = "this position"
+        
         required_skills = []
         
         if self.data_model:
@@ -211,6 +286,7 @@ class InterviewController:
             seed_category = "conceptual" if experience_level == "junior" else None
         
         seed_question = self.question_manager.find_seed_question(
+            role_type=self.role_type,  # NEW: Pass role type for filtering
             experience_level=experience_level,
             skills=required_skills if required_skills else [self.language],
             category=seed_category,
@@ -232,8 +308,43 @@ class InterviewController:
             
             required_skills_str = ', '.join(required_skills[:5]) if required_skills else self.language
 
-            if seed_category == 'coding':
-                 prompt = f"""You are a friendly, professional technical interviewer for a {position_title} position ({experience_level} level).
+            # Different prompts for technical vs non-technical roles
+            if not is_technical_role:
+                # NON-TECHNICAL ROLE PROMPT
+                prompt = f"""You are a friendly, professional interviewer for {position_title} ({experience_level} level).
+
+Your task: Create a personalized first question that assesses the candidate's problem-solving, communication, and behavioral skills based on their background.
+
+SEED QUESTION (use as structural inspiration):
+"{seed_text}"
+Topic: {seed_topic}
+Category: {seed_category}
+
+CANDIDATE'S RESUME:
+{self.resume_text[:1500]}
+
+INSTRUCTIONS:
+1. Start with a warm, brief acknowledgment of their resume and work experience.
+2. **CRITICAL**: This is a NON-TECHNICAL role. DO NOT ask about:
+   - Writing code or debugging software
+   - Programming languages or frameworks
+   - Technical systems or databases
+   - Software development concepts
+3. Instead, ask about:
+   - Problem-solving in their actual work context (facilities, operations, etc.)
+   - How they handle challenges and unexpected situations
+   - Communication and teamwork
+   - Process improvement and efficiency
+4. Connect the seed question's core concept (problem-solving, communication, etc.) to their actual work experience.
+5. Keep it conversational, warm, and relevant to their background.
+
+EXAMPLE for a janitor:
+"Hi [Name], I see you have [X years] of experience in facilities management. That kind of dedication is valuable. Could you describe a time when you faced an unexpected challenge in your work - perhaps a maintenance issue or scheduling conflict - and walk me through how you systematically diagnosed and resolved it?"
+
+Generate ONLY the personalized question text."""
+            elif seed_category == 'coding':
+                # TECHNICAL CODING PROMPT
+                prompt = f"""You are a friendly, professional technical interviewer for a {position_title} position ({experience_level} level).
 
 Your task: Personalize the introduction of a CODING CHALLENGE for the REQUIRED SKILLS, keeping the technical coding task intact.
 
@@ -258,7 +369,8 @@ INSTRUCTIONS:
 
 Generate ONLY the personalized question text."""
             else:
-                 prompt = f"""You are a friendly, professional technical interviewer for a {position_title} position ({experience_level} level).
+                # TECHNICAL NON-CODING PROMPT
+                prompt = f"""You are a friendly, professional technical interviewer for a {position_title} position ({experience_level} level).
 
 Your task: Create a personalized first question that tests the **REQUIRED SKILLS**, using the candidate's background as a bridge.
 
@@ -453,9 +565,11 @@ Generate ONLY the personalized question text. Keep it conversational and warm.""
                 experience_level=self.data_model.get("experience_level", "mid") if self.data_model else "mid"
             )
             
-            # Soft Stop Logic: "Opinion by 2" based on SUSTAINED performance
-            # After 2 followups (3 total responses), we have enough data to form an opinion
-            if self.current_followup_count >= 2:
+            # Soft Stop Logic: "Opinion by OPINION_THRESHOLD" based on SUSTAINED performance
+            # After OPINION_THRESHOLD followups, we have enough data to form an opinion
+            from config import Config
+            opinion_threshold = Config.OPINION_THRESHOLD
+            if self.current_followup_count >= opinion_threshold:
                 # Calculate average score of the current round to ensure consistency
                 current_round_summary = self.context_manager.get_current_round_summary()
                 avg_round_score = 0

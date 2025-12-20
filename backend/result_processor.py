@@ -49,16 +49,33 @@ async def process_session_results(session_id: str, sessions_data: Dict, logger_i
             "id": f"res_{uuid.uuid4().hex[:8]}",
             "session_id": session_id,
             "date": datetime.now().isoformat(),
+            "candidate": {
+                "id": session_info.get("candidate_id"),
+                "name": session_info.get("candidate_name", "Candidate"),
+                "email": session_info.get("candidate_account"),
+                "thank_you_token": None,  # Will be set by end_interview
+                "thank_you_url": None
+            },
+            "expert": {
+                "id": session_info.get("expert_id"),
+                "name": session_info.get("expert_name", "Expert")
+            },
             "position": {
                 "id": session_info.get("position_id"),
-                "title": session_info.get("position_title", "Unknown Position")
+                "title": session_info.get("position_title") or session_info.get("candidate_role", "Position")
             },
             "overall_metrics": {
                 "total_score": final_score,
                 "questions_asked": question_count,
             },
-            "feedback_report": {
-                "status": "PENDING"
+            "feedback": {
+                "status": "NOT_GENERATED",
+                "type": None,  # 'short' or 'long'
+                "content": None,
+                "generated_at": None,
+                "approved_at": None,
+                "published_at": None,
+                "rejected_reason": None
             },
             "status": "completed"
         }

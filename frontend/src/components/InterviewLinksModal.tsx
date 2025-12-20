@@ -12,7 +12,10 @@ interface InterviewLinksModalProps {
     candidate: { id: string; name: string }
     links: {
       candidate: string
-      admin: string
+      admin: string  // Backend still uses 'admin' key for backward compatibility
+      expert?: string  // New key
+      candidate_link?: string  // Alternative format
+      admin_link?: string  // Alternative format
     }
     expires_at?: string
     ttl_minutes?: number
@@ -21,31 +24,34 @@ interface InterviewLinksModalProps {
 
 export default function InterviewLinksModal({ isOpen, onClose, sessionData }: InterviewLinksModalProps) {
   const [copiedCandidate, setCopiedCandidate] = useState(false)
-  const [copiedAdmin, setCopiedAdmin] = useState(false)
+  const [copiedExpert, setCopiedExpert] = useState(false)
 
   if (!isOpen || !sessionData) return null
 
   const baseUrl = typeof window !== 'undefined' ? window.location.origin : ''
-  const candidateFullUrl = `${baseUrl}${sessionData.links.candidate}`
-  const adminFullUrl = `${baseUrl}${sessionData.links.admin}`
+  // Handle both old format (candidate/admin) and new format (candidate_link/expert_link)
+  const candidateLink = sessionData.links.candidate || sessionData.links.candidate_link || ''
+  const expertLink = sessionData.links.expert || sessionData.links.admin || sessionData.links.admin_link || ''  // Try expert first, fallback to admin
+  const candidateFullUrl = `${baseUrl}${candidateLink}`
+  const expertFullUrl = `${baseUrl}${expertLink}`
 
-  const copyToClipboard = async (text: string, type: 'candidate' | 'admin') => {
+  const copyToClipboard = async (text: string, type: 'candidate' | 'expert') => {
     try {
       await navigator.clipboard.writeText(text)
       if (type === 'candidate') {
         setCopiedCandidate(true)
         setTimeout(() => setCopiedCandidate(false), 2000)
       } else {
-        setCopiedAdmin(true)
-        setTimeout(() => setCopiedAdmin(false), 2000)
+        setCopiedExpert(true)
+        setTimeout(() => setCopiedExpert(false), 2000)
       }
     } catch (err) {
       console.error('Failed to copy:', err)
     }
   }
 
-  const openAdminView = () => {
-    window.open(adminFullUrl, '_blank')
+  const openExpertView = () => {
+    window.open(expertFullUrl, '_blank')
   }
 
   return (
@@ -147,8 +153,8 @@ export default function InterviewLinksModal({ isOpen, onClose, sessionData }: In
               <button
                 onClick={() => copyToClipboard(candidateFullUrl, 'candidate')}
                 className={`w-full py-2.5 text-sm font-medium transition-colors flex items-center justify-center gap-2 ${copiedCandidate
-                    ? 'bg-green-500 text-white'
-                    : 'bg-gray-100 dark:bg-[#1A1A1A] text-black dark:text-white hover:bg-gray-200 dark:hover:bg-[#2A2A2A]'
+                  ? 'bg-green-500 text-white'
+                  : 'bg-gray-100 dark:bg-[#1A1A1A] text-black dark:text-white hover:bg-gray-200 dark:hover:bg-[#2A2A2A]'
                   }`}
               >
                 {copiedCandidate ? (
@@ -169,13 +175,13 @@ export default function InterviewLinksModal({ isOpen, onClose, sessionData }: In
               </button>
             </div>
 
-            {/* Admin Link */}
+            {/* Expert Link */}
             <div className="border border-[#00E5FF]/30 dark:border-[#00E5FF]/30 p-5 bg-[#00E5FF]/5">
               <div className="flex items-center gap-2 mb-4">
                 <svg className="w-5 h-5 text-[#00E5FF]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                 </svg>
-                <h3 className="text-lg font-medium text-black dark:text-white">Admin Link</h3>
+                <h3 className="text-lg font-medium text-black dark:text-white">Expert Link</h3>
               </div>
 
               <p className="text-xs text-gray-500 mb-4">
@@ -185,7 +191,7 @@ export default function InterviewLinksModal({ isOpen, onClose, sessionData }: In
               {/* QR Code */}
               <div className="flex justify-center mb-4 p-4 bg-white rounded">
                 <QRCodeSVG
-                  value={adminFullUrl}
+                  value={expertFullUrl}
                   size={140}
                   level="M"
                   includeMargin={false}
@@ -196,18 +202,18 @@ export default function InterviewLinksModal({ isOpen, onClose, sessionData }: In
 
               {/* URL Display */}
               <div className="mb-3 p-2 bg-white dark:bg-black border border-[#00E5FF]/30 text-xs font-mono text-[#00E5FF] break-all">
-                {adminFullUrl}
+                {expertFullUrl}
               </div>
 
               {/* Copy Button */}
               <button
-                onClick={() => copyToClipboard(adminFullUrl, 'admin')}
-                className={`w-full py-2.5 text-sm font-medium transition-colors flex items-center justify-center gap-2 ${copiedAdmin
-                    ? 'bg-green-500 text-white'
-                    : 'bg-[#00E5FF]/10 text-[#00E5FF] hover:bg-[#00E5FF]/20 border border-[#00E5FF]/30'
+                onClick={() => copyToClipboard(expertFullUrl, 'expert')}
+                className={`w-full py-2.5 text-sm font-medium transition-colors flex items-center justify-center gap-2 ${copiedExpert
+                  ? 'bg-green-500 text-white'
+                  : 'bg-[#00E5FF]/10 text-[#00E5FF] hover:bg-[#00E5FF]/20 border border-[#00E5FF]/30'
                   }`}
               >
-                {copiedAdmin ? (
+                {copiedExpert ? (
                   <>
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
@@ -219,7 +225,7 @@ export default function InterviewLinksModal({ isOpen, onClose, sessionData }: In
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
                     </svg>
-                    Copy Admin Link
+                    Copy Expert Link
                   </>
                 )}
               </button>
@@ -231,7 +237,7 @@ export default function InterviewLinksModal({ isOpen, onClose, sessionData }: In
             <h4 className="text-sm font-medium text-yellow-800 dark:text-yellow-200 mb-2">Instructions</h4>
             <ol className="text-xs text-yellow-700 dark:text-yellow-300 space-y-1 list-decimal list-inside">
               <li>Share the <strong>Candidate Link</strong> with the interviewee (via email, chat, etc.)</li>
-              <li>Click <strong>Open Admin View</strong> below to join as the interviewer</li>
+              <li>Click <strong>Open Expert View</strong> below to join as the interviewer</li>
               <li>Both parties can scan the QR codes on mobile devices</li>
               <li>The interview will begin when both parties are connected</li>
             </ol>
@@ -256,13 +262,13 @@ export default function InterviewLinksModal({ isOpen, onClose, sessionData }: In
             Open Candidate View
           </button>
           <button
-            onClick={openAdminView}
+            onClick={openExpertView}
             className="px-5 py-2.5 text-sm font-medium bg-[#00E5FF] text-black hover:bg-[#00E5FF]/90 transition-colors flex items-center gap-2"
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
             </svg>
-            Open Admin View
+            Open Expert View
           </button>
         </div>
       </div>

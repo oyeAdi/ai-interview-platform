@@ -2,13 +2,18 @@
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException, UploadFile, File, Form, Body
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from typing import Optional, List
+from typing import Optional, List, Any
 from pydantic import BaseModel
 import json
 import os
 import uuid
 import asyncio
 from datetime import datetime, timedelta
+from dotenv import load_dotenv
+
+# Load environment variables from backend/.env
+load_dotenv(os.path.join(os.path.dirname(__file__), '.env'))
+
 from config import Config
 from websocket.connection_manager import ConnectionManager
 from websocket.message_handler import MessageHandler
@@ -68,6 +73,27 @@ class LoginResponse(BaseModel):
     token: str
     username: str
     role: str
+
+class CategoryConfig(BaseModel):
+    enabled: bool
+    difficulty_level: str  # 'easy', 'medium', or 'hard'
+
+class AnalyzeJDRequest(BaseModel):
+    jd_text: str
+    position_title: str
+
+class AnalyzeJDResponse(BaseModel):
+    question_categories: dict[str, CategoryConfig]
+    analysis_summary: str
+
+class ExtractSkillsRequest(BaseModel):
+    jd_text: str
+
+class MapSkillsRequest(BaseModel):
+    skills: List[dict]  # List of skill dictionaries
+    
+    class Config:
+        arbitrary_types_allowed = True
 
 # Helper functions for data file operations
 def load_json_file(filepath: str) -> dict:
@@ -256,9 +282,10 @@ initialize_data_files()
 # Global managers
 connection_manager = ConnectionManager()
 message_handler = MessageHandler(connection_manager)
+# Initialize logger instance for result processing
+logger = Logger()
 jd_analyzer = JDResumeAnalyzer()
 file_parser = FileParser()
-logger = Logger()
 feedback_generator = FeedbackGenerator()
 
 # Store active interviews
@@ -268,6 +295,100 @@ active_interviews: dict = {}
 async def root():
     """Root endpoint"""
     return {"message": "AI Interviewer API"}
+
+@app.post("/api/analyze-jd-categories")
+async def analyze_jd_categories(
+    jd_text: Optional[str] = Form(None),
+    jd_file: Optional[UploadFile] = File(None)
+):
+    """Analyze JD and suggest appropriate question categories using Gemini"""
+    try:
+        # Extract JD text
+        jd_content = jd_text or ""
+        
+        if jd_file:
+            import tempfile
+            with tempfile.NamedTemporaryFile(delete=False, suffix=os.path.splitext(jd_file.filename)[1]) as tmp:
+                content = await jd_file.read()
+                tmp.write(content)
+                temp_path = tmp.name
+            jd_content = file_parser.parse_file(temp_path)
+            os.remove(temp_path)
+        
+        if not jd_content:
+            raise HTTPException(status_code=400, detail="JD text or file must be provided")
+        
+        # Use Gemini to analyze JD
+        prompt = f"""Analyze this job description and determine which interview question categories are most appropriate.
+
+Job Description:
+{jd_content}
+
+Question Categories:
+1. coding - Programming, algorithms, data structures
+2. conceptual - Theoretical knowledge, fundamentals  
+3. system_design - Architecture, scalability, design patterns
+4. problem_solving - Analytical thinking, real-world scenarios
+5. behavioral - Soft skills, teamwork, conflict resolution
+6. communication - Presentation, clarity, articulation
+
+Return ONLY valid JSON:
+{{
+    "job_type": "technical" | "non-technical" | "hybrid",
+    "suggested_categories": {{
+        "coding": true/false,
+        "conceptual": true/false,
+        "system_design": true/false,
+        "problem_solving": true/false,
+        "behavioral": true/false,
+        "communication": true/false
+    }},
+    "reasoning": "Brief explanation"
+}}
+
+Examples:
+- Software Engineer → technical, coding=true, conceptual=true, system_design=true, problem_solving=true
+- Helper/Admin → non-technical, behavioral=true, communication=true, others=false
+- Product Manager → hybrid, problem_solving=true, behavioral=true, communication=true, system_design=true"""
+        
+        response = GeminiClient().model.generate_content(
+            prompt,
+            generation_config=genai.types.GenerationConfig(temperature=0.3, max_output_tokens=500)
+        )
+        
+        # Extract JSON
+        response_text = ""
+        if hasattr(response, 'candidates') and response.candidates:
+            candidate = response.candidates[0]
+            if hasattr(candidate, 'content') and hasattr(candidate.content, 'parts'):
+                parts = candidate.content.parts
+                if parts:
+                    response_text = ''.join([part.text for part in parts if hasattr(part, 'text')]).strip()
+        
+        if not response_text and hasattr(response, 'text'):
+            response_text = response.text.strip()
+        
+        # Clean markdown
+        response_text = response_text.replace('```json', '').replace('```', '').strip()
+        
+        # Parse JSON
+        result = json.loads(response_text)
+        return result
+        
+    except json.JSONDecodeError as e:
+        print(f"Error parsing Gemini response: {e}")
+        # Fallback
+        return {
+            "job_type": "hybrid",
+            "suggested_categories": {
+                "coding": False, "conceptual": False, "system_design": False,
+                "problem_solving": True, "behavioral": True, "communication": True
+            },
+            "reasoning": "Unable to analyze JD, using safe defaults"
+        }
+    except Exception as e:
+        print(f"Error analyzing JD: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/api/analyze-language")
 async def analyze_language(
@@ -402,6 +523,20 @@ async def get_jds():
     with open(jds_file, 'r', encoding='utf-8') as f:
         data = json.load(f)
         return {"jds": data.get("jds", [])}
+
+@app.get("/api/expert/results")  # Changed from /api/admin/results to /api/expert/results
+async def get_results():
+    """Get list of all interview results"""
+    data = load_json_file(RESULTS_FILE)
+    results = data.get("results", {})
+    
+    # Convert dict to list if needed (results stored as {session_id: data})
+    if isinstance(results, dict):
+        results_list = list(results.values())
+    else:
+        results_list = results
+    
+    return {"results": results_list}
 
 @app.get("/api/resumes")
 async def get_resumes():
@@ -866,6 +1001,224 @@ async def get_skills_taxonomy():
     data = load_json_file(QUESTION_BANK_FILE)
     return {"skills_taxonomy": data.get("skills_taxonomy", {})}
 
+# ==================== JD Analysis API ====================
+
+@app.post("/api/analyze-jd")
+async def analyze_jd(request: AnalyzeJDRequest):
+    """
+    Analyze job description using LLM to suggest question categories and difficulty levels.
+    
+    Returns AI-suggested configuration that can be edited by the user.
+    """
+    from llm.gemini_client import GeminiClient
+    
+    try:
+        # Initialize LLM client
+        llm_client = GeminiClient()
+        
+        # Create analysis prompt
+        prompt = f"""Analyze this job description and determine the interview configuration.
+
+Position Title: {request.position_title}
+
+Job Description:
+{request.jd_text}
+
+Your task:
+1. Determine which question categories are relevant for this role
+2. Assign appropriate difficulty level (easy, medium, hard) for each category
+3. Consider the role's seniority, technical requirements, and industry
+
+IMPORTANT: You can suggest ANY category that's relevant - not limited to a predefined list.
+
+Common Categories (examples, not exhaustive):
+- coding: Programming, algorithms, data structures
+- behavioral: Soft skills, past experiences, situational questions
+- system_design: Architecture, scalability, design patterns
+- problem_solving: Analytical thinking, case studies
+- conceptual: Theoretical knowledge, fundamentals
+- technical_knowledge: Domain-specific technical expertise
+- safety: Safety protocols, compliance (for trades/operations)
+- recruitment: Hiring, talent acquisition (for HR roles)
+- stakeholder_management: Managing relationships, communication
+- leadership: Team management, decision making
+- hr_policies: HR regulations, compliance
+- product_sense: Product thinking, user empathy (for PM roles)
+- metrics_analytics: Data analysis, KPIs
+- sales: Sales techniques, negotiation
+- customer_service: Customer interaction, support
+
+Guidelines:
+- Senior roles → hard difficulty
+- Junior roles → easy/medium difficulty  
+- Technical roles (Software Engineer, Data Scientist) → enable coding, system_design
+- Non-technical roles (Product Manager, Marketing) → enable behavioral, problem_solving
+- HR roles → enable recruitment, stakeholder_management, hr_policies, leadership (NOT coding)
+- Trades/Operations (Electrician, Mechanic) → enable technical_knowledge, safety, problem_solving (NOT coding)
+- Mid-level roles → medium difficulty
+
+Return ONLY valid JSON in this exact format (no markdown, no code blocks):
+{{
+  "coding": {{"enabled": true, "difficulty_level": "hard"}},
+  "behavioral": {{"enabled": true, "difficulty_level": "medium"}},
+  "system_design": {{"enabled": false, "difficulty_level": "easy"}}
+}}
+
+For HR Manager, you might return:
+{{
+  "recruitment": {{"enabled": true, "difficulty_level": "hard"}},
+  "stakeholder_management": {{"enabled": true, "difficulty_level": "medium"}},
+  "leadership": {{"enabled": true, "difficulty_level": "medium"}},
+  "hr_policies": {{"enabled": true, "difficulty_level": "medium"}},
+  "behavioral": {{"enabled": true, "difficulty_level": "medium"}}
+}}
+
+IMPORTANT: Return ONLY the JSON object, nothing else."""
+
+        # Get LLM response
+        response = llm_client.generate_content(prompt)
+        
+        # Parse JSON response
+        import json
+        import re
+        
+        # Extract JSON from response (handle markdown code blocks)
+        response_text = response.strip()
+        json_match = re.search(r'\{.*\}', response_text, re.DOTALL)
+        if json_match:
+            response_text = json_match.group(0)
+        
+        categories_data = json.loads(response_text)
+        
+        # Convert to CategoryConfig objects
+        question_categories = {}
+        for category, config in categories_data.items():
+            question_categories[category] = CategoryConfig(
+                enabled=config.get("enabled", False),
+                difficulty_level=config.get("difficulty_level", "medium")
+            )
+        
+        # Generate summary
+        enabled_categories = [cat for cat, conf in question_categories.items() if conf.enabled]
+        summary = f"Analyzed {request.position_title}: Suggested {len(enabled_categories)} relevant categories"
+        
+        return AnalyzeJDResponse(
+            question_categories=question_categories,
+            analysis_summary=summary
+        )
+        
+    except json.JSONDecodeError as e:
+        raise HTTPException(status_code=500, detail=f"Failed to parse LLM response: {str(e)}")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"JD analysis failed: {str(e)}")
+
+# ==================== Skill Extraction & Mapping ====================
+
+class ExtractSkillsRequest(BaseModel):
+    jd_text: str
+
+@app.post("/api/extract-skills")
+async def extract_skills(request: ExtractSkillsRequest):
+    """
+    Extract must-have skills from job description using LLM
+    """
+    from llm.gemini_client import GeminiClient
+    
+    try:
+        llm_client = GeminiClient()
+        
+        prompt = f"""Extract skills from this job description with proficiency levels and types.
+
+Job Description:
+{request.jd_text}
+
+For each skill, determine:
+1. Skill name (lowercase, underscore-separated)
+2. Proficiency level: basic_knowledge | comfortable | strong | expert
+3. Type: must_have | nice_to_have
+
+Rules:
+- Must-have skills typically require higher proficiency (strong/expert)
+- Nice-to-have skills typically require lower proficiency (basic_knowledge/comfortable)
+- Look for keywords like "required", "must have", "essential" for must_have
+- Look for keywords like "preferred", "nice to have", "bonus" for nice_to_have
+
+Return ONLY a JSON array:
+[
+  {{"name": "product_strategy", "proficiency": "strong", "type": "must_have"}},
+  {{"name": "user_research", "proficiency": "basic_knowledge", "type": "nice_to_have"}}
+]
+
+Return ONLY the JSON array, nothing else."""
+
+        response = llm_client.model.generate_content(prompt)
+        
+        # Parse JSON from response
+        import re
+        json_match = re.search(r'\[.*?\]', response.text, re.DOTALL)
+        if json_match:
+            skills = json.loads(json_match.group())
+            return {"skills": skills}
+        
+        raise ValueError("Could not parse skills from LLM response")
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Skill extraction failed: {str(e)}")
+
+@app.post("/api/map-skills")
+async def map_skills(request: MapSkillsRequest):
+    """
+    Map skills to question categories dynamically
+    Uses cache + LLM for unknown skills
+    """
+    from llm.gemini_client import GeminiClient
+    from core.skill_mapper import SkillCategoryMapper
+    
+    try:
+        llm_client = GeminiClient()
+        mapper = SkillCategoryMapper()
+        
+        # Map skills to categories
+        category_map = mapper.map_to_categories(request.skills, llm_client)
+        
+        return {
+            "category_map": category_map,
+            "categories": list(category_map.keys())
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Skill mapping failed: {str(e)}")
+
+@app.post("/api/configure-interview")
+async def configure_interview(request: ExtractSkillsRequest):
+    """
+    Comprehensive AI interview configuration from JD
+    Extracts: parameters, skills, categories, interview flow, sample Q&A
+    """
+    from core.ai_configurator import AIConfigurator
+    from utils.jd_hasher import hash_jd
+    from datetime import datetime
+    
+    try:
+        configurator = AIConfigurator()
+        
+        # Get comprehensive configuration
+        config = configurator.configure_interview(request.jd_text)
+        
+        # Add metadata
+        jd_hash = hash_jd(request.jd_text)
+        
+        return {
+            "ai_metadata": {
+                "last_analyzed": datetime.utcnow().isoformat() + "Z",
+                "jd_hash": jd_hash,
+                **config
+            }
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Interview configuration failed: {str(e)}")
+
 # ==================== Enhanced Interview Start ====================
 
 @app.post("/api/interview/start")
@@ -976,10 +1329,18 @@ async def start_interview_with_position(
 
 from result_processor import process_session_results
 
+class EndInterviewRequest(BaseModel):
+    ended_by: str = "candidate"  # candidate, admin, system
+    reason: str = "completed"  # completed, ended_early, timeout
+
 @app.post("/api/interview/{session_id}/end")
-async def end_interview(session_id: str):
+async def end_interview(session_id: str, request: EndInterviewRequest = None):
     """End an ongoing interview session"""
     print(f"[INFO] Request to end session {session_id}")
+    
+    # Extract ended_by and reason from request if provided
+    ended_by = request.ended_by if request else "unknown"
+    end_reason = request.reason if request else "completed"
     
     # 1. Update in-memory controller
     if session_id in active_interviews:
@@ -987,11 +1348,12 @@ async def end_interview(session_id: str):
         if hasattr(controller, 'context_manager'):
             controller.context_manager.context["status"] = "completed"
         
-        # Broadcast end message
+        # Broadcast end message to ALL connections (expert + candidate)
         try:
             await connection_manager.broadcast({
                 "type": "session_end",
-                "message": "The interview has been concluded."
+                "message": "The interview has been concluded.",
+                "ended_by": ended_by
             })
         except Exception as e:
             print(f"[ERROR] Failed to broadcast end message: {e}")
@@ -1003,6 +1365,8 @@ async def end_interview(session_id: str):
         if "sessions" in sessions_data and session_id in sessions_data["sessions"]:
             sessions_data["sessions"][session_id]["status"] = "completed"
             sessions_data["sessions"][session_id]["ended_at"] = datetime.utcnow().isoformat()
+            sessions_data["sessions"][session_id]["ended_by"] = ended_by
+            sessions_data["sessions"][session_id]["end_reason"] = end_reason
             save_json_file(SESSIONS_FILE, sessions_data)
     except Exception as e:
         print(f"[ERROR] Failed to update session file: {e}")
@@ -1017,8 +1381,32 @@ async def end_interview(session_id: str):
         await process_session_results(session_id, sessions_data, logger, save_candidate_result)
     except Exception as e:
         print(f"[ERROR] Result processing in end_interview failed: {e}")
+    
+    # 4. Generate thank you tokens and URLs
+    candidate_thank_you_token = f"cty_{uuid.uuid4().hex[:12]}"
+    candidate_thank_you_url = f"/candidate/thank-you/{candidate_thank_you_token}"
+    expert_thank_you_url = f"/expert/thank-you/{session_id}"
+    
+    # Store thank you token in results
+    try:
+        results_data = load_json_file(RESULTS_FILE)
+        if session_id in results_data.get("results", {}):
+            if "candidate" not in results_data["results"][session_id]:
+                results_data["results"][session_id]["candidate"] = {}
+            results_data["results"][session_id]["candidate"]["thank_you_token"] = candidate_thank_you_token
+            results_data["results"][session_id]["candidate"]["thank_you_url"] = candidate_thank_you_url
+            save_json_file(RESULTS_FILE, results_data)
+    except Exception as e:
+        print(f"[ERROR] Failed to save thank you tokens: {e}")
 
-    return {"status": "success", "message": "Interview ended"}
+    return {
+        "status": "success",
+        "message": "Interview ended",
+        "redirect_urls": {
+            "candidate": candidate_thank_you_url,
+            "expert": expert_thank_you_url
+        }
+    }
 
 @app.post("/api/interview/{session_id}/process-results")
 async def manual_process_results(session_id: str):
@@ -1073,126 +1461,391 @@ def get_session_result_path(session_id: str) -> Optional[str]:
                 return os.path.join(CANDIDATE_RESULTS_DIR, f)
                 
         return None
-    except:
+    except Exception as e:
+        print(f"[ERROR] Finding candidate file failed: {e}")
         return None
 
+
 @app.post("/api/feedback/generate")
-async def generate_feedback_report(request: FeedbackRequest):
-    """Generate a feedback report using the Feedback Agent"""
+async def generate_feedback(request: dict):
+    """Generate AI feedback with type selection (short/long)"""
+    session_id = request.get("session_id")
+    feedback_type = request.get("feedback_type", "short")  # 'short' or 'long'
+    
+    if not session_id:
+        raise HTTPException(status_code=400, detail="session_id required")
+    
+    if feedback_type not in ["short", "long"]:
+        raise HTTPException(status_code=400, detail="feedback_type must be 'short' or 'long'")
+    
     try:
-        # Load Log
-        log_data = logger.get_log_data()
-        session_log = None
-        for session in log_data.get("interview_sessions", []):
-            if session.get("session_id") == request.session_id:
-                session_log = session
-                break
+        # Load result
+        results_data = load_json_file(RESULTS_FILE)
+        result = results_data.get("results", {}).get(session_id)
         
-        if not session_log:
+        if not result:
+            raise HTTPException(status_code=404, detail="Session not found")
+        
+        # Get session log
+        log_data = logger.get_session_log(session_id)
+        if not log_data:
             raise HTTPException(status_code=404, detail="Session log not found")
-            
-        # Load Calculated Results
-        result_path = get_session_result_path(request.session_id)
-        if not result_path or not os.path.exists(result_path):
-            # It's possible the result file hasn't been created if no questions were answered
-            # or if the save failed. We'll proceed with log data only.
-            result_data = {"candidate": {"name": "Candidate"}, "overall_score": 0}
-        else:
-            # Parse result file (it contains a list of interviews)
-            with open(result_path, 'r', encoding='utf-8') as f:
-                candidate_file_data = json.load(f)
-                
-            # Find the specific result for this session
-            result_data = None
-            for interview in candidate_file_data.get("interviews", []):
-                if interview.get("session_id") == request.session_id:
-                    result_data = interview
-                    break
-                    
-            if not result_data:
-                result_data = {"candidate": {"name": "Candidate"}, "overall_score": 0}
-            
-        # Generate Feedback
-        report = feedback_generator.generate_feedback(session_log, result_data, request.feedback_type)
         
-        return {"status": "generated", "content": report, "type": request.feedback_type}
+        # Map user-facing types to internal types
+        internal_type = "detailed" if feedback_type == "long" else "short"
         
+        # Generate feedback
+        from llm.feedback_agent import FeedbackGenerator
+        generator = FeedbackGenerator()
+        
+        feedback_content = generator.generate_feedback(
+            log_data=log_data,
+            result_data=result,
+            feedback_type=internal_type
+        )
+        
+        # Update result with generated feedback
+        result["feedback"]["status"] = "GENERATED"
+        result["feedback"]["type"] = feedback_type
+        result["feedback"]["content"] = feedback_content
+        result["feedback"]["generated_at"] = datetime.now().isoformat()
+        
+        save_json_file(RESULTS_FILE, results_data)
+        
+        return {
+            "status": "success",
+            "content": feedback_content,
+            "type": feedback_type
+        }
+    except HTTPException:
+        raise
     except Exception as e:
-        print(f"Error generating feedback: {e}")
+        print(f"[ERROR] Feedback generation failed: {e}")
         import traceback
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/api/feedback/approve")
-async def approve_feedback_report(approval: FeedbackApproval):
-    """Approve and publish the feedback report"""
+async def approve_feedback(request: dict):
+    """Approve generated feedback"""
+    session_id = request.get("session_id")
+    content = request.get("content")  # Allow editing before approval
+    
+    if not session_id:
+        raise HTTPException(status_code=400, detail="session_id required")
+    
     try:
-        result_path = get_session_result_path(approval.session_id)
-        if not result_path or not os.path.exists(result_path):
-            raise HTTPException(status_code=404, detail="Result file not found")
-            
-        with open(result_path, 'r', encoding='utf-8') as f:
-            data = json.load(f)
-            
-        found = False
-        for interview in data.get("interviews", []):
-            if interview.get("session_id") == approval.session_id:
-                # Update the result entry
-                interview["feedback_report"] = {
-                    "content": approval.content,
-                    "status": "APPROVED",
-                    "approved_at": datetime.utcnow().isoformat()
-                }
-                interview["feedback_summary"] = approval.content
-                found = True
-                break
+        results_data = load_json_file(RESULTS_FILE)
+        result = results_data.get("results", {}).get(session_id)
         
-        if not found:
-            raise HTTPException(status_code=404, detail="Interview result entry not found")
-            
-        with open(result_path, 'w', encoding='utf-8') as f:
-            json.dump(data, f, indent=2, ensure_ascii=False)
-            
-        return {"status": "published"}
+        if not result:
+            raise HTTPException(status_code=404, detail="Session not found")
         
+        # Update feedback status and content
+        result["feedback"]["status"] = "APPROVED"
+        result["feedback"]["content"] = content or result["feedback"]["content"]
+        result["feedback"]["approved_at"] = datetime.now().isoformat()
+        
+        save_json_file(RESULTS_FILE, results_data)
+        
+        return {
+            "status": "success",
+            "message": "Feedback approved"
+        }
+    except HTTPException:
+        raise
     except Exception as e:
+        print(f"[ERROR] Feedback approval failed: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
-class FeedbackReject(BaseModel):
-    session_id: str
-    reason: str
+@app.post("/api/feedback/reject")
+async def reject_feedback(request: dict):
+    """Reject generated feedback"""
+    session_id = request.get("session_id")
+    reason = request.get("reason", "Not satisfactory")
+    
+    if not session_id:
+        raise HTTPException(status_code=400, detail="session_id required")
+    
+    try:
+        results_data = load_json_file(RESULTS_FILE)
+        result = results_data.get("results", {}).get(session_id)
+        
+        if not result:
+            raise HTTPException(status_code=404, detail="Session not found")
+        
+        # Reset feedback to allow regeneration
+        result["feedback"]["status"] = "REJECTED"
+        result["feedback"]["rejected_reason"] = reason
+        result["feedback"]["type"] = None
+        result["feedback"]["content"] = None
+        
+        save_json_file(RESULTS_FILE, results_data)
+        
+        return {
+            "status": "success",
+            "message": "Feedback rejected"
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"[ERROR] Feedback rejection failed: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/feedback/publish")
+async def publish_feedback(request: dict):
+    """Publish approved feedback to candidate"""
+    session_id = request.get("session_id")
+    
+    if not session_id:
+        raise HTTPException(status_code=400, detail="session_id required")
+    
+    try:
+        results_data = load_json_file(RESULTS_FILE)
+        result = results_data.get("results", {}).get(session_id)
+        
+        if not result:
+            raise HTTPException(status_code=404, detail="Session not found")
+        
+        if result["feedback"]["status"] != "APPROVED":
+            raise HTTPException(status_code=400, detail="Feedback must be approved before publishing")
+        
+        # Update status to published
+        result["feedback"]["status"] = "PUBLISHED"
+        result["feedback"]["published_at"] = datetime.now().isoformat()
+        
+        # Generate share token if not exists
+        if "share" not in result or not result.get("share", {}).get("token"):
+            share_token = f"share_{uuid.uuid4().hex[:12]}"
+            result["share"] = {
+                "token": share_token,
+                "url": f"/share/{share_token}",
+                "created_at": datetime.now().isoformat()
+            }
+        
+        save_json_file(RESULTS_FILE, results_data)
+        
+        return {
+            "status": "success",
+            "message": "Feedback published",
+            "share_url": result["share"]["url"]
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"[ERROR] Feedback publishing failed: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/share/{token}")
+async def get_shared_feedback(token: str):
+    """Get published feedback by share token"""
+    try:
+        results_data = load_json_file(RESULTS_FILE)
+        
+        # Find result by share token
+        for session_id, result in results_data.get("results", {}).items():
+            share_info = result.get("share", {})
+            if share_info.get("token") == token:
+                # Only return published feedback
+                if result.get("feedback", {}).get("status") != "PUBLISHED":
+                    raise HTTPException(status_code=404, detail="Feedback not published yet")
+                
+                # Return safe data for public viewing
+                return {
+                    "candidate_name": result.get("candidate", {}).get("name") or "Candidate",
+                    "position_title": result.get("position", {}).get("title") or "Position",
+                    "interview_date": result.get("date", datetime.now().isoformat()),
+                    "feedback_content": result.get("feedback", {}).get("content", ""),
+                    "overall_score": result.get("overall_metrics", {}).get("total_score", 0)
+                }
+        
+        raise HTTPException(status_code=404, detail="Share link not found")
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"[ERROR] Share link fetch failed: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/feedback/generate")
+async def generate_feedback(request: dict):
+    """Generate AI feedback with type selection (short/long)"""
+    session_id = request.get("session_id")
+    feedback_type = request.get("feedback_type", "short")  # 'short' or 'long'
+    
+    if not session_id:
+        raise HTTPException(status_code=400, detail="session_id required")
+    
+    if feedback_type not in ["short", "long"]:
+        raise HTTPException(status_code=400, detail="feedback_type must be 'short' or 'long'")
+    
+    try:
+        # Load result
+        results_data = load_json_file(RESULTS_FILE)
+        result = results_data.get("results", {}).get(session_id)
+        
+        if not result:
+            raise HTTPException(status_code=404, detail="Session not found")
+        
+        # Get session log
+        log_data = logger.get_session_log(session_id)
+        if not log_data:
+            raise HTTPException(status_code=404, detail="Session log not found")
+        
+        # Map user-facing types to internal types
+        internal_type = "detailed" if feedback_type == "long" else "short"
+        
+        # Generate feedback
+        from llm.feedback_agent import FeedbackGenerator
+        generator = FeedbackGenerator()
+        
+        feedback_content = generator.generate_feedback(
+            log_data=log_data,
+            result_data=result,
+            feedback_type=internal_type
+        )
+        
+        # Initialize feedback field if it doesn't exist (for old results)
+        if "feedback" not in result:
+            result["feedback"] = {
+                "status": "NOT_GENERATED",
+                "type": None,
+                "content": None,
+                "generated_at": None,
+                "approved_at": None,
+                "published_at": None,
+                "rejected_reason": None
+            }
+        
+        # Update result with generated feedback
+        result["feedback"]["status"] = "GENERATED"
+        result["feedback"]["type"] = feedback_type
+        result["feedback"]["content"] = feedback_content
+        result["feedback"]["generated_at"] = datetime.now().isoformat()
+        
+        save_json_file(RESULTS_FILE, results_data)
+        
+        return {
+            "status": "success",
+            "content": feedback_content,
+            "type": feedback_type
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"[ERROR] Feedback generation failed: {e}")
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/feedback/approve")
+async def approve_feedback(request: dict):
+    """Approve generated feedback"""
+    session_id = request.get("session_id")
+    content = request.get("content")  # Allow editing before approval
+    
+    if not session_id:
+        raise HTTPException(status_code=400, detail="session_id required")
+    
+    try:
+        results_data = load_json_file(RESULTS_FILE)
+        result = results_data.get("results", {}).get(session_id)
+        
+        if not result:
+            raise HTTPException(status_code=404, detail="Session not found")
+        
+        # Update feedback status and content
+        result["feedback"]["status"] = "APPROVED"
+        result["feedback"]["content"] = content or result["feedback"]["content"]
+        result["feedback"]["approved_at"] = datetime.now().isoformat()
+        
+        save_json_file(RESULTS_FILE, results_data)
+        
+        return {
+            "status": "success",
+            "message": "Feedback approved"
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"[ERROR] Feedback approval failed: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/api/feedback/reject")
-async def reject_feedback_report(rejection: FeedbackReject):
-    """Reject/cancel feedback publishing with a reason"""
+async def reject_feedback(request: dict):
+    """Reject generated feedback"""
+    session_id = request.get("session_id")
+    reason = request.get("reason", "Not satisfactory")
+    
+    if not session_id:
+        raise HTTPException(status_code=400, detail="session_id required")
+    
     try:
-        result_path = get_session_result_path(rejection.session_id)
-        if not result_path or not os.path.exists(result_path):
-            raise HTTPException(status_code=404, detail="Result file not found")
-            
-        with open(result_path, 'r', encoding='utf-8') as f:
-            data = json.load(f)
-            
-        found = False
-        for interview in data.get("interviews", []):
-            if interview.get("session_id") == rejection.session_id:
-                interview["feedback_report"] = {
-                    "status": "REJECTED",
-                    "rejection_reason": rejection.reason,
-                    "rejected_at": datetime.utcnow().isoformat()
-                }
-                found = True
-                break
+        results_data = load_json_file(RESULTS_FILE)
+        result = results_data.get("results", {}).get(session_id)
         
-        if not found:
-            raise HTTPException(status_code=404, detail="Interview result entry not found")
-            
-        with open(result_path, 'w', encoding='utf-8') as f:
-            json.dump(data, f, indent=2, ensure_ascii=False)
-            
-        return {"status": "rejected", "reason": rejection.reason}
+        if not result:
+            raise HTTPException(status_code=404, detail="Session not found")
         
+        # Reset feedback to allow regeneration
+        result["feedback"]["status"] = "REJECTED"
+        result["feedback"]["rejected_reason"] = reason
+        result["feedback"]["type"] = None
+        result["feedback"]["content"] = None
+        
+        save_json_file(RESULTS_FILE, results_data)
+        
+        return {
+            "status": "success",
+            "message": "Feedback rejected"
+        }
+    except HTTPException:
+        raise
     except Exception as e:
+        print(f"[ERROR] Feedback rejection failed: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/feedback/publish")
+async def publish_feedback(request: dict):
+    """Publish approved feedback to candidate"""
+    session_id = request.get("session_id")
+    
+    if not session_id:
+        raise HTTPException(status_code=400, detail="session_id required")
+    
+    try:
+        results_data = load_json_file(RESULTS_FILE)
+        result = results_data.get("results", {}).get(session_id)
+        
+        if not result:
+            raise HTTPException(status_code=404, detail="Session not found")
+        
+        if result["feedback"]["status"] != "APPROVED":
+            raise HTTPException(status_code=400, detail="Feedback must be approved before publishing")
+        
+        # Update status to published
+        result["feedback"]["status"] = "PUBLISHED"
+        result["feedback"]["published_at"] = datetime.now().isoformat()
+        
+        # Generate share token if not exists
+        if "share" not in result or not result.get("share", {}).get("token"):
+            share_token = f"share_{uuid.uuid4().hex[:12]}"
+            result["share"] = {
+                "token": share_token,
+                "url": f"/share/{share_token}",
+                "created_at": datetime.now().isoformat()
+            }
+        
+        save_json_file(RESULTS_FILE, results_data)
+        
+        return {
+            "status": "success",
+            "message": "Feedback published",
+            "share_url": result["share"]["url"]
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"[ERROR] Feedback publishing failed: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/api/results/{session_id}/status")
@@ -1290,6 +1943,41 @@ async def list_interview_results():
         return {"results": results}
     except Exception as e:
         print(f"[ERROR] listing results: {e}")
+        return {"results": [], "error": str(e)}
+
+@app.get("/api/expert/results")
+async def get_expert_results():
+    """Get all interview results for expert review"""
+    try:
+        # Load all results
+        results_data = load_json_file(RESULTS_FILE)
+        all_results = results_data.get("results", {})
+        
+        # Convert to list format for frontend
+        results_list = []
+        for session_id, result in all_results.items():
+            result["session_id"] = session_id
+            results_list.append(result)
+        
+        # Filter out test/unknown sessions
+        filtered_results = [
+            r for r in results_list
+            if (
+                # Exclude Unknown positions
+                r.get("position", {}).get("title") != "Unknown Position"
+                # Exclude test candidate names
+                and r.get("candidate", {}).get("name") not in ["Unknown", "John Smith", "Jane Doe", "John Doe"]
+                # Exclude test session IDs
+                and not r.get("session_id", "").startswith("test_session")
+            )
+        ]
+        
+        # Sort by date (newest first)
+        filtered_results.sort(key=lambda x: x.get("date", ""), reverse=True)
+        
+        return {"results": filtered_results}
+    except Exception as e:
+        print(f"[ERROR] Failed to load results: {e}")
         return {"results": [], "error": str(e)}
 
 @app.get("/api/sessions/active")
@@ -1407,6 +2095,10 @@ async def abandon_session(session_id: str):
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket, view: str = "candidate"):
     """WebSocket endpoint for interview communication"""
+    # Backward compatibility: normalize admin → expert
+    if view == "admin":
+        view = "expert"
+        print(f"[INFO] Redirected admin view to expert view for backward compatibility")
     try:
         print(f"[DEBUG] WebSocket connection attempt, view={view}")
         debug_logger.info(f"WebSocket connection attempt, view={view}")
@@ -1418,10 +2110,7 @@ async def websocket_endpoint(websocket: WebSocket, view: str = "candidate"):
         error_msg = f"Failed to accept WebSocket connection: {connect_error}\n{traceback.format_exc()}"
         print(f"[ERROR] {error_msg}")
         debug_logger.error(error_msg)
-    except Exception as connect_error:
-        import traceback
-        print(f"[ERROR] Failed to accept WebSocket connection: {connect_error}")
-        print(f"[ERROR] Full traceback:\n{traceback.format_exc()}")
+        # Properly close the connection and return
         try:
             await websocket.close(code=1011, reason="Connection failed")
         except:
@@ -1487,16 +2176,7 @@ async def websocket_endpoint(websocket: WebSocket, view: str = "candidate"):
                         sessions_dict = sessions_data.get("sessions", {})
                         session_info = sessions_dict.get(session_id)
                         
-                        print(f"[DEBUG] Looking for session {session_id} in sessions.json")
-                        print(f"[DEBUG] Sessions file has {len(sessions_dict)} sessions")
-                        if sessions_dict:
-                            print(f"[DEBUG] Session keys: {list(sessions_dict.keys())[:10]}")  # Show first 10 keys
-                            print(f"[DEBUG] Session ID type: {type(session_id)}, Value: '{session_id}'")
-                            # Check if session_id matches any key (case-insensitive or exact)
-                            matching_keys = [k for k in sessions_dict.keys() if str(k) == str(session_id)]
-                            print(f"[DEBUG] Matching keys: {matching_keys}")
-                        else:
-                            print(f"[DEBUG] Sessions dict is empty!")
+                        print(f"[DEBUG] Looking for session {session_id} in sessions.json ({len(sessions_dict)} total sessions)")
                         
                         if session_info:
                             print(f"[DEBUG] ✓ Found session {session_id} in sessions.json")
@@ -1519,15 +2199,6 @@ async def websocket_endpoint(websocket: WebSocket, view: str = "candidate"):
                                 await asyncio.sleep(1)
                                 return
 
-                            if session_info.get("status") == "completed" and view == "candidate":
-                                print(f"[INFO] Session {session_id} is already completed. Preventing restart.")
-                                await websocket.send_json({
-                                    "type": "session_end",
-                                    "message": "Interview previously completed."
-                                })
-                                # Skip controller creation and wait for next message (or disconnect?)
-                                # Better to let client handle the end state.
-                                continue
                             # Session exists in sessions.json - this is a new session
                             try:
                                 # Get position to determine language
@@ -1541,21 +2212,13 @@ async def websocket_endpoint(websocket: WebSocket, view: str = "candidate"):
                                 
                                 print(f"[DEBUG] Creating controller for session {session_id}, position_id={position_id}, view={view}")
                                 
-                                # Create new controller for this session
-                                # NOTE: InterviewController.__init__ will create a session with auto-generated ID
-                                # We'll override it immediately after creation
-                                controller = InterviewController(language, position_id, expert_mode=is_expert)
-                                
-                                # Override the auto-generated session_id with the one from sessions.json
-                                # This must be done before any operations that use session_id
-                                old_session_id = controller.context_manager.session_id
-                                controller.context_manager.session_id = session_id
-                                controller.context_manager.context["interview_context"]["session_id"] = session_id
-                                
-                                # Initialize session in logger with the correct session_id
-                                # (The controller's __init__ already called initialize_session with wrong ID)
-                                # We call it again with the correct ID - logger will handle duplicates gracefully
-                                controller.logger.initialize_session(session_id, language, position_id)
+                                # Create new controller with correct session_id from start
+                                controller = InterviewController(
+                                    language, 
+                                    position_id, 
+                                    expert_mode=is_expert,
+                                    session_id=session_id  # Pass session_id directly - no override needed!
+                                )
                                 
                                 # Set question categories and difficulty distribution if present
                                 if session_info.get("question_categories"):
@@ -1621,8 +2284,13 @@ async def websocket_endpoint(websocket: WebSocket, view: str = "candidate"):
                                     jd_id = session.get("jd_id")
                                     # Check if expert view - set expert_mode accordingly
                                     is_expert = view == "expert"
-                                    controller = InterviewController(language, jd_id, expert_mode=is_expert)
-                                    controller.context_manager.session_id = session_id
+                                    # Create controller with correct session_id from start
+                                    controller = InterviewController(
+                                        language, 
+                                        jd_id, 
+                                        expert_mode=is_expert,
+                                        session_id=session_id  # Pass session_id directly
+                                    )
                                     
                                     # Restore interview state from log
                                     questions = session.get("questions", [])
@@ -1896,6 +2564,16 @@ async def websocket_endpoint(websocket: WebSocket, view: str = "candidate"):
                     if controller.is_interview_complete():
                         final_summary = controller.finalize_interview()
                         
+                        # Broadcast completion to both views
+                        await broadcast_to_session(session_id, {
+                            "type": "interview_completed",
+                            "data": {
+                                "ended_by": "system",
+                                "reason": "all_questions_completed",
+                                "session_id": session_id
+                            }
+                        })
+                        
                         # Save detailed candidate result
                         try:
                             sessions_data = load_json_file(SESSIONS_FILE)
@@ -1956,9 +2634,59 @@ async def websocket_endpoint(websocket: WebSocket, view: str = "candidate"):
                             await message_handler.send_question(next_question, view)
                             await message_handler.send_progress(controller.get_progress())
             
+            
             elif message_type == "get_progress":
                 if controller:
                     await message_handler.send_progress(controller.get_progress())
+            
+            elif message_type == "interview_ended":
+                # Handle interview end from either side
+                print(f"[INFO] interview_ended message received from {view}, session_id={session_id}")
+                
+                # Broadcast completion to both views
+                await broadcast_to_session(session_id, {
+                    "type": "interview_completed",
+                    "data": {
+                        "ended_by": data.get("ended_by", view),
+                        "session_id": session_id
+                    }
+                })
+                
+                # Close the interview session
+                if session_id in active_sessions:
+                    active_sessions[session_id]["status"] = "completed"
+                ended_by = data.get("ended_by", view)
+                
+                # Mark session as completed
+                try:
+                    sessions_data = load_json_file(SESSIONS_FILE)
+                    if "sessions" in sessions_data and session_id in sessions_data["sessions"]:
+                        sessions_data["sessions"][session_id]["status"] = "completed"
+                        sessions_data["sessions"][session_id]["ended_at"] = datetime.utcnow().isoformat()
+                        sessions_data["sessions"][session_id]["ended_by"] = ended_by
+                        sessions_data["sessions"][session_id]["end_reason"] = data.get("reason", "ended_early")
+                        save_json_file(SESSIONS_FILE, sessions_data)
+                        print(f"[INFO] Session {session_id} marked as completed by {ended_by}")
+                except Exception as e:
+                    print(f"[ERROR] Failed to update session status: {e}")
+                
+                # Broadcast to ALL connections (expert + candidate)
+                try:
+                    await connection_manager.broadcast({
+                        "type": "session_end",
+                        "message": "The interview has been concluded.",
+                        "ended_by": ended_by
+                    })
+                    print(f"[INFO] Broadcasted session_end to all connections")
+                except Exception as e:
+                    print(f"[ERROR] Failed to broadcast session_end: {e}")
+                
+                # Trigger result processing
+                try:
+                    print(f"[INFO] Triggering result processing for {session_id}")
+                    await process_session_results(session_id, sessions_data, logger, save_candidate_result)
+                except Exception as e:
+                    print(f"[ERROR] Result processing failed: {e}")
             
             elif message_type == "get_log":
                 if view == "admin" or view == "expert":
@@ -2210,10 +2938,14 @@ def generate_interview_links(session_id: str, position_id: str, candidate_id: st
     sessions["sessions"][session_id] = session_data
     save_json_file(SESSIONS_FILE, sessions)
     
+    # Generate links
+    candidate_link = f"/interview/{session_id}?token={candidate_token}&view=candidate"
+    admin_link = f"/interview/{session_id}?token={admin_token}&view=expert"  # Changed from view=admin to view=expert
+    
     return {
         "session_id": session_id,
-        "candidate_link": f"/interview/{session_id}?token={candidate_token}&view=candidate",
-        "admin_link": f"/interview/{session_id}?token={admin_token}&view=admin",
+        "candidate_link": candidate_link,
+        "admin_link": admin_link,
         "candidate_token": candidate_token,
         "admin_token": admin_token,
         "expires_at": expires_at.isoformat(),
@@ -2225,6 +2957,8 @@ class CreateSessionRequest(BaseModel):
     candidate_id: str
     ttl_minutes: int = 30  # Default 30 mins
     resume_text: Optional[str] = None
+    send_email: bool = False  # NEW: Email invite flag
+    candidate_email: Optional[str] = None  # NEW: Candidate email
 
 @app.post("/api/interview/create-session")
 async def create_interview_session(request: CreateSessionRequest):
@@ -2272,6 +3006,97 @@ async def create_interview_session(request: CreateSessionRequest):
         sessions["sessions"][session_id]["candidate_info"] = candidate_info
         save_json_file(SESSIONS_FILE, sessions)
     
+    # NEW: Email sending logic
+    if request.send_email and request.candidate_email:
+        try:
+            from utils.email_generator import generate_interview_email
+            from utils.email_sender import send_interview_email
+            
+            # Get account name from position
+            account_name = "Company"
+            if position.get("account_id"):
+                accounts_data = load_json_file(ACCOUNTS_FILE)
+                account = next((a for a in accounts_data.get("accounts", []) if a["id"] == position["account_id"]), None)
+                if account:
+                    account_name = account.get("name", "Company")
+            
+            # Format expiry time
+            expires_at_dt = datetime.fromisoformat(links["expires_at"])
+            expires_at_formatted = expires_at_dt.strftime("%b %d, %Y at %I:%M %p")
+            
+            # Build full candidate link URL
+            base_url = os.getenv("FRONTEND_URL", "http://localhost:3000")
+            candidate_full_url = f"{base_url}{links['candidate_link']}"
+            expert_full_url = f"{base_url}{links['admin_link']}"
+            
+            # Generate email using Gemini
+            email_html = generate_interview_email(
+                candidate_name=candidate_name,
+                position_title=position.get("title", "Position"),
+                company_name=account_name,
+                interview_link=candidate_full_url,
+                expires_at=expires_at_formatted,
+                ttl_minutes=ttl
+            )
+            
+            # Send email (SendGrid → Gmail fallback)
+            result = send_interview_email(
+                to_email=request.candidate_email,
+                subject=f"Interview Invitation - {position.get('title', 'Position')}",
+                html_body=email_html
+            )
+            
+            if result['success']:
+                # Email sent successfully
+                return {
+                    "status": "created",
+                    "session_id": session_id,
+                    "position": {"id": request.position_id, "title": position.get("title")},
+                    "candidate": {"id": request.candidate_id, "name": candidate_name},
+                    "email_sent": True,
+                    "expert_link": expert_full_url,
+                    "candidate_email": request.candidate_email,
+                    "email_provider": result['provider'],
+                    "links": links,  # Include QR links
+                    "expires_at": links["expires_at"],
+                    "ttl_minutes": ttl
+                }
+            else:
+                # Email failed but session created - return QR links
+                print(f"[WARN] Email failed but session created: {result['error']}")
+                return {
+                    "status": "created",
+                    "session_id": session_id,
+                    "position": {"id": request.position_id, "title": position.get("title")},
+                    "candidate": {"id": request.candidate_id, "name": candidate_name},
+                    "email_sent": False,
+                    "email_error": result['error'],
+                    "expert_link": expert_full_url,
+                    "candidate_email": request.candidate_email,
+                    "links": links,  # Include QR links
+                    "expires_at": links["expires_at"],
+                    "ttl_minutes": ttl
+                }
+                
+        except Exception as e:
+            print(f"[ERROR] Email generation/sending failed: {e}")
+            # Don't fail the whole request - return QR links anyway
+            base_url = os.getenv("FRONTEND_URL", "http://localhost:3000")
+            expert_full_url = f"{base_url}{links['admin_link']}"
+            return {
+                "status": "created",
+                "session_id": session_id,
+                "position": {"id": request.position_id, "title": position.get("title")},
+                "candidate": {"id": request.candidate_id, "name": candidate_name},
+                "email_sent": False,
+                "email_error": str(e),
+                "expert_link": expert_full_url,
+                "links": links,  # Include QR links
+                "expires_at": links["expires_at"],
+                "ttl_minutes": ttl
+            }
+    
+    # Default: Return QR code links
     return {
         "status": "created",
         "session_id": session_id,
@@ -2316,7 +3141,7 @@ async def validate_interview_token(session_id: str, token: str):
     elif token == session.get("admin_token"):
         return {
             "valid": True, 
-            "view": "admin", 
+            "view": "expert",  # Changed from "admin" to "expert"
             "session_id": session_id,
             "expires_at": session.get("expires_at")
         }
@@ -2349,7 +3174,7 @@ async def get_interview_session(session_id: str, token: str):
     response = {
         "session_id": session_id,
         "status": session.get("status"),
-        "view": "admin" if is_admin else "candidate",
+        "view": "expert" if is_admin else "candidate",  # Changed from "admin" to "expert"
         "position": {"id": session["position_id"], "title": position.get("title") if position else "Unknown"},
         "created_at": session.get("created_at")
     }
@@ -2363,7 +3188,7 @@ async def get_interview_session(session_id: str, token: str):
         }
         response["links"] = {
             "candidate": f"/interview/{session_id}?token={session['candidate_token']}&view=candidate",
-            "admin": f"/interview/{session_id}?token={session['admin_token']}&view=admin"
+            "expert": f"/interview/{session_id}?token={session['admin_token']}&view=expert"  # Changed from admin to expert
         }
     
     return response
@@ -2872,10 +3697,6 @@ async def reindex_wiki(request: ReindexRequest):
 
 # ==================== Interview Results & Evaluation ====================
 
-class EndInterviewRequest(BaseModel):
-    ended_by: str = "candidate"  # candidate, admin, system
-    reason: str = "completed"  # completed, ended_early, timeout
-
 class AdminFeedbackRequest(BaseModel):
     overall_notes: str = ""
     question_notes: dict = {}
@@ -2945,193 +3766,6 @@ WEAKNESSES: [2-3 bullet points of gaps or areas to improve, separated by |]
             "weaknesses": ["Feedback generation unavailable"]
         }
 
-@app.post("/api/interview/{session_id}/end")
-async def end_interview(session_id: str, request: EndInterviewRequest):
-    """End interview and generate results with AI feedback"""
-    # Check if session exists
-    sessions = load_json_file(SESSIONS_FILE)
-    session = sessions.get("sessions", {}).get(session_id)
-    
-    if not session:
-        raise HTTPException(status_code=404, detail="Session not found")
-    
-    # Update session status
-    session["status"] = "completed"
-    session["ended_at"] = datetime.now().isoformat()
-    session["ended_by"] = request.ended_by
-    session["end_reason"] = request.reason
-    sessions["sessions"][session_id] = session
-    save_json_file(SESSIONS_FILE, sessions)
-    
-    # Get interview data from logger
-    from utils.logger import Logger
-    logger = Logger()
-    log_data = logger.get_session_log(session_id)
-    
-    # Get position and candidate info
-    positions_data = load_json_file(POSITIONS_FILE)
-    position = next((p for p in positions_data.get("positions", []) if p["id"] == session.get("position_id")), None)
-    
-    resumes_data = load_json_file(RESUMES_FILE)
-    candidate = next((r for r in resumes_data.get("resumes", []) if r["id"] == session.get("candidate_id")), None)
-    
-    # Process questions and generate feedback
-    question_results = []
-    all_scores = []
-    topics_covered = set()
-    
-    questions = log_data.get("questions", []) if log_data else []
-    
-    for q_data in questions:
-        question_text = q_data.get("question_text", "")
-        topic = q_data.get("topic", "General")
-        topics_covered.add(topic)
-        
-        # Get best response for this question
-        responses = q_data.get("responses", [])
-        if responses:
-            best_response = responses[0]
-            for r in responses:
-                if r.get("evaluation", {}).get("overall_score", 0) > best_response.get("evaluation", {}).get("overall_score", 0):
-                    best_response = r
-            
-            candidate_answer = best_response.get("candidate_response", "")
-            evaluation = best_response.get("evaluation", {})
-            overall_score = evaluation.get("overall_score", 0)
-            all_scores.append(overall_score)
-            
-            # Generate AI feedback for this question
-            ai_feedback = generate_question_feedback(question_text, candidate_answer, evaluation)
-            
-            # Extract followup responses
-            followup_responses = [r for r in responses[1:] if r.get("response_type") == "followup"]
-            followup_count = len(followup_responses)
-            
-            # Get stop reason from last response if available
-            last_response = responses[-1] if responses else {}
-            followup_stop_reason = q_data.get("followup_stop_reason", 
-                "max_reached" if followup_count >= 10 else "completed")
-            followup_confidence = q_data.get("followup_confidence", 1.0)
-            
-            question_results.append({
-                "question_id": q_data.get("question_id", ""),
-                "question_text": question_text,
-                "topic": topic,
-                "candidate_answer": candidate_answer,
-                "scores": {
-                    "deterministic": evaluation.get("deterministic_scores", {}),
-                    "llm_score": evaluation.get("llm_evaluation", {}).get("score", overall_score),
-                    "combined_score": overall_score
-                },
-                "ai_feedback": ai_feedback,
-                "followup_count": followup_count,
-                "followup_stop_reason": followup_stop_reason,
-                "followup_confidence": followup_confidence,
-                "followups": [
-                    {
-                        "question": r.get("followup_question", ""),
-                        "answer": r.get("candidate_response", ""),
-                        "score": r.get("evaluation", {}).get("overall_score", 0)
-                    }
-                    for r in followup_responses
-                ]
-            })
-    
-    # Calculate overall metrics
-    avg_score = sum(all_scores) / len(all_scores) if all_scores else 0
-    score_trend = "stable"
-    if len(all_scores) > 2:
-        first_half = sum(all_scores[:len(all_scores)//2]) / (len(all_scores)//2)
-        second_half = sum(all_scores[len(all_scores)//2:]) / (len(all_scores) - len(all_scores)//2)
-        if second_half > first_half + 5:
-            score_trend = "improving"
-        elif second_half < first_half - 5:
-            score_trend = "declining"
-    
-    # Create result record
-    result_id = f"result_{uuid.uuid4().hex[:8]}"
-    result = {
-        "id": result_id,
-        "session_id": session_id,
-        "candidate": {
-            "id": session.get("candidate_id", ""),
-            "name": candidate.get("name") if candidate else session.get("candidate_name", "Unknown"),
-            "experience_level": candidate.get("experience_level") if candidate else session.get("candidate_info", {}).get("experience_years", "Unknown")
-        },
-        "position": {
-            "id": session.get("position_id", ""),
-            "title": position.get("title") if position else session.get("candidate_role", "Unknown"),
-            "account": position.get("account_id") if position else session.get("candidate_account", "Unknown")
-        },
-        "created_at": datetime.now().isoformat(),
-        "ended_by": request.ended_by,
-        "end_reason": request.reason,
-        "status": "completed",
-        "overall_metrics": {
-            "total_score": round(avg_score, 1),
-            "questions_asked": len(question_results),
-            "avg_response_time_sec": log_data.get("avg_response_time", 0) if log_data else 0,
-            "score_trend": score_trend,
-            "topics_covered": list(topics_covered)
-        },
-        "question_results": question_results,
-        "followup_metrics": {
-            "total_followups_asked": sum(q.get("followup_count", 0) for q in question_results),
-            "per_question": {
-                f"q{i+1}": {
-                    "count": q.get("followup_count", 0),
-                    "stopped_reason": q.get("followup_stop_reason", "completed"),
-                    "confidence": q.get("followup_confidence", 1.0)
-                }
-                for i, q in enumerate(question_results)
-            }
-        },
-        "admin_feedback": {
-            "overall_notes": "",
-            "question_notes": {},
-            "recommendation": "pending",
-            "added_by": None,
-            "added_at": None
-        },
-        "feedback_summary": result.get("feedback_report", {}).get("content", ""),
-        "shareable_link": {
-            "token": None,
-            "expires_at": None,
-            "views": ["summary"]
-        }
-    }
-    
-    # Save result to main results file
-    try:
-        results_data = load_json_file(RESULTS_FILE)
-        if "results" not in results_data:
-            results_data["results"] = {}
-        results_data["results"][result_id] = result
-        save_json_file(RESULTS_FILE, results_data)
-        
-        # Also save to per-candidate file
-        candidate_name = session.get("candidate_name", "Unknown")
-        candidate_id = session.get("candidate_id", "")
-        save_candidate_result(candidate_name, candidate_id, result, session_id)
-        
-        # IMPORTANT: Persist session status change
-        save_json_file(SESSIONS_FILE, sessions)
-        print(f"[INFO] Successfully saved interview result {result_id} and updated session {session_id}")
-        
-    except Exception as e:
-        print(f"[ERROR] Failed to save interview results: {e}")
-        # Even if saving result fails, try to save session status so it doesn't get stuck? 
-        # No, if result save fails, maybe we want it to remain pending to retry?
-        # But for now, failure means data loss risk, so logging is key.
-        raise HTTPException(status_code=500, detail=f"Failed to save results: {str(e)}")
-    
-    return {
-        "status": "completed",
-        "result_id": result_id,
-        "session_id": session_id,
-        "overall_score": round(avg_score, 1),
-        "questions_evaluated": len(question_results)
-    }
 
 @app.get("/api/results/{result_id}")
 async def get_interview_result(result_id: str, admin: bool = True):
@@ -3294,6 +3928,53 @@ async def create_shareable_link(result_id: str):
         "token": share_token
     }
 
+def save_candidate_result(candidate_name: str, candidate_id: str, result: dict, session_id: str = None):
+    """
+    Save interview result to:
+    1. Candidate-specific file (legacy)
+    2. interview_results.json (for feedback page)
+    """
+    # Generate unique filename
+    date_str = datetime.now().strftime("%Y%m%d")
+    unique_id = session_id or candidate_id or uuid.uuid4().hex[:8]
+    
+    # Sanitize candidate name for filename
+    safe_name = "".join(c if c.isalnum() or c in (' ', '-', '_') else '_' for c in candidate_name)
+    safe_name = safe_name.replace(' ', '_')
+    
+    filename = f"{safe_name}_{date_str}_{unique_id}_result.json"
+    filepath = os.path.join(CANDIDATE_RESULTS_DIR, filename)
+    
+    # 1. Save to candidate-specific file (legacy behavior)
+    if os.path.exists(filepath):
+        with open(filepath, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+    else:
+        data = {"interviews": []}
+    
+    data["interviews"].append(result)
+    
+    with open(filepath, 'w', encoding='utf-8') as f:
+        json.dump(data, f, indent=2, ensure_ascii=False)
+    
+    # 2. ALSO save to interview_results.json (for feedback page)
+    try:
+        results_data = load_json_file(RESULTS_FILE)
+        if "results" not in results_data:
+            results_data["results"] = {}
+        
+        # Use session_id as key
+        results_data["results"][session_id] = result
+        results_data["last_updated"] = datetime.now().isoformat()
+        results_data["total_count"] = len(results_data["results"])
+        
+        save_json_file(RESULTS_FILE, results_data)
+        print(f"[INFO] Saved result to interview_results.json with key: {session_id}")
+    except Exception as e:
+        print(f"[ERROR] Failed to save to interview_results.json: {e}")
+    
+    return filepath
+
 @app.get("/api/results/shared/{token}")
 async def get_shared_result(token: str):
     """Retrieve result by share token"""
@@ -3325,6 +4006,52 @@ async def get_shared_result(token: str):
         print(f"[ERROR] searching share token: {e}")
         
     raise HTTPException(status_code=404, detail="Shared result not found or expired")
+
+# Thank You Page Endpoints
+@app.get("/api/candidate/thank-you/{token}")
+async def get_candidate_thank_you_status(token: str):
+    """Get candidate thank you page status"""
+    try:
+        results_data = load_json_file(RESULTS_FILE)
+        results_dict = results_data.get("results", {})
+        
+        # Find result by candidate thank you token
+        for session_id, result in results_dict.items():
+            if result.get("candidate", {}).get("thank_you_token") == token:
+                return {
+                    "candidate_name": result.get("candidate", {}).get("name", "Candidate"),
+                    "position_title": result.get("position", {}).get("title", "Position"),
+                    "interview_date": result.get("date", datetime.now().isoformat()),
+                    "feedback_status": result.get("feedback", {}).get("status", "NOT_GENERATED")
+                }
+        
+        raise HTTPException(status_code=404, detail="Thank you page not found")
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/expert/thank-you/{session_id}")
+async def get_expert_thank_you_info(session_id: str):
+    """Get expert thank you page info"""
+    try:
+        results_data = load_json_file(RESULTS_FILE)
+        result = results_data.get("results", {}).get(session_id)
+        
+        if not result:
+            raise HTTPException(status_code=404, detail="Session not found")
+        
+        return {
+            "session_id": session_id,
+            "candidate_name": result.get("candidate", {}).get("name", "Candidate"),
+            "position_title": result.get("position", {}).get("title", "Position"),
+            "interview_date": result.get("date", datetime.now().isoformat())
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 
 @app.get("/api/results")
 async def list_all_results(limit: int = 20, offset: int = 0):
@@ -3534,7 +4261,179 @@ async def get_pending_code_reviews():
         "total": len(pending)
     }
 
+# ==================== Feedback Management Endpoints ====================
+
+@app.post("/api/feedback/generate")
+async def generate_feedback(request: dict = Body(...)):
+    """Generate AI feedback with type selection (short/long)"""
+    session_id = request.get("session_id")
+    feedback_type = request.get("feedback_type", "short")  # 'short' or 'long'
+    
+    if not session_id:
+        raise HTTPException(status_code=400, detail="session_id required")
+    
+    if feedback_type not in ["short", "long"]:
+        raise HTTPException(status_code=400, detail="feedback_type must be 'short' or 'long'")
+    
+    try:
+        # Load result
+        results_data = load_json_file(RESULTS_FILE)
+        result = results_data.get("results", {}).get(session_id)
+        
+        if not result:
+            raise HTTPException(status_code=404, detail="Session not found")
+        
+        # Get session log
+        log_data = logger.get_session_log(session_id)
+        if not log_data:
+            raise HTTPException(status_code=404, detail="Session log not found")
+        
+        # Map user-facing types to internal types
+        internal_type = "detailed" if feedback_type == "long" else "short"
+        
+        # Generate feedback
+        feedback_content = feedback_generator.generate_feedback(
+            log_data=log_data,
+            result_data=result,
+            feedback_type=internal_type
+        )
+        
+        # Update result with generated feedback
+        result["feedback"]["status"] = "GENERATED"
+        result["feedback"]["type"] = feedback_type
+        result["feedback"]["content"] = feedback_content
+        result["feedback"]["generated_at"] = datetime.now().isoformat()
+        
+        save_json_file(RESULTS_FILE, results_data)
+        
+        return {
+            "status": "success",
+            "content": feedback_content,
+            "type": feedback_type
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"[ERROR] Feedback generation failed: {e}")
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/feedback/approve")
+async def approve_feedback(request: dict = Body(...)):
+    """Approve generated feedback"""
+    session_id = request.get("session_id")
+    content = request.get("content")  # Allow editing before approval
+    
+    if not session_id:
+        raise HTTPException(status_code=400, detail="session_id required")
+    
+    try:
+        results_data = load_json_file(RESULTS_FILE)
+        result = results_data.get("results", {}).get(session_id)
+        
+        if not result:
+            raise HTTPException(status_code=404, detail="Session not found")
+        
+        # Update feedback status and content
+        result["feedback"]["status"] = "APPROVED"
+        result["feedback"]["content"] = content or result["feedback"]["content"]
+        result["feedback"]["approved_at"] = datetime.now().isoformat()
+        
+        save_json_file(RESULTS_FILE, results_data)
+        
+        return {
+            "status": "success",
+            "message": "Feedback approved"
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"[ERROR] Feedback approval failed: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/feedback/reject")
+async def reject_feedback(request: dict = Body(...)):
+    """Reject generated feedback"""
+    session_id = request.get("session_id")
+    reason = request.get("reason", "Not satisfactory")
+    
+    if not session_id:
+        raise HTTPException(status_code=400, detail="session_id required")
+    
+    try:
+        results_data = load_json_file(RESULTS_FILE)
+        result = results_data.get("results", {}).get(session_id)
+        
+        if not result:
+            raise HTTPException(status_code=404, detail="Session not found")
+        
+        # Reset feedback to allow regeneration
+        result["feedback"]["status"] = "REJECTED"
+        result["feedback"]["rejected_reason"] = reason
+        result["feedback"]["rejected_at"] = datetime.now().isoformat()
+        result["feedback"]["type"] = None
+        result["feedback"]["content"] = None
+        
+        save_json_file(RESULTS_FILE, results_data)
+        
+        return {
+            "status": "success",
+            "message": "Feedback rejected"
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"[ERROR] Feedback rejection failed: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/feedback/publish")
+async def publish_feedback(request: dict = Body(...)):
+    """Publish approved feedback to candidate"""
+    session_id = request.get("session_id")
+    
+    if not session_id:
+        raise HTTPException(status_code=400, detail="session_id required")
+    
+    try:
+        results_data = load_json_file(RESULTS_FILE)
+        result = results_data.get("results", {}).get(session_id)
+        
+        if not result:
+            raise HTTPException(status_code=404, detail="Session not found")
+        
+        if result["feedback"]["status"] != "APPROVED":
+            raise HTTPException(status_code=400, detail="Feedback must be approved before publishing")
+        
+        # Update status to published
+        result["feedback"]["status"] = "PUBLISHED"
+        result["feedback"]["published_at"] = datetime.now().isoformat()
+        
+        # Generate share token if not exists
+        if "share" not in result or not result.get("share", {}).get("token"):
+            share_token = f"share_{uuid.uuid4().hex[:12]}"
+            result["share"] = {
+                "token": share_token,
+                "url": f"/share/{share_token}",
+                "created_at": datetime.now().isoformat()
+            }
+        
+        save_json_file(RESULTS_FILE, results_data)
+        
+        return {
+            "status": "success",
+            "message": "Feedback published",
+            "share_url": result["share"]["url"]
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"[ERROR] Feedback publishing failed: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
+
 

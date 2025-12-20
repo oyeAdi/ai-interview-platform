@@ -26,6 +26,7 @@ out/
 # Environment
 .env
 .env.local
+.env.supabase
 
 # Logs
 backend/logs/*.json
@@ -53,3 +54,5 @@ backend/regenerate_result.py
 backend/test_calibration.py
 backend/apply_approval.py
 log*.json
+
+

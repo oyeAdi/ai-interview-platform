@@ -52,7 +52,7 @@ export default function AccountSelector({
           bg-white dark:bg-black
           border transition-all duration-200
           ${isOpen 
-            ? 'border-epam-cyan' 
+            ? 'border-brand-primary' 
             : 'border-gray-200 dark:border-[#2A2A2A] hover:border-gray-300 dark:hover:border-gray-600'
           }
           ${loading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
@@ -143,7 +143,7 @@ export default function AccountSelector({
                 <div className={`
                   w-10 h-10 flex items-center justify-center font-medium
                   ${selectedAccount === account.id
-                    ? 'bg-epam-cyan text-black'
+                    ? 'bg-brand-primary text-black'
                     : 'bg-gray-100 dark:bg-[#1A1A1A] text-gray-600 dark:text-gray-300'
                   }
                 `}>
@@ -152,7 +152,7 @@ export default function AccountSelector({
                 <div className="flex-1">
                   <div className={`font-medium ${
                     selectedAccount === account.id
-                      ? 'text-epam-cyan'
+                      ? 'text-brand-primary'
                       : 'text-black dark:text-white'
                   }`}>
                     {account.name}
@@ -164,7 +164,7 @@ export default function AccountSelector({
                   )}
                 </div>
                 {selectedAccount === account.id && (
-                  <svg className="w-5 h-5 text-epam-cyan" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <svg className="w-5 h-5 text-brand-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
                   </svg>
                 )}

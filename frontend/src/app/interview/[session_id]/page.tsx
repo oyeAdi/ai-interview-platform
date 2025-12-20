@@ -5,13 +5,12 @@ import { apiUrl } from '@/config/api'
 import { Suspense, useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import CandidateView from '@/components/CandidateView'
-import AdminDashboard from '@/components/AdminDashboard'
 import ExpertView from '@/components/ExpertView'
 import Header from '@/components/Header'
 
 interface SessionInfo {
   session_id: string
-  view: 'candidate' | 'admin'
+  view: 'candidate' | 'expert'  // Changed from 'admin' to 'expert'
   position?: { id: string; title: string }
   candidate?: { id: string; name: string; experience_level?: string }
   status?: string
@@ -19,7 +18,7 @@ interface SessionInfo {
 
 function AccessDenied({ message }: { message: string }) {
   const router = useRouter()
-  
+
   return (
     <div className="min-h-screen bg-white dark:bg-black flex flex-col">
       <Header showQuickStart={false} showBackToDashboard={true} />
@@ -59,15 +58,15 @@ function InterviewSessionContent() {
   const searchParams = useSearchParams()
   const params = useParams()
   const router = useRouter()
-  
+
   const [validating, setValidating] = useState(true)
   const [accessDenied, setAccessDenied] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
   const [sessionInfo, setSessionInfo] = useState<SessionInfo | null>(null)
-  
+
   // Get session_id from URL path
   const sessionId = params.session_id as string
-  
+
   // Get token from query params
   const token = searchParams.get('token')
   const viewParam = searchParams.get('view')
@@ -75,27 +74,27 @@ function InterviewSessionContent() {
   useEffect(() => {
     const validateAccess = async () => {
       setValidating(true)
-      
+
       if (!sessionId) {
         setAccessDenied(true)
         setErrorMessage('No session ID provided')
         setValidating(false)
         return
       }
-      
+
       if (!token) {
         setAccessDenied(true)
         setErrorMessage('No access token provided. Please use a valid interview link.')
         setValidating(false)
         return
       }
-      
+
       try {
         // Validate the token
         const response = await fetch(
           apiUrl(`api/interview/validate-token?session_id=${sessionId}&token=${token}`)
         )
-        
+
         if (!response.ok) {
           const data = await response.json()
           setAccessDenied(true)
@@ -103,52 +102,52 @@ function InterviewSessionContent() {
           setValidating(false)
           return
         }
-        
+
         const validationData = await response.json()
-        
+
         if (!validationData.valid) {
           setAccessDenied(true)
           setErrorMessage('Invalid access token')
           setValidating(false)
           return
         }
-        
+
         // Get full session details
         const sessionResponse = await fetch(
           apiUrl(`api/interview/session/${sessionId}?token=${token}`)
         )
-        
+
         if (!sessionResponse.ok) {
           setAccessDenied(true)
           setErrorMessage('Failed to load session details')
           setValidating(false)
           return
         }
-        
+
         const sessionData = await sessionResponse.json()
-        
+
         setSessionInfo({
           session_id: sessionId,
-          view: validationData.view as 'candidate' | 'admin',
+          view: validationData.view as 'candidate' | 'expert',
           position: sessionData.position,
           candidate: sessionData.candidate,
           status: sessionData.status
         })
-        
+
         // Store for later use
         localStorage.setItem('current_session_id', sessionId)
         localStorage.setItem('interview_view', validationData.view)
         localStorage.setItem('interview_token', token)
-        
+
       } catch (error) {
         console.error('Token validation error:', error)
         setAccessDenied(true)
         setErrorMessage('Failed to validate access. Please check your connection and try again.')
       }
-      
+
       setValidating(false)
     }
-    
+
     validateAccess()
   }, [sessionId, token])
 
@@ -156,30 +155,27 @@ function InterviewSessionContent() {
   if (validating) {
     return <LoadingScreen />
   }
-  
+
   // Show access denied
   if (accessDenied) {
     return <AccessDenied message={errorMessage} />
   }
-  
+
   // No session info - shouldn't happen but handle gracefully
   if (!sessionInfo) {
     return <AccessDenied message="Session information not found" />
   }
-  
+
   // Get language from localStorage
   const language = localStorage.getItem('current_language') || 'python'
   const expertMode = localStorage.getItem('expert_mode') === 'true'
-  
+
   // Render appropriate view based on validated role
-  if (sessionInfo.view === 'admin') {
-    // Check if expert mode was requested
-    if (expertMode || viewParam === 'expert') {
-      return <ExpertView sessionId={sessionInfo.session_id} language={language} />
-    }
-    return <AdminDashboard sessionId={sessionInfo.session_id} language={language} />
+  // Note: admin view is deprecated, always use expert for admin/expert roles
+  if (sessionInfo.view === 'expert' || viewParam === 'expert') {  // Changed from 'admin' to 'expert'
+    return <ExpertView sessionId={sessionInfo.session_id} language={language} />
   }
-  
+
   // Candidate view - no wiki access
   return <CandidateView sessionId={sessionInfo.session_id} language={language} />
 }

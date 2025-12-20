@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
-import ReactMarkdown from 'react-markdown'
 import { apiUrl } from '@/config/api'
 
 export default function SharedResultPage() {
@@ -15,7 +14,7 @@ export default function SharedResultPage() {
     useEffect(() => {
         if (!token) return
 
-        fetch(apiUrl(`api/results/shared/${token}`))
+        fetch(apiUrl(`api/share/${token}`))
             .then(res => {
                 if (!res.ok) throw new Error('Result not found or link expired')
                 return res.json()
@@ -25,136 +24,98 @@ export default function SharedResultPage() {
             .finally(() => setLoading(false))
     }, [token])
 
-    const handlePrint = () => {
-        window.print()
-    }
-
     if (loading) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-gray-50">
-                <div className="w-8 h-8 border-4 border-epam-cyan border-t-transparent rounded-full animate-spin"></div>
-            </div>
-        )
-    }
-
-    if (error) {
-        return (
-            <div className="min-h-screen flex items-center justify-center bg-gray-50">
+            <div className="min-h-screen bg-black flex items-center justify-center">
                 <div className="text-center">
-                    <h1 className="text-2xl font-bold text-gray-900 mb-2">Unavailable</h1>
-                    <p className="text-gray-600">{error}</p>
+                    <div className="inline-block w-16 h-16 border-4 border-[#00E5FF] border-t-transparent rounded-full animate-spin mb-4"></div>
+                    <p className="text-white text-lg">Loading feedback...</p>
                 </div>
             </div>
         )
     }
 
-
-
-    // Helper for safe date formatting
-    const formatDate = (dateString: string) => {
-        try {
-            if (!dateString || dateString === 'Invalid Date') return new Date().toLocaleDateString()
-            return new Date(dateString).toLocaleDateString('en-US', {
-                year: 'numeric', month: 'long', day: 'numeric'
-            })
-        } catch (e) {
-            return new Date().toLocaleDateString()
-        }
+    if (error || !result) {
+        return (
+            <div className="min-h-screen bg-black flex items-center justify-center p-4">
+                <div className="text-center">
+                    <div className="w-20 h-20 bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <svg className="w-10 h-10 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </div>
+                    <h1 className="text-2xl font-bold text-white mb-2">Feedback Not Found</h1>
+                    <p className="text-gray-400">This feedback link is invalid or has expired.</p>
+                </div>
+            </div>
+        )
     }
 
-    if (!result) return null
-
     return (
-        <div className="min-h-screen bg-gray-50 print:bg-white animate-fade-in">
-            {/* Print Controls - Hidden in print */}
-            <div className="fixed top-6 right-6 print:hidden z-50">
-                <button
-                    onClick={handlePrint}
-                    className="flex items-center gap-2 px-4 py-2 bg-epam-cyan hover:bg-epam-cyan/90 text-white rounded-md shadow-lg transition-colors font-medium"
-                >
-                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
-                    </svg>
-                    Download PDF
-                </button>
+        <div className="min-h-screen bg-black">
+            {/* Header */}
+            <div className="bg-gradient-to-r from-[#00E5FF]/10 to-[#39FF14]/10 border-b border-[#2A2A2A]">
+                <div className="max-w-4xl mx-auto px-6 py-8">
+                    <div className="flex items-center gap-3 mb-4">
+                        <div className="w-12 h-12 bg-gradient-to-br from-[#00E5FF] to-[#39FF14] rounded-full flex items-center justify-center">
+                            <svg className="w-6 h-6 text-black" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <h1 className="text-3xl font-bold text-white">Interview Feedback</h1>
+                            <p className="text-gray-400">Technical Interview Results</p>
+                        </div>
+                    </div>
+                </div>
             </div>
 
-            <div className="max-w-[210mm] mx-auto bg-white min-h-screen shadow-xl print:shadow-none print:w-full print:max-w-none">
-                {/* Header with EPAM Branding */}
-                <header className="px-12 py-8 border-b-4 border-epam-cyan flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                        {/* EPAM Logo Placeholder / Text */}
-                        <div className="text-3xl font-bold tracking-tight text-[#39C2D7]">
-                            EPAM
-                            <span className="text-gray-400 font-light text-lg ml-2">Systems</span>
+            {/* Content */}
+            <div className="max-w-4xl mx-auto px-6 py-12">
+                {/* Candidate Info Card */}
+                <div className="bg-[#141414] border border-[#2A2A2A] rounded-2xl p-8 mb-8">
+                    <div className="flex items-center justify-between mb-6">
+                        <div>
+                            <h2 className="text-2xl font-bold text-white mb-2">{result.candidate_name}</h2>
+                            <p className="text-lg text-gray-300">{result.position_title}</p>
+                        </div>
+                        <div className="text-right">
+                            <div className="text-sm text-gray-400 mb-1">Overall Score</div>
+                            <div className="text-3xl font-bold text-[#39FF14]">{result.overall_score}/10</div>
                         </div>
                     </div>
-                    <div className="text-right">
-                        <h1 className="text-xl font-semibold text-gray-900">Interview Result</h1>
-                        <p className="text-sm text-gray-500">Confidential Assessment</p>
+                    <div className="flex items-center gap-2 text-gray-400">
+                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        <span>{new Date(result.interview_date).toLocaleDateString('en-US', {
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric'
+                        })}</span>
                     </div>
-                </header>
+                </div>
 
-                <main className="px-12 py-10">
-                    {/* Candidate Info Grid */}
-                    <section className="grid grid-cols-2 gap-y-6 gap-x-12 mb-12">
-                        <div>
-                            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Candidate</label>
-                            <div className="text-xl font-medium text-gray-900">{result.candidate?.name || 'Unknown Candidate'}</div>
+                {/* Feedback Content */}
+                <div className="bg-[#141414] border border-[#2A2A2A] rounded-2xl p-8">
+                    <div className="flex items-center gap-2 mb-6">
+                        <svg className="w-6 h-6 text-[#00E5FF]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        <h3 className="text-xl font-bold text-white">Detailed Feedback</h3>
+                    </div>
+                    <div className="prose prose-invert max-w-none">
+                        <div className="text-gray-300 whitespace-pre-wrap leading-relaxed">
+                            {result.feedback_content}
                         </div>
-                        <div>
-                            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Position</label>
-                            <div className="text-xl font-medium text-gray-900">{result.position?.title || 'General Evaluation'}</div>
-                        </div>
-                        <div>
-                            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Date</label>
-                            <div className="text-lg text-gray-900">
-                                {formatDate(result.created_at || result.date)}
-                            </div>
-                        </div>
-                        <div>
-                            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Status</label>
-                            <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium
-                ${result.status === 'completed' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
-                                {result.status ? (result.status.charAt(0).toUpperCase() + result.status.slice(1)) : 'Completed'}
-                            </span>
-                        </div>
-                    </section>
+                    </div>
+                </div>
 
-                    {/* Scores Section */}
-                    <section className="bg-gray-50 p-6 rounded-lg border border-gray-100 mb-12 print:bg-white print:border-gray-200">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <h2 className="text-lg font-semibold text-gray-900 mb-1">Overall Performance</h2>
-                                <p className="text-sm text-gray-500">Based on technical assessment</p>
-                            </div>
-                            <div className="text-right">
-                                <div className="text-4xl font-bold text-gray-900">
-                                    {Math.round(result.overall_metrics?.total_score || result.overall_score || result.metrics?.average_score || 0)}%
-                                </div>
-                                <div className="text-sm text-gray-500">Total Score</div>
-                            </div>
-                        </div>
-                    </section>
-
-                    {/* Feedback Summary */}
-                    <section className="mb-12">
-                        <h3 className="text-md font-bold text-gray-900 uppercase border-b border-gray-200 pb-2 mb-4">
-                            Assessment Summary
-                        </h3>
-                        <div className="prose prose-gray max-w-none text-gray-700 leading-relaxed text-sm">
-                            <ReactMarkdown>
-                                {result.feedback_summary || "No specific feedback provided."}
-                            </ReactMarkdown>
-                        </div>
-                    </section>
-
-                    {/* Footer */}
-                    <footer className="mt-20 pt-8 border-t border-gray-200 text-center text-xs text-gray-400">
-                        <p>&copy; {new Date().getFullYear()} EPAM Systems. Confidential & Proprietary.</p>
-                        <p className="mt-1">Generated by AI Interview Platform</p>
-                    </footer>
-                </main>
+                {/* Footer */}
+                <div className="mt-12 text-center text-gray-500 text-sm">
+                    <p>This feedback was generated by AI Interview Platform</p>
+                    <p className="mt-2">© {new Date().getFullYear()} All rights reserved</p>
+                </div>
             </div>
         </div>
     )

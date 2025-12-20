@@ -14,12 +14,7 @@ interface DataModel {
   experience_level: string
   expectations: string
   required_skills: Skill[]
-  interview_flow: string[]
-  question_distribution: {
-    easy: number
-    medium: number
-    hard: number
-  }
+  interview_flow?: string[]
 }
 
 interface Position {
@@ -30,6 +25,14 @@ interface Position {
   created_at: string
   data_model: DataModel
   jd_text?: string
+  // Metadata fields
+  posted_by?: string
+  project_code?: string
+  work_location?: 'remote' | 'office' | 'hybrid'
+  billable?: boolean
+  published_date?: string
+  timeline?: string
+  employment_type?: 'contract' | 'fulltime'
 }
 
 interface PositionDetailProps {
@@ -191,7 +194,7 @@ export default function PositionDetail({
               {position.title}
             </h3>
           )}
-          
+
           <div className="flex items-center gap-2 flex-wrap">
             {isEditing ? (
               <select
@@ -212,11 +215,77 @@ export default function PositionDetail({
               {position.data_model.experience_level}
             </span>
           </div>
-          
+
           <p className="text-[10px] text-gray-500 mt-1.5">
             Created: {new Date(position.created_at).toLocaleDateString()}
           </p>
         </div>
+
+        {/* Metadata Section */}
+        {!isEditing && (
+          <>
+            <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-xs">
+              {position.project_code && (
+                <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
+                  <span className="font-medium">Project:</span>
+                  <span className="text-[#00E5FF]">{position.project_code}</span>
+                </div>
+              )}
+              {position.work_location && (
+                <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
+                  <span className="font-medium">Location:</span>
+                  <span className="capitalize">{position.work_location}</span>
+                </div>
+              )}
+              {position.billable !== undefined && (
+                <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
+                  <span className="font-medium">Billable:</span>
+                  <span className={position.billable ? 'text-green-500' : 'text-gray-500'}>
+                    {position.billable ? 'Yes' : 'No'}
+                  </span>
+                </div>
+              )}
+              {position.posted_by && (
+                <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
+                  <span className="font-medium">Posted by:</span>
+                  <span>{position.posted_by}</span>
+                </div>
+              )}
+              {position.published_date && (
+                <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
+                  <span className="font-medium">Published:</span>
+                  <span>{position.published_date}</span>
+                </div>
+              )}
+              {position.timeline && (
+                <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
+                  <span className="font-medium">Timeline:</span>
+                  <span>{position.timeline}</span>
+                </div>
+              )}
+              {position.employment_type && (
+                <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
+                  <span className="font-medium">Type:</span>
+                  <span className="capitalize">{position.employment_type}</span>
+                </div>
+              )}
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex gap-2">
+              <button
+                className="flex-1 px-3 py-1.5 bg-[#00E5FF]/10 text-[#00E5FF] text-xs font-medium hover:bg-[#00E5FF]/20 transition-colors"
+              >
+                🔗 Share
+              </button>
+              <button
+                className="flex-1 px-3 py-1.5 bg-gray-100 dark:bg-[#1A1A1A] text-gray-700 dark:text-gray-300 text-xs font-medium hover:bg-gray-200 dark:hover:bg-[#2A2A2A] transition-colors"
+              >
+                ✉️ Invite
+              </button>
+            </div>
+          </>
+        )}
 
         {/* Quick Stats */}
         <div className="grid grid-cols-3 gap-2">
@@ -276,56 +345,72 @@ export default function PositionDetail({
           </div>
         )}
 
-        {/* Skills */}
-        <div>
-          <label className="block text-[10px] text-gray-500 uppercase tracking-wider mb-2">
-            Required Skills
-          </label>
-          <div className="flex flex-wrap gap-1.5">
-            {position.data_model.required_skills.map((skill, i) => (
-              <span
-                key={i}
-                className="px-2 py-1 bg-gray-100 dark:bg-[#1A1A1A] text-xs text-gray-600 dark:text-gray-400 capitalize"
-              >
-                {skill.skill.replace('_', ' ')}
-              </span>
-            ))}
-          </div>
-        </div>
+        {/* Skills - Parse from JD text */}
+        <div className="space-y-3">
+          {/* Must-Have Skills */}
+          <div>
+            <label className="block text-[10px] text-gray-500 uppercase tracking-wider mb-2">
+              Must-Have Skills
+            </label>
+            <div className="flex flex-wrap gap-1.5">
+              {(() => {
+                const jdText = position.jd_text || ''
+                const mustHaveMatch = jdText.match(/\*\*MUST-HAVE SKILLS\*\*:?\n([\s\S]*?)(?:\n\*\*|$)/i)
+                if (mustHaveMatch) {
+                  const skills = mustHaveMatch[1]
+                    .split('\n')
+                    .filter(line => line.trim().startsWith('•'))
+                    .map(line => line.replace('•', '').trim())
 
-        {/* Interview Flow */}
-        <div>
-          <label className="block text-[10px] text-gray-500 uppercase tracking-wider mb-2">
-            Interview Flow
-          </label>
-          <div className="flex items-center gap-1.5 flex-wrap">
-            {position.data_model.interview_flow.map((step, i) => (
-              <div key={i} className="flex items-center gap-1">
-                <span className="px-2 py-1 bg-[#00E5FF]/10 text-[#00E5FF] text-[10px] capitalize">
-                  {step.replace('_', ' ')}
-                </span>
-                {i < position.data_model.interview_flow.length - 1 && (
-                  <span className="text-gray-400 text-xs">→</span>
-                )}
-              </div>
-            ))}
+                  return skills.length > 0 ? skills.map((skill, i) => (
+                    <span
+                      key={i}
+                      className="px-2 py-1 bg-[#00E5FF]/10 text-[#00E5FF] text-xs font-medium"
+                    >
+                      {skill}
+                    </span>
+                  )) : <span className="text-xs text-gray-400">-</span>
+                }
+                // Fallback to old required_skills array
+                return position.data_model.required_skills?.map((skill, i) => (
+                  <span
+                    key={i}
+                    className="px-2 py-1 bg-[#00E5FF]/10 text-[#00E5FF] text-xs font-medium"
+                  >
+                    {skill.skill.replace('_', ' ')}
+                  </span>
+                )) || <span className="text-xs text-gray-400">-</span>
+              })()}
+            </div>
           </div>
-        </div>
 
-        {/* Question Distribution */}
-        <div>
-          <label className="block text-[10px] text-gray-500 uppercase tracking-wider mb-2">
-            Difficulty Split
-          </label>
-          <div className="flex items-center gap-1 h-3">
-            <div className="bg-green-500 h-full" style={{ width: `${position.data_model.question_distribution.easy * 100}%` }} title={`Easy: ${Math.round(position.data_model.question_distribution.easy * 100)}%`} />
-            <div className="bg-amber-500 h-full" style={{ width: `${position.data_model.question_distribution.medium * 100}%` }} title={`Medium: ${Math.round(position.data_model.question_distribution.medium * 100)}%`} />
-            <div className="bg-red-500 h-full" style={{ width: `${position.data_model.question_distribution.hard * 100}%` }} title={`Hard: ${Math.round(position.data_model.question_distribution.hard * 100)}%`} />
-          </div>
-          <div className="flex justify-between text-[9px] text-gray-400 mt-1">
-            <span>Easy {Math.round(position.data_model.question_distribution.easy * 100)}%</span>
-            <span>Med {Math.round(position.data_model.question_distribution.medium * 100)}%</span>
-            <span>Hard {Math.round(position.data_model.question_distribution.hard * 100)}%</span>
+          {/* Nice-to-Have Skills */}
+          <div>
+            <label className="block text-[10px] text-gray-500 uppercase tracking-wider mb-2">
+              Nice-to-Have Skills
+            </label>
+            <div className="flex flex-wrap gap-1.5">
+              {(() => {
+                const jdText = position.jd_text || ''
+                const niceToHaveMatch = jdText.match(/\*\*NICE-TO-HAVE SKILLS\*\*:?\n([\s\S]*?)(?:\n\*\*|$)/i)
+                if (niceToHaveMatch) {
+                  const skills = niceToHaveMatch[1]
+                    .split('\n')
+                    .filter(line => line.trim().startsWith('•'))
+                    .map(line => line.replace('•', '').trim())
+
+                  return skills.length > 0 ? skills.map((skill, i) => (
+                    <span
+                      key={i}
+                      className="px-2 py-1 bg-gray-100 dark:bg-[#1A1A1A] text-xs text-gray-600 dark:text-gray-400"
+                    >
+                      {skill}
+                    </span>
+                  )) : <span className="text-xs text-gray-400">-</span>
+                }
+                return <span className="text-xs text-gray-400">-</span>
+              })()}
+            </div>
           </div>
         </div>
 

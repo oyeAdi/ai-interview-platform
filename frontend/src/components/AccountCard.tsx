@@ -1,5 +1,7 @@
 'use client'
 
+import React, { useCallback, useMemo } from 'react'
+
 interface AccountCardProps {
   id: string
   name: string
@@ -17,7 +19,7 @@ interface AccountCardProps {
   onSelect: (id: string) => void
 }
 
-export default function AccountCard({
+const AccountCard: React.FC<AccountCardProps> = React.memo(({
   id,
   name,
   description,
@@ -25,94 +27,134 @@ export default function AccountCard({
   recentPosition,
   isSelected,
   onSelect
-}: AccountCardProps) {
+}) => {
+  const handleClick = useCallback(() => {
+    onSelect(id)
+  }, [id, onSelect])
+  const initials = useMemo(() => {
+    return name
+      .split(' ')
+      .map(word => word[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2)
+  }, [name])
+
   return (
     <button
-      type="button"
-      onClick={() => onSelect(id)}
-      className={`
-        w-full text-left p-4 border transition-all duration-200 overflow-hidden
-        ${isSelected
-          ? 'border-[#00E5FF] bg-[#00E5FF]/5'
-          : 'border-gray-200 dark:border-[#2A2A2A] hover:border-gray-300 dark:hover:border-[#3A3A3A] bg-white dark:bg-black'
-        }
-      `}
+      onClick={handleClick}
+      className={`group relative w-full text-left transition-all duration-300 ${isSelected
+        ? 'scale-[1.02]'
+        : 'hover:scale-[1.01]'
+        }`}
     >
-      {/* Header: Logo + Name + Selection */}
-      <div className="flex items-start justify-between gap-3">
-        <div className="flex items-center gap-3 min-w-0 flex-1">
-          {/* Logo/Initial */}
-          <div className={`
-            w-10 h-10 flex-shrink-0 flex items-center justify-center font-medium text-lg
-            ${isSelected
-              ? 'bg-[#00E5FF] text-black'
-              : 'bg-gray-100 dark:bg-[#1A1A1A] text-gray-600 dark:text-gray-300'
-            }
-          `}>
-            {name.charAt(0).toUpperCase()}
+      {/* Card Container */}
+      <div
+        className={`relative overflow-hidden rounded-xl border-2 transition-all duration-300 ${isSelected
+          ? 'border-[#00E5FF] bg-[#00E5FF]/5 shadow-lg shadow-[#00E5FF]/20'
+          : 'border-gray-200 dark:border-[#2A2A2A] bg-white dark:bg-[#0A0A0A] hover:border-[#00E5FF]/50 hover:shadow-md'
+          }`}
+      >
+        {/* Selected Indicator */}
+        {isSelected && (
+          <div className="absolute top-0 right-0 w-16 h-16">
+            <div className="absolute top-2 right-2 w-5 h-5 bg-[#00E5FF] rounded-full flex items-center justify-center">
+              <svg className="w-3 h-3 text-black" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
           </div>
-          
-          {/* Name & Description */}
-          <div className="min-w-0 flex-1">
-            <h3 className={`font-medium truncate ${
-              isSelected ? 'text-[#00E5FF]' : 'text-black dark:text-white'
-            }`}>
-              {name}
-            </h3>
-            {description && (
-              <p className="text-xs text-gray-500 dark:text-gray-400 truncate max-w-full">
-                {description}
-              </p>
-            )}
-          </div>
-        </div>
+        )}
 
-        {/* Selection Indicator */}
-        <div className={`
-          w-5 h-5 flex-shrink-0 flex items-center justify-center
-          border transition-all
-          ${isSelected
-            ? 'bg-[#00E5FF] border-[#00E5FF]'
-            : 'border-gray-300 dark:border-[#3A3A3A]'
-          }
-        `}>
-          {isSelected && (
-            <svg className="w-3 h-3 text-black" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-            </svg>
+        {/* Card Content */}
+        <div className="p-5 space-y-4">
+          {/* Header */}
+          <div className="flex items-start gap-3">
+            {/* Logo/Avatar */}
+            <div className={`flex-shrink-0 w-12 h-12 rounded-lg flex items-center justify-center text-lg font-bold transition-all ${isSelected
+              ? 'bg-[#00E5FF] text-black'
+              : 'bg-gradient-to-br from-gray-100 to-gray-200 dark:from-[#1A1A1A] dark:to-[#2A2A2A] text-gray-700 dark:text-gray-300'
+              }`}>
+              {initials}
+            </div>
+
+            {/* Name & Description */}
+            <div className="flex-1 min-w-0">
+              <h3 className={`font-semibold text-base mb-1 truncate transition-colors ${isSelected ? 'text-[#00E5FF]' : 'text-gray-900 dark:text-white'
+                }`}>
+                {name}
+              </h3>
+              {description && (
+                <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2">
+                  {description}
+                </p>
+              )}
+            </div>
+          </div>
+
+          {/* Stats Grid */}
+          <div className="grid grid-cols-3 gap-2">
+            {/* Open Positions */}
+            <div className="text-center p-2 rounded-lg bg-green-50 dark:bg-green-900/10 border border-green-100 dark:border-green-900/20">
+              <div className="text-lg font-bold text-green-600 dark:text-green-400">
+                {positionCounts.open}
+              </div>
+              <div className="text-[9px] text-green-600/70 dark:text-green-400/70 uppercase tracking-wider">
+                Open
+              </div>
+            </div>
+
+            {/* Closed Positions */}
+            <div className="text-center p-2 rounded-lg bg-gray-50 dark:bg-[#1A1A1A] border border-gray-100 dark:border-[#2A2A2A]">
+              <div className="text-lg font-bold text-gray-600 dark:text-gray-400">
+                {positionCounts.closed}
+              </div>
+              <div className="text-[9px] text-gray-500 dark:text-gray-500 uppercase tracking-wider">
+                Closed
+              </div>
+            </div>
+
+            {/* Total Positions */}
+            <div className="text-center p-2 rounded-lg bg-blue-50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-900/20">
+              <div className="text-lg font-bold text-blue-600 dark:text-blue-400">
+                {positionCounts.total}
+              </div>
+              <div className="text-[9px] text-blue-600/70 dark:text-blue-400/70 uppercase tracking-wider">
+                Total
+              </div>
+            </div>
+          </div>
+
+          {/* Recent Position */}
+          {recentPosition && (
+            <div className="pt-3 border-t border-gray-100 dark:border-[#2A2A2A]">
+              <div className="flex items-center justify-between">
+                <div className="flex-1 min-w-0">
+                  <p className="text-[10px] text-gray-400 uppercase tracking-wider mb-1">
+                    Recent
+                  </p>
+                  <p className="text-xs font-medium text-gray-700 dark:text-gray-300 truncate">
+                    {recentPosition.title}
+                  </p>
+                </div>
+                <span className="ml-2 text-[9px] text-gray-400">
+                  {recentPosition.daysAgo === 0 ? 'today' : `${recentPosition.daysAgo}d ago`}
+                </span>
+              </div>
+            </div>
           )}
         </div>
-      </div>
 
-      {/* Position Counts */}
-      <div className="flex items-center gap-2 mt-4 flex-wrap">
-        <div className="flex items-center gap-1 px-2 py-1 bg-green-500/10 text-green-500 text-xs font-medium whitespace-nowrap">
-          <span>{positionCounts.open}</span>
-          <span className="text-green-500/70">Open</span>
-        </div>
-        <div className="flex items-center gap-1 px-2 py-1 bg-gray-100 dark:bg-[#1A1A1A] text-gray-500 text-xs whitespace-nowrap">
-          <span>{positionCounts.closed}</span>
-          <span className="opacity-70">Closed</span>
-        </div>
-        <div className="flex items-center gap-1 px-2 py-1 bg-gray-100 dark:bg-[#1A1A1A] text-gray-500 text-xs whitespace-nowrap">
-          <span>{positionCounts.total}</span>
-          <span className="opacity-70">Total</span>
-        </div>
+        {/* Hover Effect Border */}
+        <div className={`absolute inset-0 rounded-xl transition-opacity duration-300 pointer-events-none ${isSelected
+          ? 'opacity-0'
+          : 'opacity-0 group-hover:opacity-100 bg-gradient-to-r from-[#00E5FF]/10 to-transparent'
+          }`} />
       </div>
-
-      {/* Recent Position */}
-      {recentPosition && (
-        <div className="mt-3 pt-3 border-t border-gray-100 dark:border-[#1A1A1A]">
-          <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
-            <span className="text-gray-400 dark:text-gray-500">Recent:</span>{' '}
-            <span className="text-gray-600 dark:text-gray-300">{recentPosition.title}</span>
-            <span className="text-gray-400 dark:text-gray-500">
-              {' '}({recentPosition.daysAgo === 0 ? 'today' : `${recentPosition.daysAgo}d ago`})
-            </span>
-          </p>
-        </div>
-      )}
     </button>
   )
-}
+})
 
+AccountCard.displayName = 'AccountCard'
+
+export default AccountCard

@@ -2,187 +2,244 @@
   "resumes": [
     {
       "id": "resume1",
-      "name": "John Smith - Python Developer",
+      "name": "Venkat Ramakrishnan - Python Developer",
       "experience_level": "senior",
-      "skills": ["python", "django", "flask", "databases", "docker", "aws", "microservices", "system_design", "coding"],
-      "text": "John Smith\nSenior Python Developer\nEmail: john.smith@email.com | Phone: +1-234-567-8900\n\nPROFESSIONAL SUMMARY\nExperienced Python developer with 6 years of expertise in building scalable web applications. Strong background in Python fundamentals, data structures, and advanced concepts including decorators, generators, and memory management. Proficient in Django and Flask frameworks.\n\nTECHNICAL SKILLS\n- Python (Advanced)\n- Django, Flask\n- RESTful APIs\n- PostgreSQL, MySQL\n- Docker, AWS\n- Git, CI/CD\n- System Design\n\nPROJECTS\n- Payment Gateway Integration: Led the design and implementation of a high-throughput payment processing system handling 10K+ transactions/minute. Implemented circuit breaker patterns and graceful degradation.\n- Real-time Analytics Dashboard: Built a streaming data pipeline using Python and Apache Kafka to process and visualize user behavior data in real-time.\n\nEXPERIENCE\nSenior Python Developer | Tech Solutions Inc. | 2020 - Present\n- Developed and maintained Python-based web applications using Django\n- Implemented RESTful APIs and microservices architecture\n- Optimized database queries and improved application performance by 40%\n- Mentored junior developers on Python best practices\n\nPython Developer | StartupXYZ | 2018 - 2020\n- Built web applications using Flask framework\n- Implemented data processing pipelines\n- Collaborated on memory management and optimization projects\n\nEDUCATION\nBachelor of Science in Computer Science | University ABC | 2018",
+      "skills": [
+        "python",
+        "django",
+        "flask",
+        "databases",
+        "docker",
+        "aws",
+        "microservices",
+        "system_design",
+        "coding"
+      ],
+      "text": "Venkat Ramakrishnan\\nSenior Python Developer\\nEmail: venkat.ramakrishnan@email.com | Phone: +91-98765-43210\\n\\nPROFESSIONAL SUMMARY\\nExperienced Python developer from Chennai with 6 years of expertise in building scalable web applications. Strong background in Python fundamentals, data structures, and advanced concepts including decorators, generators, and memory management. Proficient in Django and Flask frameworks.\\n\\nTECHNICAL SKILLS\\n- Python (Advanced)\\n- Django, Flask\\n- RESTful APIs\\n- PostgreSQL, MySQL\\n- Docker, AWS\\n- Git, CI/CD\\n- System Design\\n\\nPROJECTS\\n- Payment Gateway Integration: Led the design and implementation of a high-throughput payment processing system handling 10K+ transactions/minute. Implemented circuit breaker patterns and graceful degradation.\\n- Real-time Analytics Dashboard: Built a streaming data pipeline using Python and Apache Kafka to process and visualize user behavior data in real-time.\\n\\nEXPERIENCE\\nSenior Python Developer | TCS Bangalore | 2020 - Present\\n- Developed and maintained Python-based web applications using Django\\n- Implemented RESTful APIs and microservices architecture\\n- Optimized database queries and improved application performance by 40%\\n- Mentored junior developers on Python best practices\\n\\nPython Developer | Infosys Hyderabad | 2018 - 2020\\n- Built web applications using Flask framework\\n- Implemented data processing pipelines\\n- Collaborated on memory management and optimization projects\\n\\nEDUCATION\\nBachelor of Technology in Computer Science | IIT Madras | 2018",
       "language": "python"
     },
     {
       "id": "resume2",
-      "name": "Sarah Johnson - Java Engineer",
+      "name": "Gotta Reddy - Java Engineer",
       "experience_level": "senior",
-      "skills": ["java", "spring", "microservices", "databases", "docker", "kubernetes", "coding", "system_design"],
-      "text": "Sarah Johnson\nJava Backend Engineer\nEmail: sarah.johnson@email.com | Phone: +1-234-567-8901\n\nPROFESSIONAL SUMMARY\nJava backend engineer with 5 years of experience in enterprise application development. Expertise in Java fundamentals, Spring framework, and building scalable backend systems.\n\nTECHNICAL SKILLS\n- Java (Advanced)\n- Spring Boot, Spring Framework\n- Hibernate, JPA\n- MySQL, PostgreSQL\n- Microservices Architecture\n- Docker, Kubernetes\n\nPROJECTS\n- Order Management System: Designed and built a distributed order management system using Spring Boot microservices.\n- API Gateway: Developed a centralized API gateway handling 50K+ requests/second.\n\nEXPERIENCE\nJava Backend Engineer | Enterprise Solutions | 2019 - Present\n- Developed RESTful APIs using Spring Boot\n- Implemented microservices architecture\n- Worked with Java collections, multithreading, and concurrency\n\nJunior Java Developer | TechCorp | 2017 - 2019\n- Built Java applications using Spring Framework\n- Implemented exception handling and error management\n\nEDUCATION\nBachelor of Science in Software Engineering | University XYZ | 2017",
+      "skills": [
+        "java",
+        "spring",
+        "microservices",
+        "databases",
+        "docker",
+        "kubernetes",
+        "coding",
+        "system_design"
+      ],
+      "text": "Gotta Reddy\\nJava Backend Engineer\\nEmail: gotta.reddy@email.com | Phone: +91-98765-43211\\n\\nPROFESSIONAL SUMMARY\\nJava backend engineer from Hyderabad with 5 years of experience in enterprise application development. Expertise in Java fundamentals, Spring framework, and building scalable backend systems.\\n\\nTECHNICAL SKILLS\\n- Java (Advanced)\\n- Spring Boot, Spring Framework\\n- Hibernate, JPA\\n- MySQL, PostgreSQL\\n- Microservices Architecture\\n- Docker, Kubernetes\\n\\nPROJECTS\\n- Order Management System: Designed and built a distributed order management system using Spring Boot microservices.\\n- API Gateway: Developed a centralized API gateway handling 50K+ requests/second.\\n\\nEXPERIENCE\\nJava Backend Engineer | Wipro Hyderabad | 2019 - Present\\n- Developed RESTful APIs using Spring Boot\\n- Implemented microservices architecture\\n- Worked with Java collections, multithreading, and concurrency\\n\\nJunior Java Developer | Tech Mahindra | 2017 - 2019\\n- Built Java applications using Spring Framework\\n- Implemented exception handling and error management\\n\\nEDUCATION\\nBachelor of Engineering in Computer Science | BITS Pilani Hyderabad | 2017",
       "language": "java"
     },
     {
       "id": "resume3",
       "name": "Michael Chen - Full Stack Developer",
       "experience_level": "mid",
-      "skills": ["python", "javascript", "react", "django", "databases", "docker", "nodejs", "coding"],
-      "text": "Michael Chen\nFull Stack Developer\nEmail: michael.chen@email.com | Phone: +1-234-567-8902\n\nPROFESSIONAL SUMMARY\nFull stack developer with expertise in Python backend and modern frontend technologies. 4 years of experience building end-to-end web applications.\n\nTECHNICAL SKILLS\n- Python, Django, Flask\n- JavaScript, React, Vue.js\n- Node.js, Express\n- RESTful APIs\n- PostgreSQL, MongoDB\n- Docker, AWS\n\nPROJECTS\n- E-commerce Platform: Built a complete e-commerce solution with Django backend and React frontend.\n- Task Management App: Developed a real-time collaborative task management application.\n\nEXPERIENCE\nFull Stack Developer | Digital Innovations | 2020 - Present\n- Developed full stack applications using Python (Django) and React\n- Built and maintained RESTful APIs\n\nSoftware Developer | WebStart | 2018 - 2020\n- Built web applications using Python and JavaScript\n\nEDUCATION\nBachelor of Science in Computer Science | Tech University | 2018",
+      "skills": [
+        "python",
+        "javascript",
+        "react",
+        "django",
+        "databases",
+        "docker",
+        "nodejs",
+        "coding"
+      ],
+      "text": "Michael Chen\\nFull Stack Developer\\nEmail: michael.chen@email.com | Phone: +1-234-567-8902\\n\\nPROFESSIONAL SUMMARY\\nFull stack developer with expertise in Python backend and modern frontend technologies. 4 years of experience building end-to-end web applications.\\n\\nTECHNICAL SKILLS\\n- Python, Django, Flask\\n- JavaScript, React, Vue.js\\n- Node.js, Express\\n- RESTful APIs\\n- PostgreSQL, MongoDB\\n- Docker, AWS\\n\\nPROJECTS\\n- E-commerce Platform: Built a complete e-commerce solution with Django backend and React frontend.\\n- Task Management App: Developed a real-time collaborative task management application.\\n\\nEXPERIENCE\\nFull Stack Developer | Digital Innovations | 2020 - Present\\n- Developed full stack applications using Python (Django) and React\\n- Built and maintained RESTful APIs\\n\\nSoftware Developer | WebStart | 2018 - 2020\\n- Built web applications using Python and JavaScript\\n\\nEDUCATION\\nBachelor of Science in Computer Science | UC Berkeley | 2018",
       "language": "python"
     },
     {
       "id": "resume4",
-      "name": "Emily Rodriguez - Junior Python Developer",
-      "experience_level": "junior",
-      "skills": ["python", "django", "databases", "coding"],
-      "text": "Emily Rodriguez\nJunior Python Developer\nEmail: emily.rodriguez@email.com | Phone: +1-234-567-8903\n\nPROFESSIONAL SUMMARY\nRecent computer science graduate with 1 year of experience in Python development. Strong foundation in Python programming and database concepts.\n\nTECHNICAL SKILLS\n- Python (Intermediate)\n- Django basics\n- MySQL, SQLite\n- Git\n\nPROJECTS\n- Blog Application: Built a personal blog using Django with user authentication.\n- Weather App: Created a weather application using Python and OpenWeather API.\n\nEXPERIENCE\nJunior Python Developer | CodeStart Inc. | 2023 - Present\n- Developing and maintaining Python scripts for data processing\n- Assisting in Django web application development\n\nEDUCATION\nBachelor of Science in Computer Science | State University | 2023",
-      "language": "python"
+      "name": "Priya Sharma - HR Manager",
+      "experience_level": "senior",
+      "skills": [
+        "recruitment",
+        "employee_relations",
+        "compensation",
+        "hr_policies",
+        "training_development",
+        "hris",
+        "leadership"
+      ],
+      "text": "Priya Sharma\\nSenior HR Manager\\nEmail: priya.sharma@email.com | Phone: +91-98765-43212\\n\\nPROFESSIONAL SUMMARY\\nExperienced HR professional from Hyderabad with 8 years of expertise in talent acquisition, employee relations, and organizational development. Strong background in building high-performing teams and implementing HR best practices.\\n\\nCORE COMPETENCIES\\n- Talent Acquisition & Recruitment\\n- Employee Relations & Engagement\\n- Compensation & Benefits\\n- Performance Management\\n- HR Policies & Compliance\\n- Training & Development\\n- HRIS (Workday, SAP SuccessFactors)\\n\\nKEY ACHIEVEMENTS\\n- Reduced time-to-hire by 35% through process optimization\\n- Improved employee retention rate from 78% to 92%\\n- Led diversity hiring initiative resulting in 40% increase in diverse hires\\n- Implemented new performance management system for 500+ employees\\n\\nEXPERIENCE\\nSenior HR Manager | Infosys Hyderabad | 2020 - Present\\n- Lead recruitment for technology roles across India\\n- Manage employee relations and conflict resolution\\n- Design and implement compensation structures\\n- Conduct training programs for managers\\n\\nHR Manager | TCS Bangalore | 2017 - 2020\\n- Managed full-cycle recruitment\\n- Implemented employee engagement initiatives\\n- Handled HR compliance and policy development\\n\\nHR Business Partner | Wipro Chennai | 2015 - 2017\\n- Supported business units with HR strategy\\n- Managed onboarding and orientation programs\\n\\nEDUCATION\\nMBA in Human Resources | XLRI Jamshedpur | 2015\\nBachelor of Arts in Psychology | Osmania University | 2013",
+      "language": "english"
     },
     {
       "id": "resume5",
-      "name": "David Park - Java Tech Lead",
-      "experience_level": "lead",
-      "skills": ["java", "spring", "system_design", "microservices", "databases", "kubernetes", "aws", "leadership", "coding"],
-      "text": "David Park\nJava Tech Lead / Architect\nEmail: david.park@email.com | Phone: +1-234-567-8904\n\nPROFESSIONAL SUMMARY\nSeasoned Java architect with 10+ years of experience in enterprise software development. Expert in system design, microservices architecture, and leading engineering teams.\n\nTECHNICAL SKILLS\n- Java (Expert)\n- Spring Boot, Spring Cloud\n- System Design & Architecture\n- Microservices, Event-Driven Architecture\n- Kubernetes, Docker, AWS\n- Team Leadership\n\nPROJECTS\n- Banking Platform Migration: Led the architectural redesign of a legacy monolithic banking system to microservices.\n- Real-time Fraud Detection: Designed a real-time fraud detection system processing 100K+ transactions/second.\n\nEXPERIENCE\nJava Tech Lead | FinTech Corp | 2019 - Present\n- Lead a team of 8 engineers in designing distributed systems\n- Architected microservices handling 1M+ daily transactions\n- Established coding standards and best practices\n\nSenior Java Developer | Enterprise Systems | 2015 - 2019\n- Designed and implemented core banking modules\n- Led technical interviews and hiring decisions\n\nEDUCATION\nMaster of Science in Computer Science | MIT | 2012",
-      "language": "java"
+      "name": "Oleksandr Kovalenko - Game Designer",
+      "experience_level": "senior",
+      "skills": [
+        "game_design",
+        "game_development",
+        "unity",
+        "gameplay",
+        "monetization",
+        "game_analytics",
+        "product_sense"
+      ],
+      "text": "Oleksandr Kovalenko\\nSenior Game Designer\\nEmail: oleksandr.kovalenko@email.com | Phone: +380-50-123-4567\\n\\nPROFESSIONAL SUMMARY\\nPassionate game designer from Kyiv with 7 years of experience creating engaging gameplay experiences. Expert in game mechanics, player psychology, and free-to-play monetization strategies.\\n\\nCORE COMPETENCIES\\n- Game Design & Mechanics\\n- Unity, Unreal Engine\\n- Gameplay Systems\\n- Monetization & Economy Design\\n- Player Retention Strategies\\n- Game Analytics & A/B Testing\\n- Level Design\\n\\nKEY ACHIEVEMENTS\\n- Designed mobile game with 5M+ downloads and 4.5★ rating\\n- Increased player retention by 45% through gameplay improvements\\n- Designed monetization system generating $2M+ monthly revenue\\n- Led game design for award-winning indie title\\n\\nEXPERIENCE\\nSenior Game Designer | Wargaming Kyiv | 2020 - Present\\n- Design core gameplay systems for free-to-play titles\\n- Create game economy and monetization strategies\\n- Analyze player data and iterate on game features\\n- Collaborate with artists and programmers\\n\\nGame Designer | Gameloft Ukraine | 2018 - 2020\\n- Designed levels and game progression systems\\n- Implemented A/B tests for feature optimization\\n- Created game design documents and prototypes\\n\\nJunior Game Designer | Indie Studio Kyiv | 2016 - 2018\\n- Designed game mechanics and player interactions\\n- Balanced game difficulty and progression\\n\\nEDUCATION\\nBachelor of Arts in Game Design | Kyiv Polytechnic Institute | 2016",
+      "language": "english"
     },
     {
       "id": "resume6",
-      "name": "Lisa Wang - React Developer",
-      "experience_level": "mid",
-      "skills": ["javascript", "react", "nodejs", "databases", "typescript", "css", "graphql", "coding"],
-      "text": "Lisa Wang\nFrontend Developer\nEmail: lisa.wang@email.com | Phone: +1-234-567-8905\n\nPROFESSIONAL SUMMARY\nPassionate frontend developer with 4 years of experience specializing in React and modern JavaScript. Strong focus on creating intuitive user interfaces.\n\nTECHNICAL SKILLS\n- JavaScript (Advanced), TypeScript\n- React, Redux, Next.js\n- GraphQL, Apollo\n- Node.js, Express\n- HTML5, CSS3, Tailwind CSS\n- PostgreSQL, MongoDB\n\nPROJECTS\n- Dashboard Analytics: Built a complex analytics dashboard with React featuring real-time data visualization.\n- Social Media App: Developed a social media application with React and Node.js.\n\nEXPERIENCE\nFrontend Developer | WebCraft Studios | 2021 - Present\n- Develop responsive web applications using React and TypeScript\n- Implement state management with Redux and Context API\n\nJunior Developer | DigitalAgency | 2019 - 2021\n- Built interactive websites using React\n- Implemented REST API and GraphQL integrations\n\nEDUCATION\nBachelor of Science in Computer Science | UC Berkeley | 2019",
-      "language": "javascript"
+      "name": "Sarah Johnson - Sales Manager",
+      "experience_level": "senior",
+      "skills": [
+        "sales_strategy",
+        "negotiation",
+        "crm",
+        "customer_success",
+        "pipeline_management",
+        "b2b_sales",
+        "leadership"
+      ],
+      "text": "Sarah Johnson\\nSenior Sales Manager\\nEmail: sarah.johnson@email.com | Phone: +1-415-555-0123\\n\\nPROFESSIONAL SUMMARY\\nResults-driven sales leader with 9 years of experience in B2B SaaS sales. Proven track record of exceeding quotas, building high-performing teams, and closing enterprise deals.\\n\\nCORE COMPETENCIES\\n- B2B Sales Strategy\\n- Enterprise Sales & Negotiation\\n- CRM (Salesforce, HubSpot)\\n- Customer Success & Account Management\\n- Pipeline Management\\n- Sales Team Leadership\\n- Contract Negotiation\\n\\nKEY ACHIEVEMENTS\\n- Exceeded annual quota by 145% for 3 consecutive years\\n- Closed $15M+ in enterprise deals in 2023\\n- Built and led sales team of 12 reps\\n- Increased average deal size from $50K to $200K\\n\\nEXPERIENCE\\nSenior Sales Manager | Salesforce San Francisco | 2021 - Present\\n- Lead enterprise sales team targeting Fortune 500 companies\\n- Develop sales strategies and playbooks\\n- Manage $25M+ annual sales pipeline\\n- Negotiate complex multi-year contracts\\n\\nSales Manager | HubSpot Boston | 2018 - 2021\\n- Managed team of 8 account executives\\n- Implemented new sales methodology increasing win rate by 30%\\n- Conducted sales training and coaching\\n\\nAccount Executive | Oracle | 2015 - 2018\\n- Sold enterprise software solutions\\n- Managed full sales cycle from prospecting to close\\n\\nEDUCATION\\nMBA | Stanford Graduate School of Business | 2015\\nBachelor of Business Administration | UC Berkeley | 2013",
+      "language": "english"
     },
     {
       "id": "resume7",
-      "name": "Alex Thompson - Python/ML Engineer",
+      "name": "Lakshmi Narayanan - Data Scientist",
       "experience_level": "senior",
-      "skills": ["python", "system_design", "databases", "aws", "microservices", "coding", "machine_learning", "tensorflow", "data_structures"],
-      "text": "Alex Thompson\nSenior Python Engineer / ML Specialist\nEmail: alex.thompson@email.com | Phone: +1-234-567-8906\n\nPROFESSIONAL SUMMARY\nSenior Python engineer with 7 years of experience and specialization in machine learning systems. Expert in building scalable data pipelines and ML infrastructure.\n\nTECHNICAL SKILLS\n- Python (Expert)\n- TensorFlow, PyTorch, scikit-learn\n- System Design & Architecture\n- FastAPI, Django\n- AWS (SageMaker, Lambda, S3)\n- PostgreSQL, Redis, Elasticsearch\n- Docker, Kubernetes\n\nPROJECTS\n- Recommendation Engine: Designed a real-time recommendation system serving 10M+ users.\n- ML Pipeline Platform: Architected an end-to-end ML platform for model training and deployment.\n\nEXPERIENCE\nSenior Python Engineer | AI Solutions Inc. | 2020 - Present\n- Lead ML infrastructure development and system design\n- Design scalable data pipelines processing TB of data daily\n\nPython Developer | DataTech Corp | 2017 - 2020\n- Built backend services using FastAPI and Django\n- Developed ML models for production use\n\nEDUCATION\nMaster of Science in Machine Learning | Carnegie Mellon | 2015",
+      "skills": [
+        "python",
+        "machine_learning",
+        "tensorflow",
+        "data_structures",
+        "system_design",
+        "coding",
+        "spark",
+        "sql"
+      ],
+      "text": "Lakshmi Narayanan\\nSenior Data Scientist\\nEmail: lakshmi.narayanan@email.com | Phone: +91-98765-43213\\n\\nPROFESSIONAL SUMMARY\\nData scientist from Chennai with 6 years of experience in machine learning and AI. Expert in building production ML systems and deriving insights from large datasets.\\n\\nTECHNICAL SKILLS\\n- Python (Expert)\\n- Machine Learning, Deep Learning\\n- TensorFlow, PyTorch, scikit-learn\\n- Apache Spark, PySpark\\n- SQL, pandas, numpy\\n- AWS SageMaker\\n- MLflow, Kubeflow\\n\\nKEY ACHIEVEMENTS\\n- Built recommendation engine serving 10M+ users\\n- Improved fraud detection accuracy from 75% to 94%\\n- Reduced model inference time by 60%\\n- Published 3 papers in ML conferences\\n\\nEXPERIENCE\\nSenior Data Scientist | Flipkart Bangalore | 2020 - Present\\n- Design and deploy ML models at scale\\n- Build recommendation and personalization systems\\n- Lead ML infrastructure initiatives\\n\\nData Scientist | Amazon Hyderabad | 2018 - 2020\\n- Developed ML models for product recommendations\\n- Implemented A/B testing framework\\n\\nEDUCATION\\nMaster of Technology in AI & ML | IIT Madras | 2018\\nBachelor of Engineering in Computer Science | Anna University | 2016",
       "language": "python"
     },
     {
       "id": "resume8",
-      "name": "Kevin Martinez - DevOps Engineer",
-      "experience_level": "mid",
-      "skills": ["kubernetes", "docker", "aws", "python", "databases", "ci_cd", "scripting", "cloud"],
-      "text": "Kevin Martinez\nDevOps Engineer\nEmail: kevin.martinez@email.com | Phone: +1-234-567-8907\n\nPROFESSIONAL SUMMARY\nDevOps engineer with 4 years of experience in cloud infrastructure, CI/CD pipelines, and container orchestration.\n\nTECHNICAL SKILLS\n- Kubernetes (Advanced)\n- Docker, Container Orchestration\n- AWS (EKS, EC2, S3, Lambda)\n- Terraform, CloudFormation\n- Jenkins, GitHub Actions\n- Python, Bash scripting\n- Prometheus, Grafana\n\nPROJECTS\n- Kubernetes Migration: Led the migration of 50+ microservices to Kubernetes.\n- CI/CD Platform: Built a company-wide CI/CD platform.\n\nEXPERIENCE\nDevOps Engineer | CloudFirst Inc. | 2021 - Present\n- Manage Kubernetes clusters hosting 100+ services\n- Design and implement CI/CD pipelines\n\nJunior DevOps Engineer | TechOps | 2019 - 2021\n- Maintained Docker containers and deployment scripts\n\nEDUCATION\nBachelor of Science in Information Technology | Arizona State | 2019",
-      "language": "python"
+      "name": "Kateryna Shevchenko - UX Designer",
+      "experience_level": "senior",
+      "skills": [
+        "ux_design",
+        "ui_design",
+        "figma",
+        "user_research",
+        "prototyping",
+        "design_systems",
+        "creativity"
+      ],
+      "text": "Kateryna Shevchenko\\nSenior UX/UI Designer\\nEmail: kateryna.shevchenko@email.com | Phone: +380-50-234-5678\\n\\nPROFESSIONAL SUMMARY\\nCreative UX designer from Lviv with 7 years of experience designing user-centered digital products. Expert in user research, prototyping, and building design systems.\\n\\nCORE COMPETENCIES\\n- UX/UI Design\\n- User Research & Testing\\n- Figma, Sketch, Adobe XD\\n- Prototyping & Wireframing\\n- Design Systems\\n- Information Architecture\\n- Accessibility (WCAG)\\n\\nKEY ACHIEVEMENTS\\n- Redesigned e-commerce platform increasing conversion by 35%\\n- Built design system used by 50+ designers\\n- Improved mobile app usability score from 65 to 92\\n- Led UX research for product serving 2M+ users\\n\\nEXPERIENCE\\nSenior UX Designer | Grammarly Kyiv | 2020 - Present\\n- Lead UX design for core product features\\n- Conduct user research and usability testing\\n- Maintain and evolve design system\\n- Collaborate with product and engineering teams\\n\\nUX Designer | MacPaw Kyiv | 2018 - 2020\\n- Designed user interfaces for desktop applications\\n- Created prototypes and conducted user testing\\n\\nJunior UX Designer | Design Studio Lviv | 2016 - 2018\\n- Designed websites and mobile apps\\n- Conducted user interviews and surveys\\n\\nEDUCATION\\nMaster of Arts in Design | Lviv Polytechnic | 2016",
+      "language": "english"
     },
     {
       "id": "resume9",
-      "name": "Jennifer Lee - Junior Java Developer",
-      "experience_level": "junior",
-      "skills": ["java", "spring", "databases", "coding"],
-      "text": "Jennifer Lee\nJunior Java Developer\nEmail: jennifer.lee@email.com | Phone: +1-234-567-8908\n\nPROFESSIONAL SUMMARY\nEnthusiastic junior Java developer with 1 year of experience. Strong foundation in Java fundamentals and Spring Boot basics.\n\nTECHNICAL SKILLS\n- Java (Intermediate)\n- Spring Boot basics\n- MySQL, PostgreSQL\n- Git, Maven\n- JUnit testing\n\nPROJECTS\n- Library Management System: Built a library management system using Spring Boot.\n- Todo Application: Created a todo app with Java backend.\n\nEXPERIENCE\nJunior Java Developer | SoftwareCo | 2023 - Present\n- Developing backend features using Spring Boot\n- Writing unit tests with JUnit\n\nEDUCATION\nBachelor of Science in Computer Science | Boston University | 2023",
-      "language": "java"
+      "name": "Aravind Kumar - DevOps Engineer",
+      "experience_level": "mid",
+      "skills": [
+        "kubernetes",
+        "docker",
+        "aws",
+        "python",
+        "databases",
+        "ci_cd",
+        "terraform",
+        "cloud"
+      ],
+      "text": "Aravind Kumar\\nDevOps Engineer\\nEmail: aravind.kumar@email.com | Phone: +91-98765-43214\\n\\nPROFESSIONAL SUMMARY\\nDevOps engineer from Bangalore with 4 years of experience in cloud infrastructure and automation. Expert in Kubernetes, AWS, and CI/CD pipelines.\\n\\nTECHNICAL SKILLS\\n- Kubernetes (Advanced)\\n- Docker, Container Orchestration\\n- AWS (EKS, EC2, S3, Lambda)\\n- Terraform, CloudFormation\\n- Jenkins, GitLab CI\\n- Python, Bash scripting\\n- Prometheus, Grafana\\n\\nKEY ACHIEVEMENTS\\n- Migrated 100+ microservices to Kubernetes\\n- Reduced deployment time from 2 hours to 15 minutes\\n- Achieved 99.95% uptime for production systems\\n- Automated infrastructure provisioning saving 40 hours/month\\n\\nEXPERIENCE\\nDevOps Engineer | Amazon Bangalore | 2021 - Present\\n- Manage Kubernetes clusters hosting 200+ services\\n- Design and implement CI/CD pipelines\\n- Automate infrastructure with Terraform\\n\\nJunior DevOps Engineer | Flipkart | 2019 - 2021\\n- Maintained Docker containers and deployments\\n- Implemented monitoring and alerting\\n\\nEDUCATION\\nBachelor of Technology in Computer Science | PES University Bangalore | 2019",
+      "language": "python"
     },
     {
       "id": "resume10",
-      "name": "Robert Chen - .NET Lead Developer",
-      "experience_level": "lead",
-      "skills": ["csharp", "dotnet", "azure", "system_design", "databases", "leadership", "microservices", "coding"],
-      "text": "Robert Chen\n.NET Tech Lead\nEmail: robert.chen@email.com | Phone: +1-234-567-8909\n\nPROFESSIONAL SUMMARY\nExperienced .NET architect with 9 years of experience building enterprise applications on Microsoft stack. Expert in Azure cloud services and leading development teams.\n\nTECHNICAL SKILLS\n- C# (Expert)\n- .NET Core, ASP.NET\n- Azure (App Services, Functions, SQL, CosmosDB)\n- System Design & Architecture\n- Microservices, Event-Driven Architecture\n- SQL Server, Redis\n- Team Leadership\n\nPROJECTS\n- Enterprise CRM: Architected a cloud-native CRM system serving 500K+ users on Azure.\n- Payment Processing: Designed a PCI-compliant payment system processing $10M+ daily.\n\nEXPERIENCE\n.NET Tech Lead | Enterprise Solutions | 2019 - Present\n- Lead team of 6 engineers building Azure-based solutions\n- Design microservices architecture for enterprise clients\n- Establish coding standards and architectural guidelines\n\nSenior .NET Developer | TechCorp | 2015 - 2019\n- Built enterprise applications using C# and .NET\n- Migrated legacy applications to Azure cloud\n\nEDUCATION\nMaster of Science in Software Engineering | Columbia University | 2015",
-      "language": "csharp"
+      "name": "David Martinez - Marketing Manager",
+      "experience_level": "senior",
+      "skills": [
+        "marketing_strategy",
+        "digital_marketing",
+        "seo",
+        "content_marketing",
+        "growth_hacking",
+        "metrics_analytics"
+      ],
+      "text": "David Martinez\\nDigital Marketing Manager\\nEmail: david.martinez@email.com | Phone: +1-512-555-0124\\n\\nPROFESSIONAL SUMMARY\\nDigital marketing leader with 8 years of experience driving growth for B2B SaaS companies. Expert in SEO, content marketing, and data-driven growth strategies.\\n\\nCORE COMPETENCIES\\n- Digital Marketing Strategy\\n- SEO & SEM\\n- Content Marketing\\n- Growth Hacking\\n- Marketing Analytics (Google Analytics, Mixpanel)\\n- Email Marketing & Automation\\n- Social Media Marketing\\n\\nKEY ACHIEVEMENTS\\n- Grew organic traffic from 50K to 500K monthly visitors\\n- Increased MQL-to-SQL conversion rate by 65%\\n- Built content marketing program generating 200+ leads/month\\n- Managed $2M+ annual marketing budget\\n\\nEXPERIENCE\\nDigital Marketing Manager | HubSpot Austin | 2020 - Present\\n- Lead digital marketing strategy and execution\\n- Manage SEO, content, and paid acquisition channels\\n- Analyze marketing metrics and optimize campaigns\\n\\nMarketing Manager | Atlassian | 2018 - 2020\\n- Developed content marketing strategy\\n- Managed marketing automation and email campaigns\\n\\nSEO Specialist | Moz | 2015 - 2018\\n- Optimized website for search engines\\n- Created SEO content and link building strategies\\n\\nEDUCATION\\nMBA in Marketing | UT Austin | 2015\\nBachelor of Business Administration | Texas A&M | 2013",
+      "language": "english"
     },
     {
       "id": "resume11",
-      "name": "Amanda Foster - Azure Cloud Developer",
-      "experience_level": "mid",
-      "skills": ["csharp", "azure", "dotnet", "databases", "cloud_architecture", "docker", "coding"],
-      "text": "Amanda Foster\nAzure Cloud Developer\nEmail: amanda.foster@email.com | Phone: +1-234-567-8910\n\nPROFESSIONAL SUMMARY\nCloud developer with 4 years of experience specializing in Microsoft Azure. Strong background in building cloud-native applications using C# and .NET.\n\nTECHNICAL SKILLS\n- C# (Advanced)\n- .NET Core, ASP.NET Core\n- Azure (Functions, App Service, Storage, SQL)\n- Azure DevOps\n- Docker, Kubernetes on Azure\n- SQL Server, CosmosDB\n- ARM Templates, Bicep\n\nPROJECTS\n- Serverless API Platform: Built a serverless API platform using Azure Functions handling 1M+ requests/day.\n- Data Pipeline: Designed Azure Data Factory pipelines for ETL processing.\n\nEXPERIENCE\nAzure Cloud Developer | CloudTech Inc. | 2021 - Present\n- Develop cloud-native applications on Azure\n- Implement Azure DevOps CI/CD pipelines\n- Design and optimize cloud architecture\n\nJunior .NET Developer | SoftwareHouse | 2019 - 2021\n- Built web applications using ASP.NET Core\n- Deployed applications to Azure\n\nEDUCATION\nBachelor of Science in Computer Science | University of Washington | 2019",
-      "language": "csharp"
+      "name": "Divya Menon - Product Manager",
+      "experience_level": "senior",
+      "skills": [
+        "product_strategy",
+        "product_sense",
+        "metrics_analytics",
+        "stakeholder_management",
+        "user_research",
+        "agile"
+      ],
+      "text": "Divya Menon\\nSenior Product Manager\\nEmail: divya.menon@email.com | Phone: +91-98765-43215\\n\\nPROFESSIONAL SUMMARY\\nProduct leader from Kochi with 7 years of experience building consumer and enterprise products. Expert in product strategy, user research, and data-driven decision making.\\n\\nCORE COMPETENCIES\\n- Product Strategy & Roadmapping\\n- Product Sense & Intuition\\n- Metrics & Analytics\\n- Stakeholder Management\\n- User Research & Testing\\n- Agile/Scrum Methodologies\\n- Go-to-Market Strategy\\n\\nKEY ACHIEVEMENTS\\n- Launched product feature increasing DAU by 40%\\n- Led product strategy for $50M revenue product line\\n- Improved user retention from 60% to 85%\\n- Managed cross-functional team of 15+ people\\n\\nEXPERIENCE\\nSenior Product Manager | Google Bangalore | 2021 - Present\\n- Define product vision and strategy\\n- Conduct user research and analyze metrics\\n- Collaborate with engineering and design teams\\n- Launch features to millions of users\\n\\nProduct Manager | Microsoft Hyderabad | 2018 - 2021\\n- Managed product roadmap and backlog\\n- Conducted A/B tests and analyzed results\\n- Worked with stakeholders across organization\\n\\nAssociate Product Manager | Amazon Bangalore | 2016 - 2018\\n- Supported senior PMs on product initiatives\\n- Conducted competitive analysis\\n\\nEDUCATION\\nMBA | IIM Bangalore | 2016\\nBachelor of Engineering in Computer Science | NIT Calicut | 2014",
+      "language": "english"
     },
     {
       "id": "resume12",
-      "name": "Daniel Kim - ML/AI Engineer",
-      "experience_level": "senior",
-      "skills": ["python", "machine_learning", "tensorflow", "data_structures", "system_design", "coding", "pytorch"],
-      "text": "Daniel Kim\nML/AI Engineer\nEmail: daniel.kim@email.com | Phone: +1-234-567-8911\n\nPROFESSIONAL SUMMARY\nMachine Learning engineer with 6 years of experience building production ML systems. Expert in deep learning frameworks and MLOps practices.\n\nTECHNICAL SKILLS\n- Python (Expert)\n- TensorFlow, PyTorch, Keras\n- Machine Learning, Deep Learning\n- MLflow, Kubeflow\n- Data Structures & Algorithms\n- System Design for ML\n- AWS SageMaker, Vertex AI\n\nPROJECTS\n- NLP Platform: Built a natural language processing platform for document classification achieving 95% accuracy.\n- Computer Vision: Developed real-time object detection system for autonomous vehicles.\n\nEXPERIENCE\nSenior ML Engineer | AI Innovations | 2020 - Present\n- Design and implement ML systems at scale\n- Lead MLOps initiatives for model deployment\n- Build data pipelines for training data\n\nML Engineer | DataScience Corp | 2017 - 2020\n- Developed ML models for production use\n- Implemented feature engineering pipelines\n\nEDUCATION\nMaster of Science in Artificial Intelligence | Stanford | 2017",
-      "language": "python"
+      "name": "Dmytro Bondarenko - Frontend Developer",
+      "experience_level": "mid",
+      "skills": [
+        "javascript",
+        "typescript",
+        "react",
+        "css",
+        "nodejs",
+        "graphql",
+        "coding"
+      ],
+      "text": "Dmytro Bondarenko\\nFrontend Developer\\nEmail: dmytro.bondarenko@email.com | Phone: +380-50-345-6789\\n\\nPROFESSIONAL SUMMARY\\nFrontend developer from Kharkiv with 4 years of experience building modern web applications. Expert in React, TypeScript, and creating responsive user interfaces.\\n\\nTECHNICAL SKILLS\\n- JavaScript (Advanced), TypeScript\\n- React, Next.js, Redux\\n- HTML5, CSS3, Tailwind CSS\\n- GraphQL, Apollo Client\\n- Node.js\\n- Webpack, Vite\\n- Jest, React Testing Library\\n\\nKEY ACHIEVEMENTS\\n- Built e-commerce platform serving 100K+ users\\n- Improved page load time by 50%\\n- Created reusable component library with 80+ components\\n- Implemented responsive design for mobile-first approach\\n\\nEXPERIENCE\\nFrontend Developer | Preply Kyiv | 2021 - Present\\n- Develop React applications with TypeScript\\n- Implement responsive and accessible UIs\\n- Optimize web performance\\n- Collaborate with designers and backend engineers\\n\\nJunior Frontend Developer | Sigma Software Kharkiv | 2019 - 2021\\n- Built web applications using React\\n- Implemented REST API integrations\\n- Wrote unit and integration tests\\n\\nEDUCATION\\nBachelor of Science in Computer Science | Kharkiv National University | 2019",
+      "language": "javascript"
     },
     {
       "id": "resume13",
-      "name": "Sophie Williams - React/TypeScript Developer",
+      "name": "Emily Thompson - Financial Analyst",
       "experience_level": "mid",
-      "skills": ["javascript", "typescript", "react", "graphql", "css", "nodejs", "coding"],
-      "text": "Sophie Williams\nReact Developer\nEmail: sophie.williams@email.com | Phone: +1-234-567-8912\n\nPROFESSIONAL SUMMARY\nFrontend developer with 4 years of experience specializing in React and TypeScript. Expert in building modern, performant web applications.\n\nTECHNICAL SKILLS\n- TypeScript (Advanced)\n- React, Next.js, Remix\n- GraphQL, Apollo Client\n- CSS3, Styled Components, Tailwind\n- Node.js, Express\n- Jest, React Testing Library\n- Webpack, Vite\n\nPROJECTS\n- E-commerce Platform: Built a headless e-commerce frontend with React and GraphQL.\n- Design System: Created a company-wide design system with 50+ reusable components.\n\nEXPERIENCE\nSenior Frontend Developer | TechStartup | 2021 - Present\n- Lead frontend development using React and TypeScript\n- Implement GraphQL integrations with Apollo\n- Optimize web performance and accessibility\n\nFrontend Developer | WebAgency | 2019 - 2021\n- Built React applications for various clients\n- Implemented responsive designs\n\nEDUCATION\nBachelor of Science in Computer Science | NYU | 2019",
-      "language": "javascript"
+      "skills": [
+        "financial_analysis",
+        "forecasting",
+        "excel",
+        "sql",
+        "business_acumen",
+        "metrics_analytics"
+      ],
+      "text": "Emily Thompson\\nFinancial Analyst\\nEmail: emily.thompson@email.com | Phone: +1-212-555-0125\\n\\nPROFESSIONAL SUMMARY\\nFinancial analyst with 5 years of experience in corporate finance and FP&A. Expert in financial modeling, forecasting, and data analysis.\\n\\nCORE COMPETENCIES\\n- Financial Analysis & Modeling\\n- Forecasting & Budgeting\\n- Variance Analysis\\n- Excel (Advanced), SQL\\n- Financial Reporting\\n- Business Intelligence (Tableau, Power BI)\\n- P&L Management\\n\\nKEY ACHIEVEMENTS\\n- Improved forecast accuracy from 85% to 96%\\n- Identified cost savings opportunities worth $2M annually\\n- Built financial models for M&A due diligence\\n- Automated monthly reporting saving 20 hours/month\\n\\nEXPERIENCE\\nFinancial Analyst | Goldman Sachs New York | 2021 - Present\\n- Perform financial analysis and modeling\\n- Prepare monthly financial reports and variance analysis\\n- Support budgeting and forecasting processes\\n- Analyze business performance metrics\\n\\nJunior Financial Analyst | JPMorgan Chase | 2019 - 2021\\n- Assisted in financial planning and analysis\\n- Created financial dashboards and reports\\n- Conducted ad-hoc financial analysis\\n\\nEDUCATION\\nMaster of Finance | NYU Stern | 2019\\nBachelor of Business Administration | Boston College | 2017",
+      "language": "english"
     },
     {
       "id": "resume14",
-      "name": "Marcus Johnson - Infrastructure Engineer",
+      "name": "Rajesh Patel - Operations Manager",
       "experience_level": "senior",
-      "skills": ["python", "linux", "distributed_systems", "networking", "docker", "kubernetes", "coding"],
-      "text": "Marcus Johnson\nInfrastructure Engineer\nEmail: marcus.johnson@email.com | Phone: +1-234-567-8913\n\nPROFESSIONAL SUMMARY\nInfrastructure engineer with 7 years of experience in large-scale distributed systems. Expert in Linux systems, networking, and container orchestration.\n\nTECHNICAL SKILLS\n- Linux (Expert)\n- Distributed Systems\n- Network Engineering\n- Python, Go, Bash\n- Docker, Kubernetes\n- Terraform, Ansible\n- Prometheus, Grafana\n\nPROJECTS\n- Global CDN: Designed and built a global CDN serving 100B+ requests/month.\n- Container Platform: Architected a container platform hosting 1000+ microservices.\n\nEXPERIENCE\nSenior Infrastructure Engineer | BigTech Corp | 2020 - Present\n- Design and maintain large-scale infrastructure\n- Lead infrastructure reliability initiatives\n- Build internal tools for infrastructure automation\n\nInfrastructure Engineer | CloudServices | 2017 - 2020\n- Managed Linux systems and network infrastructure\n- Implemented monitoring and alerting systems\n\nEDUCATION\nBachelor of Science in Computer Engineering | Georgia Tech | 2017",
-      "language": "python"
+      "skills": [
+        "operations",
+        "supply_chain",
+        "process_optimization",
+        "vendor_management",
+        "leadership",
+        "six_sigma"
+      ],
+      "text": "Rajesh Patel\\nOperations Manager\\nEmail: rajesh.patel@email.com | Phone: +91-98765-43216\\n\\nPROFESSIONAL SUMMARY\\nOperations leader from Mumbai with 9 years of experience in supply chain and operations management. Expert in process optimization, vendor management, and operational excellence.\\n\\nCORE COMPETENCIES\\n- Operations Management\\n- Supply Chain Optimization\\n- Process Improvement (Six Sigma Black Belt)\\n- Vendor Management\\n- Inventory Management\\n- Team Leadership\\n- ERP Systems (SAP, Oracle)\\n\\nKEY ACHIEVEMENTS\\n- Reduced operational costs by 25% through process optimization\\n- Improved on-time delivery from 82% to 97%\\n- Managed operations for 5 warehouses across India\\n- Led team of 50+ operations staff\\n\\nEXPERIENCE\\nOperations Manager | Amazon Mumbai | 2020 - Present\\n- Manage end-to-end operations for fulfillment center\\n- Optimize supply chain and logistics processes\\n- Implement continuous improvement initiatives\\n- Manage vendor relationships\\n\\nOperations Manager | Flipkart Bangalore | 2017 - 2020\\n- Oversaw warehouse operations and inventory management\\n- Implemented Six Sigma projects\\n- Managed team of 30 operations staff\\n\\nOperations Analyst | Reliance Industries | 2014 - 2017\\n- Analyzed operational metrics and KPIs\\n- Supported process improvement projects\\n\\nEDUCATION\\nMBA in Operations | IIM Ahmedabad | 2014\\nBachelor of Engineering in Industrial Engineering | VJTI Mumbai | 2012",
+      "language": "english"
     },
     {
       "id": "resume15",
-      "name": "Christina Lee - Data Engineer",
-      "experience_level": "senior",
-      "skills": ["python", "spark", "sql", "data_modeling", "databases", "gcp", "coding", "aws"],
-      "text": "Christina Lee\nSenior Data Engineer\nEmail: christina.lee@email.com | Phone: +1-234-567-8914\n\nPROFESSIONAL SUMMARY\nData engineer with 6 years of experience building data pipelines and analytics platforms. Expert in Apache Spark, SQL, and cloud data services.\n\nTECHNICAL SKILLS\n- Python (Advanced)\n- Apache Spark, PySpark\n- SQL (Expert)\n- Data Modeling\n- GCP (BigQuery, Dataflow, Dataproc)\n- AWS (Redshift, Glue, EMR)\n- Airflow, dbt\n\nPROJECTS\n- Data Lake: Built a company-wide data lake processing 10TB+ daily on GCP.\n- Real-time Analytics: Designed streaming data pipelines for real-time dashboards.\n\nEXPERIENCE\nSenior Data Engineer | Analytics Inc. | 2020 - Present\n- Design and implement data pipelines at scale\n- Build data models for analytics and reporting\n- Optimize query performance and data quality\n\nData Engineer | DataCorp | 2018 - 2020\n- Built ETL pipelines using Python and Spark\n- Managed data warehouse on Redshift\n\nEDUCATION\nMaster of Science in Data Science | UC San Diego | 2018",
-      "language": "python"
-    },
-    {
-      "id": "resume16",
-      "name": "Ryan Miller - Backend Java Developer",
+      "name": "Jessica Williams - Content Writer",
       "experience_level": "mid",
-      "skills": ["java", "spring", "microservices", "databases", "gcp", "docker", "coding"],
-      "text": "Ryan Miller\nBackend Java Developer\nEmail: ryan.miller@email.com | Phone: +1-234-567-8915\n\nPROFESSIONAL SUMMARY\nBackend developer with 4 years of experience building Java microservices. Strong expertise in Spring Boot and cloud platforms.\n\nTECHNICAL SKILLS\n- Java (Advanced)\n- Spring Boot, Spring Cloud\n- Microservices Architecture\n- GCP (Cloud Run, GKE, Cloud SQL)\n- Docker, Kubernetes\n- PostgreSQL, Redis\n- Kafka, RabbitMQ\n\nPROJECTS\n- Payment Service: Built a payment microservice handling 50K+ transactions/day.\n- Notification System: Designed an event-driven notification system.\n\nEXPERIENCE\nBackend Developer | TechStartup | 2021 - Present\n- Develop microservices using Spring Boot\n- Deploy and manage services on GCP\n- Implement event-driven architecture with Kafka\n\nJunior Java Developer | SoftwareCo | 2019 - 2021\n- Built backend APIs using Spring Framework\n- Wrote unit and integration tests\n\nEDUCATION\nBachelor of Science in Computer Science | USC | 2019",
-      "language": "java"
-    },
-    {
-      "id": "resume17",
-      "name": "Jessica Brown - Junior Frontend Developer",
-      "experience_level": "junior",
-      "skills": ["javascript", "typescript", "react", "css", "coding"],
-      "text": "Jessica Brown\nJunior Frontend Developer\nEmail: jessica.brown@email.com | Phone: +1-234-567-8916\n\nPROFESSIONAL SUMMARY\nJunior frontend developer with 1 year of experience in React development. Strong foundation in JavaScript and modern CSS.\n\nTECHNICAL SKILLS\n- JavaScript (Intermediate)\n- TypeScript basics\n- React, Redux\n- HTML5, CSS3, Tailwind CSS\n- Git, npm\n- Responsive Design\n\nPROJECTS\n- Portfolio Website: Built a personal portfolio using React and Tailwind CSS.\n- Todo App: Created a todo application with React and local storage.\n\nEXPERIENCE\nJunior Frontend Developer | WebStudio | 2023 - Present\n- Build responsive web pages using React\n- Implement designs from Figma mockups\n- Fix bugs and improve UI components\n\nWeb Development Intern | DesignAgency | Summer 2022\n- Learned React fundamentals\n- Assisted in building client websites\n\nEDUCATION\nBachelor of Science in Computer Science | UCLA | 2023",
-      "language": "javascript"
-    },
-    {
-      "id": "resume18",
-      "name": "Andrew Wilson - Python Backend Developer",
-      "experience_level": "mid",
-      "skills": ["python", "django", "databases", "aws", "docker", "coding", "microservices"],
-      "text": "Andrew Wilson\nPython Backend Developer\nEmail: andrew.wilson@email.com | Phone: +1-234-567-8917\n\nPROFESSIONAL SUMMARY\nBackend developer with 4 years of experience building Python web services. Expert in Django and FastAPI frameworks.\n\nTECHNICAL SKILLS\n- Python (Advanced)\n- Django, FastAPI\n- PostgreSQL, Redis\n- AWS (Lambda, RDS, S3)\n- Docker, ECS\n- REST APIs\n- Celery, RabbitMQ\n\nPROJECTS\n- REST API Platform: Built a multi-tenant REST API platform serving 100+ clients.\n- Background Jobs: Implemented asynchronous job processing with Celery.\n\nEXPERIENCE\nBackend Developer | APIFirst Inc. | 2021 - Present\n- Design and implement RESTful APIs\n- Build microservices using FastAPI\n- Deploy applications on AWS\n\nJunior Python Developer | StartupXYZ | 2019 - 2021\n- Developed Django web applications\n- Implemented database models and migrations\n\nEDUCATION\nBachelor of Science in Computer Science | Michigan State | 2019",
-      "language": "python"
-    },
-    {
-      "id": "resume19",
-      "name": "Nicole Taylor - Junior C# Developer",
-      "experience_level": "junior",
-      "skills": ["csharp", "dotnet", "databases", "azure", "coding"],
-      "text": "Nicole Taylor\nJunior .NET Developer\nEmail: nicole.taylor@email.com | Phone: +1-234-567-8918\n\nPROFESSIONAL SUMMARY\nJunior developer with 1 year of experience in C# and .NET development. Strong foundation in object-oriented programming and basic Azure services.\n\nTECHNICAL SKILLS\n- C# (Intermediate)\n- .NET Core, ASP.NET Core\n- Azure basics\n- SQL Server\n- Git, Visual Studio\n- Entity Framework\n\nPROJECTS\n- Inventory System: Built an inventory management system using ASP.NET Core MVC.\n- API Project: Created a RESTful API with .NET Core and Entity Framework.\n\nEXPERIENCE\nJunior .NET Developer | TechSolutions | 2023 - Present\n- Develop features using C# and .NET Core\n- Write unit tests and fix bugs\n- Deploy applications to Azure\n\n.NET Development Intern | SoftwareCorp | Summer 2022\n- Learned .NET development fundamentals\n- Assisted in building internal tools\n\nEDUCATION\nBachelor of Science in Computer Science | Penn State | 2023",
-      "language": "csharp"
-    },
-    {
-      "id": "resume20",
-      "name": "Brian Anderson - Senior React Developer",
-      "experience_level": "senior",
-      "skills": ["javascript", "typescript", "react", "graphql", "css", "nodejs", "coding", "system_design"],
-      "text": "Brian Anderson\nSenior React Developer\nEmail: brian.anderson@email.com | Phone: +1-234-567-8919\n\nPROFESSIONAL SUMMARY\nSenior frontend engineer with 6 years of experience building large-scale React applications. Expert in React ecosystem and modern JavaScript.\n\nTECHNICAL SKILLS\n- React (Expert)\n- TypeScript (Advanced)\n- GraphQL, Apollo\n- Next.js, Remix\n- CSS-in-JS, Tailwind\n- Node.js\n- Webpack, Vite\n- Testing (Jest, Cypress)\n\nPROJECTS\n- Enterprise Dashboard: Built a complex admin dashboard with 200+ components serving 10K+ users.\n- Real-time Collaboration: Implemented real-time features using WebSockets and CRDT.\n\nEXPERIENCE\nSenior Frontend Engineer | BigTech Inc. | 2021 - Present\n- Lead frontend architecture decisions\n- Build reusable component libraries\n- Mentor junior developers\n- Optimize application performance\n\nFrontend Developer | TechAgency | 2018 - 2021\n- Built React applications for enterprise clients\n- Implemented GraphQL APIs\n\nEDUCATION\nBachelor of Science in Computer Science | MIT | 2018",
-      "language": "javascript"
-    },
-    {
-      "id": "resume21",
-      "name": "Samantha Davis - Data Scientist/ML",
-      "experience_level": "mid",
-      "skills": ["python", "machine_learning", "tensorflow", "spark", "sql", "data_structures", "coding"],
-      "text": "Samantha Davis\nData Scientist\nEmail: samantha.davis@email.com | Phone: +1-234-567-8920\n\nPROFESSIONAL SUMMARY\nData scientist with 4 years of experience in machine learning and analytics. Strong background in Python, statistical modeling, and data engineering.\n\nTECHNICAL SKILLS\n- Python (Advanced)\n- TensorFlow, scikit-learn\n- Apache Spark, PySpark\n- SQL, pandas\n- Data Visualization\n- Statistical Modeling\n- Jupyter, MLflow\n\nPROJECTS\n- Churn Prediction: Built ML models predicting customer churn with 85% accuracy.\n- A/B Testing Platform: Designed and implemented a statistical A/B testing framework.\n\nEXPERIENCE\nData Scientist | Analytics Corp | 2021 - Present\n- Build and deploy ML models\n- Design experiments and analyze results\n- Create data pipelines for feature engineering\n\nJunior Data Analyst | DataFirst | 2019 - 2021\n- Performed exploratory data analysis\n- Built dashboards and reports\n\nEDUCATION\nMaster of Science in Statistics | UC Berkeley | 2019",
-      "language": "python"
-    },
-    {
-      "id": "resume22",
-      "name": "Thomas Garcia - GCP Backend Developer",
-      "experience_level": "mid",
-      "skills": ["java", "python", "gcp", "microservices", "databases", "docker", "kubernetes", "coding"],
-      "text": "Thomas Garcia\nCloud Backend Developer\nEmail: thomas.garcia@email.com | Phone: +1-234-567-8921\n\nPROFESSIONAL SUMMARY\nBackend developer with 4 years of experience building cloud-native applications on GCP. Strong expertise in Java, Python, and containerization.\n\nTECHNICAL SKILLS\n- Java, Python\n- GCP (Cloud Run, GKE, BigQuery, Pub/Sub)\n- Microservices Architecture\n- Docker, Kubernetes\n- PostgreSQL, Firestore\n- Terraform\n\nPROJECTS\n- Event Platform: Built a real-time event processing platform on GCP handling 1M+ events/day.\n- API Gateway: Implemented a serverless API gateway using Cloud Functions.\n\nEXPERIENCE\nCloud Developer | GCP Partners | 2021 - Present\n- Build cloud-native applications on GCP\n- Design microservices architecture\n- Implement CI/CD with Cloud Build\n\nBackend Developer | StartupTech | 2019 - 2021\n- Developed backend services\n- Migrated applications to GCP\n\nEDUCATION\nBachelor of Science in Computer Science | UT Austin | 2019",
-      "language": "java"
-    },
-    {
-      "id": "resume23",
-      "name": "Laura Martinez - Senior Python Developer",
-      "experience_level": "senior",
-      "skills": ["python", "django", "fastapi", "databases", "aws", "microservices", "system_design", "coding", "data_structures"],
-      "text": "Laura Martinez\nSenior Python Developer\nEmail: laura.martinez@email.com | Phone: +1-234-567-8922\n\nPROFESSIONAL SUMMARY\nSenior Python developer with 6 years of experience building scalable backend systems. Expert in Django, FastAPI, and cloud architecture.\n\nTECHNICAL SKILLS\n- Python (Expert)\n- Django, FastAPI, Flask\n- System Design\n- AWS (Lambda, ECS, RDS)\n- PostgreSQL, Redis, Elasticsearch\n- Docker, Kubernetes\n- Data Structures & Algorithms\n\nPROJECTS\n- Search Platform: Built a search service using Elasticsearch serving 10M+ queries/day.\n- Microservices Migration: Led the migration from monolith to microservices architecture.\n\nEXPERIENCE\nSenior Python Developer | ScaleTech | 2020 - Present\n- Design and implement scalable backend systems\n- Lead technical architecture discussions\n- Mentor mid-level developers\n\nPython Developer | WebServices Inc. | 2017 - 2020\n- Built Django applications for enterprise clients\n- Implemented REST APIs and background jobs\n\nEDUCATION\nBachelor of Science in Computer Science | University of Michigan | 2017",
-      "language": "python"
+      "skills": [
+        "copywriting",
+        "content_marketing",
+        "seo",
+        "communication",
+        "creativity",
+        "social_media"
+      ],
+      "text": "Jessica Williams\\nSenior Content Writer\\nEmail: jessica.williams@email.com | Phone: +1-415-555-0126\\n\\nPROFESSIONAL SUMMARY\\nCreative content writer with 5 years of experience in B2B SaaS and technology. Expert in SEO content, thought leadership, and storytelling.\\n\\nCORE COMPETENCIES\\n- Content Writing & Copywriting\\n- SEO Content Strategy\\n- Thought Leadership\\n- Blog Writing\\n- Social Media Content\\n- Content Marketing\\n- Editing & Proofreading\\n\\nKEY ACHIEVEMENTS\\n- Wrote 200+ blog posts generating 500K+ organic visits\\n- Increased content engagement rate by 75%\\n- Created content strategy for product launch\\n- Managed content calendar for 3 brands\\n\\nEXPERIENCE\\nSenior Content Writer | HubSpot San Francisco | 2021 - Present\\n- Write SEO-optimized blog posts and articles\\n- Create thought leadership content\\n- Collaborate with marketing and product teams\\n- Edit and review content from other writers\\n\\nContent Writer | Salesforce | 2019 - 2021\\n- Wrote product marketing content\\n- Created email campaigns and landing pages\\n- Developed content for social media\\n\\nEDUCATION\\nBachelor of Arts in English | UC Berkeley | 2019",
+      "language": "english"
     }
   ]
 }
