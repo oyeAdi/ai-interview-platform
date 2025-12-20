@@ -2881,15 +2881,15 @@ export default function LandingPage() {
                                     </h4>
                                     <div className="space-y-3 font-mono text-[10px]">
                                         <div className="p-2 bg-indigo-800 rounded border border-indigo-700">
-                                            <p className="text-indigo-300">#4 Executioner -> Event: AGENT_THOUGHT</p>
+                                            <p className="text-indigo-300">#4 Executioner {"->"} Event: AGENT_THOUGHT</p>
                                             <p>"Synthesizing 5 strategies into 1 response..."</p>
                                         </div>
                                         <div className="p-2 bg-indigo-800 rounded border border-indigo-700">
-                                            <p className="text-indigo-300">#6 Guardian -> Event: SECURITY_CHECK</p>
+                                            <p className="text-indigo-300">#6 Guardian {"->"} Event: SECURITY_CHECK</p>
                                             <p>"Status: CLEAN. No prompt injection detected."</p>
                                         </div>
                                         <div className="p-2 bg-indigo-800 rounded border border-indigo-700">
-                                            <p className="text-indigo-300">#7 Critic -> Event: QUALITY_AUDIT</p>
+                                            <p className="text-indigo-300">#7 Critic {"->"} Event: QUALITY_AUDIT</p>
                                             <p>"Score adjustment: -10 for lack of DCL pattern."</p>
                                         </div>
                                     </div>
