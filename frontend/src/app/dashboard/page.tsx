@@ -80,7 +80,13 @@ export default function DashboardPage() {
     session_id: string
     position: { id: string; title: string }
     candidate: { id: string; name: string }
-    links: { candidate: string; expert: string }  // Changed from admin to expert
+    links: {
+      candidate?: string;
+      expert?: string;
+      admin?: string;
+      candidate_link?: string;
+      admin_link?: string;
+    }
     expires_at?: string
     ttl_minutes?: number
   } | null>(null)
