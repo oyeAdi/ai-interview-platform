@@ -737,3 +737,942 @@ TypeError: int() argument must be a string, a bytes-like object or a real number
 2025-12-14 13:44:04,952 - debug_logger - INFO - WebSocket connected successfully, view=admin
 2025-12-14 13:53:39,871 - debug_logger - INFO - WebSocket connection attempt, view=admin
 2025-12-14 13:53:39,871 - debug_logger - INFO - WebSocket connected successfully, view=admin
+2025-12-16 21:10:19,944 - debug_logger - INFO - WebSocket connection attempt, view=candidate
+2025-12-16 21:10:19,945 - debug_logger - INFO - WebSocket connected successfully, view=candidate
+2025-12-16 21:10:29,243 - debug_logger - INFO - WebSocket connection attempt, view=candidate
+2025-12-16 21:10:29,243 - debug_logger - INFO - WebSocket connected successfully, view=candidate
+2025-12-16 21:10:42,101 - debug_logger - INFO - WebSocket connection attempt, view=expert
+2025-12-16 21:10:42,102 - debug_logger - INFO - WebSocket connected successfully, view=expert
+2025-12-16 21:10:44,440 - debug_logger - INFO - WebSocket connection attempt, view=expert
+2025-12-16 21:10:44,441 - debug_logger - INFO - WebSocket connected successfully, view=expert
+2025-12-16 21:10:51,706 - debug_logger - INFO - WebSocket connection attempt, view=expert
+2025-12-16 21:10:51,707 - debug_logger - INFO - WebSocket connected successfully, view=expert
+2025-12-16 21:10:53,726 - debug_logger - INFO - WebSocket connection attempt, view=expert
+2025-12-16 21:10:53,726 - debug_logger - INFO - WebSocket connected successfully, view=expert
+2025-12-16 21:11:01,323 - debug_logger - INFO - WebSocket connection attempt, view=expert
+2025-12-16 21:11:01,324 - debug_logger - INFO - WebSocket connected successfully, view=expert
+2025-12-16 21:11:03,341 - debug_logger - INFO - WebSocket connection attempt, view=expert
+2025-12-16 21:11:03,341 - debug_logger - INFO - WebSocket connected successfully, view=expert
+2025-12-16 21:11:05,789 - debug_logger - INFO - WebSocket connection attempt, view=expert
+2025-12-16 21:11:05,789 - debug_logger - INFO - WebSocket connected successfully, view=expert
+2025-12-16 21:11:08,457 - debug_logger - INFO - WebSocket connection attempt, view=expert
+2025-12-16 21:11:08,458 - debug_logger - INFO - WebSocket connected successfully, view=expert
+2025-12-16 21:11:09,836 - debug_logger - INFO - WebSocket connection attempt, view=expert
+2025-12-16 21:11:09,836 - debug_logger - INFO - WebSocket connected successfully, view=expert
+2025-12-16 21:11:12,442 - debug_logger - INFO - WebSocket connection attempt, view=expert
+2025-12-16 21:11:12,442 - debug_logger - INFO - WebSocket connected successfully, view=expert
+2025-12-16 21:11:14,324 - debug_logger - INFO - WebSocket connection attempt, view=candidate
+2025-12-16 21:11:14,325 - debug_logger - INFO - WebSocket connected successfully, view=candidate
+2025-12-16 21:11:16,340 - debug_logger - INFO - WebSocket connection attempt, view=candidate
+2025-12-16 21:11:16,340 - debug_logger - INFO - WebSocket connected successfully, view=candidate
+2025-12-16 21:12:39,119 - debug_logger - INFO - WebSocket connection attempt, view=candidate
+2025-12-16 21:12:39,120 - debug_logger - INFO - WebSocket connected successfully, view=candidate
+2025-12-16 21:12:45,284 - debug_logger - INFO - WebSocket connection attempt, view=candidate
+2025-12-16 21:12:45,285 - debug_logger - INFO - WebSocket connected successfully, view=candidate
+2025-12-16 21:12:47,302 - debug_logger - INFO - WebSocket connection attempt, view=candidate
+2025-12-16 21:12:47,303 - debug_logger - INFO - WebSocket connected successfully, view=candidate
+2025-12-16 22:14:42,461 - debug_logger - INFO - WebSocket connection attempt, view=candidate
+2025-12-16 22:14:42,462 - debug_logger - INFO - WebSocket connected successfully, view=candidate
+2025-12-16 22:14:51,122 - debug_logger - INFO - WebSocket connection attempt, view=candidate
+2025-12-16 22:14:51,122 - debug_logger - INFO - WebSocket connected successfully, view=candidate
+2025-12-16 22:15:40,756 - debug_logger - INFO - WebSocket connection attempt, view=candidate
+2025-12-16 22:15:40,757 - debug_logger - INFO - WebSocket connected successfully, view=candidate
+2025-12-16 22:20:07,341 - debug_logger - INFO - WebSocket connection attempt, view=candidate
+2025-12-16 22:20:07,342 - debug_logger - INFO - WebSocket connected successfully, view=candidate
+2025-12-16 22:20:15,530 - debug_logger - INFO - WebSocket connection attempt, view=candidate
+2025-12-16 22:20:15,531 - debug_logger - INFO - WebSocket connected successfully, view=candidate
+2025-12-16 22:20:23,528 - debug_logger - INFO - WebSocket connection attempt, view=expert
+2025-12-16 22:20:23,529 - debug_logger - INFO - WebSocket connected successfully, view=expert
+2025-12-16 22:20:25,544 - debug_logger - INFO - WebSocket connection attempt, view=expert
+2025-12-16 22:20:25,545 - debug_logger - INFO - WebSocket connected successfully, view=expert
+2025-12-16 22:23:56,421 - debug_logger - INFO - WebSocket connection attempt, view=candidate
+2025-12-16 22:23:56,421 - debug_logger - INFO - WebSocket connected successfully, view=candidate
+2025-12-16 23:37:42,993 - debug_logger - INFO - WebSocket connection attempt, view=expert
+2025-12-16 23:37:42,993 - debug_logger - INFO - WebSocket connected successfully, view=expert
+2025-12-16 23:37:43,021 - debug_logger - INFO - WebSocket connection attempt, view=expert
+2025-12-16 23:37:43,022 - debug_logger - INFO - WebSocket connected successfully, view=expert
+2025-12-16 23:37:45,758 - debug_logger - INFO - WebSocket connection attempt, view=expert
+2025-12-16 23:37:45,758 - debug_logger - INFO - WebSocket connected successfully, view=expert
+2025-12-16 23:37:45,773 - debug_logger - INFO - WebSocket connection attempt, view=expert
+2025-12-16 23:37:45,773 - debug_logger - INFO - WebSocket connected successfully, view=expert
+2025-12-16 23:38:03,740 - debug_logger - INFO - WebSocket connection attempt, view=expert
+2025-12-16 23:38:03,741 - debug_logger - INFO - WebSocket connected successfully, view=expert
+2025-12-16 23:38:03,770 - debug_logger - ERROR - Failed to restore session invalid-session: cannot access local variable 'asyncio' where it is not associated with a value
+Traceback (most recent call last):
+  File "C:\Users\aditya_raj\Documents\intelliJ-workspace\cursor-code\backend\main.py", line 1704, in websocket_endpoint
+    "type": "error",
+      ^^^^^^^
+UnboundLocalError: cannot access local variable 'asyncio' where it is not associated with a value
+
+2025-12-16 23:38:03,771 - debug_logger - ERROR - WebSocket error: cannot access local variable 'asyncio' where it is not associated with a value
+Traceback (most recent call last):
+  File "C:\Users\aditya_raj\Documents\intelliJ-workspace\cursor-code\backend\main.py", line 1704, in websocket_endpoint
+    "type": "error",
+      ^^^^^^^
+UnboundLocalError: cannot access local variable 'asyncio' where it is not associated with a value
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\aditya_raj\Documents\intelliJ-workspace\cursor-code\backend\main.py", line 1719, in websocket_endpoint
+    "type": "error",
+      ^^^^^^^
+UnboundLocalError: cannot access local variable 'asyncio' where it is not associated with a value
+
+2025-12-16 23:38:24,078 - debug_logger - INFO - WebSocket connection attempt, view=expert
+2025-12-16 23:38:24,078 - debug_logger - INFO - WebSocket connected successfully, view=expert
+2025-12-16 23:38:24,100 - debug_logger - ERROR - Failed to restore session invalid-session: cannot access local variable 'asyncio' where it is not associated with a value
+Traceback (most recent call last):
+  File "C:\Users\aditya_raj\Documents\intelliJ-workspace\cursor-code\backend\main.py", line 1704, in websocket_endpoint
+    "type": "error",
+      ^^^^^^^
+UnboundLocalError: cannot access local variable 'asyncio' where it is not associated with a value
+
+2025-12-16 23:38:24,101 - debug_logger - ERROR - WebSocket error: cannot access local variable 'asyncio' where it is not associated with a value
+Traceback (most recent call last):
+  File "C:\Users\aditya_raj\Documents\intelliJ-workspace\cursor-code\backend\main.py", line 1704, in websocket_endpoint
+    "type": "error",
+      ^^^^^^^
+UnboundLocalError: cannot access local variable 'asyncio' where it is not associated with a value
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\aditya_raj\Documents\intelliJ-workspace\cursor-code\backend\main.py", line 1719, in websocket_endpoint
+    "type": "error",
+      ^^^^^^^
+UnboundLocalError: cannot access local variable 'asyncio' where it is not associated with a value
+
+2025-12-16 23:39:28,633 - debug_logger - INFO - WebSocket connection attempt, view=expert
+2025-12-16 23:39:28,633 - debug_logger - INFO - WebSocket connected successfully, view=expert
+2025-12-16 23:39:28,652 - debug_logger - ERROR - Failed to restore session invalid-session: cannot access local variable 'asyncio' where it is not associated with a value
+Traceback (most recent call last):
+  File "C:\Users\aditya_raj\Documents\intelliJ-workspace\cursor-code\backend\main.py", line 1704, in websocket_endpoint
+    "type": "error",
+      ^^^^^^^
+UnboundLocalError: cannot access local variable 'asyncio' where it is not associated with a value
+
+2025-12-16 23:39:28,653 - debug_logger - ERROR - WebSocket error: cannot access local variable 'asyncio' where it is not associated with a value
+Traceback (most recent call last):
+  File "C:\Users\aditya_raj\Documents\intelliJ-workspace\cursor-code\backend\main.py", line 1704, in websocket_endpoint
+    "type": "error",
+      ^^^^^^^
+UnboundLocalError: cannot access local variable 'asyncio' where it is not associated with a value
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\aditya_raj\Documents\intelliJ-workspace\cursor-code\backend\main.py", line 1719, in websocket_endpoint
+    "type": "error",
+      ^^^^^^^
+UnboundLocalError: cannot access local variable 'asyncio' where it is not associated with a value
+
+2025-12-17 04:36:53,449 - debug_logger - INFO - WebSocket connection attempt, view=candidate
+2025-12-17 04:36:53,450 - debug_logger - INFO - WebSocket connected successfully, view=candidate
+2025-12-17 04:36:53,479 - debug_logger - INFO - WebSocket connection attempt, view=candidate
+2025-12-17 04:36:53,480 - debug_logger - INFO - WebSocket connected successfully, view=candidate
+2025-12-17 04:36:53,494 - debug_logger - INFO - WebSocket connection attempt, view=expert
+2025-12-17 04:36:53,495 - debug_logger - INFO - WebSocket connected successfully, view=expert
+2025-12-17 04:36:53,509 - debug_logger - INFO - WebSocket connection attempt, view=expert
+2025-12-17 04:36:53,510 - debug_logger - INFO - WebSocket connected successfully, view=expert
+2025-12-17 04:36:56,333 - debug_logger - INFO - WebSocket connection attempt, view=expert
+2025-12-17 04:36:56,334 - debug_logger - INFO - WebSocket connected successfully, view=expert
+2025-12-17 04:36:58,981 - debug_logger - INFO - WebSocket connection attempt, view=expert
+2025-12-17 04:36:58,982 - debug_logger - INFO - WebSocket connected successfully, view=expert
+2025-12-17 04:36:59,009 - debug_logger - INFO - WebSocket connection attempt, view=expert
+2025-12-17 04:36:59,010 - debug_logger - INFO - WebSocket connected successfully, view=expert
+2025-12-17 04:36:59,025 - debug_logger - INFO - WebSocket connection attempt, view=candidate
+2025-12-17 04:36:59,026 - debug_logger - INFO - WebSocket connected successfully, view=candidate
+2025-12-17 04:36:59,044 - debug_logger - INFO - WebSocket connection attempt, view=candidate
+2025-12-17 04:36:59,045 - debug_logger - INFO - WebSocket connected successfully, view=candidate
+2025-12-17 04:36:59,072 - debug_logger - INFO - WebSocket connection attempt, view=expert
+2025-12-17 04:36:59,073 - debug_logger - INFO - WebSocket connected successfully, view=expert
+2025-12-17 04:36:59,339 - debug_logger - INFO - WebSocket connection attempt, view=expert
+2025-12-17 04:36:59,339 - debug_logger - INFO - WebSocket connected successfully, view=expert
+2025-12-17 05:39:05,754 - debug_logger - INFO - WebSocket connection attempt, view=candidate
+2025-12-17 05:39:05,755 - debug_logger - INFO - WebSocket connected successfully, view=candidate
+2025-12-17 05:39:09,960 - debug_logger - INFO - WebSocket connection attempt, view=expert
+2025-12-17 05:39:09,961 - debug_logger - INFO - WebSocket connected successfully, view=expert
+2025-12-17 05:39:09,979 - debug_logger - INFO - WebSocket connection attempt, view=expert
+2025-12-17 05:39:09,980 - debug_logger - INFO - WebSocket connected successfully, view=expert
+2025-12-17 05:39:09,995 - debug_logger - INFO - WebSocket connection attempt, view=candidate
+2025-12-17 05:39:09,996 - debug_logger - INFO - WebSocket connected successfully, view=candidate
+2025-12-17 05:39:19,002 - debug_logger - INFO - WebSocket connection attempt, view=expert
+2025-12-17 05:39:19,002 - debug_logger - INFO - WebSocket connected successfully, view=expert
+2025-12-17 05:39:21,582 - debug_logger - INFO - WebSocket connection attempt, view=expert
+2025-12-17 05:39:21,583 - debug_logger - INFO - WebSocket connected successfully, view=expert
+2025-12-17 05:39:27,652 - debug_logger - INFO - WebSocket connection attempt, view=candidate
+2025-12-17 05:39:27,652 - debug_logger - INFO - WebSocket connected successfully, view=candidate
+2025-12-17 05:39:29,661 - debug_logger - INFO - WebSocket connection attempt, view=candidate
+2025-12-17 05:39:29,662 - debug_logger - INFO - WebSocket connected successfully, view=candidate
+2025-12-17 05:40:49,756 - debug_logger - INFO - WebSocket connection attempt, view=expert
+2025-12-17 05:40:49,756 - debug_logger - INFO - WebSocket connected successfully, view=expert
+2025-12-17 05:40:49,770 - debug_logger - INFO - WebSocket connection attempt, view=expert
+2025-12-17 05:40:49,770 - debug_logger - INFO - WebSocket connected successfully, view=expert
+2025-12-17 05:40:52,764 - debug_logger - INFO - WebSocket connection attempt, view=candidate
+2025-12-17 05:40:52,764 - debug_logger - INFO - WebSocket connected successfully, view=candidate
+2025-12-17 05:45:12,980 - debug_logger - INFO - WebSocket connection attempt, view=expert
+2025-12-17 05:45:12,981 - debug_logger - INFO - WebSocket connected successfully, view=expert
+2025-12-17 05:45:15,760 - debug_logger - INFO - WebSocket connection attempt, view=expert
+2025-12-17 05:45:15,760 - debug_logger - INFO - WebSocket connected successfully, view=expert
+2025-12-17 05:45:15,777 - debug_logger - INFO - WebSocket connection attempt, view=expert
+2025-12-17 05:45:15,778 - debug_logger - INFO - WebSocket connected successfully, view=expert
+2025-12-17 05:59:51,975 - debug_logger - INFO - WebSocket connection attempt, view=expert
+2025-12-17 05:59:51,976 - debug_logger - INFO - WebSocket connected successfully, view=expert
+2025-12-17 05:59:51,991 - debug_logger - INFO - WebSocket connection attempt, view=expert
+2025-12-17 05:59:51,992 - debug_logger - INFO - WebSocket connected successfully, view=expert
+2025-12-17 05:59:52,005 - debug_logger - INFO - WebSocket connection attempt, view=expert
+2025-12-17 05:59:52,006 - debug_logger - INFO - WebSocket connected successfully, view=expert
+2025-12-17 05:59:52,025 - debug_logger - INFO - WebSocket connection attempt, view=candidate
+2025-12-17 05:59:52,025 - debug_logger - INFO - WebSocket connected successfully, view=candidate
+2025-12-17 05:59:52,053 - debug_logger - INFO - WebSocket connection attempt, view=expert
+2025-12-17 05:59:52,053 - debug_logger - INFO - WebSocket connected successfully, view=expert
+2025-12-17 05:59:53,763 - debug_logger - INFO - WebSocket connection attempt, view=candidate
+2025-12-17 05:59:53,763 - debug_logger - INFO - WebSocket connected successfully, view=candidate
+2025-12-18 21:15:30,346 - debug_logger - INFO - WebSocket connection attempt, view=expert
+2025-12-18 21:15:30,347 - debug_logger - INFO - WebSocket connected successfully, view=expert
+2025-12-18 21:15:30,424 - debug_logger - ERROR - Failed to restore session 9f54f483: cannot access local variable 'asyncio' where it is not associated with a value
+Traceback (most recent call last):
+  File "C:\Users\aditya_raj\Documents\intelliJ-workspace\cursor-code\backend\main.py", line 1940, in websocket_endpoint
+    await asyncio.sleep(0.5)
+          ^^^^^^^
+UnboundLocalError: cannot access local variable 'asyncio' where it is not associated with a value
+
+2025-12-18 21:15:30,426 - debug_logger - ERROR - WebSocket error: cannot access local variable 'asyncio' where it is not associated with a value
+Traceback (most recent call last):
+  File "C:\Users\aditya_raj\Documents\intelliJ-workspace\cursor-code\backend\main.py", line 1940, in websocket_endpoint
+    await asyncio.sleep(0.5)
+          ^^^^^^^
+UnboundLocalError: cannot access local variable 'asyncio' where it is not associated with a value
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\aditya_raj\Documents\intelliJ-workspace\cursor-code\backend\main.py", line 1953, in websocket_endpoint
+    await asyncio.sleep(0.5)
+          ^^^^^^^
+UnboundLocalError: cannot access local variable 'asyncio' where it is not associated with a value
+
+2025-12-18 21:15:32,334 - debug_logger - INFO - WebSocket connection attempt, view=expert
+2025-12-18 21:15:32,335 - debug_logger - INFO - WebSocket connected successfully, view=expert
+2025-12-18 21:15:40,711 - debug_logger - INFO - WebSocket connection attempt, view=candidate
+2025-12-18 21:15:40,712 - debug_logger - INFO - WebSocket connected successfully, view=candidate
+2025-12-18 21:15:40,739 - debug_logger - INFO - WebSocket connection attempt, view=candidate
+2025-12-18 21:15:40,740 - debug_logger - INFO - WebSocket connected successfully, view=candidate
+2025-12-18 21:22:26,764 - debug_logger - INFO - WebSocket connection attempt, view=expert
+2025-12-18 21:22:26,764 - debug_logger - INFO - WebSocket connected successfully, view=expert
+2025-12-18 21:22:28,761 - debug_logger - INFO - WebSocket connection attempt, view=expert
+2025-12-18 21:22:28,762 - debug_logger - INFO - WebSocket connected successfully, view=expert
+2025-12-18 21:23:37,116 - debug_logger - INFO - WebSocket connection attempt, view=expert
+2025-12-18 21:23:37,116 - debug_logger - INFO - WebSocket connected successfully, view=expert
+2025-12-18 21:23:39,634 - debug_logger - INFO - WebSocket connection attempt, view=expert
+2025-12-18 21:23:39,634 - debug_logger - INFO - WebSocket connected successfully, view=expert
+2025-12-18 21:23:39,651 - debug_logger - INFO - WebSocket connection attempt, view=expert
+2025-12-18 21:23:39,651 - debug_logger - INFO - WebSocket connected successfully, view=expert
+2025-12-18 21:27:42,161 - debug_logger - INFO - WebSocket connection attempt, view=expert
+2025-12-18 21:27:42,161 - debug_logger - INFO - WebSocket connected successfully, view=expert
+2025-12-18 21:27:42,172 - debug_logger - ERROR - Failed to restore session 9f54f483: cannot access local variable 'asyncio' where it is not associated with a value
+Traceback (most recent call last):
+  File "C:\Users\aditya_raj\Documents\intelliJ-workspace\cursor-code\backend\main.py", line 1940, in websocket_endpoint
+    await asyncio.sleep(0.5)
+          ^^^^^^^
+UnboundLocalError: cannot access local variable 'asyncio' where it is not associated with a value
+
+2025-12-18 21:27:42,174 - debug_logger - ERROR - WebSocket error: cannot access local variable 'asyncio' where it is not associated with a value
+Traceback (most recent call last):
+  File "C:\Users\aditya_raj\Documents\intelliJ-workspace\cursor-code\backend\main.py", line 1940, in websocket_endpoint
+    await asyncio.sleep(0.5)
+          ^^^^^^^
+UnboundLocalError: cannot access local variable 'asyncio' where it is not associated with a value
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\aditya_raj\Documents\intelliJ-workspace\cursor-code\backend\main.py", line 1953, in websocket_endpoint
+    await asyncio.sleep(0.5)
+          ^^^^^^^
+UnboundLocalError: cannot access local variable 'asyncio' where it is not associated with a value
+
+2025-12-18 21:27:42,176 - debug_logger - INFO - WebSocket connection attempt, view=candidate
+2025-12-18 21:27:42,176 - debug_logger - INFO - WebSocket connected successfully, view=candidate
+2025-12-18 21:27:54,851 - debug_logger - INFO - WebSocket connection attempt, view=expert
+2025-12-18 21:27:54,852 - debug_logger - INFO - WebSocket connected successfully, view=expert
+2025-12-18 21:27:54,873 - debug_logger - INFO - WebSocket connection attempt, view=candidate
+2025-12-18 21:27:54,873 - debug_logger - INFO - WebSocket connected successfully, view=candidate
+2025-12-18 21:27:54,898 - debug_logger - INFO - WebSocket connection attempt, view=expert
+2025-12-18 21:27:54,898 - debug_logger - INFO - WebSocket connected successfully, view=expert
+2025-12-18 21:27:54,921 - debug_logger - INFO - WebSocket connection attempt, view=expert
+2025-12-18 21:27:54,921 - debug_logger - INFO - WebSocket connected successfully, view=expert
+2025-12-18 21:31:16,667 - debug_logger - INFO - WebSocket connection attempt, view=candidate
+2025-12-18 21:31:16,667 - debug_logger - INFO - WebSocket connected successfully, view=candidate
+2025-12-19 00:26:45,402 - debug_logger - INFO - WebSocket connection attempt, view=expert
+2025-12-19 00:26:45,404 - debug_logger - INFO - WebSocket connected successfully, view=expert
+2025-12-19 00:26:45,473 - debug_logger - ERROR - Failed to restore session fa375973: cannot access local variable 'asyncio' where it is not associated with a value
+Traceback (most recent call last):
+  File "C:\Users\aditya_raj\Documents\intelliJ-workspace\cursor-code\backend\main.py", line 1945, in websocket_endpoint
+    await asyncio.sleep(0.5)
+          ^^^^^^^
+UnboundLocalError: cannot access local variable 'asyncio' where it is not associated with a value
+
+2025-12-19 00:26:45,475 - debug_logger - ERROR - WebSocket error: cannot access local variable 'asyncio' where it is not associated with a value
+Traceback (most recent call last):
+  File "C:\Users\aditya_raj\Documents\intelliJ-workspace\cursor-code\backend\main.py", line 1945, in websocket_endpoint
+    await asyncio.sleep(0.5)
+          ^^^^^^^
+UnboundLocalError: cannot access local variable 'asyncio' where it is not associated with a value
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\aditya_raj\Documents\intelliJ-workspace\cursor-code\backend\main.py", line 1958, in websocket_endpoint
+    await asyncio.sleep(0.5)
+          ^^^^^^^
+UnboundLocalError: cannot access local variable 'asyncio' where it is not associated with a value
+
+2025-12-19 00:26:47,418 - debug_logger - INFO - WebSocket connection attempt, view=expert
+2025-12-19 00:26:47,419 - debug_logger - INFO - WebSocket connected successfully, view=expert
+2025-12-19 00:28:19,347 - debug_logger - INFO - WebSocket connection attempt, view=candidate
+2025-12-19 00:28:19,348 - debug_logger - INFO - WebSocket connected successfully, view=candidate
+2025-12-19 00:28:21,625 - debug_logger - INFO - WebSocket connection attempt, view=candidate
+2025-12-19 00:28:21,626 - debug_logger - INFO - WebSocket connected successfully, view=candidate
+2025-12-19 00:28:45,230 - debug_logger - INFO - WebSocket connection attempt, view=candidate
+2025-12-19 00:28:45,231 - debug_logger - INFO - WebSocket connected successfully, view=candidate
+2025-12-19 00:28:47,597 - debug_logger - INFO - WebSocket connection attempt, view=candidate
+2025-12-19 00:28:47,598 - debug_logger - INFO - WebSocket connected successfully, view=candidate
+2025-12-19 00:28:54,906 - debug_logger - INFO - WebSocket connection attempt, view=expert
+2025-12-19 00:28:54,907 - debug_logger - INFO - WebSocket connected successfully, view=expert
+2025-12-19 00:28:56,911 - debug_logger - INFO - WebSocket connection attempt, view=expert
+2025-12-19 00:28:56,912 - debug_logger - INFO - WebSocket connected successfully, view=expert
+2025-12-19 02:32:11,940 - debug_logger - INFO - WebSocket connection attempt, view=candidate
+2025-12-19 02:32:11,941 - debug_logger - INFO - WebSocket connected successfully, view=candidate
+2025-12-19 02:55:07,617 - debug_logger - INFO - WebSocket connection attempt, view=candidate
+2025-12-19 02:55:07,618 - debug_logger - INFO - WebSocket connected successfully, view=candidate
+2025-12-19 02:55:07,687 - debug_logger - ERROR - Failed to restore session 7e01de8f: cannot access local variable 'asyncio' where it is not associated with a value
+Traceback (most recent call last):
+  File "C:\Users\aditya_raj\Documents\intelliJ-workspace\cursor-code\backend\main.py", line 1945, in websocket_endpoint
+    await asyncio.sleep(0.5)
+          ^^^^^^^
+UnboundLocalError: cannot access local variable 'asyncio' where it is not associated with a value
+
+2025-12-19 02:55:07,690 - debug_logger - ERROR - WebSocket error: cannot access local variable 'asyncio' where it is not associated with a value
+Traceback (most recent call last):
+  File "C:\Users\aditya_raj\Documents\intelliJ-workspace\cursor-code\backend\main.py", line 1945, in websocket_endpoint
+    await asyncio.sleep(0.5)
+          ^^^^^^^
+UnboundLocalError: cannot access local variable 'asyncio' where it is not associated with a value
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\aditya_raj\Documents\intelliJ-workspace\cursor-code\backend\main.py", line 1958, in websocket_endpoint
+    await asyncio.sleep(0.5)
+          ^^^^^^^
+UnboundLocalError: cannot access local variable 'asyncio' where it is not associated with a value
+
+2025-12-19 02:56:46,310 - debug_logger - INFO - WebSocket connection attempt, view=candidate
+2025-12-19 02:56:46,311 - debug_logger - INFO - WebSocket connected successfully, view=candidate
+2025-12-19 02:56:56,901 - debug_logger - INFO - WebSocket connection attempt, view=expert
+2025-12-19 02:56:56,901 - debug_logger - INFO - WebSocket connected successfully, view=expert
+2025-12-19 02:56:58,934 - debug_logger - INFO - WebSocket connection attempt, view=expert
+2025-12-19 02:56:58,934 - debug_logger - INFO - WebSocket connected successfully, view=expert
+2025-12-19 02:57:07,100 - debug_logger - INFO - WebSocket connection attempt, view=candidate
+2025-12-19 02:57:07,100 - debug_logger - INFO - WebSocket connected successfully, view=candidate
+2025-12-19 02:57:09,634 - debug_logger - INFO - WebSocket connection attempt, view=candidate
+2025-12-19 02:57:09,635 - debug_logger - INFO - WebSocket connected successfully, view=candidate
+2025-12-19 03:12:04,414 - debug_logger - INFO - WebSocket connection attempt, view=expert
+2025-12-19 03:12:04,416 - debug_logger - INFO - WebSocket connected successfully, view=expert
+2025-12-19 03:12:04,429 - debug_logger - ERROR - Failed to restore session 7e01de8f: cannot access local variable 'asyncio' where it is not associated with a value
+Traceback (most recent call last):
+  File "C:\Users\aditya_raj\Documents\intelliJ-workspace\cursor-code\backend\main.py", line 1945, in websocket_endpoint
+    await asyncio.sleep(0.5)
+          ^^^^^^^
+UnboundLocalError: cannot access local variable 'asyncio' where it is not associated with a value
+
+2025-12-19 03:12:04,431 - debug_logger - ERROR - WebSocket error: cannot access local variable 'asyncio' where it is not associated with a value
+Traceback (most recent call last):
+  File "C:\Users\aditya_raj\Documents\intelliJ-workspace\cursor-code\backend\main.py", line 1945, in websocket_endpoint
+    await asyncio.sleep(0.5)
+          ^^^^^^^
+UnboundLocalError: cannot access local variable 'asyncio' where it is not associated with a value
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\aditya_raj\Documents\intelliJ-workspace\cursor-code\backend\main.py", line 1958, in websocket_endpoint
+    await asyncio.sleep(0.5)
+          ^^^^^^^
+UnboundLocalError: cannot access local variable 'asyncio' where it is not associated with a value
+
+2025-12-19 03:12:04,433 - debug_logger - INFO - WebSocket connection attempt, view=expert
+2025-12-19 03:12:04,433 - debug_logger - INFO - WebSocket connected successfully, view=expert
+2025-12-19 03:12:11,512 - debug_logger - INFO - WebSocket connection attempt, view=candidate
+2025-12-19 03:12:11,513 - debug_logger - INFO - WebSocket connected successfully, view=candidate
+2025-12-19 03:12:11,529 - debug_logger - INFO - WebSocket connection attempt, view=candidate
+2025-12-19 03:12:11,530 - debug_logger - INFO - WebSocket connected successfully, view=candidate
+2025-12-19 03:12:42,373 - debug_logger - INFO - WebSocket connection attempt, view=expert
+2025-12-19 03:12:42,374 - debug_logger - INFO - WebSocket connected successfully, view=expert
+2025-12-19 03:12:44,387 - debug_logger - INFO - WebSocket connection attempt, view=expert
+2025-12-19 03:12:44,388 - debug_logger - INFO - WebSocket connected successfully, view=expert
+2025-12-19 03:13:07,099 - debug_logger - INFO - WebSocket connection attempt, view=candidate
+2025-12-19 03:13:07,099 - debug_logger - INFO - WebSocket connected successfully, view=candidate
+2025-12-19 03:16:04,490 - debug_logger - INFO - WebSocket connection attempt, view=expert
+2025-12-19 03:16:04,491 - debug_logger - INFO - WebSocket connected successfully, view=expert
+2025-12-19 03:16:04,548 - debug_logger - ERROR - Failed to restore session fde1d972: cannot access local variable 'asyncio' where it is not associated with a value
+Traceback (most recent call last):
+  File "C:\Users\aditya_raj\Documents\intelliJ-workspace\cursor-code\backend\main.py", line 1945, in websocket_endpoint
+    await asyncio.sleep(0.5)
+          ^^^^^^^
+UnboundLocalError: cannot access local variable 'asyncio' where it is not associated with a value
+
+2025-12-19 03:16:04,550 - debug_logger - ERROR - WebSocket error: cannot access local variable 'asyncio' where it is not associated with a value
+Traceback (most recent call last):
+  File "C:\Users\aditya_raj\Documents\intelliJ-workspace\cursor-code\backend\main.py", line 1945, in websocket_endpoint
+    await asyncio.sleep(0.5)
+          ^^^^^^^
+UnboundLocalError: cannot access local variable 'asyncio' where it is not associated with a value
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\aditya_raj\Documents\intelliJ-workspace\cursor-code\backend\main.py", line 1958, in websocket_endpoint
+    await asyncio.sleep(0.5)
+          ^^^^^^^
+UnboundLocalError: cannot access local variable 'asyncio' where it is not associated with a value
+
+2025-12-19 03:16:06,509 - debug_logger - INFO - WebSocket connection attempt, view=expert
+2025-12-19 03:16:06,510 - debug_logger - INFO - WebSocket connected successfully, view=expert
+2025-12-19 03:16:36,075 - debug_logger - INFO - WebSocket connection attempt, view=candidate
+2025-12-19 03:16:36,076 - debug_logger - INFO - WebSocket connected successfully, view=candidate
+2025-12-19 03:16:38,083 - debug_logger - INFO - WebSocket connection attempt, view=candidate
+2025-12-19 03:16:38,083 - debug_logger - INFO - WebSocket connected successfully, view=candidate
+2025-12-19 03:32:22,547 - debug_logger - INFO - WebSocket connection attempt, view=candidate
+2025-12-19 03:32:22,548 - debug_logger - INFO - WebSocket connected successfully, view=candidate
+2025-12-19 03:32:22,558 - debug_logger - ERROR - Failed to restore session fde1d972: cannot access local variable 'asyncio' where it is not associated with a value
+Traceback (most recent call last):
+  File "C:\Users\aditya_raj\Documents\intelliJ-workspace\cursor-code\backend\main.py", line 1945, in websocket_endpoint
+    await asyncio.sleep(0.5)
+          ^^^^^^^
+UnboundLocalError: cannot access local variable 'asyncio' where it is not associated with a value
+
+2025-12-19 03:32:22,561 - debug_logger - ERROR - WebSocket error: cannot access local variable 'asyncio' where it is not associated with a value
+Traceback (most recent call last):
+  File "C:\Users\aditya_raj\Documents\intelliJ-workspace\cursor-code\backend\main.py", line 1945, in websocket_endpoint
+    await asyncio.sleep(0.5)
+          ^^^^^^^
+UnboundLocalError: cannot access local variable 'asyncio' where it is not associated with a value
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\aditya_raj\Documents\intelliJ-workspace\cursor-code\backend\main.py", line 1958, in websocket_endpoint
+    await asyncio.sleep(0.5)
+          ^^^^^^^
+UnboundLocalError: cannot access local variable 'asyncio' where it is not associated with a value
+
+2025-12-19 03:32:22,563 - debug_logger - INFO - WebSocket connection attempt, view=expert
+2025-12-19 03:32:22,563 - debug_logger - INFO - WebSocket connected successfully, view=expert
+2025-12-19 03:32:28,648 - debug_logger - INFO - WebSocket connection attempt, view=expert
+2025-12-19 03:32:28,649 - debug_logger - INFO - WebSocket connected successfully, view=expert
+2025-12-19 03:32:28,671 - debug_logger - INFO - WebSocket connection attempt, view=candidate
+2025-12-19 03:32:28,672 - debug_logger - INFO - WebSocket connected successfully, view=candidate
+2025-12-19 03:32:28,695 - debug_logger - INFO - WebSocket connection attempt, view=candidate
+2025-12-19 03:32:28,695 - debug_logger - INFO - WebSocket connected successfully, view=candidate
+2025-12-19 03:32:28,710 - debug_logger - INFO - WebSocket connection attempt, view=candidate
+2025-12-19 03:32:28,711 - debug_logger - INFO - WebSocket connected successfully, view=candidate
+2025-12-19 03:32:28,725 - debug_logger - INFO - WebSocket connection attempt, view=expert
+2025-12-19 03:32:28,726 - debug_logger - INFO - WebSocket connected successfully, view=expert
+2025-12-19 03:32:28,741 - debug_logger - INFO - WebSocket connection attempt, view=expert
+2025-12-19 03:32:28,742 - debug_logger - INFO - WebSocket connected successfully, view=expert
+2025-12-19 03:42:03,613 - debug_logger - INFO - WebSocket connection attempt, view=candidate
+2025-12-19 03:42:03,613 - debug_logger - INFO - WebSocket connected successfully, view=candidate
+2025-12-19 03:44:52,556 - debug_logger - INFO - WebSocket connection attempt, view=candidate
+2025-12-19 03:44:52,557 - debug_logger - INFO - WebSocket connected successfully, view=candidate
+2025-12-19 03:44:54,591 - debug_logger - INFO - WebSocket connection attempt, view=expert
+2025-12-19 03:44:54,592 - debug_logger - INFO - WebSocket connected successfully, view=expert
+2025-12-19 03:44:54,618 - debug_logger - INFO - WebSocket connection attempt, view=candidate
+2025-12-19 03:44:54,619 - debug_logger - INFO - WebSocket connected successfully, view=candidate
+2025-12-19 03:44:56,622 - debug_logger - INFO - WebSocket connection attempt, view=expert
+2025-12-19 03:44:56,622 - debug_logger - INFO - WebSocket connected successfully, view=expert
+2025-12-19 03:45:06,286 - debug_logger - INFO - WebSocket connection attempt, view=candidate
+2025-12-19 03:45:06,287 - debug_logger - INFO - WebSocket connected successfully, view=candidate
+2025-12-19 03:45:08,288 - debug_logger - INFO - WebSocket connection attempt, view=candidate
+2025-12-19 03:45:08,289 - debug_logger - INFO - WebSocket connected successfully, view=candidate
+2025-12-19 03:47:38,579 - debug_logger - INFO - WebSocket connection attempt, view=candidate
+2025-12-19 03:47:38,580 - debug_logger - INFO - WebSocket connected successfully, view=candidate
+2025-12-19 03:51:55,217 - debug_logger - INFO - WebSocket connection attempt, view=candidate
+2025-12-19 03:51:55,217 - debug_logger - INFO - WebSocket connected successfully, view=candidate
+2025-12-19 03:51:59,522 - debug_logger - INFO - WebSocket connection attempt, view=expert
+2025-12-19 03:51:59,524 - debug_logger - INFO - WebSocket connected successfully, view=expert
+2025-12-19 03:51:59,537 - debug_logger - INFO - WebSocket connection attempt, view=candidate
+2025-12-19 03:51:59,538 - debug_logger - INFO - WebSocket connected successfully, view=candidate
+2025-12-19 03:51:59,619 - debug_logger - INFO - WebSocket connection attempt, view=expert
+2025-12-19 03:51:59,620 - debug_logger - INFO - WebSocket connected successfully, view=expert
+2025-12-19 03:54:01,616 - debug_logger - INFO - WebSocket connection attempt, view=candidate
+2025-12-19 03:54:01,618 - debug_logger - INFO - WebSocket connected successfully, view=candidate
+2025-12-19 03:54:01,644 - debug_logger - INFO - WebSocket connection attempt, view=candidate
+2025-12-19 03:54:01,645 - debug_logger - INFO - WebSocket connected successfully, view=candidate
+2025-12-19 03:54:01,661 - debug_logger - INFO - WebSocket connection attempt, view=candidate
+2025-12-19 03:54:01,661 - debug_logger - INFO - WebSocket connected successfully, view=candidate
+2025-12-19 03:54:01,677 - debug_logger - INFO - WebSocket connection attempt, view=expert
+2025-12-19 03:54:01,678 - debug_logger - INFO - WebSocket connected successfully, view=expert
+2025-12-19 03:54:01,692 - debug_logger - ERROR - Failed to restore session session_20251219_035154: cannot access local variable 'asyncio' where it is not associated with a value
+Traceback (most recent call last):
+  File "C:\Users\aditya_raj\Documents\intelliJ-workspace\cursor-code\backend\main.py", line 2045, in websocket_endpoint
+    await asyncio.sleep(0.5)
+          ^^^^^^^
+UnboundLocalError: cannot access local variable 'asyncio' where it is not associated with a value
+
+2025-12-19 03:54:01,694 - debug_logger - ERROR - WebSocket error: cannot access local variable 'asyncio' where it is not associated with a value
+Traceback (most recent call last):
+  File "C:\Users\aditya_raj\Documents\intelliJ-workspace\cursor-code\backend\main.py", line 2045, in websocket_endpoint
+    await asyncio.sleep(0.5)
+          ^^^^^^^
+UnboundLocalError: cannot access local variable 'asyncio' where it is not associated with a value
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\aditya_raj\Documents\intelliJ-workspace\cursor-code\backend\main.py", line 2058, in websocket_endpoint
+    await asyncio.sleep(0.5)
+          ^^^^^^^
+UnboundLocalError: cannot access local variable 'asyncio' where it is not associated with a value
+
+2025-12-19 03:54:01,696 - debug_logger - INFO - WebSocket connection attempt, view=candidate
+2025-12-19 03:54:01,697 - debug_logger - INFO - WebSocket connected successfully, view=candidate
+2025-12-19 03:54:01,712 - debug_logger - INFO - WebSocket connection attempt, view=expert
+2025-12-19 03:54:01,713 - debug_logger - INFO - WebSocket connected successfully, view=expert
+2025-12-19 03:54:01,738 - debug_logger - INFO - WebSocket connection attempt, view=candidate
+2025-12-19 03:54:01,739 - debug_logger - INFO - WebSocket connected successfully, view=candidate
+2025-12-19 03:54:01,753 - debug_logger - INFO - WebSocket connection attempt, view=expert
+2025-12-19 03:54:01,754 - debug_logger - INFO - WebSocket connected successfully, view=expert
+2025-12-19 03:54:01,768 - debug_logger - INFO - WebSocket connection attempt, view=expert
+2025-12-19 03:54:01,769 - debug_logger - INFO - WebSocket connected successfully, view=expert
+2025-12-19 03:54:01,794 - debug_logger - INFO - WebSocket connection attempt, view=candidate
+2025-12-19 03:54:01,794 - debug_logger - INFO - WebSocket connected successfully, view=candidate
+2025-12-19 03:54:01,830 - debug_logger - ERROR - WebSocket error: received 1005 (no status received [internal]); then sent 1005 (no status received [internal])
+Traceback (most recent call last):
+  File "C:\Users\aditya_raj\Documents\intelliJ-workspace\cursor-code\backend\main.py", line 2161, in websocket_endpoint
+    await websocket.send_json({
+    ...<2 lines>...
+    })
+  File "C:\Users\aditya_raj\AppData\Roaming\Python\Python313\site-packages\starlette\websockets.py", line 173, in send_json
+    await self.send({"type": "websocket.send", "text": text})
+  File "C:\Users\aditya_raj\AppData\Roaming\Python\Python313\site-packages\starlette\websockets.py", line 85, in send
+    await self._send(message)
+  File "C:\Users\aditya_raj\AppData\Roaming\Python\Python313\site-packages\starlette\middleware\exceptions.py", line 65, in sender
+    await send(message)
+  File "C:\Users\aditya_raj\AppData\Roaming\Python\Python313\site-packages\uvicorn\protocols\websockets\websockets_impl.py", line 320, in asgi_send
+    await self.send(data)  # type: ignore[arg-type]
+    ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\aditya_raj\AppData\Roaming\Python\Python313\site-packages\websockets\legacy\protocol.py", line 635, in send
+    await self.ensure_open()
+  File "C:\Users\aditya_raj\AppData\Roaming\Python\Python313\site-packages\websockets\legacy\protocol.py", line 939, in ensure_open
+    raise self.connection_closed_exc()
+websockets.exceptions.ConnectionClosedOK: received 1005 (no status received [internal]); then sent 1005 (no status received [internal])
+
+2025-12-19 03:54:04,627 - debug_logger - INFO - WebSocket connection attempt, view=candidate
+2025-12-19 03:54:04,627 - debug_logger - INFO - WebSocket connected successfully, view=candidate
+2025-12-19 03:58:18,862 - debug_logger - INFO - WebSocket connection attempt, view=candidate
+2025-12-19 03:58:18,863 - debug_logger - INFO - WebSocket connected successfully, view=candidate
+2025-12-19 03:58:22,755 - debug_logger - INFO - WebSocket connection attempt, view=candidate
+2025-12-19 03:58:22,756 - debug_logger - INFO - WebSocket connected successfully, view=candidate
+2025-12-19 04:00:35,627 - debug_logger - INFO - WebSocket connection attempt, view=expert
+2025-12-19 04:00:35,627 - debug_logger - INFO - WebSocket connected successfully, view=expert
+2025-12-19 04:00:35,655 - debug_logger - INFO - WebSocket connection attempt, view=candidate
+2025-12-19 04:00:35,656 - debug_logger - INFO - WebSocket connected successfully, view=candidate
+2025-12-19 04:00:35,669 - debug_logger - INFO - WebSocket connection attempt, view=expert
+2025-12-19 04:00:35,669 - debug_logger - INFO - WebSocket connected successfully, view=expert
+2025-12-19 04:00:35,711 - debug_logger - ERROR - Failed to restore session session_20251219_035154: cannot access local variable 'asyncio' where it is not associated with a value
+Traceback (most recent call last):
+  File "C:\Users\aditya_raj\Documents\intelliJ-workspace\cursor-code\backend\main.py", line 2045, in websocket_endpoint
+    await asyncio.sleep(0.5)
+          ^^^^^^^
+UnboundLocalError: cannot access local variable 'asyncio' where it is not associated with a value
+
+2025-12-19 04:00:35,713 - debug_logger - ERROR - WebSocket error: cannot access local variable 'asyncio' where it is not associated with a value
+Traceback (most recent call last):
+  File "C:\Users\aditya_raj\Documents\intelliJ-workspace\cursor-code\backend\main.py", line 2045, in websocket_endpoint
+    await asyncio.sleep(0.5)
+          ^^^^^^^
+UnboundLocalError: cannot access local variable 'asyncio' where it is not associated with a value
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\aditya_raj\Documents\intelliJ-workspace\cursor-code\backend\main.py", line 2058, in websocket_endpoint
+    await asyncio.sleep(0.5)
+          ^^^^^^^
+UnboundLocalError: cannot access local variable 'asyncio' where it is not associated with a value
+
+2025-12-19 04:00:35,715 - debug_logger - INFO - WebSocket connection attempt, view=candidate
+2025-12-19 04:00:35,716 - debug_logger - INFO - WebSocket connected successfully, view=candidate
+2025-12-19 04:00:35,739 - debug_logger - INFO - WebSocket connection attempt, view=candidate
+2025-12-19 04:00:35,741 - debug_logger - INFO - WebSocket connected successfully, view=candidate
+2025-12-19 04:00:35,756 - debug_logger - INFO - WebSocket connection attempt, view=expert
+2025-12-19 04:00:35,757 - debug_logger - INFO - WebSocket connected successfully, view=expert
+2025-12-19 04:00:35,770 - debug_logger - INFO - WebSocket connection attempt, view=candidate
+2025-12-19 04:00:35,771 - debug_logger - INFO - WebSocket connected successfully, view=candidate
+2025-12-19 04:00:35,791 - debug_logger - INFO - WebSocket connection attempt, view=expert
+2025-12-19 04:00:35,793 - debug_logger - INFO - WebSocket connected successfully, view=expert
+2025-12-19 04:00:35,988 - debug_logger - INFO - WebSocket connection attempt, view=candidate
+2025-12-19 04:00:35,989 - debug_logger - INFO - WebSocket connected successfully, view=candidate
+2025-12-19 04:00:36,033 - debug_logger - ERROR - Failed to restore session session_20251219_035818: cannot access local variable 'asyncio' where it is not associated with a value
+Traceback (most recent call last):
+  File "C:\Users\aditya_raj\Documents\intelliJ-workspace\cursor-code\backend\main.py", line 2045, in websocket_endpoint
+    await asyncio.sleep(0.5)
+          ^^^^^^^
+UnboundLocalError: cannot access local variable 'asyncio' where it is not associated with a value
+
+2025-12-19 04:00:36,034 - debug_logger - ERROR - WebSocket error: cannot access local variable 'asyncio' where it is not associated with a value
+Traceback (most recent call last):
+  File "C:\Users\aditya_raj\Documents\intelliJ-workspace\cursor-code\backend\main.py", line 2045, in websocket_endpoint
+    await asyncio.sleep(0.5)
+          ^^^^^^^
+UnboundLocalError: cannot access local variable 'asyncio' where it is not associated with a value
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\aditya_raj\Documents\intelliJ-workspace\cursor-code\backend\main.py", line 2058, in websocket_endpoint
+    await asyncio.sleep(0.5)
+          ^^^^^^^
+UnboundLocalError: cannot access local variable 'asyncio' where it is not associated with a value
+
+2025-12-19 04:00:36,036 - debug_logger - INFO - WebSocket connection attempt, view=candidate
+2025-12-19 04:00:36,036 - debug_logger - INFO - WebSocket connected successfully, view=candidate
+2025-12-19 04:17:08,591 - debug_logger - INFO - WebSocket connection attempt, view=candidate
+2025-12-19 04:17:08,591 - debug_logger - INFO - WebSocket connected successfully, view=candidate
+2025-12-19 04:17:11,028 - debug_logger - INFO - WebSocket connection attempt, view=expert
+2025-12-19 04:17:11,028 - debug_logger - INFO - WebSocket connected successfully, view=expert
+2025-12-19 04:17:11,046 - debug_logger - INFO - WebSocket connection attempt, view=candidate
+2025-12-19 04:17:11,046 - debug_logger - INFO - WebSocket connected successfully, view=candidate
+2025-12-19 04:17:12,624 - debug_logger - INFO - WebSocket connection attempt, view=expert
+2025-12-19 04:17:12,625 - debug_logger - INFO - WebSocket connected successfully, view=expert
+2025-12-19 04:31:26,633 - debug_logger - INFO - WebSocket connection attempt, view=candidate
+2025-12-19 04:31:26,633 - debug_logger - INFO - WebSocket connected successfully, view=candidate
+2025-12-19 04:31:28,637 - debug_logger - INFO - WebSocket connection attempt, view=candidate
+2025-12-19 04:31:28,637 - debug_logger - INFO - WebSocket connected successfully, view=candidate
+2025-12-19 04:40:55,140 - debug_logger - INFO - WebSocket connection attempt, view=candidate
+2025-12-19 04:40:55,141 - debug_logger - INFO - WebSocket connected successfully, view=candidate
+2025-12-19 04:40:55,168 - debug_logger - INFO - WebSocket connection attempt, view=candidate
+2025-12-19 04:40:55,168 - debug_logger - INFO - WebSocket connected successfully, view=candidate
+2025-12-19 04:40:55,185 - debug_logger - INFO - WebSocket connection attempt, view=expert
+2025-12-19 04:40:55,186 - debug_logger - INFO - WebSocket connected successfully, view=expert
+2025-12-19 04:40:55,194 - debug_logger - ERROR - Failed to restore session session_20251219_041708: cannot access local variable 'asyncio' where it is not associated with a value
+Traceback (most recent call last):
+  File "C:\Users\aditya_raj\Documents\intelliJ-workspace\cursor-code\backend\main.py", line 2045, in websocket_endpoint
+    await asyncio.sleep(0.5)
+          ^^^^^^^
+UnboundLocalError: cannot access local variable 'asyncio' where it is not associated with a value
+
+2025-12-19 04:40:55,196 - debug_logger - ERROR - WebSocket error: cannot access local variable 'asyncio' where it is not associated with a value
+Traceback (most recent call last):
+  File "C:\Users\aditya_raj\Documents\intelliJ-workspace\cursor-code\backend\main.py", line 2045, in websocket_endpoint
+    await asyncio.sleep(0.5)
+          ^^^^^^^
+UnboundLocalError: cannot access local variable 'asyncio' where it is not associated with a value
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\aditya_raj\Documents\intelliJ-workspace\cursor-code\backend\main.py", line 2058, in websocket_endpoint
+    await asyncio.sleep(0.5)
+          ^^^^^^^
+UnboundLocalError: cannot access local variable 'asyncio' where it is not associated with a value
+
+2025-12-19 04:40:55,198 - debug_logger - INFO - WebSocket connection attempt, view=candidate
+2025-12-19 04:40:55,199 - debug_logger - INFO - WebSocket connected successfully, view=candidate
+2025-12-19 04:40:55,217 - debug_logger - INFO - WebSocket connection attempt, view=candidate
+2025-12-19 04:40:55,218 - debug_logger - INFO - WebSocket connected successfully, view=candidate
+2025-12-19 04:40:55,234 - debug_logger - INFO - WebSocket connection attempt, view=expert
+2025-12-19 04:40:55,234 - debug_logger - INFO - WebSocket connected successfully, view=expert
+2025-12-19 04:40:55,249 - debug_logger - INFO - WebSocket connection attempt, view=candidate
+2025-12-19 04:40:55,250 - debug_logger - INFO - WebSocket connected successfully, view=candidate
+2025-12-19 04:40:55,266 - debug_logger - INFO - WebSocket connection attempt, view=expert
+2025-12-19 04:40:55,267 - debug_logger - INFO - WebSocket connected successfully, view=expert
+2025-12-19 04:40:55,282 - debug_logger - INFO - WebSocket connection attempt, view=candidate
+2025-12-19 04:40:55,282 - debug_logger - INFO - WebSocket connected successfully, view=candidate
+2025-12-19 04:40:55,298 - debug_logger - INFO - WebSocket connection attempt, view=expert
+2025-12-19 04:40:55,298 - debug_logger - INFO - WebSocket connected successfully, view=expert
+2025-12-19 04:40:58,617 - debug_logger - INFO - WebSocket connection attempt, view=candidate
+2025-12-19 04:40:58,618 - debug_logger - INFO - WebSocket connected successfully, view=candidate
+2025-12-19 04:44:01,842 - debug_logger - INFO - WebSocket connection attempt, view=candidate
+2025-12-19 04:44:01,843 - debug_logger - INFO - WebSocket connected successfully, view=candidate
+2025-12-19 04:44:07,559 - debug_logger - INFO - WebSocket connection attempt, view=expert
+2025-12-19 04:44:07,560 - debug_logger - INFO - WebSocket connected successfully, view=expert
+2025-12-19 04:44:07,572 - debug_logger - INFO - WebSocket connection attempt, view=candidate
+2025-12-19 04:44:07,573 - debug_logger - INFO - WebSocket connected successfully, view=candidate
+2025-12-19 04:44:07,587 - debug_logger - INFO - WebSocket connection attempt, view=expert
+2025-12-19 04:44:07,588 - debug_logger - INFO - WebSocket connected successfully, view=expert
+2025-12-19 04:49:58,129 - debug_logger - INFO - WebSocket connection attempt, view=expert
+2025-12-19 04:49:58,130 - debug_logger - INFO - WebSocket connected successfully, view=expert
+2025-12-19 04:49:58,142 - debug_logger - ERROR - Failed to restore session session_20251219_044401: cannot access local variable 'asyncio' where it is not associated with a value
+Traceback (most recent call last):
+  File "C:\Users\aditya_raj\Documents\intelliJ-workspace\cursor-code\backend\main.py", line 2045, in websocket_endpoint
+    await asyncio.sleep(0.5)
+          ^^^^^^^
+UnboundLocalError: cannot access local variable 'asyncio' where it is not associated with a value
+
+2025-12-19 04:49:58,143 - debug_logger - ERROR - WebSocket error: cannot access local variable 'asyncio' where it is not associated with a value
+Traceback (most recent call last):
+  File "C:\Users\aditya_raj\Documents\intelliJ-workspace\cursor-code\backend\main.py", line 2045, in websocket_endpoint
+    await asyncio.sleep(0.5)
+          ^^^^^^^
+UnboundLocalError: cannot access local variable 'asyncio' where it is not associated with a value
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\aditya_raj\Documents\intelliJ-workspace\cursor-code\backend\main.py", line 2058, in websocket_endpoint
+    await asyncio.sleep(0.5)
+          ^^^^^^^
+UnboundLocalError: cannot access local variable 'asyncio' where it is not associated with a value
+
+2025-12-19 04:49:58,144 - debug_logger - INFO - WebSocket connection attempt, view=candidate
+2025-12-19 04:49:58,145 - debug_logger - INFO - WebSocket connected successfully, view=candidate
+2025-12-19 04:49:58,158 - debug_logger - INFO - WebSocket connection attempt, view=expert
+2025-12-19 04:49:58,158 - debug_logger - INFO - WebSocket connected successfully, view=expert
+2025-12-19 04:49:58,174 - debug_logger - INFO - WebSocket connection attempt, view=candidate
+2025-12-19 04:49:58,174 - debug_logger - INFO - WebSocket connected successfully, view=candidate
+2025-12-19 05:40:47,294 - debug_logger - INFO - WebSocket connection attempt, view=candidate
+2025-12-19 05:40:47,295 - debug_logger - INFO - WebSocket connected successfully, view=candidate
+2025-12-19 05:40:53,608 - debug_logger - INFO - WebSocket connection attempt, view=expert
+2025-12-19 05:40:53,609 - debug_logger - INFO - WebSocket connected successfully, view=expert
+2025-12-19 05:40:53,637 - debug_logger - INFO - WebSocket connection attempt, view=candidate
+2025-12-19 05:40:53,638 - debug_logger - INFO - WebSocket connected successfully, view=candidate
+2025-12-19 05:40:53,658 - debug_logger - INFO - WebSocket connection attempt, view=expert
+2025-12-19 05:40:53,659 - debug_logger - INFO - WebSocket connected successfully, view=expert
+2025-12-19 05:44:11,407 - debug_logger - INFO - WebSocket connection attempt, view=candidate
+2025-12-19 05:44:11,407 - debug_logger - INFO - WebSocket connected successfully, view=candidate
+2025-12-19 05:48:56,695 - debug_logger - INFO - WebSocket connection attempt, view=candidate
+2025-12-19 05:48:56,696 - debug_logger - INFO - WebSocket connected successfully, view=candidate
+2025-12-19 05:49:04,908 - debug_logger - INFO - WebSocket connection attempt, view=expert
+2025-12-19 05:49:04,909 - debug_logger - INFO - WebSocket connected successfully, view=expert
+2025-12-19 05:49:04,937 - debug_logger - INFO - WebSocket connection attempt, view=candidate
+2025-12-19 05:49:04,938 - debug_logger - INFO - WebSocket connected successfully, view=candidate
+2025-12-19 05:49:04,953 - debug_logger - INFO - WebSocket connection attempt, view=expert
+2025-12-19 05:49:04,954 - debug_logger - INFO - WebSocket connected successfully, view=expert
+2025-12-19 05:57:32,483 - debug_logger - INFO - WebSocket connection attempt, view=candidate
+2025-12-19 05:57:32,484 - debug_logger - INFO - WebSocket connected successfully, view=candidate
+2025-12-19 05:57:37,987 - debug_logger - INFO - WebSocket connection attempt, view=expert
+2025-12-19 05:57:37,988 - debug_logger - INFO - WebSocket connected successfully, view=expert
+2025-12-19 05:57:38,012 - debug_logger - INFO - WebSocket connection attempt, view=candidate
+2025-12-19 05:57:38,013 - debug_logger - INFO - WebSocket connected successfully, view=candidate
+2025-12-19 05:57:38,027 - debug_logger - INFO - WebSocket connection attempt, view=expert
+2025-12-19 05:57:38,027 - debug_logger - INFO - WebSocket connected successfully, view=expert
+2025-12-19 05:59:40,131 - debug_logger - INFO - WebSocket connection attempt, view=candidate
+2025-12-19 05:59:40,131 - debug_logger - INFO - WebSocket connected successfully, view=candidate
+2025-12-19 06:11:27,178 - debug_logger - INFO - WebSocket connection attempt, view=candidate
+2025-12-19 06:11:27,179 - debug_logger - INFO - WebSocket connected successfully, view=candidate
+2025-12-19 06:11:36,478 - debug_logger - INFO - WebSocket connection attempt, view=expert
+2025-12-19 06:11:36,479 - debug_logger - INFO - WebSocket connected successfully, view=expert
+2025-12-19 06:11:36,493 - debug_logger - INFO - WebSocket connection attempt, view=candidate
+2025-12-19 06:11:36,495 - debug_logger - INFO - WebSocket connected successfully, view=candidate
+2025-12-19 06:11:36,517 - debug_logger - INFO - WebSocket connection attempt, view=expert
+2025-12-19 06:11:36,517 - debug_logger - INFO - WebSocket connected successfully, view=expert
+2025-12-19 06:15:13,754 - debug_logger - INFO - WebSocket connection attempt, view=candidate
+2025-12-19 06:15:13,755 - debug_logger - INFO - WebSocket connected successfully, view=candidate
+2025-12-19 06:19:24,640 - debug_logger - INFO - WebSocket connection attempt, view=candidate
+2025-12-19 06:19:24,641 - debug_logger - INFO - WebSocket connected successfully, view=candidate
+2025-12-19 06:19:24,660 - debug_logger - INFO - WebSocket connection attempt, view=candidate
+2025-12-19 06:19:24,660 - debug_logger - INFO - WebSocket connected successfully, view=candidate
+2025-12-19 06:26:21,581 - debug_logger - INFO - WebSocket connection attempt, view=expert
+2025-12-19 06:26:21,581 - debug_logger - INFO - WebSocket connected successfully, view=expert
+2025-12-19 06:26:26,750 - debug_logger - INFO - WebSocket connection attempt, view=expert
+2025-12-19 06:26:26,750 - debug_logger - INFO - WebSocket connected successfully, view=expert
+2025-12-19 15:35:18,793 - debug_logger - INFO - WebSocket connection attempt, view=candidate
+2025-12-19 15:35:18,795 - debug_logger - INFO - WebSocket connected successfully, view=candidate
+2025-12-19 15:35:31,261 - debug_logger - INFO - WebSocket connection attempt, view=candidate
+2025-12-19 15:35:31,262 - debug_logger - INFO - WebSocket connected successfully, view=candidate
+2025-12-19 15:36:02,184 - debug_logger - INFO - WebSocket connection attempt, view=expert
+2025-12-19 15:36:02,184 - debug_logger - INFO - WebSocket connected successfully, view=expert
+2025-12-19 15:36:02,203 - debug_logger - INFO - WebSocket connection attempt, view=expert
+2025-12-19 15:36:02,204 - debug_logger - INFO - WebSocket connected successfully, view=expert
+2025-12-19 15:43:31,196 - debug_logger - INFO - WebSocket connection attempt, view=expert
+2025-12-19 15:43:31,197 - debug_logger - INFO - WebSocket connected successfully, view=expert
+2025-12-19 15:43:32,021 - debug_logger - INFO - WebSocket connection attempt, view=expert
+2025-12-19 15:43:32,022 - debug_logger - INFO - WebSocket connected successfully, view=expert
+2025-12-19 15:57:21,055 - debug_logger - INFO - WebSocket connection attempt, view=expert
+2025-12-19 15:57:21,057 - debug_logger - INFO - WebSocket connected successfully, view=expert
+2025-12-19 15:57:21,070 - debug_logger - INFO - WebSocket connection attempt, view=expert
+2025-12-19 15:57:21,071 - debug_logger - INFO - WebSocket connected successfully, view=expert
+2025-12-19 16:05:39,615 - debug_logger - INFO - WebSocket connection attempt, view=expert
+2025-12-19 16:05:39,616 - debug_logger - INFO - WebSocket connected successfully, view=expert
+2025-12-19 16:05:41,380 - debug_logger - INFO - WebSocket connection attempt, view=expert
+2025-12-19 16:05:41,381 - debug_logger - INFO - WebSocket connected successfully, view=expert
+2025-12-19 16:06:32,511 - debug_logger - INFO - WebSocket connection attempt, view=expert
+2025-12-19 16:06:32,512 - debug_logger - INFO - WebSocket connected successfully, view=expert
+2025-12-19 16:06:32,526 - debug_logger - INFO - WebSocket connection attempt, view=expert
+2025-12-19 16:06:32,527 - debug_logger - INFO - WebSocket connected successfully, view=expert
+2025-12-19 16:29:58,674 - debug_logger - INFO - WebSocket connection attempt, view=candidate
+2025-12-19 16:29:58,675 - debug_logger - INFO - WebSocket connected successfully, view=candidate
+2025-12-19 16:30:06,227 - debug_logger - INFO - WebSocket connection attempt, view=expert
+2025-12-19 16:30:06,227 - debug_logger - INFO - WebSocket connected successfully, view=expert
+2025-12-19 16:30:06,244 - debug_logger - INFO - WebSocket connection attempt, view=candidate
+2025-12-19 16:30:06,244 - debug_logger - INFO - WebSocket connected successfully, view=candidate
+2025-12-19 16:30:06,259 - debug_logger - INFO - WebSocket connection attempt, view=expert
+2025-12-19 16:30:06,260 - debug_logger - INFO - WebSocket connected successfully, view=expert
+2025-12-19 16:37:07,938 - debug_logger - INFO - WebSocket connection attempt, view=candidate
+2025-12-19 16:37:07,938 - debug_logger - INFO - WebSocket connected successfully, view=candidate
+2025-12-19 17:36:21,846 - debug_logger - INFO - WebSocket connection attempt, view=candidate
+2025-12-19 17:36:21,848 - debug_logger - INFO - WebSocket connected successfully, view=candidate
+2025-12-19 17:36:30,843 - debug_logger - INFO - WebSocket connection attempt, view=expert
+2025-12-19 17:36:30,843 - debug_logger - INFO - WebSocket connected successfully, view=expert
+2025-12-19 17:36:30,857 - debug_logger - INFO - WebSocket connection attempt, view=candidate
+2025-12-19 17:36:30,858 - debug_logger - INFO - WebSocket connected successfully, view=candidate
+2025-12-19 17:36:30,872 - debug_logger - INFO - WebSocket connection attempt, view=expert
+2025-12-19 17:36:30,873 - debug_logger - INFO - WebSocket connected successfully, view=expert
+2025-12-19 17:46:31,784 - debug_logger - INFO - WebSocket connection attempt, view=candidate
+2025-12-19 17:46:31,784 - debug_logger - INFO - WebSocket connected successfully, view=candidate
+2025-12-19 17:47:49,973 - debug_logger - INFO - WebSocket connection attempt, view=candidate
+2025-12-19 17:47:49,973 - debug_logger - INFO - WebSocket connected successfully, view=candidate
+2025-12-19 17:47:53,007 - debug_logger - INFO - WebSocket connection attempt, view=candidate
+2025-12-19 17:47:53,008 - debug_logger - INFO - WebSocket connected successfully, view=candidate
+2025-12-19 19:30:03,432 - debug_logger - INFO - WebSocket connection attempt, view=candidate
+2025-12-19 19:30:03,433 - debug_logger - INFO - WebSocket connected successfully, view=candidate
+2025-12-19 19:30:03,452 - debug_logger - ERROR - Failed to restore session 11e556da: cannot access local variable 'asyncio' where it is not associated with a value
+Traceback (most recent call last):
+  File "C:\Users\aditya_raj\Documents\intelliJ-workspace\cursor-code\backend\main.py", line 2377, in websocket_endpoint
+    await asyncio.sleep(0.5)
+          ^^^^^^^
+UnboundLocalError: cannot access local variable 'asyncio' where it is not associated with a value
+
+2025-12-19 19:30:03,453 - debug_logger - ERROR - WebSocket error: cannot access local variable 'asyncio' where it is not associated with a value
+Traceback (most recent call last):
+  File "C:\Users\aditya_raj\Documents\intelliJ-workspace\cursor-code\backend\main.py", line 2377, in websocket_endpoint
+    await asyncio.sleep(0.5)
+          ^^^^^^^
+UnboundLocalError: cannot access local variable 'asyncio' where it is not associated with a value
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\aditya_raj\Documents\intelliJ-workspace\cursor-code\backend\main.py", line 2390, in websocket_endpoint
+    await asyncio.sleep(0.5)
+          ^^^^^^^
+UnboundLocalError: cannot access local variable 'asyncio' where it is not associated with a value
+
+2025-12-19 19:30:10,894 - debug_logger - INFO - WebSocket connection attempt, view=candidate
+2025-12-19 19:30:10,895 - debug_logger - INFO - WebSocket connected successfully, view=candidate
+2025-12-19 19:30:28,747 - debug_logger - INFO - WebSocket connection attempt, view=expert
+2025-12-19 19:30:28,748 - debug_logger - INFO - WebSocket connected successfully, view=expert
+2025-12-19 19:30:30,757 - debug_logger - INFO - WebSocket connection attempt, view=expert
+2025-12-19 19:30:30,758 - debug_logger - INFO - WebSocket connected successfully, view=expert
+2025-12-19 19:30:37,329 - debug_logger - INFO - WebSocket connection attempt, view=expert
+2025-12-19 19:30:37,330 - debug_logger - INFO - WebSocket connected successfully, view=expert
+2025-12-19 19:30:39,374 - debug_logger - INFO - WebSocket connection attempt, view=expert
+2025-12-19 19:30:39,375 - debug_logger - INFO - WebSocket connected successfully, view=expert
+2025-12-19 19:30:47,573 - debug_logger - INFO - WebSocket connection attempt, view=expert
+2025-12-19 19:30:47,573 - debug_logger - INFO - WebSocket connected successfully, view=expert
+2025-12-19 19:30:53,504 - debug_logger - INFO - WebSocket connection attempt, view=candidate
+2025-12-19 19:30:53,505 - debug_logger - INFO - WebSocket connected successfully, view=candidate
+2025-12-19 19:30:56,003 - debug_logger - INFO - WebSocket connection attempt, view=candidate
+2025-12-19 19:30:56,004 - debug_logger - INFO - WebSocket connected successfully, view=candidate
+2025-12-19 19:39:37,192 - debug_logger - INFO - WebSocket connection attempt, view=candidate
+2025-12-19 19:39:37,193 - debug_logger - INFO - WebSocket connected successfully, view=candidate
+2025-12-19 19:39:37,195 - debug_logger - INFO - WebSocket connection attempt, view=candidate
+2025-12-19 19:39:37,195 - debug_logger - INFO - WebSocket connected successfully, view=candidate
+2025-12-19 19:39:37,209 - debug_logger - INFO - WebSocket connection attempt, view=candidate
+2025-12-19 19:39:37,210 - debug_logger - INFO - WebSocket connected successfully, view=candidate
+2025-12-19 20:10:33,307 - debug_logger - INFO - WebSocket connection attempt, view=expert
+2025-12-19 20:10:33,309 - debug_logger - INFO - WebSocket connected successfully, view=expert
+2025-12-19 20:10:33,338 - debug_logger - ERROR - Failed to restore session c93ad73b: cannot access local variable 'asyncio' where it is not associated with a value
+Traceback (most recent call last):
+  File "C:\Users\aditya_raj\Documents\intelliJ-workspace\cursor-code\backend\main.py", line 2377, in websocket_endpoint
+    await asyncio.sleep(0.5)
+          ^^^^^^^
+UnboundLocalError: cannot access local variable 'asyncio' where it is not associated with a value
+
+2025-12-19 20:10:33,341 - debug_logger - ERROR - WebSocket error: cannot access local variable 'asyncio' where it is not associated with a value
+Traceback (most recent call last):
+  File "C:\Users\aditya_raj\Documents\intelliJ-workspace\cursor-code\backend\main.py", line 2377, in websocket_endpoint
+    await asyncio.sleep(0.5)
+          ^^^^^^^
+UnboundLocalError: cannot access local variable 'asyncio' where it is not associated with a value
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\aditya_raj\Documents\intelliJ-workspace\cursor-code\backend\main.py", line 2390, in websocket_endpoint
+    await asyncio.sleep(0.5)
+          ^^^^^^^
+UnboundLocalError: cannot access local variable 'asyncio' where it is not associated with a value
+
+2025-12-19 20:10:35,310 - debug_logger - INFO - WebSocket connection attempt, view=expert
+2025-12-19 20:10:35,311 - debug_logger - INFO - WebSocket connected successfully, view=expert
+2025-12-19 20:10:43,274 - debug_logger - INFO - WebSocket connection attempt, view=candidate
+2025-12-19 20:10:43,274 - debug_logger - INFO - WebSocket connected successfully, view=candidate
+2025-12-19 20:10:43,289 - debug_logger - INFO - WebSocket connection attempt, view=candidate
+2025-12-19 20:10:43,290 - debug_logger - INFO - WebSocket connected successfully, view=candidate
+2025-12-19 20:13:31,081 - debug_logger - ERROR - WebSocket error: name 'broadcast_to_session' is not defined
+Traceback (most recent call last):
+  File "C:\Users\aditya_raj\Documents\intelliJ-workspace\cursor-code\backend\main.py", line 2647, in websocket_endpoint
+    await broadcast_to_session(session_id, {
+          ^^^^^^^^^^^^^^^^^^^^
+NameError: name 'broadcast_to_session' is not defined
+
+2025-12-19 20:15:34,489 - debug_logger - INFO - WebSocket connection attempt, view=candidate
+2025-12-19 20:15:34,490 - debug_logger - INFO - WebSocket connected successfully, view=candidate
+2025-12-19 20:15:58,746 - debug_logger - INFO - WebSocket connection attempt, view=candidate
+2025-12-19 20:15:58,747 - debug_logger - INFO - WebSocket connected successfully, view=candidate
+2025-12-20 01:00:17,998 - debug_logger - INFO - WebSocket connection attempt, view=candidate
+2025-12-20 01:00:18,034 - debug_logger - INFO - WebSocket connected successfully, view=candidate
+2025-12-20 01:00:18,285 - debug_logger - INFO - WebSocket connection attempt, view=candidate
+2025-12-20 01:00:18,349 - debug_logger - INFO - WebSocket connected successfully, view=candidate
+2025-12-20 04:37:24,260 - debug_logger - INFO - WebSocket connection attempt, view=candidate
+2025-12-20 04:37:24,262 - debug_logger - INFO - WebSocket connected successfully, view=candidate
+2025-12-20 04:37:24,990 - debug_logger - INFO - WebSocket connection attempt, view=candidate
+2025-12-20 04:37:25,066 - debug_logger - INFO - WebSocket connected successfully, view=candidate
+2025-12-20 05:51:42,729 - debug_logger - INFO - WebSocket connection attempt, view=candidate
+2025-12-20 05:51:42,730 - debug_logger - INFO - WebSocket connected successfully, view=candidate
+2025-12-20 05:51:44,690 - debug_logger - INFO - WebSocket connection attempt, view=candidate
+2025-12-20 05:51:44,691 - debug_logger - INFO - WebSocket connected successfully, view=candidate
+2025-12-20 05:51:56,048 - debug_logger - INFO - WebSocket connection attempt, view=expert
+2025-12-20 05:51:56,050 - debug_logger - INFO - WebSocket connected successfully, view=expert
+2025-12-20 05:51:58,077 - debug_logger - INFO - WebSocket connection attempt, view=expert
+2025-12-20 05:51:58,078 - debug_logger - INFO - WebSocket connected successfully, view=expert
+2025-12-20 05:52:09,324 - debug_logger - INFO - WebSocket connection attempt, view=candidate
+2025-12-20 05:52:09,325 - debug_logger - INFO - WebSocket connected successfully, view=candidate
+2025-12-20 05:52:11,332 - debug_logger - INFO - WebSocket connection attempt, view=candidate
+2025-12-20 05:52:11,333 - debug_logger - INFO - WebSocket connected successfully, view=candidate
+2025-12-20 05:52:12,104 - debug_logger - INFO - WebSocket connection attempt, view=expert
+2025-12-20 05:52:12,105 - debug_logger - INFO - WebSocket connected successfully, view=expert
+2025-12-20 05:52:14,112 - debug_logger - INFO - WebSocket connection attempt, view=expert
+2025-12-20 05:52:14,113 - debug_logger - INFO - WebSocket connected successfully, view=expert
+2025-12-20 05:55:59,887 - debug_logger - INFO - WebSocket connection attempt, view=candidate
+2025-12-20 05:55:59,888 - debug_logger - INFO - WebSocket connected successfully, view=candidate
+2025-12-20 05:55:59,905 - debug_logger - ERROR - Failed to restore session session_20251220_055138: cannot access local variable 'asyncio' where it is not associated with a value
+Traceback (most recent call last):
+  File "C:\Users\aditya_raj\Documents\intelliJ-workspace\cursor-code\backend\main.py", line 2378, in websocket_endpoint
+    await asyncio.sleep(0.5)
+          ^^^^^^^
+UnboundLocalError: cannot access local variable 'asyncio' where it is not associated with a value
+
+2025-12-20 05:55:59,908 - debug_logger - ERROR - WebSocket error: cannot access local variable 'asyncio' where it is not associated with a value
+Traceback (most recent call last):
+  File "C:\Users\aditya_raj\Documents\intelliJ-workspace\cursor-code\backend\main.py", line 2378, in websocket_endpoint
+    await asyncio.sleep(0.5)
+          ^^^^^^^
+UnboundLocalError: cannot access local variable 'asyncio' where it is not associated with a value
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\aditya_raj\Documents\intelliJ-workspace\cursor-code\backend\main.py", line 2391, in websocket_endpoint
+    await asyncio.sleep(0.5)
+          ^^^^^^^
+UnboundLocalError: cannot access local variable 'asyncio' where it is not associated with a value
+
+2025-12-20 05:55:59,910 - debug_logger - INFO - WebSocket connection attempt, view=candidate
+2025-12-20 05:55:59,911 - debug_logger - INFO - WebSocket connected successfully, view=candidate
+2025-12-20 05:55:59,931 - debug_logger - INFO - WebSocket connection attempt, view=expert
+2025-12-20 05:55:59,932 - debug_logger - INFO - WebSocket connected successfully, view=expert
+2025-12-20 05:55:59,950 - debug_logger - INFO - WebSocket connection attempt, view=expert
+2025-12-20 05:55:59,951 - debug_logger - INFO - WebSocket connected successfully, view=expert
+2025-12-20 05:58:35,826 - debug_logger - ERROR - WebSocket error: name 'active_sessions' is not defined
+Traceback (most recent call last):
+  File "C:\Users\aditya_raj\Documents\intelliJ-workspace\cursor-code\backend\main.py", line 2657, in websocket_endpoint
+    active_sessions[session_id]["status"] = "completed"
+                 ^^^^^^^^^^^^^^^
+NameError: name 'active_sessions' is not defined. Did you mean: 'get_active_sessions'?
+

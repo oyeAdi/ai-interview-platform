@@ -9,11 +9,11 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        // EPAM Brand Colors - Cyan accent
-        epam: {
-          cyan: '#00D4AA',
-          'cyan-light': '#00FFD0',
-          'cyan-dark': '#00A88A',
+        // SwarmHire Brand Colors
+        brand: {
+          primary: '#FF6B35',
+          'primary-light': '#FF8C61',
+          'primary-dark': '#E5511F',
         },
         surface: {
           primary: 'var(--surface-primary)',

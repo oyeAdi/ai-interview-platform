@@ -32,40 +32,173 @@ class FeedbackGenerator:
         
         # 2. Select Style Directive
         style_directive = ""
-        if feedback_type == "short":
-            style_directive = """
-Additional Style Directive – /format-short-concise
+        if feedback_type == "detailed":
+            # Extract necessary details for the detailed prompt
+            candidate_name = interview_summary.get("meta", {}).get("candidate_name", "Candidate")
+            position_title = interview_summary.get("meta", {}).get("position", "Unknown Position")
+            overall_score = interview_summary.get("meta", {}).get("overall_internal_score", "N/A")
+            
+            # Placeholder for duration, total_questions, metrics_str, transcript_str, expert_name
+            # These would typically be derived from log_data or result_data in a real implementation
+            duration_str = "60 minutes" # Example placeholder
+            total_questions = len(interview_summary.get("transcript_summary", [])) # Example placeholder
+            metrics_str = "Technical Skills: 70/100, Problem Solving: 80/100" # Example placeholder
+            transcript_str = json.dumps(interview_summary.get("transcript_summary", []), indent=2) # Example placeholder
+            expert_name = "Aditya" # Example placeholder
 
-When the user requests “short feedback,” “concise feedback,” or explicitly says “use /format-short-concise”, apply the following structure verbatim:
+            style_directive = f"""You are an expert technical interviewer providing COMPREHENSIVE, DETAILED feedback for a candidate interview.
+
+**IMPORTANT**: This is a LONG, DETAILED feedback report. Provide in-depth technical analysis with specific examples.
+
+Interview Context:
+- Candidate: {candidate_name}
+- Position: {position_title}
+- Duration: {duration_str}
+- Questions Asked: {total_questions}
+- Overall Score: {overall_score}/100
+
+Performance Breakdown:
+{metrics_str}
+
+Interview Transcript:
+{transcript_str}
+
+Generate a DETAILED, COMPREHENSIVE technical feedback report (minimum 400 words) that includes:
+
+1. **General Summary** (2-3 paragraphs):
+   - Overall performance assessment
+   - Key technical strengths demonstrated
+   - Main areas needing improvement
+   - Specific examples from the interview
+
+2. **Detailed Technical Analysis**:
+   - Deep dive into each technical area covered
+   - Specific code quality observations
+   - Problem-solving approach evaluation
+   - Communication effectiveness
+
+3. **Positive Highlights** (bullet points with details):
+   - Specific technical concepts mastered
+   - Strong problem-solving moments
+   - Good coding practices observed
+   - Effective communication examples
+
+4. **Areas for Improvement** (bullet points with details):
+   - Technical gaps identified
+   - Missed optimization opportunities
+   - Communication issues
+   - Specific recommendations for each area
+
+5. **Rating Justification**:
+   - Explain the {overall_score}/100 score
+   - Break down by technical competency
+   - Compare to position requirements
+
+6. **Recommendations**:
+   - Specific topics to study
+   - Practice suggestions
+   - Next steps for the candidate
+
+Be specific, constructive, and reference actual moments from the interview. This should be a thorough technical assessment.
+
+Regards,
+{expert_name}"""
+        elif feedback_type == "short":
+            candidate_name = interview_summary.get("meta", {}).get("candidate_name", "Candidate")
+            position_title = interview_summary.get("meta", {}).get("position", "Unknown Position")
+            
+            style_directive = f"""
+You are an expert technical interviewer providing COMPREHENSIVE, DETAILED feedback for {candidate_name}'s interview for the {position_title} position.
+
+**CRITICAL REQUIREMENTS**:
+1. **Length**: Generate 1000-1500 words of exhaustive, detailed feedback
+2. **Structure**: Follow the exact format below
+3. **Depth**: Provide specific examples from the interview, not generic statements
+4. **Skills**: Include detailed skill-wise breakdown with technical analysis
+
+**FORMAT** (MUST FOLLOW EXACTLY):
 
 Hi,
 
-Please find feedback for [Candidate Name]:
+Please find comprehensive feedback for {candidate_name}:
 
-General Summary:
-[Brief summary paragraph – 4–5 lines describing interview focus, candidate performance, and key improvement areas.]
+**General Summary** (200-250 words):
+[Provide a detailed overview covering:
+- Interview focus and question types asked
+- Overall performance assessment
+- Key strengths demonstrated
+- Main areas requiring improvement
+- Candidate's communication style and approach
+- Technical depth and problem-solving ability
+- Comparison to expected level for {position_title}]
 
-Positive:
-• [Positive point 1]
-• [Positive point 2]
-• [Positive point 3]
+**Skill-Wise Technical Analysis** (500-700 words):
 
-Negative:
-• [Negative point 1]
-• [Negative point 2]
-• [Negative point 3]
+For each relevant technical skill area, provide detailed assessment:
 
-Rating out of 4:
-X.X/4
+• **[Skill Area 1]** (e.g., Java Core & Data Structures):
+  - Demonstrated understanding: [Specific examples from interview]
+  - Strengths: [What they did well]
+  - Gaps: [What was missing or weak]
+  - Score: X/10
+
+• **[Skill Area 2]** (e.g., Problem Solving & Algorithms):
+  - Demonstrated understanding: [Specific examples]
+  - Strengths: [What they did well]
+  - Gaps: [What was missing]
+  - Score: X/10
+
+• **[Skill Area 3]** (e.g., System Design/Architecture):
+  - Demonstrated understanding: [Specific examples]
+  - Strengths: [What they did well]
+  - Gaps: [What was missing]
+  - Score: X/10
+
+[Continue for all relevant skills - minimum 3-4 skill areas]
+
+**Communication & Approach** (100-150 words):
+- Clarity of explanations
+- Ability to articulate thought process
+- Response to follow-up questions
+- Handling of challenging questions
+- Overall interview presence
+
+**Detailed Strengths** (150-200 words):
+• [Strength 1 with specific example from interview]
+• [Strength 2 with specific example]
+• [Strength 3 with specific example]
+• [Strength 4 with specific example]
+• [Strength 5 with specific example]
+
+**Areas for Improvement** (150-200 words):
+• [Improvement area 1 with specific gap identified]
+• [Improvement area 2 with specific gap]
+• [Improvement area 3 with specific gap]
+• [Improvement area 4 with specific gap]
+• [Improvement area 5 with specific gap]
+
+**Recommendation** (100-150 words):
+[Clear hire/no-hire recommendation with justification based on:
+- Overall technical competency
+- Fit for {position_title} role
+- Comparison to required skill level
+- Potential for growth
+- Specific next steps if not hired]
+
+**Overall Rating**: X.X/4
+[Provide rating with brief justification]
 
 Regards,
 Aditya
 
-Rules:
-Always preserve this layout and phrasing.
-Keep tone concise, neutral, and professional.
-Use bullet points and one short paragraph in “General Summary.”
-If rating is omitted or unknown, write “N/A” instead.
+**RULES**:
+- MUST be 1000-1500 words total
+- Use specific examples from the actual interview transcript
+- Avoid generic statements - be specific and detailed
+- Include technical terminology relevant to {position_title}
+- Provide actionable feedback
+- Be constructive but honest
+- Reference actual questions asked and answers given
 """
         elif feedback_type == "skill-wise":
             style_directive = """
@@ -125,27 +258,58 @@ Detailed Reason:
 
         # 3. Construct System Prompt
         system_prompt = f"""
-This Agent is a Technical Interview Feedback Assistant designed to help interviewers produce clear, structured, and professional and very technical feedback after technical interviews. It accepts input in form of log.json and candidate results.json and converts them into consistent, role-appropriate evaluation documents for hiring decisions. This feedback should be mostly technical where It focuses on the skills and related topics discussed during the call.
+You are a Technical Interview Feedback Assistant. Generate ONLY the feedback content itself - no meta-commentary, no explanations about what you're doing, no preambles.
 
-It follows a formal feedback format unless instructed otherwise. Responses are organized into sections such as: General Summary, Positives, Weaknesses, and (if not omitted) Overall Rating. When 'no rating is needed' is specified, the rating section is excluded. Even with minimal input, the GPT extracts as much meaningful insight as possible without fabricating information.
-
-It ensures objectivity and professionalism, avoiding speculation or personal bias. Writing is concise and business-appropriate, focusing on demonstrated technical competence, reasoning, and communication.
-
-Any skill that was not explicitly discussed in the feedback should be marked as such. Use judgment when deciding what to mention. If a skill was neither covered nor clearly related to the topics discussed, and it is not possible to determine whether the candidate knows it, state this explicitly.
+CRITICAL RULES:
+1. Start DIRECTLY with the feedback content (e.g., "Hi," or "Dear [Name],")
+2. Do NOT include phrases like "Okay, here's the feedback..." or "Based on the input..."
+3. Do NOT include markdown code fences (```) in your output
+4. Do NOT explain limitations or missing data - work with what you have
+5. Be professional, technical, and concise
 
 {style_directive}
 
 INPUT DATA:
 {json.dumps(interview_summary, indent=2)}
 
-Generate the feedback report now based on the requested format: {feedback_type}
+Generate ONLY the {feedback_type} feedback content now. Start directly with the greeting.
 """
-
+        
         # 4. Generate Content
         try:
             response = self.client.model.generate_content(system_prompt)
-            # Use basic text extraction, handle potential blocks
-            return response.text.strip()
+            feedback_text = response.text.strip()
+            
+            # Clean up any remaining artifacts
+            # Remove markdown code fences if present
+            if feedback_text.startswith('```'):
+                lines = feedback_text.split('\n')
+                # Remove first and last lines if they're code fences
+                if lines[0].startswith('```'):
+                    lines = lines[1:]
+                if lines and lines[-1].startswith('```'):
+                    lines = lines[:-1]
+                feedback_text = '\n'.join(lines).strip()
+            
+            # Remove common meta-commentary patterns
+            meta_patterns = [
+                "Okay, here's the detailed feedback",
+                "Here is the feedback",
+                "Based on the provided input",
+                "Given the limited input",
+                "Here's the feedback for"
+            ]
+            for pattern in meta_patterns:
+                if feedback_text.lower().startswith(pattern.lower()):
+                    # Find the first actual content (usually after first newline or colon)
+                    if ':' in feedback_text[:100]:
+                        feedback_text = feedback_text.split(':', 1)[1].strip()
+                    elif '\n' in feedback_text[:100]:
+                        lines = feedback_text.split('\n', 1)
+                        if len(lines) > 1:
+                            feedback_text = lines[1].strip()
+            
+            return feedback_text
         except Exception as e:
             self.logger.error(f"Failed to generate feedback: {e}")
             return f"Error generating feedback report. Please check logs. Details: {str(e)}"

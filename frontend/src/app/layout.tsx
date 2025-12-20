@@ -3,8 +3,8 @@ import './globals.css'
 import { ThemeProvider } from '@/contexts/ThemeContext'
 
 export const metadata: Metadata = {
-  title: 'AI Interview Platform | EPAM',
-  description: 'AI-powered interview system for technical assessments',
+  title: 'SwarmHire | The World\'s First Agentic Swarm AI Interview Platform',
+  description: 'Multi-agent AI interview platform with context-aware questions, real-time adaptive scoring, and Human-in-the-Loop control. Every session makes the system exponentially smarter.',
 }
 
 export default function RootLayout({

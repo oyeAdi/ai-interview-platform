@@ -7,28 +7,50 @@ from config import Config
 class GeminiClient:
     """Client for interacting with Google Gemini API"""
     
-    def __init__(self):
+    def __init__(self, use_router: bool = True):
+        """
+        Initialize GeminiClient with optional LLM router
+        
+        Args:
+            use_router: If True, use LLMRouter for intelligent model selection.
+                       If False, use direct Gemini API (legacy mode)
+        """
         Config.validate()
         genai.configure(api_key=Config.GEMINI_API_KEY)
-        # Model selection order - try models with separate quotas
-        # gemma-3-27b-it often has more available quota than gemini models
-        models_to_try = [
-            'gemma-3-27b-it',          # Usually has more quota available
-            'gemini-2.5-flash-lite',   # Fast, no thinking tokens
-            'gemini-flash-latest',     # Stable fallback
-        ]
         
-        self.model = None
-        for model_name in models_to_try:
+        self.use_router = use_router
+        
+        if use_router:
+            # Use LLM Router for intelligent model selection with fallback
             try:
-                self.model = genai.GenerativeModel(model_name)
-                print(f"GeminiClient initialized with model: {model_name}")
-                break
+                from llm.llm_router import get_llm_router
+                self.model = get_llm_router()
+                print(f"GeminiClient using LLMRouter: {self.model.get_active_model()}")
             except Exception as e:
-                print(f"Failed to initialize {model_name}: {e}")
+                print(f"Failed to initialize LLMRouter, falling back to direct Gemini: {e}")
+                self.use_router = False
         
-        if not self.model:
-            raise ValueError("Could not initialize any Gemini model")
+        if not self.use_router:
+            # Legacy mode: Direct Gemini API
+            # Model selection order - try models with separate quotas
+            # gemma-3-27b-it often has more available quota than gemini models
+            models_to_try = [
+                'gemma-3-27b-it',          # Usually has more quota available
+                'gemini-2.5-flash-lite',   # Fast, no thinking tokens
+                'gemini-flash-latest',     # Stable fallback
+            ]
+            
+            self.model = None
+            for model_name in models_to_try:
+                try:
+                    self.model = genai.GenerativeModel(model_name)
+                    print(f"GeminiClient initialized with model: {model_name}")
+                    break
+                except Exception as e:
+                    print(f"Failed to initialize {model_name}: {e}")
+            
+            if not self.model:
+                raise ValueError("Could not initialize any Gemini model")
     
     def analyze_language(self, jd_text: str, resume_text: str) -> Dict:
         """

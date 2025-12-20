@@ -92,6 +92,9 @@ export default function CandidateSelector({
     )
   }
 
+  // Filter candidates with match score >= 50%
+  const filteredCandidates = candidates.filter(c => c.match_score >= 50)
+
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
@@ -99,55 +102,52 @@ export default function CandidateSelector({
           Matching Candidates
         </label>
         <span className="text-xs text-gray-600">
-          {candidates.length} found
+          {filteredCandidates.length} found (≥50% match)
         </span>
       </div>
 
-      {candidates.length === 0 ? (
+      {filteredCandidates.length === 0 ? (
         <div className="text-center py-6 text-gray-500">
-          <p className="text-sm">No candidates available</p>
+          <p className="text-sm">No candidates with ≥50% match</p>
         </div>
       ) : (
         <div className="space-y-2 max-h-[300px] overflow-y-auto pr-1">
-          {candidates.map((candidate) => (
+          {filteredCandidates.map((candidate) => (
             <button
               key={candidate.id}
               type="button"
               onClick={() => handleSelectCandidate(candidate.id)}
-              className={`w-full text-left p-3 border transition-all duration-200 ${
-                selectedCandidate === candidate.id
+              className={`w-full text-left p-3 border transition-all duration-200 ${selectedCandidate === candidate.id
                   ? 'border-[#00E5FF] bg-[#00E5FF]/10'
                   : 'border-[#2A2A2A] bg-black hover:border-[#00E5FF]/50'
-              }`}
+                }`}
             >
               <div className="flex items-start justify-between gap-3">
                 <div className="flex-1 min-w-0">
                   {/* Candidate Name */}
                   <div className="flex items-center gap-2">
-                    <span className={`font-medium truncate ${
-                      selectedCandidate === candidate.id ? 'text-[#00E5FF]' : 'text-white'
-                    }`}>
+                    <span className={`font-medium truncate ${selectedCandidate === candidate.id ? 'text-[#00E5FF]' : 'text-white'
+                      }`}>
                       {candidate.name.split(' - ')[0]}
                     </span>
                   </div>
-                  
+
                   {/* Role/Title */}
                   <p className="text-xs text-gray-500 truncate mt-0.5">
                     {candidate.name.split(' - ')[1] || candidate.language}
                   </p>
-                  
+
                   {/* Skills & Experience */}
                   <div className="flex items-center gap-2 mt-2 flex-wrap">
-                    <span className={`px-1.5 py-0.5 text-[10px] font-medium uppercase ${
-                      experienceLevelColors[candidate.experience_level] || 'bg-gray-500/20 text-gray-400'
-                    }`}>
+                    <span className={`px-1.5 py-0.5 text-[10px] font-medium uppercase ${experienceLevelColors[candidate.experience_level] || 'bg-gray-500/20 text-gray-400'
+                      }`}>
                       {candidate.experience_level}
                     </span>
                     <span className="px-1.5 py-0.5 text-[10px] font-mono uppercase bg-[#1A1A1A] text-gray-400">
                       {candidate.language}
                     </span>
                   </div>
-                  
+
                   {/* Top Skills */}
                   <div className="flex flex-wrap gap-1 mt-2">
                     {candidate.skills.slice(0, 4).map((skill, idx) => (
@@ -165,7 +165,7 @@ export default function CandidateSelector({
                     )}
                   </div>
                 </div>
-                
+
                 {/* Match Score */}
                 <div className="flex flex-col items-end gap-1">
                   <div className={`px-2 py-1 text-xs font-bold ${getMatchScoreColor(candidate.match_score)}`}>
@@ -174,7 +174,7 @@ export default function CandidateSelector({
                   <span className="text-[10px] text-gray-600">match</span>
                 </div>
               </div>
-              
+
               {/* Selection indicator */}
               {selectedCandidate === candidate.id && (
                 <div className="mt-2 pt-2 border-t border-[#00E5FF]/20 flex items-center gap-2">

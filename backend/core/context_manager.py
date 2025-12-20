@@ -6,8 +6,13 @@ import uuid
 class ContextManager:
     """Manages interview context throughout the session"""
     
-    def __init__(self, detected_language: str, jd_id: Optional[str] = None):
-        self.session_id = f"session_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+    def __init__(self, detected_language: str, jd_id: Optional[str] = None, session_id: Optional[str] = None):
+        # Use provided session_id or generate new one
+        if session_id:
+            self.session_id = session_id
+        else:
+            self.session_id = f"session_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+        
         self.context = {
             "interview_context": {
                 "session_id": self.session_id,

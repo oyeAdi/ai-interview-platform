@@ -93,17 +93,24 @@ export default function QuickStartPage() {
   const [jds, setJds] = useState<any[]>([])
   const [resumes, setResumes] = useState<any[]>([])
   const [selectedCategories, setSelectedCategories] = useState<Record<string, boolean>>({
-    coding: true,
-    conceptual: true,
-    system_design: true,
-    problem_solving: true
+    coding: false,  // Unchecked by default - will be auto-selected for technical roles
+    conceptual: false,  // Unchecked by default
+    system_design: false,  // Unchecked by default
+    problem_solving: false,  // Unchecked by default
+    behavioral: true,  // Checked by default - useful for most roles
+    communication: true  // Checked by default - useful for most roles
   })
   const [categoryDifficulties, setCategoryDifficulties] = useState<Record<string, 'easy' | 'medium' | 'hard'>>({
     coding: 'medium',
     conceptual: 'medium',
     system_design: 'medium',
-    problem_solving: 'medium'
+    problem_solving: 'medium',
+    behavioral: 'medium',
+    communication: 'medium'
   })
+  const [jobType, setJobType] = useState<string>('')
+  const [categoryReasoning, setCategoryReasoning] = useState<string>('')
+  const [analyzingJD, setAnalyzingJD] = useState(false)
 
   // Calculate total duration based on selected categories and difficulties
   const calculateDuration = () => {
@@ -162,7 +169,52 @@ export default function QuickStartPage() {
     }
   }, [selectedResume, resumes])
 
-  const handleStartInterview = async (expertMode: boolean = false) => {
+  // Auto-analyze JD and suggest categories
+  useEffect(() => {
+    const analyzeJD = async () => {
+      if (!jdText && !selectedJd) return
+
+      setAnalyzingJD(true)
+      try {
+        const formData = new FormData()
+
+        let finalJdText = jdText
+        if (selectedJd) {
+          const jd = jds.find(j => j.id === selectedJd)
+          if (jd) finalJdText = jd.text
+        }
+
+        if (!finalJdText) return
+
+        formData.append('jd_text', finalJdText)
+
+        const response = await fetch(apiUrl('api/analyze-jd-categories'), {
+          method: 'POST',
+          body: formData
+        })
+
+        if (response.ok) {
+          const data = await response.json()
+          setSelectedCategories(data.suggested_categories)
+          setJobType(data.job_type)
+          setCategoryReasoning(data.reasoning)
+        }
+      } catch (error) {
+        console.error('Error analyzing JD:', error)
+      } finally {
+        setAnalyzingJD(false)
+      }
+    }
+
+    // Debounce the analysis
+    const timer = setTimeout(() => {
+      analyzeJD()
+    }, 1000)
+
+    return () => clearTimeout(timer)
+  }, [jdText, selectedJd, jds])
+
+  const handleStartInterview = async () => {
     if (!jdText && !jdFile && !selectedJd) {
       alert('Please provide a job description')
       return
@@ -195,7 +247,7 @@ export default function QuickStartPage() {
       if (resumeFile) formData.append('resume_file', resumeFile)
       if (selectedJd) formData.append('jd_id', selectedJd)
       if (selectedResume) formData.append('resume_id', selectedResume)
-      if (expertMode) formData.append('expert_mode', 'true')
+      formData.append('expert_mode', 'true')  // Quick Start always uses expert mode
 
       // Send selected categories with difficulties
       const categoriesWithDifficulty: any = {}
@@ -222,15 +274,15 @@ export default function QuickStartPage() {
       if (data.session_id) {
         localStorage.setItem('current_session_id', data.session_id)
         localStorage.setItem('current_language', data.language)
-        localStorage.setItem('expert_mode', expertMode ? 'true' : 'false')
+        localStorage.setItem('expert_mode', 'true')  // Quick Start always uses expert mode
 
         const candidateUrl = `/interview?view=candidate&session_id=${data.session_id}&lang=${data.language}`
         router.push(candidateUrl)
 
+        // Open expert view for the interviewer
         setTimeout(() => {
-          const viewType = expertMode ? 'expert' : 'admin'
-          const adminUrl = `${window.location.origin}/interview?view=${viewType}&session_id=${data.session_id}&lang=${data.language}`
-          window.open(adminUrl, '_blank', 'noopener,noreferrer')
+          const expertUrl = `${window.location.origin}/interview?view=expert&session_id=${data.session_id}&lang=${data.language}`
+          window.open(expertUrl, '_blank', 'noopener,noreferrer')
         }, 1000)
       }
     } catch (error) {
@@ -250,7 +302,7 @@ export default function QuickStartPage() {
         <section className="border-b border-gray-200 dark:border-[#2A2A2A]">
           <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
             <div className="inline-flex items-center gap-2 px-3 py-1 text-xs font-medium mb-6
-                            border border-epam-cyan text-epam-cyan">
+                            border border-brand-primary text-brand-primary">
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
               </svg>
@@ -270,17 +322,46 @@ export default function QuickStartPage() {
         {/* Category Selection */}
         <section className="border-b border-gray-200 dark:border-[#2A2A2A]">
           <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-            <h2 className="text-xs font-medium text-epam-cyan uppercase tracking-[0.2em] mb-6">
-              Select Question Categories
-            </h2>
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xs font-medium text-brand-primary uppercase tracking-[0.2em]">
+                Select Question Categories
+              </h2>
+              {analyzingJD && (
+                <div className="flex items-center gap-2 text-xs text-gray-500">
+                  <div className="w-3 h-3 border-2 border-brand-primary border-t-transparent rounded-full animate-spin"></div>
+                  Analyzing JD...
+                </div>
+              )}
+              {jobType && !analyzingJD && (
+                <div className="flex items-center gap-2 text-xs">
+                  <span className={`px-2 py-1 rounded ${jobType === 'technical' ? 'bg-blue-500/10 text-blue-400' :
+                    jobType === 'non-technical' ? 'bg-green-500/10 text-green-400' :
+                      'bg-purple-500/10 text-purple-400'
+                    }`}>
+                    {jobType === 'technical' ? '💻 Technical Role' :
+                      jobType === 'non-technical' ? '👥 Non-Technical Role' :
+                        '🔀 Hybrid Role'}
+                  </span>
+                </div>
+              )}
+            </div>
+
+            {categoryReasoning && !analyzingJD && (
+              <div className="mb-6 p-3 bg-brand-primary/5 border border-brand-primary/20 rounded text-xs text-gray-600 dark:text-gray-400">
+                <span className="text-brand-primary font-medium">✨ Auto-selected: </span>
+                {categoryReasoning}
+              </div>
+            )}
 
             {/* Category Checkboxes */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
               {[
-                { key: 'coding', icon: '💻', label: 'Coding' },
-                { key: 'conceptual', icon: '📚', label: 'Conceptual' },
-                { key: 'system_design', icon: '🏗️', label: 'System Design' },
-                { key: 'problem_solving', icon: '🧩', label: 'Problem Solving' }
+                { key: 'coding', icon: '💻', label: 'Coding', description: 'Algorithms & DS' },
+                { key: 'conceptual', icon: '📚', label: 'Conceptual', description: 'Theory & concepts' },
+                { key: 'system_design', icon: '🏗️', label: 'System Design', description: 'Architecture' },
+                { key: 'problem_solving', icon: '🧩', label: 'Problem Solving', description: 'Real scenarios' },
+                { key: 'behavioral', icon: '🤝', label: 'Behavioral', description: 'Soft skills' },
+                { key: 'communication', icon: '💬', label: 'Communication', description: 'Clarity & articulation' }
               ].map((cat) => (
                 <button
                   key={cat.key}
@@ -291,31 +372,31 @@ export default function QuickStartPage() {
                   }))}
                   className={`p-4 border text-left transition-all duration-200
                              ${selectedCategories[cat.key]
-                      ? 'border-epam-cyan bg-epam-cyan/5'
-                      : 'border-gray-200 dark:border-[#2A2A2A] hover:border-epam-cyan/50'
+                      ? 'border-brand-primary bg-brand-primary/5'
+                      : 'border-gray-200 dark:border-[#2A2A2A] hover:border-brand-primary/50'
                     }`}
                 >
                   <div className="flex items-center gap-2 mb-2">
                     <div className="text-2xl">{cat.icon}</div>
                     {selectedCategories[cat.key] && (
-                      <svg className="w-5 h-5 text-epam-cyan" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                      <svg className="w-5 h-5 text-brand-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                       </svg>
                     )}
                   </div>
-                  <div className={`font-medium text-sm ${selectedCategories[cat.key] ? 'text-epam-cyan' : 'text-black dark:text-white'}`}>
+                  <div className={`font-medium text-sm mb-1 ${selectedCategories[cat.key] ? 'text-brand-primary' : 'text-black dark:text-white'}`}>
                     {cat.label}
                   </div>
-                  <div className="text-xs text-gray-500">1 question</div>
+                  <div className="text-xs text-gray-500">{cat.description}</div>
                 </button>
               ))}
             </div>
 
             {/* Duration and Difficulty Selectors */}
             <div className="mt-6 space-y-4">
-              <div className="flex items-center justify-between p-4 bg-epam-cyan/5 border border-epam-cyan/20">
-                <span className="text-sm font-medium text-epam-cyan">Total Duration</span>
-                <span className="text-lg font-bold text-epam-cyan">{calculateDuration()} minutes</span>
+              <div className="flex items-center justify-between p-4 bg-brand-primary/5 border border-brand-primary/20">
+                <span className="text-sm font-medium text-brand-primary">Total Duration</span>
+                <span className="text-lg font-bold text-brand-primary">{calculateDuration()} minutes</span>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -327,7 +408,6 @@ export default function QuickStartPage() {
                         <span className="text-sm font-medium text-black dark:text-white capitalize">
                           {category.replace('_', ' ')}
                         </span>
-                        <span className="text-xs text-gray-500">× 1</span>
                       </div>
                       <select
                         value={categoryDifficulties[category] || 'medium'}
@@ -337,7 +417,7 @@ export default function QuickStartPage() {
                         }))}
                         className="w-full appearance-none bg-white dark:bg-black border border-gray-200 dark:border-[#2A2A2A] 
                                  px-3 py-2 text-sm text-black dark:text-white capitalize
-                                 focus:outline-none focus:border-epam-cyan"
+                                 focus:outline-none focus:border-brand-primary"
                       >
                         <option value="easy">Easy (10 min)</option>
                         <option value="medium">Medium (15 min)</option>
@@ -356,7 +436,7 @@ export default function QuickStartPage() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
             {/* Job Description Section */}
             <div>
-              <h2 className="text-xs font-medium text-epam-cyan uppercase tracking-[0.2em] mb-6">
+              <h2 className="text-xs font-medium text-brand-primary uppercase tracking-[0.2em] mb-6">
                 Job Description
               </h2>
 
@@ -386,7 +466,7 @@ export default function QuickStartPage() {
 
             {/* Resume Section */}
             <div>
-              <h2 className="text-xs font-medium text-epam-cyan uppercase tracking-[0.2em] mb-6">
+              <h2 className="text-xs font-medium text-brand-primary uppercase tracking-[0.2em] mb-6">
                 Resume
               </h2>
 
@@ -415,11 +495,11 @@ export default function QuickStartPage() {
             </div>
           </div>
 
-          {/* Start Interview Buttons */}
+          {/* Start Interview Button */}
           <div className="mt-12 pt-12 border-t border-gray-200 dark:border-[#2A2A2A]">
-            <div className="max-w-md mx-auto space-y-3">
+            <div className="max-w-md mx-auto">
               <button
-                onClick={() => handleStartInterview(false)}
+                onClick={() => handleStartInterview()}
                 disabled={loading}
                 className="btn-primary w-full flex items-center justify-center gap-2 h-12 disabled:opacity-40"
               >
@@ -431,26 +511,15 @@ export default function QuickStartPage() {
                 ) : (
                   <>
                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 010 1.971l-11.54 6.347a1.125 1.125 0 01-1.667-.985V5.653z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456z" />
                     </svg>
                     Start Interview
                   </>
                 )}
               </button>
 
-              <button
-                onClick={() => handleStartInterview(true)}
-                disabled={loading}
-                className="btn-secondary w-full flex items-center justify-center gap-2 h-12 disabled:opacity-40"
-              >
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456z" />
-                </svg>
-                Start as Expert
-              </button>
-
-              <p className="text-xs text-gray-500 dark:text-gray-500 text-center pt-2">
-                Expert mode: Review and approve AI questions before sending
+              <p className="text-xs text-gray-500 dark:text-gray-500 text-center pt-3">
+                Opens candidate view here and expert view in new tab
               </p>
             </div>
           </div>

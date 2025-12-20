@@ -14,12 +14,7 @@ interface DataModel {
   experience_level: string
   expectations: string
   required_skills: Skill[]
-  interview_flow: string[]
-  question_distribution: {
-    easy: number
-    medium: number
-    hard: number
-  }
+  interview_flow?: string[]
 }
 
 interface Template {
@@ -49,6 +44,14 @@ const EXPECTATION_LEVELS = ['basic', 'medium', 'high']
 const DURATION_OPTIONS = [30, 45, 60, 90]
 const PROFICIENCY_LEVELS = ['beginner', 'intermediate', 'advanced', 'expert']
 
+// User-friendly labels for proficiency levels
+const PROFICIENCY_LABELS: Record<string, string> = {
+  beginner: 'Basic working knowledge',
+  intermediate: 'Comfortable with',
+  advanced: 'Strong in',
+  expert: 'Expert in'
+}
+
 export default function AddPositionModal({
   isOpen,
   onClose,
@@ -66,7 +69,7 @@ export default function AddPositionModal({
   const [saving, setSaving] = useState(false)
   const [saveAsTemplate, setSaveAsTemplate] = useState(false)
   const [templateName, setTemplateName] = useState('')
-  
+
   // Template filtering state
   const [templateSearch, setTemplateSearch] = useState('')
   const [selectedCategory, setSelectedCategory] = useState<string>('all')
@@ -81,14 +84,13 @@ export default function AddPositionModal({
     experience_level: 'mid',
     expectations: 'medium',
     required_skills: [],
-    interview_flow: ['coding', 'conceptual'],
-    question_distribution: { easy: 0.3, medium: 0.5, hard: 0.2 }
+    interview_flow: ['coding', 'conceptual']
   })
 
   // Load templates
   useEffect(() => {
     if (!isOpen) return
-    
+
     setLoading(true)
     setLoadError(null)
     fetch(apiUrl('api/templates'))
@@ -137,8 +139,7 @@ export default function AddPositionModal({
       experience_level: 'mid',
       expectations: 'medium',
       required_skills: [],
-      interview_flow: ['coding', 'conceptual'],
-      question_distribution: { easy: 0.3, medium: 0.5, hard: 0.2 }
+      interview_flow: ['coding', 'conceptual']
     })
     setStep(2)
   }
@@ -233,8 +234,8 @@ export default function AddPositionModal({
 
         {/* Progress Bar */}
         <div className="h-1 bg-gray-200 dark:bg-[#1A1A1A]">
-          <div 
-            className="h-full bg-epam-cyan transition-all duration-300"
+          <div
+            className="h-full bg-brand-primary transition-all duration-300"
             style={{ width: `${(step / 3) * 100}%` }}
           />
         </div>
@@ -245,7 +246,7 @@ export default function AddPositionModal({
           {step === 1 && (() => {
             // Filter templates based on search and category
             const filteredTemplates = templates.filter(t => {
-              const matchesSearch = templateSearch === '' || 
+              const matchesSearch = templateSearch === '' ||
                 t.name.toLowerCase().includes(templateSearch.toLowerCase()) ||
                 t.category.toLowerCase().includes(templateSearch.toLowerCase())
               const matchesCategory = selectedCategory === 'all' || t.category === selectedCategory
@@ -253,11 +254,11 @@ export default function AddPositionModal({
             })
             const visibleTemplates = filteredTemplates.slice(0, visibleCount)
             const hasMore = filteredTemplates.length > visibleCount
-            
+
             return (
               <div>
                 <h3 className="text-sm font-medium text-black dark:text-white mb-4">Choose a Template</h3>
-                
+
                 {loading ? (
                   <div className="flex items-center justify-center py-12">
                     <div className="w-6 h-6 border-2 border-[#00E5FF]/30 border-t-[#00E5FF] animate-spin"></div>
@@ -299,16 +300,15 @@ export default function AddPositionModal({
                         />
                       </div>
                     </div>
-                    
+
                     {/* Category Filter */}
                     <div className="flex flex-wrap gap-2 mb-4">
                       <button
                         onClick={() => { setSelectedCategory('all'); setVisibleCount(4) }}
-                        className={`px-3 py-1.5 text-xs transition-colors ${
-                          selectedCategory === 'all'
-                            ? 'bg-[#00E5FF] text-black'
-                            : 'bg-gray-100 dark:bg-[#1A1A1A] text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-[#2A2A2A]'
-                        }`}
+                        className={`px-3 py-1.5 text-xs transition-colors ${selectedCategory === 'all'
+                          ? 'bg-[#00E5FF] text-black'
+                          : 'bg-gray-100 dark:bg-[#1A1A1A] text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-[#2A2A2A]'
+                          }`}
                       >
                         All
                       </button>
@@ -316,22 +316,21 @@ export default function AddPositionModal({
                         <button
                           key={cat}
                           onClick={() => { setSelectedCategory(cat); setVisibleCount(4) }}
-                          className={`px-3 py-1.5 text-xs transition-colors ${
-                            selectedCategory === cat
-                              ? 'bg-[#00E5FF] text-black'
-                              : 'bg-gray-100 dark:bg-[#1A1A1A] text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-[#2A2A2A]'
-                          }`}
+                          className={`px-3 py-1.5 text-xs transition-colors ${selectedCategory === cat
+                            ? 'bg-[#00E5FF] text-black'
+                            : 'bg-gray-100 dark:bg-[#1A1A1A] text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-[#2A2A2A]'
+                            }`}
                         >
                           {cat}
                         </button>
                       ))}
                     </div>
-                    
+
                     {/* Results count */}
                     <p className="text-xs text-gray-500 mb-3">
                       Showing {visibleTemplates.length} of {filteredTemplates.length} templates
                     </p>
-                    
+
                     {/* Template Grid */}
                     {filteredTemplates.length === 0 ? (
                       <div className="py-6 text-center">
@@ -343,11 +342,10 @@ export default function AddPositionModal({
                           <button
                             key={template.id}
                             onClick={() => handleSelectTemplate(template)}
-                            className={`text-left p-4 border transition-colors ${
-                              selectedTemplate?.id === template.id
-                                ? 'border-[#00E5FF] bg-[#00E5FF]/10'
-                                : 'border-gray-200 dark:border-[#2A2A2A] hover:border-[#00E5FF]/50'
-                            }`}
+                            className={`text-left p-4 border transition-colors ${selectedTemplate?.id === template.id
+                              ? 'border-[#00E5FF] bg-[#00E5FF]/10'
+                              : 'border-gray-200 dark:border-[#2A2A2A] hover:border-[#00E5FF]/50'
+                              }`}
                           >
                             <div className="flex items-start justify-between">
                               <div className="min-w-0 flex-1">
@@ -369,7 +367,7 @@ export default function AddPositionModal({
                         ))}
                       </div>
                     )}
-                    
+
                     {/* Show More */}
                     {hasMore && (
                       <button
@@ -379,7 +377,7 @@ export default function AddPositionModal({
                         Show {Math.min(4, filteredTemplates.length - visibleCount)} more ↓
                       </button>
                     )}
-                    
+
                     <button
                       onClick={handleSkipTemplate}
                       className="text-sm text-gray-500 hover:text-[#00E5FF] transition-colors"
@@ -486,7 +484,7 @@ export default function AddPositionModal({
                         className="w-28 appearance-none bg-white dark:bg-black border border-gray-200 dark:border-[#2A2A2A] px-3 py-2 text-sm text-black dark:text-white capitalize"
                       >
                         {PROFICIENCY_LEVELS.map(p => (
-                          <option key={p} value={p} className="capitalize">{p}</option>
+                          <option key={p} value={p}>{PROFICIENCY_LABELS[p] || p}</option>
                         ))}
                       </select>
                       <input
@@ -528,7 +526,7 @@ export default function AddPositionModal({
           {step === 3 && (
             <div className="space-y-6">
               <h3 className="text-sm font-medium text-black dark:text-white mb-4">Review Position</h3>
-              
+
               {/* Summary */}
               <div className="border border-gray-200 dark:border-[#2A2A2A] p-4 space-y-3">
                 <div className="flex justify-between">
@@ -564,7 +562,7 @@ export default function AddPositionModal({
                   />
                   <span className="text-sm text-black dark:text-white">Save as template for future use</span>
                 </label>
-                
+
                 {saveAsTemplate && (
                   <input
                     type="text"
@@ -587,7 +585,7 @@ export default function AddPositionModal({
           >
             {step > 1 ? '← Back' : 'Cancel'}
           </button>
-          
+
           {step < 3 ? (
             <button
               onClick={() => setStep(step + 1)}

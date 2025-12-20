@@ -7,13 +7,24 @@ class Config:
     
     # Gemini API
     # Use new API key provided by user
-    GEMINI_API_KEY: str = os.getenv("GEMINI_API_KEY", "AIzaSyAhMC13D-v4DcX1pMJ1JvtaZHO7gJOmmI4")
+    # Gemini API
+    GEMINI_API_KEY: str = os.getenv("GEMINI_API_KEY", "")
+    
+    # Hugging Face API
+    HUGGINGFACE_API_KEY: str = os.getenv("HUGGINGFACE_API_KEY", "")
+    
+    # Email Configuration
+    SENDGRID_API_KEY: str = os.getenv("SENDGRID_API_KEY", "")
+    SENDGRID_FROM_EMAIL: str = os.getenv("SENDGRID_FROM_EMAIL", "aditya_raj@epam.com")
+    GMAIL_EMAIL: str = os.getenv("GMAIL_EMAIL", "brut.aditya@gmail.com")
+    GMAIL_APP_PASSWORD: str = os.getenv("GMAIL_APP_PASSWORD", "")
     
     # Interview settings
 
     # Max follow-ups per question - AI decides dynamically when to stop (up to this limit)
     MAX_FOLLOWUPS_PER_QUESTION: int = int(os.getenv("MAX_FOLLOWUPS_PER_QUESTION", "8"))
     DEFAULT_QUESTIONS: int = int(os.getenv("DEFAULT_QUESTIONS", "5"))
+    OPINION_THRESHOLD: int = int(os.getenv("OPINION_THRESHOLD", "4"))  # Form opinion after 4 follow-ups
     
     # File paths
     BASE_DIR: str = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -25,6 +36,11 @@ class Config:
     RESUMES_DIR: str = os.path.join(BASE_DIR, "backend", "resumes")
     LOGS_DIR: str = os.path.join(BASE_DIR, "backend", "logs")
     LOG_FILE: str = os.path.join(LOGS_DIR, "log.json")
+    LOG_ARCHIVE_FILE: str = os.path.join(LOGS_DIR, "log_archive.json")
+    
+    # Log cleanup configuration (hybrid approach)
+    MAX_SESSIONS_IN_LOG: int = 2  # Keep only last 2 sessions
+    MAX_SESSION_AGE_DAYS: int = 1  # Keep sessions from last 1 day
     
     # Strategy parameters
     DEFAULT_STRATEGY_WEIGHTS: dict = {

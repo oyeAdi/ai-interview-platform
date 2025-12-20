@@ -1,0 +1,406 @@
+{
+  "timestamp": "20251220_061630",
+  "total_models_tested": 11,
+  "successful_models": 11,
+  "results": [
+    {
+      "model": "gemini-2.0-flash-exp",
+      "provider": "Google Gemini",
+      "cost": "FREE (with limits)",
+      "results": [
+        {
+          "test": "Code Generation",
+          "category": "coding",
+          "success": false,
+          "error": "429 You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/usage?tab=rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 0, model: gemini-2.0-flash-exp\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 0, model: gemini-2.0-flash-exp\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_input_token_count, limit: 0, model: gemini-2.0-flash-exp\nPlease retry in 55.952357072s. [links {\n  description: \"Learn more about Gemini API quotas\"\n  url: \"https://ai.google.dev/gemini-api/docs/rate-limits\"\n}\n, violations {\n  quota_metric: \"generativelanguage.googleapis.com/generate_content_free_tier_requests\"\n  quota_id: \"GenerateRequestsPerDayPerProjectPerModel-FreeTier\"\n  quota_dimensions {\n    key: \"model\"\n    value: \"gemini-2.0-flash-exp\"\n  }\n  quota_dimensions {\n    key: \"location\"\n    value: \"global\"\n  }\n}\nviolations {\n  quota_metric: \"generativelanguage.googleapis.com/generate_content_free_tier_requests\"\n  quota_id: \"GenerateRequestsPerMinutePerProjectPerModel-FreeTier\"\n  quota_dimensions {\n    key: \"model\"\n    value: \"gemini-2.0-flash-exp\"\n  }\n  quota_dimensions {\n    key: \"location\"\n    value: \"global\"\n  }\n}\nviolations {\n  quota_metric: \"generativelanguage.googleapis.com/generate_content_free_tier_input_token_count\"\n  quota_id: \"GenerateContentInputTokensPerModelPerMinute-FreeTier\"\n  quota_dimensions {\n    key: \"model\"\n    value: \"gemini-2.0-flash-exp\"\n  }\n  quota_dimensions {\n    key: \"location\"\n    value: \"global\"\n  }\n}\n, retry_delay {\n  seconds: 55\n}\n]"
+        },
+        {
+          "test": "Technical Reasoning",
+          "category": "reasoning",
+          "success": false,
+          "error": "429 You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/usage?tab=rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 0, model: gemini-2.0-flash-exp\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 0, model: gemini-2.0-flash-exp\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_input_token_count, limit: 0, model: gemini-2.0-flash-exp\nPlease retry in 55.724128651s. [links {\n  description: \"Learn more about Gemini API quotas\"\n  url: \"https://ai.google.dev/gemini-api/docs/rate-limits\"\n}\n, violations {\n  quota_metric: \"generativelanguage.googleapis.com/generate_content_free_tier_requests\"\n  quota_id: \"GenerateRequestsPerDayPerProjectPerModel-FreeTier\"\n  quota_dimensions {\n    key: \"model\"\n    value: \"gemini-2.0-flash-exp\"\n  }\n  quota_dimensions {\n    key: \"location\"\n    value: \"global\"\n  }\n}\nviolations {\n  quota_metric: \"generativelanguage.googleapis.com/generate_content_free_tier_requests\"\n  quota_id: \"GenerateRequestsPerMinutePerProjectPerModel-FreeTier\"\n  quota_dimensions {\n    key: \"model\"\n    value: \"gemini-2.0-flash-exp\"\n  }\n  quota_dimensions {\n    key: \"location\"\n    value: \"global\"\n  }\n}\nviolations {\n  quota_metric: \"generativelanguage.googleapis.com/generate_content_free_tier_input_token_count\"\n  quota_id: \"GenerateContentInputTokensPerModelPerMinute-FreeTier\"\n  quota_dimensions {\n    key: \"model\"\n    value: \"gemini-2.0-flash-exp\"\n  }\n  quota_dimensions {\n    key: \"location\"\n    value: \"global\"\n  }\n}\n, retry_delay {\n  seconds: 55\n}\n]"
+        },
+        {
+          "test": "Follow-up Question",
+          "category": "conversation",
+          "success": false,
+          "error": "429 You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/usage?tab=rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_input_token_count, limit: 0, model: gemini-2.0-flash-exp\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 0, model: gemini-2.0-flash-exp\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 0, model: gemini-2.0-flash-exp\nPlease retry in 55.507491223s. [links {\n  description: \"Learn more about Gemini API quotas\"\n  url: \"https://ai.google.dev/gemini-api/docs/rate-limits\"\n}\n, violations {\n  quota_metric: \"generativelanguage.googleapis.com/generate_content_free_tier_input_token_count\"\n  quota_id: \"GenerateContentInputTokensPerModelPerMinute-FreeTier\"\n  quota_dimensions {\n    key: \"model\"\n    value: \"gemini-2.0-flash-exp\"\n  }\n  quota_dimensions {\n    key: \"location\"\n    value: \"global\"\n  }\n}\nviolations {\n  quota_metric: \"generativelanguage.googleapis.com/generate_content_free_tier_requests\"\n  quota_id: \"GenerateRequestsPerMinutePerProjectPerModel-FreeTier\"\n  quota_dimensions {\n    key: \"model\"\n    value: \"gemini-2.0-flash-exp\"\n  }\n  quota_dimensions {\n    key: \"location\"\n    value: \"global\"\n  }\n}\nviolations {\n  quota_metric: \"generativelanguage.googleapis.com/generate_content_free_tier_requests\"\n  quota_id: \"GenerateRequestsPerDayPerProjectPerModel-FreeTier\"\n  quota_dimensions {\n    key: \"model\"\n    value: \"gemini-2.0-flash-exp\"\n  }\n  quota_dimensions {\n    key: \"location\"\n    value: \"global\"\n  }\n}\n, retry_delay {\n  seconds: 55\n}\n]"
+        },
+        {
+          "test": "Code Review",
+          "category": "analysis",
+          "success": false,
+          "error": "429 You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/usage?tab=rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 0, model: gemini-2.0-flash-exp\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 0, model: gemini-2.0-flash-exp\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_input_token_count, limit: 0, model: gemini-2.0-flash-exp\nPlease retry in 55.302180805s. [links {\n  description: \"Learn more about Gemini API quotas\"\n  url: \"https://ai.google.dev/gemini-api/docs/rate-limits\"\n}\n, violations {\n  quota_metric: \"generativelanguage.googleapis.com/generate_content_free_tier_requests\"\n  quota_id: \"GenerateRequestsPerDayPerProjectPerModel-FreeTier\"\n  quota_dimensions {\n    key: \"model\"\n    value: \"gemini-2.0-flash-exp\"\n  }\n  quota_dimensions {\n    key: \"location\"\n    value: \"global\"\n  }\n}\nviolations {\n  quota_metric: \"generativelanguage.googleapis.com/generate_content_free_tier_requests\"\n  quota_id: \"GenerateRequestsPerMinutePerProjectPerModel-FreeTier\"\n  quota_dimensions {\n    key: \"model\"\n    value: \"gemini-2.0-flash-exp\"\n  }\n  quota_dimensions {\n    key: \"location\"\n    value: \"global\"\n  }\n}\nviolations {\n  quota_metric: \"generativelanguage.googleapis.com/generate_content_free_tier_input_token_count\"\n  quota_id: \"GenerateContentInputTokensPerModelPerMinute-FreeTier\"\n  quota_dimensions {\n    key: \"model\"\n    value: \"gemini-2.0-flash-exp\"\n  }\n  quota_dimensions {\n    key: \"location\"\n    value: \"global\"\n  }\n}\n, retry_delay {\n  seconds: 55\n}\n]"
+        }
+      ],
+      "avg_time": 0.0,
+      "success_rate": "0%"
+    },
+    {
+      "model": "gemini-1.5-flash",
+      "provider": "Google Gemini",
+      "cost": "FREE (with limits)",
+      "results": [
+        {
+          "test": "Code Generation",
+          "category": "coding",
+          "success": false,
+          "error": "404 models/gemini-1.5-flash is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods."
+        },
+        {
+          "test": "Technical Reasoning",
+          "category": "reasoning",
+          "success": false,
+          "error": "404 models/gemini-1.5-flash is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods."
+        },
+        {
+          "test": "Follow-up Question",
+          "category": "conversation",
+          "success": false,
+          "error": "404 models/gemini-1.5-flash is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods."
+        },
+        {
+          "test": "Code Review",
+          "category": "analysis",
+          "success": false,
+          "error": "404 models/gemini-1.5-flash is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods."
+        }
+      ],
+      "avg_time": 0.0,
+      "success_rate": "0%"
+    },
+    {
+      "model": "gemini-1.5-flash-8b",
+      "provider": "Google Gemini",
+      "cost": "FREE (with limits)",
+      "results": [
+        {
+          "test": "Code Generation",
+          "category": "coding",
+          "success": false,
+          "error": "404 models/gemini-1.5-flash-8b is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods."
+        },
+        {
+          "test": "Technical Reasoning",
+          "category": "reasoning",
+          "success": false,
+          "error": "404 models/gemini-1.5-flash-8b is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods."
+        },
+        {
+          "test": "Follow-up Question",
+          "category": "conversation",
+          "success": false,
+          "error": "404 models/gemini-1.5-flash-8b is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods."
+        },
+        {
+          "test": "Code Review",
+          "category": "analysis",
+          "success": false,
+          "error": "404 models/gemini-1.5-flash-8b is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods."
+        }
+      ],
+      "avg_time": 0.0,
+      "success_rate": "0%"
+    },
+    {
+      "model": "gemma-3-27b-it",
+      "provider": "Google Gemini",
+      "cost": "FREE (with limits)",
+      "results": [
+        {
+          "test": "Code Generation",
+          "category": "coding",
+          "success": true,
+          "response_length": 1575,
+          "response_preview": "```python\ndef longest_palindromic_substring(s):\n    \"\"\"\n    Finds the longest palindromic substring in a given string.\n\n    Args:\n        s: The input string.\n\n    Returns:\n        The longest palindr...",
+          "time_seconds": 17.59,
+          "tokens_per_second": 12.79
+        },
+        {
+          "test": "Technical Reasoning",
+          "category": "reasoning",
+          "success": true,
+          "response_length": 1879,
+          "response_preview": "## Deep Copy vs. Shallow Copy in Python\n\nIn Python, when you copy an object, you're not necessarily creating a completely independent duplicate.  There are two main ways to copy: **shallow copy** and ...",
+          "time_seconds": 15.94,
+          "tokens_per_second": 17.62
+        },
+        {
+          "test": "Follow-up Question",
+          "category": "conversation",
+          "success": true,
+          "response_length": 2094,
+          "response_preview": "Here are a few natural, conversational follow-up questions, ranging in depth. I've included explanations of *why* they're good and what you're hoping to learn:\n\n**1. (Gentle, good for starting the con...",
+          "time_seconds": 13.24,
+          "tokens_per_second": 24.33
+        },
+        {
+          "test": "Code Review",
+          "category": "analysis",
+          "success": true,
+          "response_length": 2087,
+          "response_preview": "The code is functional and relatively easy to understand, but it can be improved in several ways for readability, efficiency, and Pythonic style. Here's a breakdown of improvements, from minor to more...",
+          "time_seconds": 13.34,
+          "tokens_per_second": 22.11
+        }
+      ],
+      "avg_time": 15.03,
+      "success_rate": "100%"
+    },
+    {
+      "model": "gemma-2-9b-it",
+      "provider": "Google Gemini",
+      "cost": "FREE (with limits)",
+      "results": [
+        {
+          "test": "Code Generation",
+          "category": "coding",
+          "success": false,
+          "error": "404 models/gemma-2-9b-it is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods."
+        },
+        {
+          "test": "Technical Reasoning",
+          "category": "reasoning",
+          "success": false,
+          "error": "404 models/gemma-2-9b-it is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods."
+        },
+        {
+          "test": "Follow-up Question",
+          "category": "conversation",
+          "success": false,
+          "error": "404 models/gemma-2-9b-it is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods."
+        },
+        {
+          "test": "Code Review",
+          "category": "analysis",
+          "success": false,
+          "error": "404 models/gemma-2-9b-it is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods."
+        }
+      ],
+      "avg_time": 0.0,
+      "success_rate": "0%"
+    },
+    {
+      "model": "Qwen 2.5 1.5B",
+      "provider": "Hugging Face",
+      "cost": "FREE (300 req/hour)",
+      "results": [
+        {
+          "test": "Code Generation",
+          "category": "coding",
+          "success": false,
+          "error": "Model Qwen/Qwen2.5-1.5B-Instruct is not supported for task text-generation and provider featherless-ai. Supported task: conversational."
+        },
+        {
+          "test": "Technical Reasoning",
+          "category": "reasoning",
+          "success": false,
+          "error": "Model Qwen/Qwen2.5-1.5B-Instruct is not supported for task text-generation and provider featherless-ai. Supported task: conversational."
+        },
+        {
+          "test": "Follow-up Question",
+          "category": "conversation",
+          "success": false,
+          "error": "Model Qwen/Qwen2.5-1.5B-Instruct is not supported for task text-generation and provider featherless-ai. Supported task: conversational."
+        },
+        {
+          "test": "Code Review",
+          "category": "analysis",
+          "success": false,
+          "error": "Model Qwen/Qwen2.5-1.5B-Instruct is not supported for task text-generation and provider featherless-ai. Supported task: conversational."
+        }
+      ],
+      "avg_time": 0.0,
+      "success_rate": "0%"
+    },
+    {
+      "model": "Qwen 2.5 7B",
+      "provider": "Hugging Face",
+      "cost": "FREE (300 req/hour)",
+      "results": [
+        {
+          "test": "Code Generation",
+          "category": "coding",
+          "success": true,
+          "response_length": 2051,
+          "response_preview": "To find the longest palindromic substring in a given string, we can use a dynamic programming approach or a center expansion technique. Here, I'll show you the center expansion technique, which is mor...",
+          "time_seconds": 4.22,
+          "tokens_per_second": 75.04
+        },
+        {
+          "test": "Technical Reasoning",
+          "category": "reasoning",
+          "success": true,
+          "response_length": 1804,
+          "response_preview": "In Python, the differences between a deep copy and a shallow copy are crucial when dealing with complex data structures, such as lists or objects that contain references to other objects. Here's a det...",
+          "time_seconds": 4.51,
+          "tokens_per_second": 65.69
+        },
+        {
+          "test": "Follow-up Question",
+          "category": "conversation",
+          "success": true,
+          "response_length": 159,
+          "response_preview": "That's a good approach! Can you give me an example of a situation where you used a try-except block, and how it helped you handle an error in your application?",
+          "time_seconds": 0.81,
+          "tokens_per_second": 37.27
+        },
+        {
+          "test": "Code Review",
+          "category": "analysis",
+          "success": true,
+          "response_length": 1737,
+          "response_preview": "Sure, here is a review of the provided code and some suggestions for improvement:\n\n### Review:\n1. **Functionality**: The function `process_data` processes an input list `data` and returns a new list w...",
+          "time_seconds": 3.5,
+          "tokens_per_second": 79.76
+        }
+      ],
+      "avg_time": 3.26,
+      "success_rate": "100%"
+    },
+    {
+      "model": "Mistral 7B Instruct",
+      "provider": "Hugging Face",
+      "cost": "FREE (300 req/hour)",
+      "results": [
+        {
+          "test": "Code Generation",
+          "category": "coding",
+          "success": false,
+          "error": "Model mistralai/Mistral-7B-Instruct-v0.3 is not supported for task text-generation and provider together. Supported task: conversational."
+        },
+        {
+          "test": "Technical Reasoning",
+          "category": "reasoning",
+          "success": false,
+          "error": "Model mistralai/Mistral-7B-Instruct-v0.3 is not supported for task text-generation and provider together. Supported task: conversational."
+        },
+        {
+          "test": "Follow-up Question",
+          "category": "conversation",
+          "success": false,
+          "error": "Model mistralai/Mistral-7B-Instruct-v0.3 is not supported for task text-generation and provider together. Supported task: conversational."
+        },
+        {
+          "test": "Code Review",
+          "category": "analysis",
+          "success": false,
+          "error": "Model mistralai/Mistral-7B-Instruct-v0.3 is not supported for task text-generation and provider together. Supported task: conversational."
+        }
+      ],
+      "avg_time": 0.0,
+      "success_rate": "0%"
+    },
+    {
+      "model": "LLaMA 3.2 3B",
+      "provider": "Hugging Face",
+      "cost": "FREE (300 req/hour)",
+      "results": [
+        {
+          "test": "Code Generation",
+          "category": "coding",
+          "success": true,
+          "response_length": 2115,
+          "response_preview": "**Longest Palindromic Substring Function**\n=============================================\n\nHere's a Python function that uses the expand-around-center approach to find the longest palindromic substring...",
+          "time_seconds": 4.65,
+          "tokens_per_second": 56.74
+        },
+        {
+          "test": "Technical Reasoning",
+          "category": "reasoning",
+          "success": true,
+          "response_length": 2135,
+          "response_preview": "**Deep Copy vs Shallow Copy in Python**\n=====================================================\n\nIn Python, when you create a copy of an object, you can choose between a shallow copy and a deep copy. Th...",
+          "time_seconds": 4.67,
+          "tokens_per_second": 73.16
+        },
+        {
+          "test": "Follow-up Question",
+          "category": "conversation",
+          "success": true,
+          "response_length": 309,
+          "response_preview": "\"That's a good start, but can you think of a scenario where you might want to not just catch an error, but also log it or take some other action after you've handled it? For example, what if an error ...",
+          "time_seconds": 1.43,
+          "tokens_per_second": 41.9
+        },
+        {
+          "test": "Code Review",
+          "category": "analysis",
+          "success": true,
+          "response_length": 1978,
+          "response_preview": "**Code Review and Suggestions**\n\nThe provided code is a simple function to process an array of numbers. Here's a review of the code with some suggestions for improvement:\n\n### Code Issues\n\n1.  **Ineff...",
+          "time_seconds": 4.4,
+          "tokens_per_second": 70.84
+        }
+      ],
+      "avg_time": 3.79,
+      "success_rate": "100%"
+    },
+    {
+      "model": "Zephyr 7B",
+      "provider": "Hugging Face",
+      "cost": "FREE (300 req/hour)",
+      "results": [
+        {
+          "test": "Code Generation",
+          "category": "coding",
+          "success": false,
+          "error": "Model HuggingFaceH4/zephyr-7b-beta is not supported for task text-generation and provider featherless-ai. Supported task: conversational."
+        },
+        {
+          "test": "Technical Reasoning",
+          "category": "reasoning",
+          "success": false,
+          "error": "Model HuggingFaceH4/zephyr-7b-beta is not supported for task text-generation and provider featherless-ai. Supported task: conversational."
+        },
+        {
+          "test": "Follow-up Question",
+          "category": "conversation",
+          "success": false,
+          "error": "Model HuggingFaceH4/zephyr-7b-beta is not supported for task text-generation and provider featherless-ai. Supported task: conversational."
+        },
+        {
+          "test": "Code Review",
+          "category": "analysis",
+          "success": false,
+          "error": "Model HuggingFaceH4/zephyr-7b-beta is not supported for task text-generation and provider featherless-ai. Supported task: conversational."
+        }
+      ],
+      "avg_time": 0.0,
+      "success_rate": "0%"
+    },
+    {
+      "model": "Phi-3 Mini",
+      "provider": "Hugging Face",
+      "cost": "FREE (300 req/hour)",
+      "results": [
+        {
+          "test": "Code Generation",
+          "category": "coding",
+          "success": false,
+          "error": ""
+        },
+        {
+          "test": "Technical Reasoning",
+          "category": "reasoning",
+          "success": false,
+          "error": ""
+        },
+        {
+          "test": "Follow-up Question",
+          "category": "conversation",
+          "success": false,
+          "error": ""
+        },
+        {
+          "test": "Code Review",
+          "category": "analysis",
+          "success": false,
+          "error": ""
+        }
+      ],
+      "avg_time": 0.0,
+      "success_rate": "0%"
+    }
+  ]
+}

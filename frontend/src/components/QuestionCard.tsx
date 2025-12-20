@@ -1,5 +1,7 @@
 'use client'
 
+import React, { useMemo } from 'react'
+
 interface QuestionCardProps {
   question: string
   questionType: string
@@ -14,13 +16,19 @@ function getFollowupLabel(questionNum: number, followupNum: number): string {
   return `${questionNum}-${letter}`
 }
 
-export default function QuestionCard({
+const QuestionCard: React.FC<QuestionCardProps> = React.memo(({
   question,
   questionType,
   isFollowup,
   followupNumber,
   questionNumber = 1,
-}: QuestionCardProps) {
+}) => {
+  const displayLabel = useMemo(() =>
+    isFollowup
+      ? getFollowupLabel(questionNumber, followupNumber)
+      : `Question ${questionNumber}`,
+    [isFollowup, questionNumber, followupNumber]
+  )
   if (!question) {
     return (
       <div className="bg-dark-black-light rounded-lg p-8 border border-gray-800">
@@ -31,18 +39,13 @@ export default function QuestionCard({
     )
   }
 
-  const displayLabel = isFollowup 
-    ? getFollowupLabel(questionNumber, followupNumber)
-    : `Question ${questionNumber}`
-
   return (
     <div className="bg-dark-black-light rounded-lg p-8 border border-gray-800">
       <div className="flex items-center gap-3 mb-4">
-        <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-          isFollowup 
-            ? 'bg-primary-orange/20 text-primary-orange border border-primary-orange/30' 
+        <span className={`px-3 py-1 rounded-full text-sm font-medium ${isFollowup
+            ? 'bg-primary-orange/20 text-primary-orange border border-primary-orange/30'
             : 'bg-primary-orange text-dark-black'
-        }`}>
+          }`}>
           {displayLabel}
         </span>
         {isFollowup && (
@@ -59,5 +62,9 @@ export default function QuestionCard({
       </div>
     </div>
   )
-}
+})
+
+QuestionCard.displayName = 'QuestionCard'
+
+export default QuestionCard
 

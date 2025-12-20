@@ -36,12 +36,10 @@ export default function Header({ showQuickStart = true, showBackToDashboard = fa
                 </svg>
               </button>
 
-              {/* EPAM Logo */}
+              {/* SwarmHire Logo */}
               <Link href="/" className="flex items-center">
-                <span className="text-xl font-light tracking-tight text-black dark:text-white">
-                  <span className="text-epam-cyan">&lt;</span>
-                  epam
-                  <span className="text-epam-cyan">&gt;</span>
+                <span className="text-xl font-bold tracking-tight text-black dark:text-white">
+                  Swarm<span className="text-brand-primary">Hire</span>
                 </span>
               </Link>
 
@@ -52,54 +50,51 @@ export default function Header({ showQuickStart = true, showBackToDashboard = fa
             {/* Center - Navigation (Desktop) */}
             <nav className="hidden md:flex items-center gap-8">
               <Link
-                href="/"
-                className={`text-sm font-normal transition-colors ${pathname === '/'
+                href="/#features"
+                className={`text-sm font-normal transition-colors ${pathname === '/#features'
                   ? 'text-black dark:text-white'
                   : 'text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white'
                   }`}
               >
-                Dashboard
+                Features
               </Link>
 
               <Link
-                href="/admin/results"
-                className={`text-sm font-normal transition-colors ${pathname === '/admin/results'
+                href="/#pricing"
+                className={`text-sm font-normal transition-colors ${pathname === '/#pricing'
                   ? 'text-black dark:text-white'
                   : 'text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white'
                   }`}
               >
-                Feedback
+                Pricing
               </Link>
 
               <Link
-                href="/wiki"
-                className={`text-sm font-normal transition-colors flex items-center gap-1.5 ${pathname === '/wiki'
-                  ? 'text-epam-cyan'
-                  : 'text-gray-500 dark:text-gray-400 hover:text-epam-cyan'
-                  }`}
-              >
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
-                </svg>
-                Wiki
-              </Link>
-
-              <Link
-                href="/docs"
-                className={`text-sm font-normal transition-colors flex items-center gap-1.5 ${pathname === '/docs'
-                  ? 'text-epam-cyan'
+                href="/#about"
+                className={`text-sm font-normal transition-colors ${pathname === '/#about'
+                  ? 'text-black dark:text-white'
                   : 'text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white'
                   }`}
               >
-                Docs
+                About
+              </Link>
+
+              <Link
+                href="/resources"
+                className={`text-sm font-normal transition-colors ${pathname === '/resources'
+                  ? 'text-black dark:text-white'
+                  : 'text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white'
+                  }`}
+              >
+                Resources
               </Link>
             </nav>
 
-            {/* Right Side - CTA & Global */}
+            {/* Right Side - CTA & Login */}
             <div className="flex items-center gap-4">
               {showBackToDashboard && (
                 <Link
-                  href="/"
+                  href="/dashboard"
                   className="hidden sm:flex items-center gap-1 text-sm text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white transition-colors"
                 >
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -109,13 +104,21 @@ export default function Header({ showQuickStart = true, showBackToDashboard = fa
                 </Link>
               )}
 
-              {/* Quick Start Button - Only show if not on quick-start page */}
+              {/* Login Link */}
+              <Link
+                href="/dashboard"
+                className="hidden sm:block text-sm font-normal text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white transition-colors"
+              >
+                Login
+              </Link>
+
+              {/* Get Started CTA */}
               {showQuickStart && pathname !== '/quick-start' && (
                 <Link
                   href="/quick-start"
-                  className="hidden sm:block px-5 py-2 text-sm font-medium border border-epam-cyan text-epam-cyan hover:bg-epam-cyan/10 transition-colors"
+                  className="hidden sm:block px-6 py-2.5 text-sm font-medium bg-black dark:bg-white text-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-100 transition-colors rounded-lg"
                 >
-                  QUICK START
+                  Get Started
                 </Link>
               )}
 
@@ -134,56 +137,59 @@ export default function Header({ showQuickStart = true, showBackToDashboard = fa
         <div className="md:hidden fixed inset-0 z-40 bg-white dark:bg-black">
           <div className="pt-20 px-6 space-y-6">
             <Link
-              href="/"
+              href="/#features"
               onClick={() => setMobileMenuOpen(false)}
-              className={`block text-2xl font-light ${pathname === '/' ? 'text-epam-cyan' : 'text-black dark:text-white'
+              className={`block text-2xl font-light ${pathname === '/#features' ? 'text-brand-primary' : 'text-black dark:text-white'
                 }`}
             >
-              Dashboard
+              Features
             </Link>
 
             <Link
-              href="/admin/results"
+              href="/#pricing"
               onClick={() => setMobileMenuOpen(false)}
-              className={`block text-2xl font-light ${pathname === '/admin/results' ? 'text-epam-cyan' : 'text-black dark:text-white'
+              className={`block text-2xl font-light ${pathname === '/#pricing' ? 'text-brand-primary' : 'text-black dark:text-white'
                 }`}
             >
-              Feedback
+              Pricing
             </Link>
 
             <Link
-              href="/wiki"
+              href="/#about"
               onClick={() => setMobileMenuOpen(false)}
-              className={`block text-2xl font-light ${pathname === '/wiki' ? 'text-epam-cyan' : 'text-black dark:text-white'
+              className={`block text-2xl font-light ${pathname === '/#about' ? 'text-brand-primary' : 'text-black dark:text-white'
                 }`}
             >
-              Wiki
+              About
             </Link>
 
-            {showQuickStart && (
+            <Link
+              href="/resources"
+              onClick={() => setMobileMenuOpen(false)}
+              className={`block text-2xl font-light ${pathname === '/resources' ? 'text-brand-primary' : 'text-black dark:text-white'
+                }`}
+            >
+              Resources
+            </Link>
+
+            <div className="pt-6 border-t border-gray-200 dark:border-[#2A2A2A] space-y-4">
               <Link
-                href="/quick-start"
+                href="/dashboard"
                 onClick={() => setMobileMenuOpen(false)}
-                className={`block text-2xl font-light ${pathname === '/quick-start' ? 'text-epam-cyan' : 'text-black dark:text-white'
-                  }`}
+                className="block text-lg font-normal text-gray-500 dark:text-gray-400"
               >
-                Quick Start
+                Login
               </Link>
-            )}
 
-            <Link
-              href="/docs"
-              onClick={() => setMobileMenuOpen(false)}
-              className={`block text-2xl font-light ${pathname === '/docs' ? 'text-epam-cyan' : 'text-black dark:text-white'
-                }`}
-            >
-              Docs
-            </Link>
-
-            <div className="pt-6 border-t border-gray-200 dark:border-[#2A2A2A]">
-              <span className="text-sm text-gray-500 dark:text-gray-400">
-                Global (EN)
-              </span>
+              {showQuickStart && (
+                <Link
+                  href="/quick-start"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="block px-6 py-3 text-center text-sm font-medium bg-black dark:bg-white text-white dark:text-black rounded-lg"
+                >
+                  Get Started
+                </Link>
+              )}
             </div>
           </div>
         </div>

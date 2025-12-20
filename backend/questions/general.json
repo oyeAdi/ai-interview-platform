@@ -1,0 +1,204 @@
+{
+    "behavioral": [
+        {
+            "id": "beh_001",
+            "question": "Tell me about a time when you had to handle a difficult situation at work. How did you approach it, and what was the outcome?",
+            "category": "behavioral",
+            "difficulty": "medium",
+            "expected_answer": "Should demonstrate problem-solving, professionalism, conflict resolution, and ability to learn from challenges."
+        },
+        {
+            "id": "beh_002",
+            "question": "Describe a situation where you had to work as part of a team to achieve a goal. What was your role, and how did you contribute?",
+            "category": "behavioral",
+            "difficulty": "easy",
+            "expected_answer": "Should show teamwork, collaboration, communication, and understanding of team dynamics."
+        },
+        {
+            "id": "beh_003",
+            "question": "Give me an example of a time when you went above and beyond your job responsibilities. What motivated you to do so?",
+            "category": "behavioral",
+            "difficulty": "medium",
+            "expected_answer": "Should demonstrate initiative, dedication, work ethic, and intrinsic motivation."
+        },
+        {
+            "id": "beh_004",
+            "question": "Tell me about a time when you received constructive criticism. How did you respond, and what did you learn from it?",
+            "category": "behavioral",
+            "difficulty": "medium",
+            "expected_answer": "Should show openness to feedback, growth mindset, emotional intelligence, and ability to improve."
+        },
+        {
+            "id": "beh_005",
+            "question": "Describe a situation where you had to adapt to a significant change at work. How did you handle it?",
+            "category": "behavioral",
+            "difficulty": "medium",
+            "expected_answer": "Should demonstrate flexibility, resilience, positive attitude, and ability to manage change."
+        },
+        {
+            "id": "beh_006",
+            "question": "Tell me about a time when you had to meet a tight deadline. How did you prioritize your tasks and ensure completion?",
+            "category": "behavioral",
+            "difficulty": "easy",
+            "expected_answer": "Should show time management, prioritization skills, ability to work under pressure, and organizational skills."
+        },
+        {
+            "id": "beh_007",
+            "question": "Give an example of a time when you had to deal with a difficult coworker or customer. How did you handle the situation?",
+            "category": "behavioral",
+            "difficulty": "hard",
+            "expected_answer": "Should demonstrate interpersonal skills, patience, empathy, conflict resolution, and professionalism."
+        },
+        {
+            "id": "beh_008",
+            "question": "Describe a situation where you made a mistake at work. How did you handle it, and what did you learn?",
+            "category": "behavioral",
+            "difficulty": "medium",
+            "expected_answer": "Should show accountability, honesty, problem-solving, and ability to learn from mistakes."
+        },
+        {
+            "id": "beh_009",
+            "question": "Tell me about a time when you had to take initiative without being asked. What was the situation, and what did you do?",
+            "category": "behavioral",
+            "difficulty": "medium",
+            "expected_answer": "Should demonstrate proactivity, leadership potential, self-motivation, and ownership."
+        },
+        {
+            "id": "beh_010",
+            "question": "Describe a situation where you had to balance multiple priorities. How did you decide what to focus on first?",
+            "category": "behavioral",
+            "difficulty": "medium",
+            "expected_answer": "Should show decision-making skills, prioritization, time management, and strategic thinking."
+        }
+    ],
+    "communication": [
+        {
+            "id": "comm_001",
+            "question": "How do you handle communication with team members when there's a misunderstanding or miscommunication?",
+            "category": "communication",
+            "difficulty": "medium",
+            "expected_answer": "Should demonstrate active listening, clarity, empathy, and conflict resolution through communication."
+        },
+        {
+            "id": "comm_002",
+            "question": "Describe a time when you had to explain a complex concept to someone who was unfamiliar with it. How did you ensure they understood?",
+            "category": "communication",
+            "difficulty": "medium",
+            "expected_answer": "Should show ability to simplify information, adapt communication style, check for understanding, and patience."
+        },
+        {
+            "id": "comm_003",
+            "question": "Tell me about a situation where you had to deliver bad news to a colleague or customer. How did you approach it?",
+            "category": "communication",
+            "difficulty": "hard",
+            "expected_answer": "Should demonstrate tact, empathy, honesty, professionalism, and ability to manage difficult conversations."
+        },
+        {
+            "id": "comm_004",
+            "question": "How do you ensure effective communication when working with people from different backgrounds or departments?",
+            "category": "communication",
+            "difficulty": "medium",
+            "expected_answer": "Should show cultural awareness, adaptability, active listening, and cross-functional collaboration skills."
+        },
+        {
+            "id": "comm_005",
+            "question": "Give an example of a time when you had to persuade someone to see things from your perspective. What approach did you take?",
+            "category": "communication",
+            "difficulty": "medium",
+            "expected_answer": "Should demonstrate persuasion skills, logical reasoning, empathy, and ability to build consensus."
+        },
+        {
+            "id": "comm_006",
+            "question": "Describe a situation where you had to communicate important information to a large group. How did you prepare and deliver the message?",
+            "category": "communication",
+            "difficulty": "hard",
+            "expected_answer": "Should show presentation skills, preparation, clarity, confidence, and ability to engage an audience."
+        },
+        {
+            "id": "comm_007",
+            "question": "How do you handle situations where you don't have all the information but need to communicate with stakeholders?",
+            "category": "communication",
+            "difficulty": "medium",
+            "expected_answer": "Should demonstrate transparency, honesty, managing expectations, and follow-up communication."
+        },
+        {
+            "id": "comm_008",
+            "question": "Tell me about a time when you had to give constructive feedback to a colleague. How did you approach it?",
+            "category": "communication",
+            "difficulty": "hard",
+            "expected_answer": "Should show tact, empathy, specific examples, focus on behavior not person, and supportive approach."
+        },
+        {
+            "id": "comm_009",
+            "question": "Describe how you adapt your communication style when dealing with different types of people (e.g., technical vs. non-technical, senior vs. junior).",
+            "category": "communication",
+            "difficulty": "medium",
+            "expected_answer": "Should demonstrate emotional intelligence, adaptability, audience awareness, and effective communication strategies."
+        },
+        {
+            "id": "comm_010",
+            "question": "How do you ensure that your written communication (emails, reports, etc.) is clear and effective?",
+            "category": "communication",
+            "difficulty": "easy",
+            "expected_answer": "Should show attention to detail, clarity, structure, proofreading, and consideration of audience."
+        }
+    ],
+    "problem_solving": [
+        {
+            "id": "prob_001",
+            "question": "Walk me through how you would prioritize tasks when you have multiple urgent requests from different people.",
+            "category": "problem_solving",
+            "difficulty": "medium",
+            "expected_answer": "Should demonstrate analytical thinking, prioritization framework, stakeholder management, and decision-making."
+        },
+        {
+            "id": "prob_002",
+            "question": "Describe a time when you identified a problem that others had overlooked. How did you bring it to attention and resolve it?",
+            "category": "problem_solving",
+            "difficulty": "medium",
+            "expected_answer": "Should show attention to detail, proactivity, analytical skills, and ability to communicate concerns effectively."
+        },
+        {
+            "id": "prob_003",
+            "question": "Tell me about a situation where you had to make a decision with incomplete information. How did you approach it?",
+            "category": "problem_solving",
+            "difficulty": "hard",
+            "expected_answer": "Should demonstrate risk assessment, critical thinking, ability to work with ambiguity, and sound judgment."
+        },
+        {
+            "id": "prob_004",
+            "question": "How do you approach a problem that you've never encountered before? Walk me through your thought process.",
+            "category": "problem_solving",
+            "difficulty": "medium",
+            "expected_answer": "Should show systematic approach, resourcefulness, learning agility, and problem-solving methodology."
+        },
+        {
+            "id": "prob_005",
+            "question": "Describe a time when your initial solution to a problem didn't work. What did you do next?",
+            "category": "problem_solving",
+            "difficulty": "medium",
+            "expected_answer": "Should demonstrate resilience, adaptability, learning from failure, and iterative problem-solving."
+        },
+        {
+            "id": "prob_006",
+            "question": "Tell me about a time when you had to find a creative solution to a challenging problem with limited resources.",
+            "category": "problem_solving",
+            "difficulty": "hard",
+            "expected_answer": "Should show creativity, resourcefulness, innovation, and ability to work within constraints."
+        },
+        {
+            "id": "prob_007",
+            "question": "How do you determine the root cause of a problem rather than just addressing symptoms?",
+            "category": "problem_solving",
+            "difficulty": "medium",
+            "expected_answer": "Should demonstrate analytical thinking, systematic approach, asking 'why', and root cause analysis skills."
+        },
+        {
+            "id": "prob_008",
+            "question": "Describe a situation where you had to balance short-term fixes with long-term solutions. How did you decide?",
+            "category": "problem_solving",
+            "difficulty": "hard",
+            "expected_answer": "Should show strategic thinking, trade-off analysis, business acumen, and balanced decision-making."
+        }
+    ]
+}

@@ -19,7 +19,28 @@ class QuestionManager:
     
     def load_question_bank(self):
         """Load question bank from JSON file"""
-        # First try the centralized question bank
+        # Special case: For non-technical roles (language="General"), load from general.json
+        if self.language.lower() == "general":
+            general_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "questions", "general.json")
+            if os.path.exists(general_path):
+                with open(general_path, 'r', encoding='utf-8') as f:
+                    data = json.load(f)
+                    # Flatten all categories into question_bank
+                    self.question_bank = []
+                    for category, questions in data.items():
+                        for q in questions:
+                            # Add category if not present
+                            if 'category' not in q:
+                                q['category'] = category
+                            self.question_bank.append(q)
+                print(f"[QuestionManager] Loaded {len(self.question_bank)} questions from general.json for non-technical role")
+                return
+            else:
+                print(f"[QuestionManager] WARNING: general.json not found at {general_path}")
+                self.question_bank = []
+                return
+        
+        # For technical roles: First try the centralized question bank
         if os.path.exists(QUESTION_BANK_PATH):
             with open(QUESTION_BANK_PATH, 'r', encoding='utf-8') as f:
                 data = json.load(f)
@@ -123,6 +144,7 @@ class QuestionManager:
     
     def find_seed_question(
         self, 
+        role_type: str = None,  # NEW: Role-based filtering
         experience_level: str = "mid",
         skills: List[str] = None,
         category: str = None,
@@ -147,8 +169,22 @@ class QuestionManager:
         skills = skills or []
         candidates = []
         
+        # Get excluded categories for this role (if role_type provided)
+        excluded_categories = []
+        if role_type:
+            try:
+                from config.role_categories import get_excluded_categories
+                excluded_categories = get_excluded_categories(role_type)
+            except ImportError:
+                pass  # Fallback if role_categories not available
+        
         for q in self.question_bank:
             score = 0
+            
+            # HARD FILTER: Exclude inappropriate categories for this role
+            q_category = q.get("category", "")
+            if q_category in excluded_categories:
+                continue  # ⭐ PM will NEVER see coding questions!
             
             # Match experience level
             q_levels = q.get("experience_levels", [])
@@ -208,8 +244,12 @@ class QuestionManager:
                 candidates.append((score, q))
         
         if not candidates:
-            # Return any available question
-            available = [q for q in self.question_bank if q["id"] not in self.questions_asked]
+            # Return any available question (excluding inappropriate categories)
+            available = [
+                q for q in self.question_bank 
+                if q["id"] not in self.questions_asked
+                and q.get("category", "") not in excluded_categories
+            ]
             return random.choice(available) if available else None
         
         # Sort by score descending and return best match

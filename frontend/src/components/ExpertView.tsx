@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import LogViewer from './LogViewer'
 import LiveScores from './LiveScores'
+import EndInterviewModal from './EndInterviewModal'
 import { apiUrl, wsUrl } from '@/config/api'
 
 interface ExpertViewProps {
@@ -25,7 +26,8 @@ export default function ExpertView({ sessionId, language }: ExpertViewProps) {
   const [strategy, setStrategy] = useState<any>(null)
   const [logData, setLogData] = useState<any>(null)
   const [progress, setProgress] = useState({ rounds_completed: 0, total_rounds: 3, percentage: 0, current_followup: 0, max_followups: 2 })
-  
+  const [interviewCompleted, setInterviewCompleted] = useState(false)
+
   // Expert mode states
   const [pendingFollowup, setPendingFollowup] = useState<any>(null)
   const [editedText, setEditedText] = useState<string>('')
@@ -33,7 +35,11 @@ export default function ExpertView({ sessionId, language }: ExpertViewProps) {
   const [rating, setRating] = useState<'good' | 'bad' | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [mode, setMode] = useState<'review' | 'edit' | 'override'>('review')
-  
+
+  // End Interview modal state
+  const [showEndModal, setShowEndModal] = useState(false)
+  const [isEndingInterview, setIsEndingInterview] = useState(false)
+
   const wsRef = useRef<WebSocket | null>(null)
 
   useEffect(() => {
@@ -55,7 +61,7 @@ export default function ExpertView({ sessionId, language }: ExpertViewProps) {
         try {
           const message = JSON.parse(event.data)
           console.log('Expert received:', message.type, message.data)
-          
+
           if (message.type === 'evaluation') {
             setEvaluation(message.data)
           } else if (message.type === 'strategy_change') {
@@ -65,16 +71,16 @@ export default function ExpertView({ sessionId, language }: ExpertViewProps) {
           } else if (message.type === 'progress') {
             setProgress(prev => ({ ...prev, ...message.data }))
           } else if (message.type === 'question') {
-            setCurrentQuestion({ 
-              text: message.data?.text || message.text, 
+            setCurrentQuestion({
+              text: message.data?.text || message.text,
               isFollowup: false,
               questionNumber: message.data?.round_number || 1
             })
             setCandidateAnswer('')
             setPendingFollowup(null)
           } else if (message.type === 'followup') {
-            setCurrentQuestion((prev: CurrentQuestion | null) => ({ 
-              text: message.data?.text || message.text, 
+            setCurrentQuestion((prev: CurrentQuestion | null) => ({
+              text: message.data?.text || message.text,
               isFollowup: true,
               followupNumber: message.data?.followup_number || 1,
               questionNumber: prev?.questionNumber || 1
@@ -90,6 +96,10 @@ export default function ExpertView({ sessionId, language }: ExpertViewProps) {
             setCandidateAnswer(message.data?.text || '')
           } else if (message.type === 'response') {
             setCandidateAnswer(message.data?.text || '')
+          } else if (message.type === 'interview_completed') {
+            // Candidate completed the interview
+            setInterviewCompleted(true)
+            setConnectionStatus('disconnected')
           }
         } catch (error) {
           console.error('Error parsing message:', error)
@@ -116,10 +126,55 @@ export default function ExpertView({ sessionId, language }: ExpertViewProps) {
     }
   }, [sessionId])
 
+  const handleEndInterview = async () => {
+    setIsEndingInterview(true)
+    try {
+      const response = await fetch(apiUrl(`api/interview/${sessionId}/end`), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ended_by: 'expert',
+          reason: 'ended_by_expert'
+        })
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        console.log('Interview ended by expert:', data)
+        setShowEndModal(false)
+
+        // Notify through WebSocket to sync both views
+        if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+          wsRef.current.send(JSON.stringify({
+            type: 'interview_ended',
+            session_id: sessionId,
+            ended_by: 'expert'
+          }))
+        }
+
+        // Close WebSocket
+        if (wsRef.current) {
+          wsRef.current.close(1000, 'Interview ended')
+        }
+
+        // Redirect to feedback dashboard where expert can review and publish feedback
+        window.location.href = `/expert/results`  // Changed from /results/${sessionId} to /expert/results
+      } else {
+        const errorData = await response.json()
+        alert(errorData.detail || 'Failed to end interview')
+      }
+    } catch (error) {
+      console.error('Error ending interview:', error)
+      alert('Failed to end interview. Please try again.')
+    } finally {
+      setIsEndingInterview(false)
+    }
+  }
+
   const handleApprove = async () => {
     if (!pendingFollowup) return
     setIsSubmitting(true)
-    
+
     try {
       const response = await fetch(apiUrl('api/expert/approve'), {
         method: 'POST',
@@ -129,7 +184,7 @@ export default function ExpertView({ sessionId, language }: ExpertViewProps) {
           rating: rating
         })
       })
-      
+
       if (response.ok) {
         setPendingFollowup(null)
         setRating(null)
@@ -144,7 +199,7 @@ export default function ExpertView({ sessionId, language }: ExpertViewProps) {
   const handleEdit = async () => {
     if (!pendingFollowup || !editedText.trim()) return
     setIsSubmitting(true)
-    
+
     try {
       const response = await fetch(apiUrl('api/expert/edit'), {
         method: 'POST',
@@ -155,7 +210,7 @@ export default function ExpertView({ sessionId, language }: ExpertViewProps) {
           rating: rating
         })
       })
-      
+
       if (response.ok) {
         setPendingFollowup(null)
         setEditedText('')
@@ -172,7 +227,7 @@ export default function ExpertView({ sessionId, language }: ExpertViewProps) {
   const handleOverride = async () => {
     if (!customText.trim()) return
     setIsSubmitting(true)
-    
+
     try {
       const response = await fetch(apiUrl('api/expert/override'), {
         method: 'POST',
@@ -183,7 +238,7 @@ export default function ExpertView({ sessionId, language }: ExpertViewProps) {
           rating: rating
         })
       })
-      
+
       if (response.ok) {
         setPendingFollowup(null)
         setCustomText('')
@@ -215,16 +270,14 @@ export default function ExpertView({ sessionId, language }: ExpertViewProps) {
               <span className="px-3 py-1 bg-purple-500/20 text-purple-400 text-xs font-medium rounded-full">
                 Human-in-the-Loop
               </span>
-              <span className={`px-3 py-1.5 rounded-full text-xs font-medium ${
-                connectionStatus === 'connected' ? 'bg-[#39FF14]/10 text-[#39FF14]' :
+              <span className={`px-3 py-1.5 rounded-full text-xs font-medium ${connectionStatus === 'connected' ? 'bg-[#39FF14]/10 text-[#39FF14]' :
                 connectionStatus === 'connecting' ? 'bg-yellow-500/10 text-yellow-400' :
-                'bg-red-500/10 text-red-400'
-              }`}>
-                <span className={`inline-block w-2 h-2 rounded-full mr-2 ${
-                  connectionStatus === 'connected' ? 'bg-[#39FF14] animate-pulse' :
+                  'bg-red-500/10 text-red-400'
+                }`}>
+                <span className={`inline-block w-2 h-2 rounded-full mr-2 ${connectionStatus === 'connected' ? 'bg-[#39FF14] animate-pulse' :
                   connectionStatus === 'connecting' ? 'bg-yellow-400 animate-pulse' :
-                  'bg-red-400'
-                }`}></span>
+                    'bg-red-400'
+                  }`}></span>
                 {connectionStatus === 'connected' ? 'Live' : connectionStatus === 'connecting' ? 'Connecting...' : 'Disconnected'}
               </span>
             </div>
@@ -237,6 +290,12 @@ export default function ExpertView({ sessionId, language }: ExpertViewProps) {
                 <p className="text-xs text-gray-500">Session</p>
                 <p className="text-sm font-mono text-gray-300">{sessionId?.slice(0, 12)}...</p>
               </div>
+              <button
+                onClick={() => setShowEndModal(true)}
+                className="px-4 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 rounded-xl transition-colors font-medium text-sm"
+              >
+                End Interview
+              </button>
             </div>
           </div>
         </div>
@@ -257,7 +316,7 @@ export default function ExpertView({ sessionId, language }: ExpertViewProps) {
             <span className="text-sm font-mono text-[#39FF14]">{progress.percentage.toFixed(0)}%</span>
           </div>
           <div className="h-2 bg-gray-800 rounded-full overflow-hidden">
-            <div 
+            <div
               className="h-full bg-gradient-to-r from-[#39FF14] to-[#7FFF5C] transition-all duration-500"
               style={{ width: `${progress.percentage}%` }}
             />
@@ -318,11 +377,10 @@ export default function ExpertView({ sessionId, language }: ExpertViewProps) {
                       <button
                         key={m}
                         onClick={() => setMode(m)}
-                        className={`flex-1 px-3 py-2 text-sm rounded-lg transition-all ${
-                          mode === m 
-                            ? 'bg-[#39FF14] text-black font-semibold' 
-                            : 'text-gray-400 hover:text-white'
-                        }`}
+                        className={`flex-1 px-3 py-2 text-sm rounded-lg transition-all ${mode === m
+                          ? 'bg-[#39FF14] text-black font-semibold'
+                          : 'text-gray-400 hover:text-white'
+                          }`}
                       >
                         {m === 'review' ? 'Review & Approve' : m === 'edit' ? 'Edit' : 'Override'}
                       </button>
@@ -374,21 +432,19 @@ export default function ExpertView({ sessionId, language }: ExpertViewProps) {
                     <div className="flex gap-2">
                       <button
                         onClick={() => setRating('good')}
-                        className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
-                          rating === 'good' 
-                            ? 'bg-[#39FF14] text-black' 
-                            : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
-                        }`}
+                        className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${rating === 'good'
+                          ? 'bg-[#39FF14] text-black'
+                          : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
+                          }`}
                       >
                         👍 Good
                       </button>
                       <button
                         onClick={() => setRating('bad')}
-                        className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
-                          rating === 'bad' 
-                            ? 'bg-red-500 text-white' 
-                            : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
-                        }`}
+                        className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${rating === 'bad'
+                          ? 'bg-red-500 text-white'
+                          : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
+                          }`}
                       >
                         👎 Bad
                       </button>
@@ -429,8 +485,29 @@ export default function ExpertView({ sessionId, language }: ExpertViewProps) {
               </div>
             )}
 
+            {/* Interview Completed Message */}
+            {interviewCompleted && (
+              <div className="bg-[#141414] rounded-2xl border-2 border-[#39FF14]/50 p-8 text-center">
+                <div className="flex flex-col items-center gap-4">
+                  <div className="w-16 h-16 bg-[#39FF14]/20 rounded-full flex items-center justify-center">
+                    <svg className="w-8 h-8 text-[#39FF14]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                  <h3 className="text-xl font-bold text-white">Interview Completed</h3>
+                  <p className="text-gray-400">The candidate has completed the interview.</p>
+                  <a
+                    href="/expert/results"
+                    className="mt-4 px-6 py-3 bg-[#39FF14] hover:bg-[#7FFF5C] text-black font-semibold rounded-xl transition-colors"
+                  >
+                    View Results & Generate Feedback
+                  </a>
+                </div>
+              </div>
+            )}
+
             {/* No pending followup message */}
-            {!pendingFollowup && evaluation && (
+            {!pendingFollowup && evaluation && !interviewCompleted && (
               <div className="bg-[#141414] rounded-2xl border border-gray-800/50 p-5 text-center">
                 <p className="text-gray-400">Waiting for AI to generate follow-up question...</p>
               </div>
@@ -504,6 +581,14 @@ export default function ExpertView({ sessionId, language }: ExpertViewProps) {
           </a>
         </div>
       </main>
+
+      {/* End Interview Modal */}
+      <EndInterviewModal
+        isOpen={showEndModal}
+        onClose={() => setShowEndModal(false)}
+        onConfirm={handleEndInterview}
+        isEnding={isEndingInterview}
+      />
     </div>
   )
 }

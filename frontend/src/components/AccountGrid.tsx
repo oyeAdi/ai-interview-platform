@@ -52,9 +52,9 @@ export default function AccountGrid({
       const accountPositions = positions.filter(p => p.account_id === account.id)
       const openCount = accountPositions.filter(p => p.status === 'open').length
       const closedCount = accountPositions.filter(p => p.status === 'closed').length
-      
+
       // Find most recent position
-      const sortedPositions = [...accountPositions].sort((a, b) => 
+      const sortedPositions = [...accountPositions].sort((a, b) =>
         new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
       )
       const recentPosition = sortedPositions[0]
@@ -83,7 +83,7 @@ export default function AccountGrid({
   // Filter and sort accounts
   const filteredAccounts = useMemo(() => {
     let result = accountsWithCounts
-    
+
     // Filter by search
     if (search.trim()) {
       const searchLower = search.toLowerCase()
@@ -92,12 +92,12 @@ export default function AccountGrid({
         account.description?.toLowerCase().includes(searchLower)
       )
     }
-    
+
     // Filter by has open positions
     if (hasOpenOnly) {
       result = result.filter(account => account.positionCounts.open > 0)
     }
-    
+
     // Sort
     if (sortBy === 'name') {
       result = [...result].sort((a, b) => a.name.localeCompare(b.name))
@@ -111,7 +111,7 @@ export default function AccountGrid({
         return aDays - bDays
       })
     }
-    
+
     return result
   }, [accountsWithCounts, search, hasOpenOnly, sortBy])
 
@@ -119,12 +119,12 @@ export default function AccountGrid({
   const INITIAL_DISPLAY = 4
   const LOAD_MORE_COUNT = 4
   const [visibleCount, setVisibleCount] = useState(INITIAL_DISPLAY)
-  
+
   // Reset visible count when search or accounts change
   useEffect(() => {
     setVisibleCount(INITIAL_DISPLAY)
   }, [search, accounts.length])
-  
+
   const displayedAccounts = filteredAccounts.slice(0, visibleCount)
   const hasMore = filteredAccounts.length > visibleCount
   const remainingCount = filteredAccounts.length - visibleCount
@@ -166,35 +166,33 @@ export default function AccountGrid({
           Add
         </button>
       </div>
-      
+
       {/* Filters */}
       <div className="flex flex-wrap items-center gap-2">
         {/* Has Open Positions Toggle */}
         <button
           type="button"
           onClick={() => { setHasOpenOnly(!hasOpenOnly); setVisibleCount(INITIAL_DISPLAY) }}
-          className={`px-3 py-1.5 text-xs transition-colors flex items-center gap-1.5 ${
-            hasOpenOnly
+          className={`px-3 py-1.5 text-xs transition-colors flex items-center gap-1.5 ${hasOpenOnly
               ? 'bg-[#00E5FF] text-black'
               : 'bg-gray-100 dark:bg-[#1A1A1A] text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-[#2A2A2A]'
-          }`}
+            }`}
         >
           <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
           Has Open
         </button>
-        
+
         {/* Sort Dropdown */}
         <div className="relative">
           <select
             value={sortBy}
             onChange={(e) => { setSortBy(e.target.value); setVisibleCount(INITIAL_DISPLAY) }}
-            className={`appearance-none px-3 py-1.5 pr-7 text-xs cursor-pointer transition-colors ${
-              sortBy !== 'recent'
+            className={`appearance-none px-3 py-1.5 pr-7 text-xs cursor-pointer transition-colors ${sortBy !== 'recent'
                 ? 'bg-[#00E5FF] text-black'
                 : 'bg-gray-100 dark:bg-[#1A1A1A] text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-[#2A2A2A]'
-            }`}
+              }`}
           >
             {SORT_OPTIONS.map(opt => (
               <option key={opt.id} value={opt.id}>{opt.label}</option>
@@ -204,7 +202,7 @@ export default function AccountGrid({
             <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
           </svg>
         </div>
-        
+
         {/* Clear Filters */}
         {hasActiveFilters && (
           <button
@@ -215,7 +213,7 @@ export default function AccountGrid({
             Clear all
           </button>
         )}
-        
+
         {/* Results count */}
         <span className="ml-auto text-xs text-gray-500">
           {filteredAccounts.length} account{filteredAccounts.length !== 1 ? 's' : ''}
@@ -241,7 +239,7 @@ export default function AccountGrid({
         </div>
       ) : (
         <>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-4">
             {displayedAccounts.map(account => (
               <AccountCard
                 key={account.id}

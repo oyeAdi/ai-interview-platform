@@ -4,21 +4,20 @@ import { useSearchParams, usePathname } from 'next/navigation'
 import { Suspense, useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import CandidateView from '@/components/CandidateView'
-import AdminDashboard from '@/components/AdminDashboard'
 import ExpertView from '@/components/ExpertView'
 import Header from '@/components/Header'
 import { apiUrl } from '@/config/api'
 
 interface SessionInfo {
   session_id: string
-  view: 'candidate' | 'admin'
+  view: 'candidate' | 'expert'  // Changed from 'admin' to 'expert'
   position?: { id: string; title: string }
   candidate?: { id: string; name: string; experience_level?: string }
 }
 
 function AccessDenied({ message }: { message: string }) {
   const router = useRouter()
-  
+
   return (
     <div className="min-h-screen bg-white dark:bg-black flex flex-col">
       <Header showQuickStart={false} showBackToDashboard={true} />
@@ -58,32 +57,42 @@ function InterviewContent() {
   const searchParams = useSearchParams()
   const pathname = usePathname()
   const router = useRouter()
-  
+
   const [validating, setValidating] = useState(true)
   const [accessDenied, setAccessDenied] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
   const [sessionInfo, setSessionInfo] = useState<SessionInfo | null>(null)
-  
-  // Get params from URL
+
+  // Get params from URL - MUST be declared before useEffect
   const token = searchParams.get('token')
   const viewParam = searchParams.get('view')
   const sessionIdParam = searchParams.get('session_id')
   const langParam = searchParams.get('lang')
-  
+
   // Extract session_id from pathname if using /interview/{session_id} format
   const pathSessionId = pathname.split('/interview/')[1]?.split('?')[0]
+
+  // Backward compatibility: redirect admin → expert
+  useEffect(() => {
+    // Handle expert view with session_id
+    if ((viewParam === 'expert' || viewParam === 'admin') && sessionIdParam) {  // Support both for backward compatibility
+      console.warn('[DEPRECATED] Admin view is deprecated, redirecting to expert view')
+      const newUrl = `/interview?view=expert&session_id=${sessionIdParam}${langParam ? `&lang=${langParam}` : ''}`
+      router.replace(newUrl)
+    }
+  }, [viewParam, sessionIdParam, langParam, router])
 
   useEffect(() => {
     const validateAccess = async () => {
       setValidating(true)
-      
-      // New format: /interview/{session_id}?token=xxx&view=candidate|admin
+
+      // New format: /interview/{session_id}?token=xxx&view=candidate|expert
       if (pathSessionId && token) {
         try {
           const response = await fetch(
             apiUrl(`api/interview/validate-token?session_id=${pathSessionId}&token=${token}`)
           )
-          
+
           if (!response.ok) {
             const data = await response.json()
             setAccessDenied(true)
@@ -91,23 +100,23 @@ function InterviewContent() {
             setValidating(false)
             return
           }
-          
+
           const data = await response.json()
-          
+
           if (data.valid) {
             // Get full session details
             const sessionResponse = await fetch(
               apiUrl(`api/interview/session/${pathSessionId}?token=${token}`)
             )
             const sessionData = await sessionResponse.json()
-            
+
             setSessionInfo({
               session_id: pathSessionId,
-              view: data.view as 'candidate' | 'admin',
+              view: data.view as 'candidate' | 'expert',
               position: sessionData.position,
               candidate: sessionData.candidate
             })
-            
+
             // Store for later use
             localStorage.setItem('current_session_id', pathSessionId)
             localStorage.setItem('interview_view', data.view)
@@ -120,17 +129,17 @@ function InterviewContent() {
           setAccessDenied(true)
           setErrorMessage('Failed to validate access. Please try again.')
         }
-        
+
         setValidating(false)
         return
       }
-      
+
       // Legacy format: /interview?view=xxx&session_id=xxx&lang=xxx
       // This supports the old flow (direct navigation from dashboard)
       if (sessionIdParam && viewParam) {
         setSessionInfo({
           session_id: sessionIdParam,
-          view: viewParam === 'admin' || viewParam === 'expert' ? 'admin' : 'candidate'
+          view: viewParam === 'expert' || viewParam === 'admin' ? 'expert' : 'candidate'
         })
         localStorage.setItem('current_session_id', sessionIdParam)
         if (langParam) {
@@ -139,13 +148,13 @@ function InterviewContent() {
         setValidating(false)
         return
       }
-      
+
       // No valid params - show error
       setAccessDenied(true)
       setErrorMessage('No valid session information provided. Please use a valid interview link.')
       setValidating(false)
     }
-    
+
     validateAccess()
   }, [pathSessionId, token, sessionIdParam, viewParam, langParam])
 
@@ -153,30 +162,27 @@ function InterviewContent() {
   if (validating) {
     return <LoadingScreen />
   }
-  
+
   // Show access denied
   if (accessDenied) {
     return <AccessDenied message={errorMessage} />
   }
-  
+
   // No session info - shouldn't happen but handle gracefully
   if (!sessionInfo) {
     return <AccessDenied message="Session information not found" />
   }
-  
+
   // Get language from localStorage or params
   const language = langParam || localStorage.getItem('current_language') || 'python'
   const expertMode = localStorage.getItem('expert_mode') === 'true'
-  
+
   // Render appropriate view based on validated role
-  if (sessionInfo.view === 'admin') {
-    // Check if expert mode was requested
-    if (expertMode || viewParam === 'expert') {
-      return <ExpertView sessionId={sessionInfo.session_id} language={language} />
-    }
-    return <AdminDashboard sessionId={sessionInfo.session_id} language={language} />
+  // Note: admin view is deprecated, always use expert for admin/expert roles
+  if (sessionInfo.view === 'expert' || viewParam === 'expert') {
+    return <ExpertView sessionId={sessionInfo.session_id} language={language} />
   }
-  
+
   // Candidate view
   return <CandidateView sessionId={sessionInfo.session_id} language={language} />
 }

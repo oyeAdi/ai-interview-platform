@@ -1,8 +1,8 @@
 """Log management - continuous appending to log.json"""
 import json
 import os
-from typing import Dict, Optional
-from datetime import datetime
+from typing import Dict, Optional, List
+from datetime import datetime, timedelta
 from config import Config
 
 class Logger:
@@ -54,29 +54,72 @@ class Logger:
                 return i
         return None
     
+    def _cleanup_old_sessions(self, log_data: Dict):
+        """Clean slate approach: Archive ALL old sessions, keep ONLY the current session"""
+        sessions = log_data.get("interview_sessions", [])
+        
+        if len(sessions) <= 1:
+            # Only current session, nothing to cleanup
+            return
+        
+        # Archive ALL sessions except the last one (current session)
+        old_sessions = sessions[:-1]
+        current_session = sessions[-1:]
+        
+        if old_sessions:
+            self._archive_sessions(old_sessions)
+            log_data["interview_sessions"] = current_session
+            print(f"[INFO] Clean slate: Archived {len(old_sessions)} old sessions, keeping only current session")
+    
+    def _archive_sessions(self, sessions: List[Dict]):
+        """Archive old sessions to log_archive.json"""
+        archive_file = Config.LOG_ARCHIVE_FILE
+        
+        # Load existing archive
+        if os.path.exists(archive_file):
+            try:
+                with open(archive_file, 'r', encoding='utf-8') as f:
+                    archive_data = json.load(f)
+            except (FileNotFoundError, json.JSONDecodeError):
+                archive_data = {"archived_sessions": []}
+        else:
+            archive_data = {"archived_sessions": []}
+        
+        # Append old sessions
+        archive_data["archived_sessions"].extend(sessions)
+        archive_data["last_archived"] = datetime.now().isoformat()
+        archive_data["total_archived"] = len(archive_data["archived_sessions"])
+        
+        # Save archive
+        os.makedirs(os.path.dirname(archive_file), exist_ok=True)
+        with open(archive_file, 'w', encoding='utf-8') as f:
+            json.dump(archive_data, f, indent=2, ensure_ascii=False)
+        
+        print(f"[INFO] Archived {len(sessions)} sessions to {archive_file}")
+    
     def initialize_session(self, session_id: str, language: str, jd_id: Optional[str] = None):
-        """Initialize new session in log"""
+        """Initialize new session in log - MINIMAL data only with hybrid cleanup"""
         log_data = self._load_log()
         
         # Check if session already exists
         session_idx = self._find_session(session_id, log_data)
         
         if session_idx is None:
-            # Create new session
+            # Create new session with MINIMAL data
+            # NO duplicates - state data belongs in sessions.json
             new_session = {
-                "session_id": session_id,
-                "timestamp": datetime.now().isoformat(),
-                "detected_language": language,
-                "jd_id": jd_id,
-                "config": {
-                    "total_questions": Config.DEFAULT_QUESTIONS,
-                    "followups_per_question": Config.MAX_FOLLOWUPS_PER_QUESTION,
-                },
-                "questions": [],
-                "strategy_performance": {},
-                "parameter_updates": {}
+                "session_id": session_id,  # Reference only (for lookup)
+                "detected_language": language,  # Interview-specific data
+                "created_at": datetime.now().isoformat(),  # For cleanup logic
+                "questions": [],  # Transcript data
+                "strategy_performance": {},  # Analytics data
+                "expert_feedback": []  # Analytics data
             }
             log_data["interview_sessions"].append(new_session)
+            
+            # HYBRID CLEANUP: Keep last N sessions OR sessions from last N days
+            self._cleanup_old_sessions(log_data)
+            
             self._save_log(log_data)
     
     def log_question(
@@ -422,3 +465,27 @@ class Logger:
         
         return strategy_stats
 
+
+    def log_email_event(self, session_id: str, event_type: str, data: dict):
+        '''Log email-related events'''
+        log_data = self._load_log()
+        session_idx = self._find_session(session_id, log_data)
+        if session_idx is None:
+            return
+        session = log_data['interview_sessions'][session_idx]
+        if 'email_events' not in session:
+            session['email_events'] = []
+        session['email_events'].append({'event_type': event_type, 'timestamp': datetime.now().isoformat(), **data})
+        self._save_log(log_data)
+    
+    def log_resume_parse(self, session_id: str, data: dict):
+        '''Log resume parsing events'''
+        log_data = self._load_log()
+        session_idx = self._find_session(session_id, log_data)
+        if session_idx is None:
+            return
+        session = log_data['interview_sessions'][session_idx]
+        if 'resume_parse_events' not in session:
+            session['resume_parse_events'] = []
+        session['resume_parse_events'].append({'timestamp': datetime.now().isoformat(), **data})
+        self._save_log(log_data)

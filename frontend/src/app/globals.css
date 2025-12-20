@@ -5,10 +5,10 @@
 @tailwind utilities;
 
 :root {
-  /* EPAM Brand Colors */
-  --epam-cyan: #00D4AA;
-  --epam-cyan-light: #00FFD0;
-  --epam-cyan-dark: #00A88A;
+  /* SwarmHire Brand Colors */
+  --brand-primary: #FF6B35;
+  --brand-primary-light: #FF8C61;
+  --brand-primary-dark: #E5511F;
 
   /* Light Mode */
   --surface-primary: #FFFFFF;
@@ -24,7 +24,7 @@
   --border-medium: #CCCCCC;
 }
 
-/* Dark mode - EPAM's signature look */
+/* Dark mode - SwarmHire's signature look */
 .dark {
   --surface-primary: #000000;
   --surface-secondary: #0A0A0A;
@@ -79,7 +79,7 @@ body {
 
 /* Focus styles */
 *:focus-visible {
-  outline: 1px solid var(--epam-cyan);
+  outline: 1px solid var(--brand-primary);
   outline-offset: 2px;
 }
 
@@ -88,23 +88,23 @@ body {
   .btn-primary {
     @apply px-6 py-3 font-medium transition-all duration-200;
     @apply disabled:opacity-50 disabled:cursor-not-allowed;
-    background-color: var(--epam-cyan);
-    color: #000000;
+    background-color: var(--brand-primary);
+    color: #FFFFFF;
   }
 
   .btn-primary:hover:not(:disabled) {
-    background-color: var(--epam-cyan-light);
+    background-color: var(--brand-primary-light);
   }
 
   .btn-secondary {
     @apply px-6 py-3 bg-transparent font-medium transition-all duration-200;
     @apply disabled:opacity-50 disabled:cursor-not-allowed;
-    border: 1px solid var(--epam-cyan);
-    color: var(--epam-cyan);
+    border: 1px solid var(--brand-primary);
+    color: var(--brand-primary);
   }
 
   .btn-secondary:hover:not(:disabled) {
-    background-color: rgba(0, 212, 170, 0.1);
+    background-color: rgba(255, 107, 53, 0.1);
   }
 
   .btn-ghost {
@@ -134,13 +134,13 @@ body {
   }
 
   .input-field:focus {
-    border-color: var(--epam-cyan);
+    border-color: var(--brand-primary);
     outline: none;
   }
 
   .section-title {
     @apply text-xs font-medium uppercase tracking-[0.2em];
-    color: var(--epam-cyan);
+    color: var(--brand-primary);
   }
 
   .section-subtitle {
@@ -151,8 +151,8 @@ body {
 
 /* Selection styling */
 ::selection {
-  background-color: var(--epam-cyan);
-  color: #000000;
+  background-color: var(--brand-primary);
+  color: #FFFFFF;
 }
 
 /* Code block styling */

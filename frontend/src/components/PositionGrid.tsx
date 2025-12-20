@@ -17,12 +17,7 @@ interface DataModel {
   experience_level: string
   expectations: string
   required_skills: Skill[]
-  interview_flow: string[]
-  question_distribution: {
-    easy: number
-    medium: number
-    hard: number
-  }
+  interview_flow?: string[]
 }
 
 interface Position {
@@ -120,7 +115,7 @@ export default function PositionGrid({
       }
       setCandidateCounts(counts)
     }
-    
+
     if (positions.length > 0) {
       fetchCandidateCounts()
     }

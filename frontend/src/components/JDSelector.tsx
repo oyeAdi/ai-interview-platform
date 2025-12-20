@@ -22,7 +22,7 @@ export default function JDSelector({ jds, selectedJd, onSelectJd }: JDSelectorPr
                      border border-gray-200 dark:border-[#2A2A2A] 
                      px-4 py-3 pr-10
                      text-black dark:text-white 
-                     focus:outline-none focus:border-epam-cyan 
+                     focus:outline-none focus:border-brand-primary 
                      transition-colors duration-200 cursor-pointer"
         >
           <option value="">Select a JD (optional)</option>

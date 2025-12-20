@@ -15,7 +15,7 @@ export default function ThemeToggle() {
       {/* Toggle Indicator */}
       <div
         className={`
-          absolute w-5 h-5 rounded-full bg-epam-cyan shadow-sm
+          absolute w-5 h-5 rounded-full bg-brand-primary shadow-sm
           transition-all duration-200 ease-out
           ${isDark ? 'left-1.5' : 'left-[calc(100%-1.625rem)]'}
         `}
