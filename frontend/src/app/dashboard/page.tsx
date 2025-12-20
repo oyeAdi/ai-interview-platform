@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useParams } from 'next/navigation'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import AccountGrid from '@/components/AccountGrid'
@@ -15,8 +15,9 @@ import AccountDetail from '@/components/AccountDetail'
 import PositionDetail from '@/components/PositionDetail'
 import WikiWidget from '@/components/WikiWidget'
 import InterviewLinksModal from '@/components/InterviewLinksModal'
+import { createClient } from '@/utils/supabase/client'
 import EmailSentModal from '@/components/EmailSentModal'
-import { apiUrl } from '@/config/api'
+import { apiUrl, getHeaders } from '@/config/api'
 
 interface Account {
   id: string
@@ -53,6 +54,8 @@ interface Position {
 
 export default function DashboardPage() {
   const router = useRouter()
+  const params = useParams()
+  const tenant = (params?.tenant as string) || 'global'
 
   // State
   const [accounts, setAccounts] = useState<Account[]>([])
@@ -110,36 +113,72 @@ export default function DashboardPage() {
   const [editableConfig, setEditableConfig] = useState<any>(null)
   const [isAnalyzing, setIsAnalyzing] = useState(false)
 
+  const headers = getHeaders()
+
   // Load accounts and all positions on mount
   useEffect(() => {
-    // Check for stored result URL
-    const storedResultUrl = sessionStorage.getItem('last_result_url')
-    if (storedResultUrl) {
-      setHasResults(true)
-      setResultUrl(storedResultUrl)
+    const checkVision = async () => {
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+
+      if (user) {
+        // Fetch user role and preferred_vision from profiles
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('role, preferred_vision')
+          .eq('id', user.id)
+          .single()
+
+        // Super admins have unrestricted access
+        if (profile?.role === 'super_admin') {
+          // Continue to load dashboard data
+        } else {
+          // Use preferred_vision from profiles table (source of truth)
+          const userVision = profile?.preferred_vision || user.user_metadata?.preferred_vision
+          console.log('B2B Route Guard - User Vision:', userVision)
+
+          if (userVision === 'B2C') {
+            console.log('Redirecting B2C user to /expert/studio')
+            router.push('/expert/studio')
+            return
+          } else if (userVision === 'C2C') {
+            console.log('Redirecting C2C user to /private/circle')
+            router.push('/private/circle')
+            return
+          }
+        }
+      }
+
+      // Check for stored result URL
+      const storedResultUrl = sessionStorage.getItem('last_result_url')
+      if (storedResultUrl) {
+        setHasResults(true)
+        setResultUrl(storedResultUrl)
+      }
+
+      Promise.all([
+        fetch(apiUrl('api/accounts'), { headers }).then(res => res.json()),
+        fetch(apiUrl('api/positions'), { headers }).then(res => res.json())
+      ])
+        .then(([accountsData, positionsData]) => {
+          setAccounts(accountsData.accounts || [])
+          setAllPositions(positionsData.positions || [])
+          setLoading(false)
+        })
+        .catch(err => {
+          console.error('Error loading data:', err)
+          setLoading(false)
+        })
     }
 
-    Promise.all([
-      fetch(apiUrl('api/accounts')).then(res => res.json()),
-      fetch(apiUrl('api/positions')).then(res => res.json())
-    ])
-      .then(([accountsData, positionsData]) => {
-        setAccounts(accountsData.accounts || [])
-        setAllPositions(positionsData.positions || [])
-        // Don't auto-select - user must choose
-        setLoading(false)
-      })
-      .catch(err => {
-        console.error('Error loading data:', err)
-        setLoading(false)
-      })
+    checkVision()
   }, [])
 
   // Load positions when account changes
   useEffect(() => {
     if (selectedAccount) {
       setPositionsLoading(true)
-      fetch(apiUrl(`api/accounts/${selectedAccount}/positions`))
+      fetch(apiUrl(`api/accounts/${selectedAccount}/positions`), { headers: getHeaders() })
         .then(res => res.json())
         .then(data => {
           setAccountPositions(data.positions || [])
@@ -449,7 +488,7 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen flex flex-col bg-white dark:bg-black transition-colors duration-200">
-      <Header showQuickStart={true} />
+      <Header showQuickStart={true} title={`${tenant?.toUpperCase() || 'GLOBAL'} Hub (B2B)`} />
 
       <main className="flex-1">
         {/* Hero Section */}

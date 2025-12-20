@@ -1,8 +1,10 @@
 'use client'
 
 import { useState, useEffect, useCallback, useMemo } from 'react'
+import { useRouter } from 'next/navigation'
 import dynamic from 'next/dynamic'
 import { apiUrl } from '@/config/api'
+import { createClient } from '@/utils/supabase/client'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import SkeletonStats from '@/components/SkeletonStats'
@@ -41,6 +43,8 @@ interface WikiStats {
 }
 
 export default function WikiPage() {
+  const router = useRouter()
+  const supabase = createClient()
   const [categories, setCategories] = useState<Category[]>([])
   const [entries, setEntries] = useState<WikiEntry[]>([])
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
@@ -56,6 +60,30 @@ export default function WikiPage() {
   const [showDiagrams, setShowDiagrams] = useState(false)
   const [diagrams, setDiagrams] = useState<any[]>([])
   const ITEMS_PER_PAGE = 10 // Reduced from 20
+
+  // Check if user is super_admin
+  useEffect(() => {
+    const checkAccess = async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+
+      if (!user) {
+        router.push('/login')
+        return
+      }
+
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .single()
+
+      if (profile?.role !== 'super_admin') {
+        // Silently redirect non-super-admin users
+        router.push('/dashboard')
+      }
+    }
+    checkAccess()
+  }, [router, supabase])
 
   // Load only essential data on mount
   useEffect(() => {
