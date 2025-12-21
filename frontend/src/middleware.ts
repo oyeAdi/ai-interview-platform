@@ -63,7 +63,7 @@ export default async function middleware(request: NextRequest) {
 
     // --- 3. Subdomain Logic & Internal Rewriting ---
     const hostname = request.headers.get('host') || '';
-    const allowedDomains = ['swarmhire.ai', 'localhost:3000', 'lvh.me:3000', 'vercel.app'];
+    const allowedDomains = ['swarmhire.ai', 'localhost:3000', 'lvh.me:3000', 'vercel.app', 'onrender.com'];
     const isBaseDomain = allowedDomains.some(domain => hostname === domain || hostname.endsWith(`.${domain}`));
 
     if (!isBaseDomain) return response;
