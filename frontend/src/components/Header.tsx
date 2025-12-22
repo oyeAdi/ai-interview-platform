@@ -10,10 +10,16 @@ import { User } from '@supabase/supabase-js'
 interface HeaderProps {
   showQuickStart?: boolean
   showBackToDashboard?: boolean
+  showVisionSwitcher?: boolean
   title?: string
 }
 
-export default function Header({ showQuickStart = true, showBackToDashboard = false, title }: HeaderProps) {
+export default function Header({
+  showQuickStart = true,
+  showBackToDashboard = false,
+  showVisionSwitcher = true,
+  title
+}: HeaderProps) {
   const pathname = usePathname()
   const router = useRouter()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -23,32 +29,40 @@ export default function Header({ showQuickStart = true, showBackToDashboard = fa
   const supabase = createClient()
 
   useEffect(() => {
-    const getUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser()
-      setUser(user)
+    const fetchProfile = async (currentUser: User | null) => {
+      if (!currentUser) {
+        setUserRole('user')
+        setUserProfile(null)
+        return
+      }
 
-      // Fetch user role from profiles table
-      if (user) {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('role, preferred_vision')
-          .eq('id', user.id)
-          .single()
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role, preferred_vision')
+        .eq('id', currentUser.id)
+        .single()
 
-        if (profile) {
-          setUserRole(profile.role || 'user')
-          setUserProfile({
-            email: user.email || '',
-            role: profile.role || 'user',
-            preferred_vision: profile.preferred_vision || 'B2B'
-          })
-        }
+      if (profile) {
+        setUserRole(profile.role || 'user')
+        setUserProfile({
+          email: currentUser.email || '',
+          role: profile.role || 'user',
+          preferred_vision: profile.preferred_vision || 'B2B'
+        })
       }
     }
-    getUser()
+
+    const initAuth = async () => {
+      const { data: { user: currentUser } } = await supabase.auth.getUser()
+      setUser(currentUser)
+      fetchProfile(currentUser)
+    }
+    initAuth()
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null)
+      const newUser = session?.user ?? null
+      setUser(newUser)
+      fetchProfile(newUser)
     })
 
     return () => subscription.unsubscribe()
@@ -133,15 +147,35 @@ export default function Header({ showQuickStart = true, showBackToDashboard = fa
 
               {/* Wiki & Docs - Only for super_admin */}
               {userRole === 'super_admin' && (
-                <Link
-                  href="/wiki"
-                  className={`text-sm font-normal transition-colors ${pathname === '/wiki'
-                    ? 'text-black dark:text-white'
-                    : 'text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white'
-                    }`}
-                >
-                  Wiki & Docs
-                </Link>
+                <>
+                  <Link
+                    href="/wiki"
+                    className={`text-sm font-normal transition-colors ${pathname === '/wiki'
+                      ? 'text-black dark:text-white'
+                      : 'text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white'
+                      }`}
+                  >
+                    Wiki & Docs
+                  </Link>
+                  <Link
+                    href="/expert/intelligence"
+                    className={`text-sm font-normal transition-colors ${pathname === '/expert/intelligence'
+                      ? 'text-black dark:text-white'
+                      : 'text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white'
+                      }`}
+                  >
+                    Intelligence Hub
+                  </Link>
+                  <Link
+                    href="/expert/pulse"
+                    className={`text-sm font-normal transition-colors ${pathname === '/expert/pulse'
+                      ? 'text-black dark:text-white'
+                      : 'text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white'
+                      }`}
+                  >
+                    Interview Pulse
+                  </Link>
+                </>
               )}
             </nav>
 
@@ -187,45 +221,59 @@ export default function Header({ showQuickStart = true, showBackToDashboard = fa
               )}
 
               {/* Vision Switcher (Desktop) */}
-              <div className="hidden lg:flex items-center gap-2 border-l border-gray-200 dark:border-[#2A2A2A] ml-2 pl-4">
-                <div className="relative group">
-                  <button className="flex items-center gap-2 text-xs font-medium text-gray-500 hover:text-black dark:hover:text-white transition-colors py-1 px-2 rounded-md hover:bg-gray-100 dark:hover:bg-[#1A1A1A]">
-                    <span className="w-1.5 h-1.5 rounded-full bg-brand-primary"></span>
-                    Switch Vision
-                    <svg className="w-3 h-3 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
-                  </button>
-                  <div className="absolute top-full left-0 mt-1 w-48 bg-white dark:bg-[#0A0A0A] border border-gray-200 dark:border-[#2A2A2A] rounded-xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-[60] py-2 overflow-hidden">
-                    <div className="flex flex-col">
-                      <VisionLink
-                        href="/dashboard"
-                        label="Enterprise Hub"
-                        icon="🏢"
-                        userVision={user?.user_metadata?.preferred_vision}
-                        userRole={userRole}
-                        targetVision="B2B"
-                      />
-                      <VisionLink
-                        href="/expert/studio"
-                        label="Expert Studio"
-                        icon="👤"
-                        userVision={user?.user_metadata?.preferred_vision}
-                        userRole={userRole}
-                        targetVision="B2C"
-                      />
-                      <VisionLink
-                        href="/private/circle"
-                        label="Private Circle"
-                        icon="🏠"
-                        userVision={user?.user_metadata?.preferred_vision}
-                        userRole={userRole}
-                        targetVision="C2C"
-                      />
+              {showVisionSwitcher && (
+                <div className="hidden lg:flex items-center gap-2 border-l border-gray-200 dark:border-[#2A2A2A] ml-2 pl-4">
+                  <div className="relative group">
+                    <button className="flex items-center gap-2 text-xs font-medium text-gray-500 hover:text-black dark:hover:text-white transition-colors py-1 px-2 rounded-md hover:bg-gray-100 dark:hover:bg-[#1A1A1A]">
+                      <span className="w-1.5 h-1.5 rounded-full bg-brand-primary"></span>
+                      Switch Vision
+                      <svg className="w-3 h-3 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </button>
+                    <div className="absolute top-full left-0 mt-1 w-48 bg-white dark:bg-[#0A0A0A] border border-gray-200 dark:border-[#2A2A2A] rounded-xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-[60] py-2 overflow-hidden">
+                      <div className="flex flex-col">
+                        <VisionLink
+                          href="/dashboard"
+                          label="Enterprise Hub"
+                          icon="🏢"
+                          userVision={user?.user_metadata?.preferred_vision}
+                          userRole={userRole}
+                          targetVision="B2B"
+                        />
+                        <VisionLink
+                          href="/expert/studio"
+                          label="Expert Studio"
+                          icon="👤"
+                          userVision={user?.user_metadata?.preferred_vision}
+                          userRole={userRole}
+                          targetVision="B2C"
+                        />
+                        <VisionLink
+                          href="/private/circle"
+                          label="Private Circle"
+                          icon="🏠"
+                          userVision={user?.user_metadata?.preferred_vision}
+                          userRole={userRole}
+                          targetVision="C2C"
+                        />
+                        {userRole === 'super_admin' && (
+                          <div className="border-t border-gray-100 dark:border-[#1A1A1A] mt-1 pt-1">
+                            <VisionLink
+                              href="/super-admin"
+                              label="System Vision"
+                              icon="🛡️"
+                              userVision={undefined}
+                              userRole={userRole}
+                              targetVision="SYSTEM"
+                            />
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
+              )}
 
               {/* User Profile Debug Indicator */}
               {userProfile && (

@@ -1,8 +1,9 @@
 """Gemini API client for LLM operations"""
 import json
 import google.generativeai as genai
-from typing import Dict, Optional, List
+from typing import Dict, Optional, List, Any
 from config import Config
+from prompts.prompt_service import get_prompt_service
 
 class GeminiClient:
     """Client for interacting with Google Gemini API"""
@@ -19,6 +20,7 @@ class GeminiClient:
         genai.configure(api_key=Config.GEMINI_API_KEY)
         
         self.use_router = use_router
+        self.prompt_service = get_prompt_service()
         
         if use_router:
             # Use LLM Router for intelligent model selection with fallback
@@ -52,26 +54,45 @@ class GeminiClient:
             if not self.model:
                 raise ValueError("Could not initialize any Gemini model")
     
+    def generate_content(self, prompt: str, generation_config: Optional[Any] = None) -> Any:
+        """
+        Generic content generation to match LLMRouter interface and handle both direct/router modes.
+        """
+        if self.use_router:
+            return self.model.generate_content(prompt, generation_config)
+        else:
+            # Direct Gemini mode
+            config = generation_config
+            if isinstance(config, dict):
+                import google.generativeai as genai
+                config = genai.types.GenerationConfig(**config)
+                
+            return self.model.generate_content(prompt, generation_config=config)
+
     def analyze_language(self, jd_text: str, resume_text: str) -> Dict:
         """
-        Analyze JD and Resume to determine required language (Java/Python)
-        Returns: { "language": "python" | "java", "confidence": float }
+        Analyze JD and Resume to determine required language (Java/Python) using PromptService
         """
-        prompt = f"""Analyze the following job description and resume to determine which programming language is primarily required for this role.
-
-Job Description:
-{jd_text}
-
-Resume:
-{resume_text}
-
-Based on the job requirements and the candidate's experience, determine if this role requires primarily Java or Python skills.
-
-Respond with ONLY one word: either "Java" or "Python".
-"""
+        render_result = self.prompt_service.render(
+            "question_generation_analyze_language_v1",
+            variables={"jd_text": jd_text, "resume_text": resume_text}
+        )
+        
+        if not render_result:
+            # Fallback to hardcoded if service fails
+            return self._analyze_language_fallback(jd_text, resume_text)
+            
+        prompt = render_result["rendered_prompt"]
+        config = render_result["generation_config"]
         
         try:
-            response = self.model.generate_content(prompt)
+            response = self.model.generate_content(
+                prompt,
+                generation_config=genai.types.GenerationConfig(
+                    temperature=config.temperature,
+                    max_output_tokens=config.max_output_tokens
+                )
+            )
             language = response.text.strip().lower()
             
             # Normalize response
@@ -80,27 +101,22 @@ Respond with ONLY one word: either "Java" or "Python".
             elif "python" in language:
                 return {"language": "python", "confidence": 0.95}
             else:
-                # Fallback: keyword counting
-                jd_lower = jd_text.lower()
-                resume_lower = resume_text.lower()
-                java_count = jd_lower.count("java") + resume_lower.count("java")
-                python_count = jd_lower.count("python") + resume_lower.count("python")
-                
-                if java_count > python_count:
-                    return {"language": "java", "confidence": 0.7}
-                else:
-                    return {"language": "python", "confidence": 0.7}
+                return self._analyze_language_fallback(jd_text, resume_text)
         except Exception as e:
-            # Fallback on error
-            jd_lower = jd_text.lower()
-            resume_lower = resume_text.lower()
-            java_count = jd_lower.count("java") + resume_lower.count("java")
-            python_count = jd_lower.count("python") + resume_lower.count("python")
-            
-            if java_count > python_count:
-                return {"language": "java", "confidence": 0.6}
-            else:
-                return {"language": "python", "confidence": 0.6}
+            print(f"Error in GeminiClient.analyze_language: {e}")
+            return self._analyze_language_fallback(jd_text, resume_text)
+
+    def _analyze_language_fallback(self, jd_text: str, resume_text: str) -> Dict:
+        """Keyword counting fallback for language detection"""
+        jd_lower = jd_text.lower()
+        resume_lower = resume_text.lower()
+        java_count = jd_lower.count("java") + resume_lower.count("java")
+        python_count = jd_lower.count("python") + resume_lower.count("python")
+        
+        if java_count > python_count:
+            return {"language": "java", "confidence": 0.6}
+        else:
+            return {"language": "python", "confidence": 0.6}
     
     def generate_followup(
         self,

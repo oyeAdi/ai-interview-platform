@@ -1,0 +1,127 @@
+{
+    "metadata": {
+        "version": "2.0",
+        "last_updated": "2025-12-21T19:40:00Z",
+        "total_sessions_analyzed": 150,
+        "total_unique_learnings": 127,
+        "confidence_threshold": 0.7,
+        "phases_covered": [
+            "planning",
+            "execution",
+            "evaluation"
+        ]
+    },
+    "learnings": [
+        {
+            "learning_id": "plan_001",
+            "pattern": "Experts prefer practical coding exercises over theoretical questions",
+            "subcategory": "question_design",
+            "confidence_score": 0.92,
+            "frequency": 23,
+            "applicable_to": [
+                "PlannerAgent",
+                "ArchitectAgent",
+                "CritiqueAgent"
+            ],
+            "decision_context": "When designing interview template",
+            "impact_on_confidence": 0.15,
+            "source_sessions": [
+                "session_abc123",
+                "session_def456"
+            ],
+            "tags": [
+                "coding",
+                "practical",
+                "hands-on"
+            ],
+            "status": "active"
+        }
+    ],
+    "execution": [
+        {
+            "learning_id": "exec_001",
+            "pattern": "Provide hints after 2 minutes of silence, not immediately",
+            "subcategory": "hint_giving",
+            "confidence_score": 0.88,
+            "frequency": 18,
+            "applicable_to": [
+                "ExecutorAgent",
+                "SwarmCoordinator"
+            ],
+            "decision_context": "When candidate is stuck on a problem",
+            "impact_on_confidence": 0.12,
+            "source_sessions": [
+                "session_xyz789",
+                "session_lmn456"
+            ],
+            "tags": [
+                "hints",
+                "timing",
+                "candidate_support"
+            ],
+            "status": "active"
+        },
+        {
+            "learning_id": "exec_002",
+            "pattern": "Ask clarifying questions before assuming wrong answer",
+            "subcategory": "conversation_flow",
+            "confidence_score": 0.85,
+            "frequency": 15,
+            "applicable_to": [
+                "ExecutorAgent"
+            ],
+            "decision_context": "When candidate gives unexpected answer",
+            "impact_on_confidence": 0.1,
+            "source_sessions": [
+                "session_pqr123"
+            ],
+            "tags": [
+                "clarification",
+                "fairness"
+            ],
+            "status": "active"
+        }
+    ],
+    "evaluation": [
+        {
+            "learning_id": "eval_001",
+            "pattern": "Consider partial credit for correct approach even if final answer is wrong",
+            "subcategory": "scoring_accuracy",
+            "confidence_score": 0.9,
+            "frequency": 21,
+            "applicable_to": [
+                "EvaluatorAgent",
+                "CritiqueAgent"
+            ],
+            "decision_context": "When scoring coding questions",
+            "impact_on_confidence": 0.18,
+            "source_sessions": [
+                "session_stu456",
+                "session_vwx789"
+            ],
+            "tags": [
+                "scoring",
+                "partial_credit",
+                "fairness"
+            ],
+            "status": "active"
+        }
+    ],
+    "cross_phase_learnings": [
+        {
+            "learning_id": "cross_001",
+            "pattern": "Candidates perform better when questions build on previous answers",
+            "applicable_phases": [
+                "planning",
+                "execution"
+            ],
+            "applicable_to": [
+                "PlannerAgent",
+                "ExecutorAgent"
+            ],
+            "confidence_score": 0.87,
+            "frequency": 19,
+            "impact": "Improves candidate experience and assessment accuracy"
+        }
+    ]
+}

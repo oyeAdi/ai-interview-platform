@@ -57,7 +57,7 @@ class LLMRouter:
         # Tertiary: Gemma 3 27B IT (always available as fallback)
         try:
             from llm.gemini_client import GeminiClient
-            gemini_client = GeminiClient()
+            gemini_client = GeminiClient(use_router=False)
             self.clients.append({
                 "client": gemini_client,
                 "name": "Gemma 3 27B IT",

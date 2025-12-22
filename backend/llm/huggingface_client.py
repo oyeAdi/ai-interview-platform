@@ -39,10 +39,24 @@ class HuggingFaceClient:
             HFResponse object with .text property
         """
         # Extract config parameters
-        config = generation_config or {}
-        temperature = config.get('temperature', 0.7)
-        max_tokens = config.get('max_output_tokens', 512)
-        top_p = config.get('top_p', 0.95)
+        config_dict = {}
+        if generation_config:
+            # Check for to_dict method (our own Prompt models)
+            if hasattr(generation_config, 'to_dict') and callable(generation_config.to_dict):
+                config_dict = generation_config.to_dict()
+            # Check for members/attributes (Google/Other)
+            elif hasattr(generation_config, 'temperature'):
+                config_dict = {
+                    'temperature': generation_config.temperature,
+                    'max_output_tokens': getattr(generation_config, 'max_output_tokens', 512),
+                    'top_p': getattr(generation_config, 'top_p', 0.95)
+                }
+            elif isinstance(generation_config, dict):
+                config_dict = generation_config
+            
+        temperature = config_dict.get('temperature', 0.7)
+        max_tokens = config_dict.get('max_output_tokens', 512)
+        top_p = config_dict.get('top_p', 0.95)
         
         try:
             # Use chat completion API for instruction-tuned models

@@ -1,12 +1,20 @@
 'use client'
 
+import { useEffect } from 'react'
+import { useRouter } from 'next/navigation'
+import { createClient } from '@/utils/supabase/client'
 import Link from 'next/link'
 import Header from '@/components/Header'
 
 export default function LandingV2() {
+    const router = useRouter()
+    const supabase = createClient()
+
+
+
     return (
         <>
-            <Header />
+            <Header showVisionSwitcher={false} />
             <div className="min-h-screen bg-gradient-to-br from-white via-orange-50 to-purple-50">
 
                 {/* Hero Section */}
@@ -237,6 +245,8 @@ export default function LandingV2() {
                                     Access Circle →
                                 </Link>
                             </div>
+
+
                         </div>
 
                         <div className="mt-8 text-center">

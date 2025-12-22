@@ -26,5 +26,8 @@
   "sales_strategy": "sales",
   "negotiation": "sales",
   "customer_success": "customer_service",
-  "graphql": "technical"
+  "graphql": "technical",
+  "cloud_architecture": "system_design",
+  "aws": "system_design",
+  "kubernetes": "system_design"
 }

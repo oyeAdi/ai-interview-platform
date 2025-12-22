@@ -1,0 +1,29 @@
+{
+    "id": "question_generation_analyze_language_v1",
+    "name": "Analyze Language",
+    "version": "1.0.0",
+    "category": "question_generation",
+    "variant": "analyze_language",
+    "template": "Analyze the following job description and resume to determine which programming language is primarily required for this role.\n\nJob Description:\n{jd_text}\n\nResume:\n{resume_text}\n\nBased on the job requirements and the candidate's experience, determine if this role requires primarily Java or Python skills.\n\nRespond with ONLY one word: either \"Java\" or \"Python\".",
+    "variables": [
+        {
+            "name": "jd_text",
+            "type": "string",
+            "required": true,
+            "max_length": 3000
+        },
+        {
+            "name": "resume_text",
+            "type": "string",
+            "required": true,
+            "max_length": 3000
+        }
+    ],
+    "generation_config": {
+        "temperature": 0.1,
+        "max_output_tokens": 10
+    },
+    "knobs": {
+        "output_format": "text"
+    }
+}

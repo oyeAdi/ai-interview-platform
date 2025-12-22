@@ -1,0 +1,50 @@
+{
+  "results": {
+    "session_20251219_162957": {
+      "id": "res_269eac2a",
+      "session_id": "session_20251219_162957",
+      "date": "2025-12-19T17:17:08.072711",
+      "candidate": {
+        "id": null,
+        "name": "Gotta Reddy",
+        "email": "INRT-Bench",
+        "thank_you_token": "cty_e5f97a8b45c5",
+        "thank_you_url": "/candidate/thank-you/cty_e5f97a8b45c5"
+      },
+      "expert": {
+        "id": null,
+        "name": "Expert"
+      },
+      "position": {
+        "id": null,
+        "title": "Bench-Pool"
+      },
+      "overall_metrics": {
+        "total_score": 7,
+        "questions_asked": 1
+      },
+      "feedback": {
+        "status": "PUBLISHED",
+        "type": "short",
+        "content": "Hi,\n\nPlease find feedback for Gotta Reddy:\n\nGeneral Summary:\nThe interview focused on experience-based questions, specifically around finding the Kth largest element in an array. The candidate demonstrated a good understanding of the min-heap approach and its efficiency. Code was provided and explained, though there was a truncated response. A lack of familiarity with follow-up questions was noted.\n\nPositive:\nâ€¢ Demonstrated knowledge of min-heap data structure.\nâ€¢ Provided a functional code implementation.\nâ€¢ Articulated the benefits of the min-heap approach for large datasets.\n\nNegative:\nâ€¢ Response was truncated mid-explanation.\nâ€¢ Unable to answer a follow-up question.\nâ€¢ Initial response lacked conciseness.\n\nRating out of 4:\n3.7/4\n\nRegards,\nAditya",
+        "generated_at": "2025-12-19T17:19:06.370161",
+        "approved_at": "2025-12-19T17:21:07.938531",
+        "published_at": "2025-12-19T17:21:10.927126",
+        "rejected_reason": null
+      },
+      "status": "completed",
+      "feedback_report": {
+        "status": "GENERATED",
+        "content": "Hi,\n\nCandidate Name: Gotta Reddy\nInterview Type: Bench-Pool\nRecommendation: Hire for Bench-Pool Position\nDetailed Reason:\n\n-General Summary\nThe candidate demonstrated a solid understanding of data structures and algorithms, specifically the min-heap approach for finding the kth largest element. They were able to articulate the solution and provide code implementation. There was a slight miscommunication regarding follow-up questions.\n\n-Technical Skills Evaluation:\n  -Java Core & Data Structures: 8/10 - Strong grasp of data structures, particularly heaps.\n  -Java 8 & Functional Programming: Not Evaluated\n  -Problem Solving & Algorithms: 7/10 - Able to apply algorithms to solve problems, but could benefit from more practice with edge cases.\n  -SQL: Not Evaluated\n  -Testing & Tooling: Not Evaluated\n  -Communication & Approach: 6/10 - Generally clear, but had difficulty understanding a follow-up question.\n\n-Strengths\nStrong understanding of heap data structure and its application to finding the kth largest element. Able to translate the concept into working Java code. Awareness of the efficiency of the min-heap approach for large datasets.\n\n-Areas for Improvement\nImprove active listening skills and ensure complete understanding of questions before responding. Expand knowledge of various testing methodologies and tooling.\n\n-Recommendation\nHire. The candidate possesses a strong foundation in core Java and data structures, making them a valuable addition to the bench pool. Further development in communication and testing would be beneficial.",
+        "generated_at": "2025-12-19T17:17:23.031382"
+      },
+      "share": {
+        "token": "share_a29fec21f46d",
+        "url": "/share/share_a29fec21f46d",
+        "created_at": "2025-12-19T17:21:10.927177"
+      }
+    }
+  },
+  "last_updated": "2025-12-19T17:47:49.969381",
+  "total_count": 1
+}

@@ -6,7 +6,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
 import Link from 'next/link'
 
-type AuthVision = 'B2B' | 'B2C' | 'C2C'
+type AuthVision = 'B2B' | 'B2C' | 'C2C' | 'SYSTEM'
 
 export default function LoginPage() {
     const [vision, setVision] = useState<AuthVision>('B2B')
@@ -39,15 +39,25 @@ export default function LoginPage() {
 
         // Check user's preferred_vision from profiles table
         if (data.user) {
-            const { data: profile } = await supabase
+            const { data: profile, error: profileError } = await supabase
                 .from('profiles')
-                .select('role, preferred_vision')
+                .select('role, preferred_vision, is_super_admin')
                 .eq('id', data.user.id)
                 .single()
 
-            // Super admins can log in from any vision
-            if (profile?.role === 'super_admin') {
-                router.push(redirect)
+            console.log('🔍 Login Debug:', {
+                userId: data.user.id,
+                email: data.user.email,
+                profile,
+                profileError,
+                currentVisionTab: vision
+            })
+
+            // Super admins can log in from any vision (they have no preferred_vision)
+            if (profile?.role === 'super_admin' || profile?.is_super_admin === true) {
+                console.log('✅ Super Admin detected, redirecting to /super-admin')
+                const superAdminRedirect = searchParams.get('redirect') || '/super-admin'
+                router.push(superAdminRedirect)
                 router.refresh()
                 return
             }
@@ -55,12 +65,13 @@ export default function LoginPage() {
             // Regular users must log in from their registered vision
             const userVision = profile?.preferred_vision || data.user.user_metadata?.preferred_vision
 
-            if (userVision !== vision) {
+            if (userVision && userVision !== vision) {
                 // Vision mismatch - show error
                 const visionNames = {
                     'B2B': 'Enterprise Hub',
                     'B2C': 'Expert Studio',
-                    'C2C': 'Private Circle'
+                    'C2C': 'Private Circle',
+                    'SYSTEM': 'System Console'
                 }
 
                 setError(`This account is registered for ${visionNames[userVision as AuthVision]} (${userVision}). Please switch to the ${userVision} tab to log in.`)
@@ -72,6 +83,7 @@ export default function LoginPage() {
             }
 
             // Vision matches - proceed with login
+            console.log('✅ Regular user, redirecting to:', redirect)
             router.push(redirect)
             router.refresh()
         }
@@ -119,18 +131,19 @@ export default function LoginPage() {
 
             {/* Vision Switcher */}
             <div className="flex p-1 bg-gray-100 dark:bg-[#111111] rounded-xl mb-6">
-                {(['B2B', 'B2C', 'C2C'] as AuthVision[]).map((v) => (
+                {(['B2B', 'B2C', 'C2C', 'SYSTEM'] as AuthVision[]).map((v) => (
                     <button
                         key={v}
                         onClick={() => setVision(v)}
-                        className={`flex-1 py-2 text-xs font-medium rounded-lg transition-all ${vision === v
+                        className={`flex-1 py-2 text-[10px] font-medium rounded-lg transition-all ${vision === v
                             ? 'bg-white dark:bg-[#1A1A1A] text-black dark:text-white shadow-sm'
                             : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
                             }`}
                     >
-                        {v === 'B2B' && '🏢 Enterprise Hub'}
-                        {v === 'B2C' && '👤 Expert Studio'}
-                        {v === 'C2C' && '🏠 Private Circle'}
+                        {v === 'B2B' && '🏢 Enterprise'}
+                        {v === 'B2C' && '👤 Expert'}
+                        {v === 'C2C' && '🏠 Private'}
+                        {v === 'SYSTEM' && '🛡️ System'}
                     </button>
                 ))}
             </div>
@@ -241,35 +254,43 @@ export default function LoginPage() {
                     </div>
                 )}
 
-                {/* C2C: Private Flow */}
-                {vision === 'C2C' && (
-                    <form onSubmit={handleMagicLink} className="space-y-4">
+                {/* SYSTEM: Console Flow */}
+                {vision === 'SYSTEM' && (
+                    <form onSubmit={handleEmailLogin} className="space-y-4">
                         <div className="text-center mb-6">
-                            <p className="text-sm text-gray-500 dark:text-gray-400">
-                                Safe, private, and instant bypass for personal hiring.
+                            <p className="text-sm font-medium text-brand-primary">
+                                Internal System Access Only
                             </p>
                         </div>
                         <div className="space-y-2">
-                            <label className="text-xs font-medium text-gray-500 dark:text-gray-400 ml-1">Email Address</label>
+                            <label className="text-xs font-medium text-gray-500 dark:text-gray-400 ml-1">Admin Email</label>
                             <input
                                 type="email"
                                 required
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                                 className="w-full px-4 py-3 bg-gray-50 dark:bg-[#111111] border border-gray-200 dark:border-[#222] rounded-xl text-sm focus:ring-2 focus:ring-brand-primary outline-none transition-all"
-                                placeholder="name@email.com"
+                                placeholder="admin@swarmhire.internal"
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <label className="text-xs font-medium text-gray-500 dark:text-gray-400 ml-1">Secure Password</label>
+                            <input
+                                type="password"
+                                required
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                className="w-full px-4 py-3 bg-gray-50 dark:bg-[#111111] border border-gray-200 dark:border-[#222] rounded-xl text-sm focus:ring-2 focus:ring-brand-primary outline-none transition-all"
+                                placeholder="••••••••"
                             />
                         </div>
                         <button
                             type="submit"
                             disabled={loading}
-                            className="w-full py-3 bg-brand-primary text-white font-semibold rounded-xl hover:opacity-90 transition-opacity disabled:opacity-50"
+                            className="w-full py-3 bg-black dark:bg-white text-white dark:text-black font-semibold rounded-xl hover:bg-gray-800 dark:hover:bg-gray-100 transition-all disabled:opacity-50"
                         >
-                            {loading ? 'Sending...' : 'Join Private Circle (Magic Link)'}
+                            {loading ? 'Authenticating...' : 'Enter System Console'}
                         </button>
-                        <p className="text-[10px] text-center text-gray-400 mt-4 leading-relaxed">
-                            By continuing, you agree to our Private Circle terms. <br /> No password required for C2C profiles.
-                        </p>
                     </form>
                 )}
             </div>

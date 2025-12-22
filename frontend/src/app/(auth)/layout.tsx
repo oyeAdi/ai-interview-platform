@@ -8,7 +8,7 @@ export default function AuthLayout({
 }) {
     return (
         <div className="min-h-screen bg-white dark:bg-[#050505] flex flex-col transition-colors duration-200">
-            <Header showQuickStart={false} />
+            <Header showVisionSwitcher={false} showQuickStart={false} />
             <main className="flex-grow flex items-center justify-center p-4">
                 <div className="w-full max-w-md">
                     {children}

@@ -99,6 +99,16 @@ class GenerationConfig:
             top_k=data.get("top_k")
         )
     
+    def to_gemini_config(self) -> Any:
+        """Convert to Google Generative AI config format."""
+        import google.generativeai as genai
+        return genai.types.GenerationConfig(
+            temperature=self.temperature,
+            max_output_tokens=self.max_output_tokens,
+            top_p=self.top_p,
+            top_k=self.top_k
+        )
+    
     def merge(self, overrides: Dict) -> "GenerationConfig":
         """Create a new config with overrides applied."""
         return GenerationConfig(
@@ -143,11 +153,16 @@ class PromptKnobs:
     def merge(self, overrides: Dict) -> "PromptKnobs":
         """Create new knobs with overrides applied."""
         custom_merged = {**self.custom, **overrides.get("custom", {})}
+        
+        # Handle output_format carefully as it might be an Enum or a string
+        current_format = self.output_format.value if hasattr(self.output_format, "value") else self.output_format
+        new_format_val = overrides.get("output_format", current_format)
+        
         return PromptKnobs(
             truncate_question_length=overrides.get("truncate_question_length", self.truncate_question_length),
             truncate_response_length=overrides.get("truncate_response_length", self.truncate_response_length),
             include_examples=overrides.get("include_examples", self.include_examples),
-            output_format=OutputFormat(overrides.get("output_format", self.output_format.value)),
+            output_format=OutputFormat(new_format_val),
             fallback_enabled=overrides.get("fallback_enabled", self.fallback_enabled),
             custom=custom_merged
         )

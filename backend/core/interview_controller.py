@@ -8,6 +8,10 @@ from strategies.strategy_factory import StrategyFactory
 from llm.gemini_client import GeminiClient
 from utils.logger import Logger
 from config import Config
+from services.event_store import get_event_store
+from services.agents.architect_agent import get_architect_agent
+from services.agents.executioner_agent import get_executioner_agent
+from services.agents.evaluator_agent import get_evaluator_agent
 
 class InterviewController:
     """Orchestrates the entire interview flow"""
@@ -21,6 +25,14 @@ class InterviewController:
         self.strategy_factory = StrategyFactory()
         self.gemini_client = GeminiClient()
         self.logger = Logger()
+        self.event_store = get_event_store()
+        self.architect = get_architect_agent()
+        self.executioner = get_executioner_agent()
+        self.agent_evaluator = get_evaluator_agent()
+        
+        # Legacy components (kept for compatibility or reference during transition)
+        self.legacy_evaluator = self.evaluator
+        self.legacy_strategy_factory = self.strategy_factory
         
         # Initialize session in log with correct session_id
         self.logger.initialize_session(
@@ -53,31 +65,67 @@ class InterviewController:
         self.question_categories: Optional[Dict] = None
     
     def start_interview(self) -> Dict:
-        """Start the interview with a warm, natural greeting"""
-        import random
+        """Start the interview with a warm, natural greeting using the ExecutionerAgent"""
         
-        # Varied, natural greetings to avoid robotic feel
-        greetings = [
-            "Hi there! Thanks for joining today. I'm really looking forward to our conversation. Let's get started!",
-            "Hello! Great to have you here. I'm excited to learn more about your experience. Let's dive in!",
-            "Hi! Thanks for taking the time to chat with me today. I've had a chance to review your background and I have some interesting questions for you.",
-            "Hello and welcome! I appreciate you being here. Let's have a good conversation about your experience and skills.",
-            "Hi! It's nice to meet you. I'm looking forward to discussing your background. Shall we begin?"
-        ]
+        # Get greeting from ExecutionerAgent
+        action = self.executioner.get_next_action(
+            self.context_manager.session_id,
+            {"current_phase": "greeting"}
+        )
         
-        greeting = random.choice(greetings)
+        # Emit InterviewStarted event
+        self.event_store.append_event(
+            self.context_manager.session_id,
+            "InterviewStarted",
+            {
+                "candidate_name": getattr(self, 'candidate_name', 'Anonymous Candidate'),
+                "position_title": self.language.title() + " Developer",
+                "language": self.language,
+                "expert_name": "AI Interviewer Swarm",
+                "greeting_text": action["text"]
+            }
+        )
+        
         return {
             "type": "greeting",
-            "message": greeting
+            "message": action["text"]
         }
     
     def get_next_question(self) -> Optional[Dict]:
-        """Get next question for the interview"""
+        """Get next question or phase-based action for the interview"""
         context = self.context_manager.get_context()
         round_num = len(self.context_manager.context["interview_context"]["round_summaries"]) + 1
         
-        # For the first question, generate a personalized question based on resume and experience level
+        # --- NEW: Multi-Phase Introduction (Greeting -> Self-Intro -> Candidate-Intro) ---
+        # We use current_followup_count or a custom state to track which intro phase we are in
+        if not self.first_question_generated:
+            # Determine next phase based on historical events or simple counter
+            # For simplicity, we'll use local session state or event counts
+            events = self.event_store.get_events(self.context_manager.session_id)
+            exec_actions = [e for e in events if e["event_type"] == "ExecutionerAction"]
+            phases_completed = [e["event_data"]["phase"] for e in exec_actions]
+            
+            next_phase = None
+            if "greeting" in phases_completed and "self_introduction" not in phases_completed:
+                next_phase = "self_introduction"
+            elif "self_introduction" in phases_completed and "candidate_introduction" not in phases_completed:
+                next_phase = "candidate_introduction"
+            
+            if next_phase:
+                action = self.executioner.get_next_action(
+                    self.context_manager.session_id,
+                    {"current_phase": next_phase}
+                )
+                return {
+                    "type": "statement" if next_phase == "self_introduction" else "question",
+                    "text": action["text"],
+                    "phase": next_phase,
+                    "is_intro": True
+                }
+
+        # For the first technical question, generate a personalized question based on resume and experience level
         if round_num == 1 and not self.first_question_generated and self.resume_text:
+            # Force "seed_execution" phase
             personalized_question = self._generate_personalized_first_question()
             if personalized_question:
                 self.first_question_generated = True
@@ -200,6 +248,19 @@ class InterviewController:
             question.get("topic")
         )
         
+        # Emit QuestionAsked event
+        self.event_store.append_event(
+            self.context_manager.session_id,
+            "QuestionAsked",
+            {
+                "question_id": question["id"],
+                "question_text": question["text"],
+                "question_category": question_category,
+                "question_number": round_num,
+                "difficulty": question.get("difficulty", "medium")
+            }
+        )
+        
         return {
             "type": "question",
             "question_id": question["id"],
@@ -245,207 +306,42 @@ class InterviewController:
     
     def _generate_personalized_first_question(self) -> Optional[Dict]:
         """
-        Generate a personalized first question using:
-        1. Bank question as seed (structural template)
-        2. Resume for personalization
-        3. AI enhancement for natural conversation
+        Generate a personalized first question using the Architect Agent.
         """
-        experience_level = "mid"  # default
-        
-        # Determine if this is a technical or non-technical role
-        is_technical_role = self.language.lower() not in ["general", "non-technical"]
-        
-        # Set appropriate position title
-        if is_technical_role:
-            position_title = self.language.title() + " Developer"
-        else:
-            # For non-technical roles, use generic title or extract from resume
-            position_title = "this position"
-        
         required_skills = []
+        experience_level = "mid"
         
         if self.data_model:
             experience_level = self.data_model.get("experience_level", "mid")
             required_skills = [s.get("skill", "") for s in self.data_model.get("required_skills", [])]
         
-        # Step 1: Find a seed question from the bank
-        # If question_categories are set, use the first enabled category
-        seed_category = None
-        seed_category = None
-        if self.question_categories:
-            enabled_categories = []
-            for cat_name, cat_config in self.question_categories.items():
-                if cat_config.get("enabled", False) and cat_config.get("count", 0) > 0:
-                    enabled_categories.append(cat_name)
+        if not required_skills:
+            required_skills = [self.language]
             
-            if enabled_categories:
-                import random
-                seed_category = random.choice(enabled_categories)
-        else:
-            # Default: conceptual for junior, otherwise None (any category)
-            seed_category = "conceptual" if experience_level == "junior" else None
-        
-        seed_question = self.question_manager.find_seed_question(
-            role_type=self.role_type,  # NEW: Pass role type for filtering
-            experience_level=experience_level,
-            skills=required_skills if required_skills else [self.language],
-            category=seed_category,
-            difficulty="easy" if experience_level == "junior" else "medium"
-        )
-        
-        # If no resume, just return the seed question directly
-        if not self.resume_text:
-            if seed_question:
-                self.question_manager.questions_asked.append(seed_question["id"])
-                return seed_question
-            return None
+        position_title = f"{self.language.title()} Developer"
         
         try:
-            # Step 2: Enhance the seed question with resume personalization
-            seed_text = seed_question.get("text", "") if seed_question else ""
-            seed_topic = seed_question.get("topic", "") if seed_question else ""
-            seed_category = seed_question.get("category", "conceptual") if seed_question else "conceptual"
-            
-            required_skills_str = ', '.join(required_skills[:5]) if required_skills else self.language
-
-            # Different prompts for technical vs non-technical roles
-            if not is_technical_role:
-                # NON-TECHNICAL ROLE PROMPT
-                prompt = f"""You are a friendly, professional interviewer for {position_title} ({experience_level} level).
-
-Your task: Create a personalized first question that assesses the candidate's problem-solving, communication, and behavioral skills based on their background.
-
-SEED QUESTION (use as structural inspiration):
-"{seed_text}"
-Topic: {seed_topic}
-Category: {seed_category}
-
-CANDIDATE'S RESUME:
-{self.resume_text[:1500]}
-
-INSTRUCTIONS:
-1. Start with a warm, brief acknowledgment of their resume and work experience.
-2. **CRITICAL**: This is a NON-TECHNICAL role. DO NOT ask about:
-   - Writing code or debugging software
-   - Programming languages or frameworks
-   - Technical systems or databases
-   - Software development concepts
-3. Instead, ask about:
-   - Problem-solving in their actual work context (facilities, operations, etc.)
-   - How they handle challenges and unexpected situations
-   - Communication and teamwork
-   - Process improvement and efficiency
-4. Connect the seed question's core concept (problem-solving, communication, etc.) to their actual work experience.
-5. Keep it conversational, warm, and relevant to their background.
-
-EXAMPLE for a janitor:
-"Hi [Name], I see you have [X years] of experience in facilities management. That kind of dedication is valuable. Could you describe a time when you faced an unexpected challenge in your work - perhaps a maintenance issue or scheduling conflict - and walk me through how you systematically diagnosed and resolved it?"
-
-Generate ONLY the personalized question text."""
-            elif seed_category == 'coding':
-                # TECHNICAL CODING PROMPT
-                prompt = f"""You are a friendly, professional technical interviewer for a {position_title} position ({experience_level} level).
-
-Your task: Personalize the introduction of a CODING CHALLENGE for the REQUIRED SKILLS, keeping the technical coding task intact.
-
-SEED CODING QUESTION (Core task):
-"{seed_text}"
-Topic: {seed_topic}
-Category: {seed_category}
-
-CANDIDATE'S RESUME:
-{self.resume_text[:1500]}
-
-REQUIRED SKILLS (TARGET POSITION): {required_skills_str}
-
-INSTRUCTIONS:
-1. Start with a warm, brief 1-sentence acknowledgment of their background.
-2. **CONTEXTUALIZATION RULE**: You MUST frame the question in the context of the **REQUIRED SKILLS** ({required_skills_str}).
-   - If the resume implies a different language (e.g., Python) but the position is for {self.language} (or {required_skills_str}), you can say "Coming from a Python background, I'd like to see how you handle [Topic] in {self.language}..."
-   - Do NOT ask them to write code in a language NOT listed in Required Skills unless the seed specifically allows it.
-3. Transition immediately to the coding task. 
-4. **CRITICAL**: The output MUST be a request to WRITE CODE. Do NOT change it to a discussion question.
-5. Example: "I see you have experience with [Resume Skill]. For this role, we use [Required Skill], so I'd like you to solve this challenge using [Required Skill]..."
-
-Generate ONLY the personalized question text."""
-            else:
-                # TECHNICAL NON-CODING PROMPT
-                prompt = f"""You are a friendly, professional technical interviewer for a {position_title} position ({experience_level} level).
-
-Your task: Create a personalized first question that tests the **REQUIRED SKILLS**, using the candidate's background as a bridge.
-
-SEED QUESTION (use as structural inspiration):
-"{seed_text}"
-Topic: {seed_topic}
-Category: {seed_category}
-
-CANDIDATE'S RESUME:
-{self.resume_text[:1500]}
-
-REQUIRED SKILLS (TARGET POSITION): {required_skills_str}
-
-INSTRUCTIONS:
-1. Start with a warm, brief acknowledgment of their resume.
-2. **RELEVANCE RULE**: The question MUST be about the **REQUIRED SKILLS**.
-   - If the candidate's resume focuses on irrelevant skills (e.g., they know React but the job is for Android), do NOT ask deep questions about React. Ask about Android, perhaps asking how their React knowledge translates.
-   - **Do NOT ask questions about skills NOT in the Required Skills list.**
-3. Connect the seed question's topic to their experience, but steer it towards the Target Position's technology.
-4. Adjust complexity for {experience_level} level.
-
-EXAMPLE OUTPUT FORMATS:
-- "I noticed you worked with [Resume Tech]. In this role, we focus on [Required Skill]. How would you compare [Specific Concept] in [Resume Tech] vs [Required Skill]?"
-- "Given your background in [Resume Tech], how would you approach [Seed Question Topic] using [Required Skill]?"
-
-Generate ONLY the personalized question text. Keep it conversational and warm."""
-
-            # Generate enhanced question using LLM
-            response = self.gemini_client.model.generate_content(prompt)
-            question_text = response.text.strip()
-            
-            # Clean up the response
-            if question_text.startswith('"') and question_text.endswith('"'):
-                question_text = question_text[1:-1]
-            
-            # Remove any meta-text the LLM might have added
-            for prefix in ["Question:", "Here's the question:", "Personalized question:"]:
-                if question_text.lower().startswith(prefix.lower()):
-                    question_text = question_text[len(prefix):].strip()
-            
-            # Mark seed question as used
-            if seed_question:
-                self.question_manager.questions_asked.append(seed_question["id"])
-            
-            question_data = {
-                "id": f"personalized_{self.context_manager.session_id[:8]}",
-                "text": question_text,
-                "type": seed_question.get("type", "probing") if seed_question else "probing",
-                "category": seed_category,
-                "topic": seed_topic or "experience_based",
-                "difficulty": seed_question.get("difficulty", "medium") if seed_question else "medium",
-                "is_personalized": True,
-                "seed_question_id": seed_question.get("id") if seed_question else None,
-                "experience_level": experience_level
-            }
-            
-            # Log the personalized question
-            self.logger.log_question(
-                self.context_manager.session_id,
-                question_data["id"],
-                question_data["text"],
-                question_data["type"],
-                1,  # First question is always round 1
-                seed_category,
-                seed_topic or "experience_based"
+            # Delegate to Architect Agent
+            question_data = self.architect.generate_initial_question(
+                session_id=self.context_manager.session_id,
+                jd_id=self.context_manager.jd_id,
+                resume_text=self.resume_text,
+                required_skills=required_skills,
+                language=self.language,
+                experience_level=experience_level,
+                position_title=position_title
             )
+            
+            # Note: ArchitectAgent already logs the question and emits the event.
+            # We just need to mark it as asked in our question manager for local tracking if needed.
+            # But Architect uses its own ID, so we'll just track that.
+            self.question_manager.questions_asked.append(question_data["id"])
             
             return question_data
             
         except Exception as e:
-            print(f"Error generating personalized question: {e}")
-            # Fallback to seed question without personalization
-            if seed_question:
-                self.question_manager.questions_asked.append(seed_question["id"])
-                return seed_question
+            print(f"Error in ArchitectAgent call: {e}")
+            # Fallback will be handled by ArchitectAgent itself or we can do it here if needed
             return None
     
     def process_response(self, response_text: str, response_type: str = "initial") -> Dict:
@@ -453,32 +349,78 @@ Generate ONLY the personalized question text. Keep it conversational and warm.""
         if not self.current_question:
             raise ValueError("No active question")
         
-        # Evaluate response
-        evaluation = self.evaluator.evaluate(
-            self.current_question,
-            response_text
+        # Emit AnswerSubmitted event
+        self.event_store.append_event(
+            self.context_manager.session_id,
+            "AnswerSubmitted",
+            {
+                "question_id": self.current_question["id"],
+                "answer_text": response_text,
+                "response_type": response_type
+            }
         )
         
-        # Select strategy
-        strategy = self.strategy_factory.select_strategy(
-            evaluation,
-            self.context_manager.get_context()
+        # 1. Evaluate response using the new EvaluatorAgent
+        scores = self.agent_evaluator.score_response(
+            question=self.current_question["text"],
+            answer=response_text,
+            experience_level=self.context_manager.get_context().get("experience_level", "mid")
         )
         
-        # Generate follow-up if needed (before logging, so we can include it)
+        evaluation = {
+            "deterministic_scores": scores,
+            "overall_score": scores.get("overall", 50),
+            "reasoning": scores.get("summary", ""),
+            "accuracy": scores.get("accuracy", 0),
+            "completeness": scores.get("completeness", 0),
+            "depth": scores.get("depth", 0)
+        }
+        
+        # Emit ResponseScored event
+        self.event_store.append_event(
+            self.context_manager.session_id,
+            "ResponseScored",
+            {
+                "question_id": self.current_question["id"],
+                "question_number": self.current_question.get("question_number", 1),
+                "answer_text": response_text,
+                "scores": scores,
+                "llm_reasoning": scores.get("summary", "")
+            }
+        )
+        
+        # 2. Get next action from ExecutionerAgent
+        executioner_context = {
+            "current_phase": "dynamic_followup",
+            "last_answer": response_text,
+            "last_question": self.current_question["text"],
+            "question_count": len(self.context_manager.get_context().get("previous_questions", [])),
+            "experience_level": self.context_manager.get_context().get("experience_level", "mid")
+        }
+        
+        agent_action = self.executioner.get_next_action(
+            self.context_manager.session_id,
+            executioner_context
+        )
+        
         followup = None
-        should_generate_followup = response_type == "initial" or (
-            response_type == "followup" and 
-            self.current_followup_count < self.max_followups_per_question and
-            self.followup_stop_reason is None  # AI hasn't decided to stop yet
-        )
+        strategy_data = {}
         
-        if should_generate_followup:
-            followup = self._generate_followup(
-                response_text,
-                evaluation,
-                strategy
-            )
+        if agent_action.get("type") == "question":
+            followup = {
+                "id": f"follow_{self.context_manager.session_id[:8]}",
+                "text": agent_action["text"],
+                "type": "followup",
+                "category": agent_action.get("strategy", "depth"),
+                "agent": "Executioner"
+            }
+            strategy_data = {
+                "id": agent_action.get("strategy", "depth"),
+                "name": agent_action.get("strategy", "depth").capitalize(),
+                "reason": agent_action.get("scores", {}).get("summary", ""),
+                "parameters": agent_action.get("scores", {}),
+                "focus_areas": [agent_action.get("strategy", "depth")]
+            }
         
         # Log response
         self.logger.log_response(
@@ -488,43 +430,18 @@ Generate ONLY the personalized question text. Keep it conversational and warm.""
             response_type,
             self.current_followup_count if response_type == "followup" else 0,
             evaluation,
-            strategy
+            None
         )
-        
-        # Update log with follow-up if generated
-        if followup:
-            self.logger.update_followup_generated(
-                self.context_manager.session_id,
-                self.current_question["id"],
-                len(self.context_manager.get_current_round_summary().get("responses", [])) - 1 if self.context_manager.get_current_round_summary() else 0,
-                followup
-            )
         
         # Update context
         self._update_context_with_response(
             response_text,
             evaluation,
-            strategy,
+            None,
             followup
         )
         
-        # Get strategy guidance for focus areas
-        strategy_guidance = strategy.get_followup_guidance(
-            self.current_question,
-            response_text,
-            evaluation,
-            self.context_manager.get_context()
-        ) if self.current_question else {}
-        
-        strategy_data = {
-            "id": strategy.get_strategy_id(),
-            "name": strategy.get_strategy_name(),
-            "reason": self.strategy_factory.get_last_selection_reason(),
-            "parameters": strategy.get_parameters(),
-            "focus_areas": strategy_guidance.get("focus_areas", [])
-        }
-        
-        # Expert mode: store followup for approval instead of returning immediately
+        # Expert mode: store followup for approval
         if self.expert_mode and followup:
             self.pending_followup = followup
             self.pending_evaluation = evaluation
@@ -532,9 +449,9 @@ Generate ONLY the personalized question text. Keep it conversational and warm.""
             return {
                 "evaluation": evaluation,
                 "strategy": strategy_data,
-                "followup": None,  # Don't send followup yet
+                "followup": None,
                 "pending_approval": True,
-                "pending_followup": followup  # Send to expert for review
+                "pending_followup": followup
             }
         
         return {

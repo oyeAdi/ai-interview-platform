@@ -33,6 +33,11 @@ class UserTenantAssignment(BaseModel):
     user_id: str
     tenant_id: str
 
+class AdminRequestCreate(BaseModel):
+    email: str
+    full_name: str
+    reason: Optional[str] = None
+
 # ============================================================================
 # MIDDLEWARE: Super Admin Check
 # ============================================================================
@@ -64,6 +69,22 @@ async def list_organizations_public():
         response = supabase_admin.table('tenants').select('id, name, slug').is_('parent_tenant_id', 'null').execute()
         return {"organizations": response.data}
     except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/public/admin-request")
+async def submit_admin_request(req: AdminRequestCreate):
+    """Submit a request to become a super admin"""
+    try:
+        data = {
+            "email": req.email,
+            "full_name": req.full_name,
+            "reason": req.reason,
+            "status": "pending"
+        }
+        response = supabase_admin.table('admin_access_requests').insert(data).execute()
+        return {"status": "submitted", "request": response.data[0]}
+    except Exception as e:
+        print(f"Error submitting admin request: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 # ============================================================================

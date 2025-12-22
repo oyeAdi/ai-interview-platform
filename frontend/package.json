@@ -16,6 +16,7 @@
     "@supabase/ssr": "^0.8.0",
     "@supabase/supabase-js": "^2.89.0",
     "autoprefixer": "^10.4.16",
+    "lucide-react": "^0.562.0",
     "mermaid": "^11.12.2",
     "next": "^14.0.0",
     "postcss": "^8.4.31",
@@ -40,3 +41,4 @@
     "typescript": "^5.2.0"
   }
 }
+

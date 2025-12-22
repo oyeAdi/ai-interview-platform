@@ -22,7 +22,7 @@ export default function LandingPage() {
 
     return (
         <div className="min-h-screen bg-[#FDFDFF] text-[#1D1D1F] selection:bg-brand-primary/30 overflow-x-hidden font-sans">
-            <Header />
+            <Header showVisionSwitcher={false} />
 
             <main>
                 {/* HERO: The Statement */}

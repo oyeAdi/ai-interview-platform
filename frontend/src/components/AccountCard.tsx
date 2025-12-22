@@ -17,6 +17,7 @@ interface AccountCardProps {
   }
   isSelected: boolean
   onSelect: (id: string) => void
+  isLoading?: boolean
 }
 
 const AccountCard: React.FC<AccountCardProps> = React.memo(({
@@ -26,7 +27,8 @@ const AccountCard: React.FC<AccountCardProps> = React.memo(({
   positionCounts,
   recentPosition,
   isSelected,
-  onSelect
+  onSelect,
+  isLoading = false
 }) => {
   const handleClick = useCallback(() => {
     onSelect(id)
@@ -97,7 +99,11 @@ const AccountCard: React.FC<AccountCardProps> = React.memo(({
             {/* Open Positions */}
             <div className="text-center p-2 rounded-lg bg-green-50 dark:bg-green-900/10 border border-green-100 dark:border-green-900/20">
               <div className="text-lg font-bold text-green-600 dark:text-green-400">
-                {positionCounts.open}
+                {isLoading ? (
+                  <div className="h-7 w-8 mx-auto bg-green-200 dark:bg-green-900/30 animate-pulse rounded"></div>
+                ) : (
+                  positionCounts.open
+                )}
               </div>
               <div className="text-[9px] text-green-600/70 dark:text-green-400/70 uppercase tracking-wider">
                 Open
@@ -107,7 +113,11 @@ const AccountCard: React.FC<AccountCardProps> = React.memo(({
             {/* Closed Positions */}
             <div className="text-center p-2 rounded-lg bg-gray-50 dark:bg-[#1A1A1A] border border-gray-100 dark:border-[#2A2A2A]">
               <div className="text-lg font-bold text-gray-600 dark:text-gray-400">
-                {positionCounts.closed}
+                {isLoading ? (
+                  <div className="h-7 w-8 mx-auto bg-gray-200 dark:bg-[#2A2A2A] animate-pulse rounded"></div>
+                ) : (
+                  positionCounts.closed
+                )}
               </div>
               <div className="text-[9px] text-gray-500 dark:text-gray-500 uppercase tracking-wider">
                 Closed
@@ -117,7 +127,11 @@ const AccountCard: React.FC<AccountCardProps> = React.memo(({
             {/* Total Positions */}
             <div className="text-center p-2 rounded-lg bg-blue-50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-900/20">
               <div className="text-lg font-bold text-blue-600 dark:text-blue-400">
-                {positionCounts.total}
+                {isLoading ? (
+                  <div className="h-7 w-8 mx-auto bg-blue-200 dark:bg-blue-900/30 animate-pulse rounded"></div>
+                ) : (
+                  positionCounts.total
+                )}
               </div>
               <div className="text-[9px] text-blue-600/70 dark:text-blue-400/70 uppercase tracking-wider">
                 Total

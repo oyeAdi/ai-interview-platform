@@ -32,8 +32,11 @@ from websocket.message_handler import MessageHandler
 from llm.jd_resume_analyzer import JDResumeAnalyzer
 from llm.feedback_agent import FeedbackGenerator
 
-# Import admin router
+# Import routers
 from api.admin import router as admin_router
+from api.intelligence import router as intelligence_router
+from api.super_admin import router as super_admin_router
+from api.tenant_admin import router as tenant_admin_router
 
 app = FastAPI(title="AI Interviewer API")
 
@@ -46,8 +49,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Register admin router
+# Register routers
 app.include_router(admin_router)
+app.include_router(intelligence_router)
+app.include_router(super_admin_router)
+app.include_router(tenant_admin_router)
 
 # Pydantic models for request/response
 class SkillRequirement(BaseModel):
@@ -220,7 +226,7 @@ def save_candidate_result(candidate_name: str, candidate_id: str, result: dict, 
 # CORS middleware - allow all subdomains of swarmhire.ai and local dev
 app.add_middleware(
     CORSMiddleware,
-    allow_origin_regex=os.getenv("CORS_ORIGIN_REGEX", r"https://.*\.swarmhire\.ai|http://localhost:3000|http://.*\.lvh\.me:3000"),
+    allow_origin_regex=os.getenv("CORS_ORIGIN_REGEX", r"https://.*\.swarmhire\.ai|http://localhost:3000|http://localhost:3001|http://.*\.lvh\.me:3000"),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -748,14 +754,27 @@ async def get_all_positions(status: Optional[str] = None):
         if status:
             query = query.eq('status', status)
         response = query.execute()
+        
+        # If Supabase returns empty, fall back to local file
+        if not response.data or len(response.data) == 0:
+            print("[INFO] Supabase returned empty positions, falling back to local file")
+            data = load_json_file(POSITIONS_FILE)
+            positions = data.get("positions", [])
+            if status:
+                positions = [pos for pos in positions if pos.get("status") == status]
+            return {"positions": positions}
+        
         # Map DB fields to expected frontend fields
         positions = []
+        # Map status: active -> open, archived -> closed, draft -> open
+        status_map = {'active': 'open', 'archived': 'closed', 'draft': 'open'}
+        
         for row in response.data:
             positions.append({
                 "id": str(row['id']),
                 "title": row['title'],
                 "account_id": str(row.get('tenant_id')),
-                "status": row.get('status', 'open'),
+                "status": status_map.get(row.get('status', 'active'), 'open'),
                 "created_at": row.get('created_at'),
                 "jd_text": row.get('description', ''),
                 "data_model": row.get('analyst_output', row.get('settings', {}))

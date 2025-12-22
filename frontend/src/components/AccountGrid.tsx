@@ -174,8 +174,8 @@ export default function AccountGrid({
           type="button"
           onClick={() => { setHasOpenOnly(!hasOpenOnly); setVisibleCount(INITIAL_DISPLAY) }}
           className={`px-3 py-1.5 text-xs transition-colors flex items-center gap-1.5 ${hasOpenOnly
-              ? 'bg-[#00E5FF] text-black'
-              : 'bg-gray-100 dark:bg-[#1A1A1A] text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-[#2A2A2A]'
+            ? 'bg-[#00E5FF] text-black'
+            : 'bg-gray-100 dark:bg-[#1A1A1A] text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-[#2A2A2A]'
             }`}
         >
           <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -190,8 +190,8 @@ export default function AccountGrid({
             value={sortBy}
             onChange={(e) => { setSortBy(e.target.value); setVisibleCount(INITIAL_DISPLAY) }}
             className={`appearance-none px-3 py-1.5 pr-7 text-xs cursor-pointer transition-colors ${sortBy !== 'recent'
-                ? 'bg-[#00E5FF] text-black'
-                : 'bg-gray-100 dark:bg-[#1A1A1A] text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-[#2A2A2A]'
+              ? 'bg-[#00E5FF] text-black'
+              : 'bg-gray-100 dark:bg-[#1A1A1A] text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-[#2A2A2A]'
               }`}
           >
             {SORT_OPTIONS.map(opt => (
@@ -250,6 +250,7 @@ export default function AccountGrid({
                 recentPosition={account.recentPosition}
                 isSelected={selectedAccount === account.id}
                 onSelect={onSelectAccount}
+                isLoading={loading}
               />
             ))}
           </div>
