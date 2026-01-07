@@ -35,10 +35,10 @@ export default function LoginPage() {
         }
 
         if (data.user) {
-            // 1. Check if Super Admin
+            // 1. Fetch Profile for Super Admin and direct Tenant link
             const { data: profile } = await supabase
                 .from('profiles')
-                .select('is_super_admin')
+                .select('is_super_admin, tenant_id')
                 .eq('id', data.user.id)
                 .single()
 
@@ -47,8 +47,8 @@ export default function LoginPage() {
                 return
             }
 
-            // 2. Check for Organization Memberships (using new RBAC table)
-            const { data: roles } = await supabase
+            // 2. Fetch Active Roles and Slugs
+            const { data: roles, error: rolesError } = await supabase
                 .from('user_tenant_roles')
                 .select(`
                     role,
@@ -58,26 +58,53 @@ export default function LoginPage() {
                 `)
                 .eq('user_id', data.user.id)
 
+            if (rolesError) {
+                console.error('Redirection Error (Roles):', rolesError)
+            }
+
+            // 3. Robust Redirection Logic
             if (roles && roles.length > 0) {
-                // Get the organization data correctly whether it's an object or an array
+                if (roles.length > 1) {
+                    router.push('/select-org')
+                    return
+                }
+
+                // Single Role - Extract Slug
                 const orgData = Array.isArray(roles[0].organizations)
                     ? roles[0].organizations[0]
                     : roles[0].organizations
 
-                const slug = (orgData as any)?.slug
+                let slug = (orgData as any)?.slug
 
-                if (roles.length === 1 && slug) {
-                    // Redirect to the only organization's dashboard
+                // Fallback: If slug is missing from join, use profiles.tenant_id
+                if (!slug && profile?.tenant_id) {
+                    const { data: org } = await supabase
+                        .from('organizations')
+                        .select('slug')
+                        .eq('id', profile.tenant_id)
+                        .single()
+                    slug = org?.slug
+                }
+
+                if (slug) {
                     router.push(`/${slug}/dashboard`)
-                } else if (roles.length > 1) {
-                    // Multiple organizations - let them choose
-                    router.push('/select-org')
                 } else {
-                    // One role but no slug found (RLS issue or orphaned role)
+                    console.warn('Single role found but no organization slug reachable.')
                     router.push('/candidate/dashboard')
                 }
             } else {
-                // No organizations - default to candidate dashboard
+                // No roles found - double check profiles.tenant_id just in case
+                if (profile?.tenant_id) {
+                    const { data: org } = await supabase
+                        .from('organizations')
+                        .select('slug')
+                        .eq('id', profile.tenant_id)
+                        .single()
+                    if (org?.slug) {
+                        router.push(`/${org.slug}/dashboard`)
+                        return
+                    }
+                }
                 router.push('/candidate/dashboard')
             }
 
