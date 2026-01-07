@@ -13,7 +13,13 @@ mermaid.initialize({
   startOnLoad: false,
   theme: 'dark',
   securityLevel: 'loose',
+  suppressErrorRendering: true, // New property in recent versions to stop default error rendering
 })
+
+// Fallback for older versions or if suppressErrorRendering doesn't work
+mermaid.parseError = (err) => {
+  console.warn('Mermaid Parse Error (Suppressed Default):', err)
+};
 
 // --- Types ---
 interface WikiEntry {
