@@ -47,9 +47,9 @@ export default function LoginPage() {
                 return
             }
 
-            // 2. Check for Organization Memberships
-            const { data: memberships } = await supabase
-                .from('organization_members')
+            // 2. Check for Organization Memberships (using new RBAC table)
+            const { data: roles } = await supabase
+                .from('user_tenant_roles')
                 .select(`
                     role,
                     organizations (
@@ -58,10 +58,10 @@ export default function LoginPage() {
                 `)
                 .eq('user_id', data.user.id)
 
-            if (memberships && memberships.length > 0) {
-                if (memberships.length === 1) {
+            if (roles && roles.length > 0) {
+                if (roles.length === 1) {
                     // Redirect to the only organization's dashboard
-                    const slug = (memberships[0].organizations as any)?.slug
+                    const slug = (roles[0].organizations as any)?.slug
                     router.push(`/${slug}/dashboard`)
                 } else {
                     // Multiple organizations - let them choose

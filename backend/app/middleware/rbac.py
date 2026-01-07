@@ -38,7 +38,7 @@ class Permission:
     ACCESS_PULSE = "access_pulse"
 
 ROLE_PERMISSIONS = {
-    "SUPER_ADMIN": [
+    "super_admin": [
         Permission.MANAGE_ORGANIZATION,
         Permission.CREATE_ACCOUNT,
         Permission.MANAGE_ACCOUNT,
@@ -49,7 +49,7 @@ ROLE_PERMISSIONS = {
         Permission.ACCESS_WIKI,
         Permission.ACCESS_PULSE,
     ],
-    "ADMIN": [
+    "tenant_admin": [
         Permission.CREATE_ACCOUNT,
         Permission.MANAGE_ACCOUNT,
         Permission.CREATE_POSITION,
@@ -58,13 +58,20 @@ ROLE_PERMISSIONS = {
         Permission.VIEW_SESSION,
         Permission.ACCESS_PULSE,
     ],
-    "PROVIDER": [
+    "account_admin": [
         Permission.CREATE_POSITION,
         Permission.MANAGE_POSITION,
         Permission.START_SESSION,
         Permission.VIEW_SESSION,
     ],
-    "MEMBER": [
+    "member": [
+        Permission.VIEW_SESSION,
+    ],
+    "HITL_expert": [
+        Permission.VIEW_SESSION,
+        Permission.START_SESSION,
+    ],
+    "candidate": [
         Permission.VIEW_SESSION,
     ]
 }
@@ -91,14 +98,20 @@ async def get_current_user(request: Request) -> Optional[dict]:
         
         # Get organization role if not super admin
         if not user_data.get('is_super_admin'):
-            membership = supabase_admin.table('organization_members').select('org_id, role').eq('user_id', user_id).execute()
-            if membership.data:
-                user_data['org_id'] = membership.data[0]['org_id']
-                user_data['role'] = membership.data[0]['role']
+            # Query the new user_tenant_roles table
+            res = supabase_admin.table('user_tenant_roles').select('tenant_id, role').eq('user_id', user_id).execute()
+            if res.data:
+                user_data['tenant_id'] = res.data[0]['tenant_id'] # Use the explicitly bound tenant
+                user_data['role'] = res.data[0]['role']
+                
+                # If account_admin, fetch managed accounts
+                if user_data['role'] == 'account_admin':
+                    assignments = supabase_admin.table('user_account_assignments').select('account_id').eq('user_id', user_id).execute()
+                    user_data['managed_accounts'] = [a['account_id'] for a in assignments.data] if assignments.data else []
             else:
-                user_data['role'] = 'MEMBER'
+                user_data['role'] = 'member'
         else:
-            user_data['role'] = 'SUPER_ADMIN'
+            user_data['role'] = 'super_admin'
             
         return user_data
     except Exception as e:

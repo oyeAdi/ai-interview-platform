@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { X, Check, Building2, UserCog, Briefcase, Shield, Fingerprint } from 'lucide-react'
+import { X, Check, Building2, UserCog, Briefcase, Shield, Fingerprint, Activity } from 'lucide-react'
 
 interface UserAssignmentModalProps {
     isOpen: boolean
@@ -26,6 +26,15 @@ export function UserAssignmentModal({ isOpen, onClose, user, tenants, accounts, 
         }
     }, [user])
 
+    // Reset role if it becomes invalid for the new context
+    useEffect(() => {
+        if (selectedTenant === 'global' && selectedRole !== 'super_admin') {
+            setSelectedRole('')
+        } else if (selectedTenant && selectedTenant !== 'global' && selectedRole === 'super_admin') {
+            setSelectedRole('')
+        }
+    }, [selectedTenant])
+
     if (!isOpen || !user) return null
 
     const handleSubmit = async () => {
@@ -50,6 +59,15 @@ export function UserAssignmentModal({ isOpen, onClose, user, tenants, accounts, 
     // Filter accounts by selected tenant
     const tenantAccounts = accounts.filter(a => a.tenant_id === selectedTenant)
 
+    const ROLES = [
+        { id: 'super_admin', label: 'Super Admin', desc: 'Full System Access & Governance (Global)', icon: Shield, globalOnly: true },
+        { id: 'tenant_admin', label: 'Organization Head', desc: 'Full control over organization settings & users', icon: Building2, orgOnly: true },
+        { id: 'account_admin', label: 'Account Admin', desc: 'Manages specific Client Accounts & Positions', icon: Briefcase, orgOnly: true },
+        { id: 'HITL_expert', label: 'HITL Expert', desc: 'Human-in-the-Loop review and session oversight', icon: Activity, orgOnly: true },
+        { id: 'member', label: 'Standard Member', desc: 'Can view assigned jobs and interview candidates', icon: UserCog, orgOnly: true },
+        { id: 'candidate', label: 'Candidate', desc: 'Restricted access only for taking interviews', icon: Fingerprint, orgOnly: true }
+    ]
+
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
             <div className="bg-white dark:bg-slate-900 rounded-2xl w-full max-w-md border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden">
@@ -57,7 +75,7 @@ export function UserAssignmentModal({ isOpen, onClose, user, tenants, accounts, 
                 <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-900/50">
                     <div>
                         <h3 className="text-lg font-bold text-slate-900 dark:text-white">Assign Access</h3>
-                        <p className="text-xs text-slate-500 font-medium">Configure organization context for {user.full_name}</p>
+                        <p className="text-xs text-slate-500 font-medium tracking-tight">Configure organization context for {user.full_name || user.email}</p>
                     </div>
                     <button onClick={onClose} className="p-2 hover:bg-slate-200 dark:hover:bg-slate-800 rounded-lg transition-colors">
                         <X className="w-4 h-4 text-slate-500" />
@@ -65,12 +83,12 @@ export function UserAssignmentModal({ isOpen, onClose, user, tenants, accounts, 
                 </div>
 
                 {/* Body */}
-                <div className="p-6 space-y-6">
+                <div className="p-6 space-y-6 max-h-[70vh] overflow-y-auto custom-scrollbar">
                     {/* Tenant Selection */}
                     <div className="space-y-2">
                         <label className="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-2">
                             <Building2 className="w-3 h-3" />
-                            Organization
+                            Target Context
                         </label>
                         <select
                             value={selectedTenant}
@@ -80,8 +98,8 @@ export function UserAssignmentModal({ isOpen, onClose, user, tenants, accounts, 
                             }}
                             className="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-sm font-medium focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 outline-none transition-all"
                         >
-                            <option value="">Select Organization...</option>
-                            <option value="global">Global / No Organization</option>
+                            <option value="">Select Target...</option>
+                            <option value="global">Global / System-Wide</option>
                             {tenants.map(t => (
                                 <option key={t.id} value={t.id}>{t.name} ({t.slug})</option>
                             ))}
@@ -95,40 +113,46 @@ export function UserAssignmentModal({ isOpen, onClose, user, tenants, accounts, 
                             Role Assignment
                         </label>
                         <div className="grid grid-cols-1 gap-2">
-                            {[
-                                { id: 'super_admin', label: 'Super Admin', desc: 'Full System Access & Governance (Global)', icon: Shield },
-                                { id: 'tenant_admin', label: 'Organization Head', desc: 'Full control over organization settings & users', icon: Building2 },
-                                { id: 'account_admin', label: 'Account Admin', desc: 'Manages specific Client Accounts & Positions', icon: Briefcase },
-                                { id: 'member', label: 'Standard Member', desc: 'Can view assigned jobs and interview candidates', icon: UserCog },
-                                { id: 'candidate', label: 'Candidate', desc: 'Restricted access only for taking interviews', icon: Fingerprint }
-                            ].map((role: any) => (
-                                <button
-                                    key={role.id}
-                                    onClick={() => setSelectedRole(role.id)}
-                                    className={`flex items-start gap-4 p-4 rounded-xl border text-left transition-all ${selectedRole === role.id
-                                        ? 'bg-orange-50 dark:bg-orange-950/30 border-orange-200 dark:border-orange-900 ring-1 ring-orange-500 shadow-sm'
-                                        : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-orange-200'
-                                        }`}
-                                >
-                                    <div className={`mt-0.5 p-2 rounded-lg border flex items-center justify-center ${selectedRole === role.id ? 'bg-orange-500 text-white border-orange-400' : 'bg-slate-50 text-slate-400 border-slate-100'
-                                        }`}>
-                                        <role.icon className="w-4 h-4" />
-                                    </div>
-                                    <div className="flex-1">
-                                        <div className="text-sm font-black text-slate-900 dark:text-white flex items-center gap-2">
-                                            {role.label}
-                                            {selectedRole === role.id && <Check className="w-3 h-3 text-orange-600" />}
+                            {ROLES.map((role: any) => {
+                                const isDisabled =
+                                    (!selectedTenant) ||
+                                    (role.globalOnly && selectedTenant !== 'global') ||
+                                    (role.orgOnly && selectedTenant === 'global');
+
+                                return (
+                                    <button
+                                        key={role.id}
+                                        disabled={isDisabled}
+                                        onClick={() => setSelectedRole(role.id)}
+                                        className={`flex items-start gap-4 p-4 rounded-xl border text-left transition-all relative ${selectedRole === role.id
+                                                ? 'bg-orange-50 dark:bg-orange-950/30 border-orange-200 dark:border-orange-900 ring-1 ring-orange-500 shadow-sm'
+                                                : isDisabled
+                                                    ? 'bg-slate-50/50 dark:bg-slate-900/50 border-slate-100 dark:border-slate-800 opacity-40 cursor-not-allowed'
+                                                    : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-orange-200'
+                                            }`}
+                                    >
+                                        <div className={`mt-0.5 p-2 rounded-lg border flex items-center justify-center ${selectedRole === role.id
+                                                ? 'bg-orange-500 text-white border-orange-400'
+                                                : 'bg-slate-50 dark:bg-slate-800 text-slate-400 border-slate-100 dark:border-slate-700'
+                                            }`}>
+                                            <role.icon className="w-4 h-4" />
                                         </div>
-                                        <div className="text-[10px] font-medium text-slate-500 leading-relaxed mt-0.5">{role.desc}</div>
-                                    </div>
-                                </button>
-                            ))}
+                                        <div className="flex-1">
+                                            <div className="text-sm font-black text-slate-900 dark:text-white flex items-center gap-2">
+                                                {role.label}
+                                                {selectedRole === role.id && <Check className="w-3 h-3 text-orange-600" />}
+                                            </div>
+                                            <div className="text-[10px] font-medium text-slate-500 dark:text-slate-400 leading-relaxed mt-0.5">{role.desc}</div>
+                                        </div>
+                                    </button>
+                                );
+                            })}
                         </div>
                     </div>
 
                     {/* Account Selection (Conditional) */}
                     {selectedRole === 'account_admin' && (
-                        <div className="space-y-2 animate-in fade-in slide-in-from-top-2">
+                        <div className="space-y-2 animate-in fade-in slide-in-from-top-2 pb-2">
                             <label className="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-2">
                                 <Briefcase className="w-3 h-3" />
                                 Target Account
@@ -147,7 +171,6 @@ export function UserAssignmentModal({ isOpen, onClose, user, tenants, accounts, 
                                     <option disabled>No accounts found for this organization</option>
                                 )}
                             </select>
-                            <p className="text-[10px] text-slate-400 ml-1">*Required for Account Admins</p>
                         </div>
                     )}
                 </div>

@@ -51,7 +51,7 @@ export default function HowItWorks() {
                                 number="3"
                                 icon={<TrendingUp className="w-12 h-12" />}
                                 title="Get Results"
-                                description="Review AI-generated scores, feedback, and hiring recommendations."
+                                description="Review scores, feedback, and AI hiring recommendations."
                                 color="green"
                             />
                         </div>
@@ -444,13 +444,13 @@ function FlowStep({ number, icon, title, description, color }: any) {
 
     return (
         <div className="relative">
-            <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-200 hover:shadow-xl transition-all">
+            <div className="bg-white rounded-2xl px-6 py-8 shadow-lg border border-gray-200 hover:shadow-xl transition-all h-full">
                 <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${colorClasses[color]} flex items-center justify-center text-white mb-6 shadow-lg`}>
                     {icon}
                 </div>
-                <div className="absolute top-4 right-4 text-6xl font-bold text-gray-100">{number}</div>
+                <div className="absolute top-4 right-4 text-6xl font-bold text-gray-100/50">{number}</div>
                 <h3 className="text-2xl font-bold mb-3 text-gray-900">{title}</h3>
-                <p className="text-gray-600">{description}</p>
+                <p className="text-gray-600 text-sm leading-relaxed">{description}</p>
             </div>
         </div>
     )
