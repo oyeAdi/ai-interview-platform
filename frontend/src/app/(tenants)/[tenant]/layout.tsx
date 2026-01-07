@@ -15,9 +15,9 @@ export default async function TenantLayout({
         redirect('/login')
     }
 
-    // Verify membership
-    const { data: membership, error } = await supabase
-        .from('organization_members')
+    // Verify membership using the new RBAC system
+    const { data: membership } = await supabase
+        .from('user_tenant_roles')
         .select(`
             role,
             organizations!inner (

@@ -87,12 +87,14 @@ export default function LoginPage() {
                 }
 
                 if (slug) {
+                    console.log('Redirecting to organization dashboard:', slug)
                     router.push(`/${slug}/dashboard`)
                 } else {
-                    console.warn('Single role found but no organization slug reachable.')
+                    console.warn('Single role found but no organization slug reachable. Falling back to candidate.')
                     router.push('/candidate/dashboard')
                 }
             } else {
+                console.log('No specific roles found in user_tenant_roles. Checking tenant_id fallback...')
                 // No roles found - double check profiles.tenant_id just in case
                 if (profile?.tenant_id) {
                     const { data: org } = await supabase
@@ -101,10 +103,12 @@ export default function LoginPage() {
                         .eq('id', profile.tenant_id)
                         .single()
                     if (org?.slug) {
+                        console.log('Fallback slug found via profile.tenant_id:', org.slug)
                         router.push(`/${org.slug}/dashboard`)
                         return
                     }
                 }
+                console.log('No organizational ties found. Defaulting to candidate dashboard.')
                 router.push('/candidate/dashboard')
             }
 

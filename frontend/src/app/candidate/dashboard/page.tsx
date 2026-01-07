@@ -43,7 +43,31 @@ export default function CandidateDashboard() {
         try {
             const { data: { user } } = await supabase.auth.getUser()
             setUser(user)
-            setUserName(user?.user_metadata?.full_name || 'Candidate')
+            if (user) {
+                setUserName(user.user_metadata?.full_name || 'Candidate')
+                // Redirection Guard: If user is an admin, send them to their portal
+                const { data: roleData } = await supabase
+                    .from('user_tenant_roles')
+                    .select(`
+                        role,
+                        organizations (
+                            slug
+                        )
+                    `)
+                    .eq('user_id', user.id)
+                    .limit(1)
+                    .maybeSingle()
+
+                if (roleData) {
+                    const orgData = Array.isArray(roleData.organizations) ? roleData.organizations[0] : roleData.organizations
+                    const slug = (orgData as any)?.slug
+                    if (slug && (roleData.role === 'tenant_admin' || roleData.role === 'account_admin')) {
+                        console.log('Admin detected on candidate dashboard, redirecting to:', `/${slug}/dashboard`)
+                        window.location.href = `/${slug}/dashboard`
+                        return
+                    }
+                }
+            }
 
             // Mock data for initial preview (Replace with real API call later)
             setInterviews([
