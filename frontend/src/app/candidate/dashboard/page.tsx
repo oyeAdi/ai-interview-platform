@@ -73,12 +73,12 @@ export default function CandidateDashboard() {
     }
 
     return (
-        <div className="min-h-screen bg-[#050505] text-white flex flex-col font-inter selection:bg-orange-500/30">
-            {/* Background Blobs */}
+        <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col font-inter selection:bg-orange-100">
+            {/* Background Blobs - Softer for Light Mode */}
             <div className="fixed inset-0 overflow-hidden pointer-events-none">
-                <div className="absolute top-0 -left-4 w-96 h-96 bg-orange-600 rounded-full mix-blend-multiply filter blur-[128px] opacity-[0.07] animate-blob" />
-                <div className="absolute top-0 -right-4 w-96 h-96 bg-purple-600 rounded-full mix-blend-multiply filter blur-[128px] opacity-[0.07] animate-blob animation-delay-2000" />
-                <div className="absolute -bottom-32 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-blue-600 rounded-full mix-blend-multiply filter blur-[128px] opacity-[0.05] animate-blob animation-delay-4000" />
+                <div className="absolute top-0 -left-4 w-[500px] h-[500px] bg-orange-200 rounded-full mix-blend-multiply filter blur-[128px] opacity-[0.2] animate-blob" />
+                <div className="absolute top-0 -right-4 w-[500px] h-[500px] bg-sky-200 rounded-full mix-blend-multiply filter blur-[128px] opacity-[0.2] animate-blob animation-delay-2000" />
+                <div className="absolute -bottom-32 left-1/2 -translate-x-1/2 w-[800px] h-[800px] bg-indigo-100 rounded-full mix-blend-multiply filter blur-[128px] opacity-[0.2] animate-blob animation-delay-4000" />
             </div>
 
             <Header showQuickStart={false} />
@@ -89,22 +89,22 @@ export default function CandidateDashboard() {
                     {/* Profile Header Section */}
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-16 items-end">
                         <div className="lg:col-span-2">
-                            <h1 className="text-5xl font-bold mb-4 tracking-tight leading-tight">
-                                Welcome back, <span className="bg-gradient-to-r from-orange-400 to-amber-200 bg-clip-text text-transparent">{userName}</span>
+                            <h1 className="text-5xl font-extrabold mb-4 tracking-tight leading-tight text-slate-900">
+                                Welcome back, <span className="text-orange-600">{userName}</span>
                             </h1>
-                            <p className="text-xl text-gray-500 max-w-xl">
-                                Your centralized hub for all active interview sessions and application progress.
+                            <p className="text-xl text-slate-500 max-w-xl font-medium">
+                                Access your active interview invitations and track your application progress.
                             </p>
                         </div>
 
                         <div className="flex flex-col gap-4 lg:items-end">
-                            <div className="flex items-center gap-3 p-1.5 bg-white/5 border border-white/10 rounded-2xl w-fit">
-                                <div className="w-12 h-12 rounded-xl bg-orange-500 flex items-center justify-center text-white font-black text-xl shadow-lg shadow-orange-500/20">
+                            <div className="flex items-center gap-4 p-2 bg-white border border-slate-200 shadow-sm rounded-2xl w-fit">
+                                <div className="w-12 h-12 rounded-xl bg-orange-600 flex items-center justify-center text-white font-black text-xl shadow-lg shadow-orange-600/20">
                                     {userName[0]}
                                 </div>
                                 <div className="pr-4">
-                                    <div className="text-sm font-bold text-gray-200">{userName}</div>
-                                    <div className="text-[10px] text-gray-500 uppercase tracking-widest font-black leading-none mt-1">Candidate Account</div>
+                                    <div className="text-sm font-bold text-slate-800">{userName}</div>
+                                    <div className="text-[10px] text-slate-400 uppercase tracking-widest font-black leading-none mt-1">Candidate Account</div>
                                 </div>
                             </div>
                         </div>
@@ -116,16 +116,16 @@ export default function CandidateDashboard() {
                         {/* Main Stream */}
                         <div className="lg:col-span-3 space-y-10">
 
-                            {/* Readiness Alert */}
+                            {/* Readiness Alert - Light Theme */}
                             <div className="relative group overflow-hidden">
-                                <div className="absolute inset-0 bg-gradient-to-r from-orange-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                                <div className="bg-white/[0.03] border border-white/10 rounded-3xl p-8 flex gap-6 items-start backdrop-blur-sm relative z-10">
-                                    <div className="p-4 bg-orange-500/10 rounded-2xl border border-orange-500/20">
-                                        <Info className="w-6 h-6 text-orange-400" />
+                                <div className="absolute inset-0 bg-gradient-to-r from-orange-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                                <div className="bg-white border border-slate-200 rounded-3xl p-8 flex gap-6 items-start shadow-sm relative z-10">
+                                    <div className="p-4 bg-orange-50 rounded-2xl border border-orange-100">
+                                        <Info className="w-6 h-6 text-orange-600" />
                                     </div>
                                     <div>
-                                        <h3 className="text-lg font-bold text-orange-200 mb-2">Systems Check: Ready for Launch</h3>
-                                        <p className="text-gray-400 leading-relaxed max-w-2xl">
+                                        <h3 className="text-lg font-bold text-slate-900 mb-2">Systems Check: Ready for Launch</h3>
+                                        <p className="text-slate-600 leading-relaxed max-w-2xl font-medium">
                                             For the best experience, please use a modern browser (Chrome/Safari) and ensure your microphone is functional.
                                             Our AI Interviewers will provide real-time guidance once the session starts.
                                         </p>
@@ -135,10 +135,10 @@ export default function CandidateDashboard() {
 
                             {/* Interviews List */}
                             <div>
-                                <h2 className="text-xs font-black uppercase tracking-[0.3em] text-gray-500 mb-8 flex items-center gap-4">
+                                <h2 className="text-xs font-black uppercase tracking-[0.3em] text-slate-400 mb-8 flex items-center gap-4">
                                     <Briefcase className="w-4 h-4" />
                                     Active Invitations
-                                    <div className="h-[1px] flex-1 bg-white/5" />
+                                    <div className="h-[1px] flex-1 bg-slate-200" />
                                 </h2>
 
                                 <div className="space-y-6">
@@ -147,44 +147,46 @@ export default function CandidateDashboard() {
                                             <InterviewCard key={interview.id} interview={interview} />
                                         ))
                                     ) : (
-                                        <div className="bg-white/[0.02] border border-dashed border-white/10 rounded-3xl p-16 text-center">
-                                            <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mx-auto mb-6">
-                                                <AlertCircle className="w-8 h-8 text-gray-700" />
+                                        <div className="bg-white border border-dashed border-slate-200 rounded-3xl p-16 text-center shadow-sm">
+                                            <div className="w-16 h-16 rounded-full bg-slate-50 flex items-center justify-center mx-auto mb-6 border border-slate-100">
+                                                <AlertCircle className="w-8 h-8 text-slate-300" />
                                             </div>
-                                            <p className="text-gray-500 font-medium italic tracking-wide">No active interview invitations found at this time.</p>
+                                            <p className="text-slate-400 font-semibold italic tracking-wide">No active interview invitations found.</p>
                                         </div>
                                     )}
                                 </div>
                             </div>
                         </div>
 
-                        {/* Sidebar Stats / Info */}
+                        {/* Sidebar Stats / Info - Light Theme */}
                         <div className="space-y-8">
-                            <div className="p-8 rounded-3xl bg-white/[0.02] border border-white/10 backdrop-blur-sm">
-                                <h4 className="text-[10px] font-black uppercase tracking-widest text-gray-500 mb-6">Activity Snapshot</h4>
-                                <div className="space-y-6">
-                                    <div className="flex justify-between items-center pb-4 border-b border-white/5">
-                                        <span className="text-gray-400 text-sm">Active Sessions</span>
-                                        <span className="text-xl font-bold text-orange-400">{interviews.length}</span>
+                            <div className="p-8 rounded-3xl bg-white border border-slate-200 shadow-sm">
+                                <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-6 font-mono">Activity Snapshot</h4>
+                                <div className="space-y-6 text-slate-800">
+                                    <div className="flex justify-between items-center pb-4 border-b border-slate-50">
+                                        <span className="text-slate-500 font-medium text-sm">Active Sessions</span>
+                                        <span className="text-xl font-black text-orange-600">{interviews.length}</span>
                                     </div>
-                                    <div className="flex justify-between items-center pb-4 border-b border-white/5">
-                                        <span className="text-gray-400 text-sm">Completed</span>
-                                        <span className="text-xl font-bold text-gray-600">0</span>
+                                    <div className="flex justify-between items-center pb-4 border-b border-slate-50">
+                                        <span className="text-slate-500 font-medium text-sm">Completed</span>
+                                        <span className="text-xl font-black text-slate-400 font-mono">00</span>
                                     </div>
                                     <div className="flex justify-between items-center">
-                                        <span className="text-gray-400 text-sm">Response Time</span>
-                                        <span className="text-xl font-bold text-green-400">Optimal</span>
+                                        <span className="text-slate-500 font-medium text-sm">Status</span>
+                                        <div className="flex items-center gap-1.5 px-3 py-1 bg-emerald-50 text-emerald-700 rounded-full text-[10px] font-black uppercase tracking-tight border border-emerald-100">
+                                            Optimal
+                                        </div>
                                     </div>
                                 </div>
                             </div>
 
-                            <div className="p-8 rounded-3xl bg-gradient-to-br from-blue-500/10 to-purple-500/10 border border-blue-500/20">
-                                <h4 className="text-[10px] font-black uppercase tracking-widest text-blue-300 mb-4">Support & FAQ</h4>
-                                <p className="text-xs text-blue-200/60 leading-relaxed mb-6">
+                            <div className="p-8 rounded-3xl bg-gradient-to-br from-indigo-500 to-indigo-600 border border-indigo-400 shadow-xl shadow-indigo-500/10">
+                                <h4 className="text-[10px] font-black uppercase tracking-widest text-indigo-100 mb-4 opacity-70">Support & FAQ</h4>
+                                <p className="text-xs text-white leading-relaxed mb-6 font-medium">
                                     Encountered a technical glitch during your session? Our support team is active 24/7.
                                 </p>
-                                <button className="text-xs font-bold text-blue-400 flex items-center gap-2 hover:translate-x-1 transition-transform">
-                                    Visit Help Center <ArrowRight className="w-3 h-3" />
+                                <button className="w-full h-10 bg-white text-indigo-600 text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-slate-50 transition-colors shadow-lg">
+                                    Get Help
                                 </button>
                             </div>
                         </div>
@@ -198,17 +200,17 @@ export default function CandidateDashboard() {
 
 function InterviewCard({ interview }: { interview: Interview }) {
     const statusConfig = {
-        pending: { label: 'Validation Required', class: 'text-amber-500 border-amber-500/20 bg-amber-500/5' },
-        ready: { label: 'Ready for Launch', class: 'text-emerald-500 border-emerald-500/20 bg-emerald-500/5' },
-        in_progress: { label: 'Live Session', class: 'text-blue-500 border-blue-500/20 bg-blue-500/5' },
-        completed: { label: 'Archived', class: 'text-gray-500 border-white/10 bg-white/5' },
-        rejected: { label: 'Not Available', class: 'text-rose-500 border-rose-500/20 bg-rose-500/5' }
+        pending: { label: 'Validation Required', class: 'text-amber-600 border-amber-200 bg-amber-50' },
+        ready: { label: 'Ready for Launch', class: 'text-emerald-600 border-emerald-200 bg-emerald-50' },
+        in_progress: { label: 'Live Session', class: 'text-blue-600 border-blue-200 bg-blue-50' },
+        completed: { label: 'Archived', class: 'text-slate-500 border-slate-200 bg-slate-50' },
+        rejected: { label: 'Not Available', class: 'text-rose-600 border-rose-200 bg-rose-50' }
     }
 
     const config = statusConfig[interview.status]
 
     return (
-        <div className="group bg-white/[0.03] border border-white/10 rounded-[2rem] p-8 md:p-10 hover:bg-white/[0.05] hover:border-white/20 transition-all duration-500 hover:shadow-2xl hover:shadow-orange-500/5">
+        <div className="group bg-white border border-slate-200 rounded-[2rem] p-8 md:p-10 hover:border-orange-200 transition-all duration-500 hover:shadow-xl hover:shadow-orange-500/5 cursor-default">
             <div className="flex flex-col md:flex-row justify-between gap-10">
                 <div className="flex-1">
                     <div className="flex items-center gap-4 mb-8">
@@ -218,47 +220,47 @@ function InterviewCard({ interview }: { interview: Interview }) {
                         `}>
                             {config.label}
                         </div>
-                        <div className="w-1.5 h-1.5 rounded-full bg-white/10" />
-                        <span className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">
+                        <div className="w-1.5 h-1.5 rounded-full bg-slate-100" />
+                        <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">
                             {new Date(interview.invited_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
                         </span>
                     </div>
 
-                    <h3 className="text-3xl font-bold mb-4 tracking-tight group-hover:text-white transition-colors">
+                    <h3 className="text-3xl font-extrabold mb-4 tracking-tight text-slate-800 transition-colors group-hover:text-slate-900">
                         {interview.position_title}
                     </h3>
                     <div className="flex items-center gap-2 mb-8">
-                        <div className="w-6 h-6 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-[10px] text-gray-400">
-                            T
+                        <div className="w-8 h-8 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center text-xs font-bold text-slate-400">
+                            {interview.company_name[0]}
                         </div>
-                        <span className="text-gray-400 font-medium tracking-tight text-lg">{interview.company_name}</span>
+                        <span className="text-slate-500 font-semibold tracking-tight text-lg">{interview.company_name}</span>
                     </div>
 
-                    <div className="flex flex-wrap gap-8 items-center text-xs text-gray-500 font-bold uppercase tracking-widest">
+                    <div className="flex flex-wrap gap-8 items-center text-xs text-slate-400 font-black uppercase tracking-[0.1em]">
                         <div className="flex items-center gap-3">
-                            <Clock className="w-4 h-4 text-orange-500/50" />
+                            <Clock className="w-4 h-4 text-orange-500" />
                             {interview.estimated_duration}
                         </div>
                         <div className="flex items-center gap-3">
-                            <Calendar className="w-4 h-4 text-orange-500/50" />
+                            <Calendar className="w-4 h-4 text-orange-500" />
                             On-Demand Access
                         </div>
                     </div>
                 </div>
 
-                <div className="flex flex-col justify-center border-t md:border-t-0 md:border-l border-white/5 pt-10 md:pt-0 md:pl-12 lg:min-w-[280px]">
+                <div className="flex flex-col justify-center border-t md:border-t-0 md:border-l border-slate-100 pt-10 md:pt-0 md:pl-12 lg:min-w-[280px]">
                     {interview.status === 'ready' || interview.status === 'in_progress' ? (
                         <div className="space-y-4">
-                            <button className="w-full h-16 bg-white text-black hover:bg-orange-500 hover:text-white rounded-2xl font-black text-xs uppercase tracking-[0.3em] flex items-center justify-center gap-3 transition-all duration-300 shadow-xl shadow-white/5 hover:shadow-orange-500/20">
+                            <button className="w-full h-16 bg-slate-900 text-white hover:bg-orange-600 rounded-2xl font-black text-xs uppercase tracking-[0.3em] flex items-center justify-center gap-3 transition-all duration-300 shadow-xl shadow-slate-900/10 hover:shadow-orange-600/20">
                                 {interview.status === 'ready' ? 'Launch Interview' : 'Resume Session'}
                                 <ArrowRight className="w-4 h-4" />
                             </button>
-                            <p className="text-center text-[9px] text-gray-500 font-bold uppercase tracking-widest">
-                                Swarm Engine Verified
+                            <p className="text-center text-[9px] text-slate-400 font-bold uppercase tracking-widest leading-none">
+                                AI Swarm Engine Verified
                             </p>
                         </div>
                     ) : (
-                        <div className="text-center p-6 bg-white/[0.02] rounded-2xl border border-white/5 text-gray-600 text-xs font-bold uppercase tracking-widest italic">
+                        <div className="text-center p-6 bg-slate-50 rounded-2xl border border-slate-100 text-slate-300 text-xs font-black uppercase tracking-widest italic">
                             Session Locked
                         </div>
                     )}
