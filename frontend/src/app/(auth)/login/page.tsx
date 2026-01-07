@@ -59,13 +59,22 @@ export default function LoginPage() {
                 .eq('user_id', data.user.id)
 
             if (roles && roles.length > 0) {
-                if (roles.length === 1) {
+                // Get the organization data correctly whether it's an object or an array
+                const orgData = Array.isArray(roles[0].organizations)
+                    ? roles[0].organizations[0]
+                    : roles[0].organizations
+
+                const slug = (orgData as any)?.slug
+
+                if (roles.length === 1 && slug) {
                     // Redirect to the only organization's dashboard
-                    const slug = (roles[0].organizations as any)?.slug
                     router.push(`/${slug}/dashboard`)
-                } else {
+                } else if (roles.length > 1) {
                     // Multiple organizations - let them choose
                     router.push('/select-org')
+                } else {
+                    // One role but no slug found (RLS issue or orphaned role)
+                    router.push('/candidate/dashboard')
                 }
             } else {
                 // No organizations - default to candidate dashboard
