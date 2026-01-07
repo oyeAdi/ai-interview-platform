@@ -67,15 +67,21 @@ const PositionCard: React.FC<PositionCardProps> = React.memo(({
   candidateCount = 0,
   compact = false
 }) => {
-  const { data_model } = position
+  const data_model = position.data_model || {
+    required_skills: [],
+    experience_level: 'unknown',
+    duration_minutes: 0,
+    expectations: 'No'
+  }
 
   const handleClick = useCallback(() => {
     onSelect(position.id)
   }, [position.id, onSelect])
 
   const formattedDate = useMemo(() => formatDate(position.created_at), [position.created_at])
-  const topSkills = useMemo(() => data_model.required_skills.slice(0, 3), [data_model.required_skills])
-  const remainingSkills = data_model.required_skills.length - 3
+  const required_skills = data_model.required_skills || []
+  const topSkills = useMemo(() => required_skills.slice(0, 3), [required_skills])
+  const remainingSkills = Math.max(0, required_skills.length - 3)
 
   return (
     <button
@@ -109,13 +115,13 @@ const PositionCard: React.FC<PositionCardProps> = React.memo(({
           <div className="space-y-2">
             <h3 className={`font-semibold text-base line-clamp-2 min-h-[3rem] transition-colors ${isSelected ? 'text-[#00E5FF]' : 'text-gray-900 dark:text-white'
               }`}>
-              {position.title}
+              {position.title || 'Untitled Position'}
             </h3>
 
             {/* Status & Level Badges */}
             <div className="flex items-center gap-2 flex-wrap">
-              <span className={`px-2 py-0.5 text-[9px] font-medium uppercase rounded-full ${statusColors[position.status]}`}>
-                {position.status.replace('_', ' ')}
+              <span className={`px-2 py-0.5 text-[9px] font-medium uppercase rounded-full ${statusColors[position.status || 'open'] || statusColors.open}`}>
+                {(position.status || 'open').replace('_', ' ')}
               </span>
               <span className={`px-2 py-0.5 text-[9px] font-medium uppercase rounded-full ${experienceLevelColors[data_model.experience_level]}`}>
                 {data_model.experience_level}
@@ -163,7 +169,7 @@ const PositionCard: React.FC<PositionCardProps> = React.memo(({
                 key={idx}
                 className="px-2 py-0.5 text-[10px] bg-gray-100 dark:bg-[#1A1A1A] text-gray-600 dark:text-gray-400 rounded"
               >
-                {skill.skill.replace('_', ' ')}
+                {(skill.skill || 'Unknown').replace('_', ' ')}
               </span>
             ))}
             {remainingSkills > 0 && (

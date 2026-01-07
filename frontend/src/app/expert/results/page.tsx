@@ -6,20 +6,20 @@ import ResultsHistory from '@/components/ResultsHistory'
 
 export default function ExpertResultsPage() {  // Changed from AdminResultsPage to ExpertResultsPage
     return (
-        <div className="min-h-screen bg-white dark:bg-black flex flex-col transition-colors duration-200">
+        <div className="min-h-screen bg-gradient-to-br from-white via-orange-50 to-purple-50 flex flex-col">
             <Header showBackToDashboard={true} />
 
-            <main className="flex-1 container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                <div className="mb-8">
-                    <h1 className="text-3xl font-light text-black dark:text-white leading-tight">
-                        Feedback
+            <main className="flex-1 container mx-auto px-4 sm:px-6 lg:px-8 py-12">
+                <div className="mb-12">
+                    <h1 className="text-4xl font-black text-gray-900 tracking-tight">
+                        Interview <span className="text-brand-primary">Intelligence</span>
                     </h1>
-                    <p className="text-gray-500 mt-2">
+                    <p className="text-gray-500 mt-4 font-medium">
                         Review past interviews, generate AI feedback, and manage approvals.
                     </p>
                 </div>
 
-                <div className="bg-white dark:bg-[#0A0A0A] border border-gray-200 dark:border-[#2A2A2A] rounded-lg p-6 min-h-[600px]">
+                <div className="bg-white border border-gray-200 rounded-[2rem] p-8 shadow-sm min-h-[600px]">
                     <ResultsHistory />
                 </div>
             </main>

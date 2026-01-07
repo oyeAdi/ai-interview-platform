@@ -28,6 +28,7 @@ import WikiWidget from '@/components/WikiWidget'
 import InterviewLinksModal from '@/components/InterviewLinksModal'
 import EmailSentModal from '@/components/EmailSentModal'
 import { apiUrl, getHeaders } from '@/config/api'
+import { createClient } from '@/utils/supabase/client'
 
 interface Account {
     id: string
@@ -82,17 +83,18 @@ export default function TenantDashboardPage() {
     const [dataModel, setDataModel] = useState<DataModel | null>(null)
     const [showAddPosition, setShowAddPosition] = useState(false)
     const [showAddAccount, setShowAddAccount] = useState(false)
+    const [userId, setUserId] = useState<string | null>(null)
 
     // Workflow State (7-Step Journey) - Universal Terminology
     const [currentStep, setCurrentStep] = useState(1)
     const steps = [
-        { id: 1, label: 'Scope', icon: <Building2 className="w-4 h-4" />, desc: 'Workspace Context' },
-        { id: 2, label: 'Criteria', icon: <FileText className="w-4 h-4" />, desc: 'Requirements' },
-        { id: 3, label: 'Subject', icon: <User className="w-4 h-4" />, desc: 'Profile Entity' },
-        { id: 4, label: 'Insight', icon: <Search className="w-4 h-4" />, desc: 'AI Analysis' },
-        { id: 5, label: 'Blueprint', icon: <Target className="w-4 h-4" />, desc: 'Strategy Map' },
-        { id: 6, label: 'Handshake', icon: <CheckCircle2 className="w-4 h-4" />, desc: 'Expert Vetting' },
-        { id: 7, label: 'Action', icon: <Rocket className="w-4 h-4" />, desc: 'Launch' },
+        { id: 1, label: 'Accounts', icon: <Building2 className="w-4 h-4" />, desc: 'Workspace Context' },
+        { id: 2, label: 'Positions', icon: <FileText className="w-4 h-4" />, desc: 'Requirements' },
+        { id: 3, label: 'Candidates', icon: <User className="w-4 h-4" />, desc: 'Profile Entity' },
+        { id: 4, label: 'Analysis', icon: <Search className="w-4 h-4" />, desc: 'AI Analysis' },
+        { id: 5, label: 'Strategy', icon: <Target className="w-4 h-4" />, desc: 'Strategy Map' },
+        { id: 6, label: 'Review', icon: <CheckCircle2 className="w-4 h-4" />, desc: 'Expert Vetting' },
+        { id: 7, label: 'Launch', icon: <Rocket className="w-4 h-4" />, desc: 'Launch' },
     ]
 
     // Sidebar state
@@ -124,27 +126,41 @@ export default function TenantDashboardPage() {
 
     // Load accounts and all positions on mount
     useEffect(() => {
-        const storedResultUrl = sessionStorage.getItem('last_result_url')
-        if (storedResultUrl) {
-            setHasResults(true)
-            setResultUrl(storedResultUrl)
-        }
+        const supabase = createClient()
 
-        const headers = getHeaders();
+        async function loadData() {
+            setLoading(true)
+            try {
+                const storedResultUrl = sessionStorage.getItem('last_result_url')
+                if (storedResultUrl) {
+                    setHasResults(true)
+                    setResultUrl(storedResultUrl)
+                }
 
-        Promise.all([
-            fetch(apiUrl('api/accounts'), { headers }).then(res => res.json()),
-            fetch(apiUrl('api/positions'), { headers }).then(res => res.json())
-        ])
-            .then(([accountsData, positionsData]) => {
+                const { data: { user } } = await supabase.auth.getUser()
+                if (!user) {
+                    setLoading(false)
+                    return
+                }
+                setUserId(user.id)
+
+                const headers = getHeaders(user.id);
+
+                const [accountsData, positionsData] = await Promise.all([
+                    fetch(apiUrl('api/accounts'), { headers }).then(res => res.json()),
+                    fetch(apiUrl('api/positions'), { headers }).then(res => res.json())
+                ])
+
                 setAccounts(accountsData.accounts || [])
                 setAllPositions(positionsData.positions || [])
-                setLoading(false)
-            })
-            .catch(err => {
+            } catch (err) {
                 console.error('Error loading data:', err)
+            } finally {
                 setLoading(false)
-            })
+            }
+        }
+
+        loadData()
     }, [])
 
     // Advance Step Logic
@@ -170,7 +186,7 @@ export default function TenantDashboardPage() {
         try {
             const response = await fetch(apiUrl('api/intelligence/generate-email'), {
                 method: 'POST',
-                headers: getHeaders(),
+                headers: getHeaders(userId || undefined),
                 body: JSON.stringify({
                     candidate_name: selectedCandidate || 'Candidate',
                     position_title: selectedPositionData?.title || 'Technical Role'
@@ -189,18 +205,23 @@ export default function TenantDashboardPage() {
     const handleAIAudit = async () => {
         setIsAuditing(true)
         try {
+            const hasCandidateData = resumeText.trim() !== '' || !!resumeFile;
+
             const response = await fetch(apiUrl('api/intelligence/audit'), {
                 method: 'POST',
-                headers: getHeaders(),
+                headers: getHeaders(userId || undefined),
                 body: JSON.stringify({
                     resume_text: resumeText,
-                    jd_text: selectedPositionData?.jd_text || ''
+                    jd_text: selectedPositionData?.jd_text || '',
+                    skip_candidate: !hasCandidateData
                 })
             })
             const data = await response.json()
             setAuditResults({
-                score: data.score || 0,
-                observations: [data.reasoning || "Analysis complete."]
+                score: data.score || (hasCandidateData ? 0 : 100),
+                observations: [
+                    data.reasoning || (hasCandidateData ? "Analysis complete." : "Position requirements analysis complete. Proceeding with strategy map generation.")
+                ]
             })
         } catch (err) {
             console.error('Error during AI Audit:', err)
@@ -215,7 +236,7 @@ export default function TenantDashboardPage() {
         try {
             const response = await fetch(apiUrl('api/intelligence/strategize'), {
                 method: 'POST',
-                headers: getHeaders(),
+                headers: getHeaders(userId || undefined),
                 body: JSON.stringify({
                     milestones: dataModel?.interview_flow || [],
                     jd_text: selectedPositionData?.jd_text || '',
@@ -238,7 +259,9 @@ export default function TenantDashboardPage() {
     useEffect(() => {
         if (selectedAccount) {
             setPositionsLoading(true)
-            fetch(apiUrl(`api/accounts/${selectedAccount}/positions`), { headers: getHeaders() })
+            fetch(apiUrl(`api/accounts/${selectedAccount}/positions`), {
+                headers: getHeaders(userId || undefined)
+            })
                 .then(res => res.json())
                 .then(data => {
                     setAccountPositions(data.positions || [])
@@ -253,7 +276,7 @@ export default function TenantDashboardPage() {
                     setPositionsLoading(false)
                 })
         }
-    }, [selectedAccount])
+    }, [selectedAccount, userId])
 
     // Update data model when position changes
     useEffect(() => {
@@ -278,8 +301,8 @@ export default function TenantDashboardPage() {
     }
 
     const handleStartInterview = async (expertMode: boolean = false) => {
-        if (!selectedAccount || !selectedPosition || (!resumeText && !resumeFile && !selectedCandidate)) {
-            alert('Please complete all selection steps')
+        if (!selectedAccount || !selectedPosition) {
+            alert('Please select both an account and a position to proceed.')
             return
         }
 
@@ -288,7 +311,7 @@ export default function TenantDashboardPage() {
         try {
             const sessionResponse = await fetch(apiUrl('api/interview/create-session'), {
                 method: 'POST',
-                headers: getHeaders(),
+                headers: getHeaders(userId || undefined),
                 body: JSON.stringify({
                     position_id: selectedPosition,
                     candidate_id: selectedCandidate || 'custom',
@@ -346,7 +369,7 @@ export default function TenantDashboardPage() {
             try {
                 await fetch(apiUrl(`api/positions/${selectedPosition}/config`), {
                     method: 'PUT',
-                    headers: getHeaders(),
+                    headers: getHeaders(userId || undefined),
                     body: JSON.stringify(updatedModel)
                 })
             } catch (err) {
@@ -357,17 +380,17 @@ export default function TenantDashboardPage() {
 
     const refreshPositions = () => {
         if (selectedAccount) {
-            fetch(apiUrl(`api/accounts/${selectedAccount}/positions`), { headers: getHeaders() })
+            fetch(apiUrl(`api/accounts/${selectedAccount}/positions`), { headers: getHeaders(userId || undefined) })
                 .then(res => res.json())
                 .then(data => setAccountPositions(data.positions || []))
         }
-        fetch(apiUrl('api/positions'), { headers: getHeaders() })
+        fetch(apiUrl('api/positions'), { headers: getHeaders(userId || undefined) })
             .then(res => res.json())
             .then(data => setAllPositions(data.positions || []))
     }
 
     const refreshAccounts = () => {
-        fetch(apiUrl('api/accounts'), { headers: getHeaders() })
+        fetch(apiUrl('api/accounts'), { headers: getHeaders(userId || undefined) })
             .then(res => res.json())
             .then(data => setAccounts(data.accounts || []))
     }
@@ -438,11 +461,11 @@ export default function TenantDashboardPage() {
 
                 <section className="flex-1 max-w-6xl mx-auto w-full px-6 py-12">
                     <div className="h-full flex flex-col">
-                        {/* Step 1: Scope */}
+                        {/* Step 1: Accounts */}
                         {currentStep === 1 && (
                             <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
                                 <div className="mb-10 text-center max-w-2xl mx-auto">
-                                    <h2 className="text-3xl font-semibold tracking-tight mb-2">Define Scope</h2>
+                                    <h2 className="text-3xl font-semibold tracking-tight mb-2">Select Account</h2>
                                     <p className="text-gray-500 text-sm">Select the organizational context where this intelligence session will operate.</p>
                                 </div>
                                 <AccountGrid
@@ -456,7 +479,7 @@ export default function TenantDashboardPage() {
                             </div>
                         )}
 
-                        {/* Step 2: Criteria */}
+                        {/* Step 2: Positions */}
                         {currentStep === 2 && (
                             <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
                                 <div className="mb-10 flex items-end justify-between border-b border-gray-100 dark:border-[#111] pb-6">
@@ -464,7 +487,7 @@ export default function TenantDashboardPage() {
                                         <button onClick={prevStep} className="flex items-center gap-1 text-xs font-semibold text-gray-400 hover:text-black dark:hover:text-white mb-2 transition-colors uppercase tracking-widest">
                                             <ChevronLeft className="w-3 h-3" /> Back
                                         </button>
-                                        <h2 className="text-3xl font-semibold tracking-tight">Establish Criteria</h2>
+                                        <h2 className="text-3xl font-semibold tracking-tight">Select Position</h2>
                                         <p className="text-gray-500 text-sm mt-1">Define the evaluation criteria for the <span className="text-black dark:text-white font-medium">{selectedAccountData?.name}</span> scope.</p>
                                     </div>
                                 </div>
@@ -479,14 +502,14 @@ export default function TenantDashboardPage() {
                             </div>
                         )}
 
-                        {/* Step 3: Subject */}
+                        {/* Step 3: Candidates */}
                         {currentStep === 3 && (
                             <div className="animate-in fade-in slide-in-from-bottom-2 duration-300 max-w-4xl mx-auto w-full">
                                 <div className="mb-10">
                                     <button onClick={prevStep} className="flex items-center gap-1 text-xs font-semibold text-gray-400 hover:text-black dark:hover:text-white mb-2 transition-colors uppercase tracking-widest">
                                         <ChevronLeft className="w-3 h-3" /> Back
                                     </button>
-                                    <h2 className="text-3xl font-semibold tracking-tight">Identify Subject</h2>
+                                    <h2 className="text-3xl font-semibold tracking-tight">Select Candidate</h2>
                                     <p className="text-gray-500 text-sm mt-1">Select or import the profile to be evaluated against the established criteria.</p>
                                 </div>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
@@ -508,10 +531,9 @@ export default function TenantDashboardPage() {
                                         </div>
                                         <button
                                             onClick={nextStep}
-                                            disabled={!selectedCandidate && !resumeText && !resumeFile}
                                             className="mt-8 flex items-center justify-center gap-3 bg-black dark:bg-white text-white dark:text-black h-14 rounded-xl text-xs font-bold tracking-[0.2em] uppercase transition-all hover:scale-[1.02] disabled:opacity-30 disabled:hover:scale-100"
                                         >
-                                            Process Analysis <Target className="w-4 h-4" />
+                                            {(!selectedCandidate && !resumeText && !resumeFile) ? 'Continue without Candidate' : 'Process Analysis'} <Target className="w-4 h-4" />
                                         </button>
                                     </div>
                                 </div>
@@ -528,7 +550,7 @@ export default function TenantDashboardPage() {
                                     {isAuditing && <div className="absolute inset-0 border-t-2 border-orange-500 rounded-full animate-spin" />}
                                 </div>
                                 <div className="text-center space-y-3 mb-12">
-                                    <h2 className="text-3xl font-semibold tracking-tight">Generate Insight</h2>
+                                    <h2 className="text-3xl font-semibold tracking-tight">AI Analysis</h2>
                                     <p className="text-gray-500 text-sm max-w-sm mx-auto leading-relaxed">AI Analyst is calculating compatibility between criteria and subject profile.</p>
                                 </div>
                                 {!isAuditing && auditResults && (
@@ -558,7 +580,7 @@ export default function TenantDashboardPage() {
                                     <Target className={`w-8 h-8 ${isStrategizing ? 'text-orange-500 animate-bounce' : 'text-gray-400'}`} />
                                 </div>
                                 <div className="text-center space-y-3 mb-10">
-                                    <h2 className="text-3xl font-semibold tracking-tight">Design Blueprint</h2>
+                                    <h2 className="text-3xl font-semibold tracking-tight">Strategy Map</h2>
                                     <p className="text-gray-500 text-sm max-w-sm mx-auto">Generating strategic execution plan for the intelligence session.</p>
                                 </div>
                                 {!isStrategizing && strategyPlan && (
@@ -586,7 +608,7 @@ export default function TenantDashboardPage() {
                             <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 max-w-5xl mx-auto w-full">
                                 <div className="flex items-center justify-between mb-10 border-b border-gray-100 dark:border-[#111] pb-8">
                                     <div>
-                                        <h2 className="text-3xl font-semibold tracking-tight">Handshake Review</h2>
+                                        <h2 className="text-3xl font-semibold tracking-tight">Expert Review</h2>
                                         <p className="text-gray-500 text-sm mt-1">Expert validation of AI-proposed configuration before execution.</p>
                                     </div>
                                     <div className="flex gap-4">

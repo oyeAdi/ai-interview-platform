@@ -10,8 +10,8 @@
 ## Project Overview
 This is an AI-powered interview platform built with:
 - **Frontend**: Next.js 14 (App Router), React, TypeScript, TailwindCSS
-- **Backend**: FastAPI, Python, WebSockets
-- **AI**: Google Gemini for question generation and evaluation
+- **Backend**: FastAPI (Python), consolidated into `backend/app/`
+- **AI**: Optimized 6-Agent Swarm (Strategy, Executioner, Evaluator, Observer, Critique, Monitor)
 
 ---
 
@@ -63,31 +63,34 @@ frontend/src/components/
 
 ## Styling Conventions
 
-### Colors (EPAM Theme)
+### SwarmHire Brand Colors (Orange Core)
 ```css
---epam-cyan: #00E5FF          /* Primary accent */
---background-dark: #000000     /* Dark mode background */
---surface-dark: #0A0A0A        /* Card backgrounds (dark) */
---border-dark: #2A2A2A         /* Borders (dark) */
---text-primary: #FFFFFF        /* Main text (dark) */
---text-secondary: #9CA3AF      /* Muted text */
+--brand-primary: #FF6B35;   /* Signature Orange */
+--accent-blue: #00D1FF;    /* Premium Cyan Accent */
+--surface-dark: #0A0A0A;    /* Card Surface (Dark) */
+--surface-primary: #000000; /* Page Background (Dark) */
+--text-primary: #FFFFFF;    /* Main Text */
+--glass-bg: rgba(255, 255, 255, 0.04);
 ```
 
 ### Component Patterns
 ```tsx
-// Card with proper overflow handling
-<div className="p-4 border border-gray-200 dark:border-[#2A2A2A] overflow-hidden">
-  <div className="flex items-start gap-3">
-    <div className="flex-shrink-0">...</div>  {/* Fixed element */}
-    <div className="min-w-0 flex-1">          {/* Truncatable content */}
-      <h3 className="truncate">...</h3>
+// Premium Glass Card
+<div className="glass-card p-6 rounded-xl overflow-hidden">
+  <div className="flex items-start gap-4">
+    <div className="p-2 bg-brand-primary/10 rounded-lg flex-shrink-0">
+      <Icon className="text-brand-primary" />
+    </div>
+    <div className="min-w-0 flex-1">
+      <h3 className="text-lg font-bold truncate">...</h3>
+      <p className="text-sm text-text-secondary line-clamp-2">...</p>
     </div>
   </div>
 </div>
 
-// Button with loading state
-<button disabled={loading} className="btn-primary disabled:opacity-40">
-  {loading ? <Spinner /> : 'Submit'}
+// SwarmHire Action Button
+<button className="btn-primary rounded-lg shadow-lg shadow-orange-500/20">
+  {loading ? <Spinner /> : 'Propel Swarm'}
 </button>
 ```
 
@@ -104,12 +107,13 @@ frontend/src/components/
 
 ### File Locations
 ```
-backend/
-├── main.py              # FastAPI app, routes
-├── core/                # Business logic
-├── models/              # JSON data files
-├── llm/                 # AI/Gemini integration
-└── resumes/             # Resume storage
+backend/app/
+├── main.py              # Central FastAPI application & RBAC enforcement
+├── core/                # 6-Agent Swarm Orchestration
+├── engine/              # Agent protocols and Intelligence dispatch
+├── middleware/          # Role-Based Access Control (RBAC) & RLS helpers
+├── services/            # Redis, LLM Router, and Payment integrations
+└── (support)/           # websocket, utils, models, prompts, questions, resumes
 ```
 
 ---

@@ -86,7 +86,7 @@ export default function PositionGrid({
 }: PositionGridProps) {
   const [search, setSearch] = useState('')
   const [filters, setFilters] = useState<Record<string, string[]>>({
-    status: ['open'], // Default to showing open positions
+    status: [], // Show all positions by default
     level: [],
     sort: ['recent']
   })
@@ -143,7 +143,7 @@ export default function PositionGrid({
       const searchLower = search.toLowerCase()
       result = result.filter(p =>
         p.title.toLowerCase().includes(searchLower) ||
-        p.data_model.required_skills.some(s => s.skill.toLowerCase().includes(searchLower))
+        (p.data_model?.required_skills || []).some(s => s.skill.toLowerCase().includes(searchLower))
       )
     }
 
@@ -154,7 +154,7 @@ export default function PositionGrid({
 
     // Level filter
     if (filters.level.length > 0) {
-      result = result.filter(p => filters.level.includes(p.data_model.experience_level))
+      result = result.filter(p => filters.level.includes(p.data_model?.experience_level || 'unknown'))
     }
 
     // Sort
@@ -166,7 +166,7 @@ export default function PositionGrid({
         case 'oldest':
           return new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
         case 'title':
-          return a.title.localeCompare(b.title)
+          return (a.title || '').localeCompare(b.title || '')
         default:
           return 0
       }

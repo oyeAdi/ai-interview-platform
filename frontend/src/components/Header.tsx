@@ -3,51 +3,49 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import ThemeToggle from './ThemeToggle'
+
 import { createClient } from '@/utils/supabase/client'
 import { User } from '@supabase/supabase-js'
+import ProfileMenu from './ProfileMenu'
 
 interface HeaderProps {
   showQuickStart?: boolean
   showBackToDashboard?: boolean
-  showVisionSwitcher?: boolean
+
   title?: string
 }
 
 export default function Header({
   showQuickStart = true,
   showBackToDashboard = false,
-  showVisionSwitcher = true,
+
   title
 }: HeaderProps) {
   const pathname = usePathname()
   const router = useRouter()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [user, setUser] = useState<User | null>(null)
-  const [userRole, setUserRole] = useState<string>('user')
-  const [userProfile, setUserProfile] = useState<{ email: string, role: string, preferred_vision: string } | null>(null)
+  const [userProfile, setUserProfile] = useState<{ email: string, is_super_admin: boolean, full_name?: string } | null>(null)
   const supabase = createClient()
 
   useEffect(() => {
     const fetchProfile = async (currentUser: User | null) => {
       if (!currentUser) {
-        setUserRole('user')
         setUserProfile(null)
         return
       }
 
       const { data: profile } = await supabase
         .from('profiles')
-        .select('role, preferred_vision')
+        .select('is_super_admin, full_name')
         .eq('id', currentUser.id)
         .single()
 
       if (profile) {
-        setUserRole(profile.role || 'user')
         setUserProfile({
           email: currentUser.email || '',
-          role: profile.role || 'user',
-          preferred_vision: profile.preferred_vision || 'B2B'
+          is_super_admin: profile.is_super_admin || false,
+          full_name: profile.full_name
         })
       }
     }
@@ -108,15 +106,14 @@ export default function Header({
                 )}
               </Link>
 
-              {/* Theme Toggle */}
-              <ThemeToggle />
+
             </div>
 
             {/* Center - Navigation (Desktop) */}
             <nav className="hidden md:flex items-center gap-8">
               <Link
-                href="/#features"
-                className={`text-sm font-normal transition-colors ${pathname === '/#features'
+                href="/features"
+                className={`text-sm font-normal transition-colors ${pathname === '/features'
                   ? 'text-black dark:text-white'
                   : 'text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white'
                   }`}
@@ -125,8 +122,18 @@ export default function Header({
               </Link>
 
               <Link
-                href="/#pricing"
-                className={`text-sm font-normal transition-colors ${pathname === '/#pricing'
+                href="/how-it-works"
+                className={`text-sm font-normal transition-colors ${pathname === '/how-it-works'
+                  ? 'text-black dark:text-white'
+                  : 'text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white'
+                  }`}
+              >
+                How It Works
+              </Link>
+
+              <Link
+                href="/subscription"
+                className={`text-sm font-normal transition-colors ${pathname === '/subscription'
                   ? 'text-black dark:text-white'
                   : 'text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white'
                   }`}
@@ -135,8 +142,8 @@ export default function Header({
               </Link>
 
               <Link
-                href="/#about"
-                className={`text-sm font-normal transition-colors ${pathname === '/#about'
+                href="/about"
+                className={`text-sm font-normal transition-colors ${pathname === '/about'
                   ? 'text-black dark:text-white'
                   : 'text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white'
                   }`}
@@ -144,19 +151,30 @@ export default function Header({
                 About
               </Link>
 
+              <Link
+                href="/wiki"
+                className={`text-sm font-normal transition-colors ${pathname === '/wiki'
+                  ? 'text-black dark:text-white'
+                  : 'text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white'
+                  }`}
+              >
+                Docs
+              </Link>
+
+              <Link
+                href="/contact"
+                className={`text-sm font-normal transition-colors ${pathname === '/contact'
+                  ? 'text-black dark:text-white'
+                  : 'text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white'
+                  }`}
+              >
+                Contact
+              </Link>
+
 
               {/* Wiki & Docs - Only for super_admin */}
-              {userRole === 'super_admin' && (
+              {userProfile?.is_super_admin && (
                 <>
-                  <Link
-                    href="/wiki"
-                    className={`text-sm font-normal transition-colors ${pathname === '/wiki'
-                      ? 'text-black dark:text-white'
-                      : 'text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white'
-                      }`}
-                  >
-                    Wiki & Docs
-                  </Link>
                   <Link
                     href="/expert/intelligence"
                     className={`text-sm font-normal transition-colors ${pathname === '/expert/intelligence'
@@ -182,25 +200,28 @@ export default function Header({
             {/* Right Side - CTA & Login */}
             <div className="flex items-center gap-4">
               {showBackToDashboard && (
-                <Link
-                  href="/dashboard"
+                <button
+                  onClick={() => {
+                    const parts = pathname.split('/')
+                    if (parts.length >= 2 && !['login', 'signup', 'super-admin'].includes(parts[1])) {
+                      router.push(`/${parts[1]}/dashboard`)
+                    } else {
+                      router.push('/')
+                    }
+                  }}
                   className="hidden sm:flex items-center gap-1 text-sm text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white transition-colors"
                 >
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
                   </svg>
                   Back
-                </Link>
+                </button>
               )}
 
               {/* Auth Section */}
+              {/* Auth Section */}
               {user ? (
-                <button
-                  onClick={handleLogout}
-                  className="hidden sm:block text-sm font-medium text-gray-500 hover:text-red-600 transition-colors"
-                >
-                  Logout
-                </button>
+                <ProfileMenu user={user} userProfile={userProfile} />
               ) : (
                 <Link
                   href="/login"
@@ -220,71 +241,9 @@ export default function Header({
                 </Link>
               )}
 
-              {/* Vision Switcher (Desktop) */}
-              {showVisionSwitcher && (
-                <div className="hidden lg:flex items-center gap-2 border-l border-gray-200 dark:border-[#2A2A2A] ml-2 pl-4">
-                  <div className="relative group">
-                    <button className="flex items-center gap-2 text-xs font-medium text-gray-500 hover:text-black dark:hover:text-white transition-colors py-1 px-2 rounded-md hover:bg-gray-100 dark:hover:bg-[#1A1A1A]">
-                      <span className="w-1.5 h-1.5 rounded-full bg-brand-primary"></span>
-                      Switch Vision
-                      <svg className="w-3 h-3 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                      </svg>
-                    </button>
-                    <div className="absolute top-full left-0 mt-1 w-48 bg-white dark:bg-[#0A0A0A] border border-gray-200 dark:border-[#2A2A2A] rounded-xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-[60] py-2 overflow-hidden">
-                      <div className="flex flex-col">
-                        <VisionLink
-                          href="/dashboard"
-                          label="Enterprise Hub"
-                          icon="🏢"
-                          userVision={user?.user_metadata?.preferred_vision}
-                          userRole={userRole}
-                          targetVision="B2B"
-                        />
-                        <VisionLink
-                          href="/expert/studio"
-                          label="Expert Studio"
-                          icon="👤"
-                          userVision={user?.user_metadata?.preferred_vision}
-                          userRole={userRole}
-                          targetVision="B2C"
-                        />
-                        <VisionLink
-                          href="/private/circle"
-                          label="Private Circle"
-                          icon="🏠"
-                          userVision={user?.user_metadata?.preferred_vision}
-                          userRole={userRole}
-                          targetVision="C2C"
-                        />
-                        {userRole === 'super_admin' && (
-                          <div className="border-t border-gray-100 dark:border-[#1A1A1A] mt-1 pt-1">
-                            <VisionLink
-                              href="/super-admin"
-                              label="System Vision"
-                              icon="🛡️"
-                              userVision={undefined}
-                              userRole={userRole}
-                              targetVision="SYSTEM"
-                            />
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
 
-              {/* User Profile Debug Indicator */}
-              {userProfile && (
-                <div className="hidden sm:flex flex-col items-end gap-0.5 text-[9px] font-mono text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-[#2A2A2A] px-2 py-1 rounded">
-                  <div className="font-bold">{userProfile.email}</div>
-                  <div className="flex gap-2">
-                    <span className="text-blue-600 dark:text-blue-400">Role: {userProfile.role}</span>
-                    <span className="text-purple-600 dark:text-purple-400">Vision: {userProfile.preferred_vision}</span>
-                  </div>
-                </div>
-              )}
+
+
             </div>
           </div>
         </div>
@@ -295,27 +254,36 @@ export default function Header({
         <div className="md:hidden fixed inset-0 z-40 bg-white dark:bg-black">
           <div className="pt-20 px-6 space-y-6">
             <Link
-              href="/#features"
+              href="/features"
               onClick={() => setMobileMenuOpen(false)}
-              className={`block text-2xl font-light ${pathname === '/#features' ? 'text-brand-primary' : 'text-black dark:text-white'
+              className={`block text-2xl font-light ${pathname === '/features' ? 'text-brand-primary' : 'text-black dark:text-white'
                 }`}
             >
               Features
             </Link>
 
             <Link
-              href="/#pricing"
+              href="/how-it-works"
               onClick={() => setMobileMenuOpen(false)}
-              className={`block text-2xl font-light ${pathname === '/#pricing' ? 'text-brand-primary' : 'text-black dark:text-white'
+              className={`block text-2xl font-light ${pathname === '/how-it-works' ? 'text-brand-primary' : 'text-black dark:text-white'
+                }`}
+            >
+              How It Works
+            </Link>
+
+            <Link
+              href="/subscription"
+              onClick={() => setMobileMenuOpen(false)}
+              className={`block text-2xl font-light ${pathname === '/subscription' ? 'text-brand-primary' : 'text-black dark:text-white'
                 }`}
             >
               Pricing
             </Link>
 
             <Link
-              href="/#about"
+              href="/about"
               onClick={() => setMobileMenuOpen(false)}
-              className={`block text-2xl font-light ${pathname === '/#about' ? 'text-brand-primary' : 'text-black dark:text-white'
+              className={`block text-2xl font-light ${pathname === '/about' ? 'text-brand-primary' : 'text-black dark:text-white'
                 }`}
             >
               About
@@ -327,8 +295,19 @@ export default function Header({
               className={`block text-2xl font-light ${pathname === '/wiki' ? 'text-brand-primary' : 'text-black dark:text-white'
                 }`}
             >
-              Wiki & Docs
+              Docs
             </Link>
+
+            <Link
+              href="/contact"
+              onClick={() => setMobileMenuOpen(false)}
+              className={`block text-2xl font-light ${pathname === '/contact' ? 'text-brand-primary' : 'text-black dark:text-white'
+                }`}
+            >
+              Contact
+            </Link>
+
+            {/* Removed archived Wiki link */}
 
             <div className="pt-6 border-t border-gray-200 dark:border-[#2A2A2A] space-y-4">
               <Link
@@ -355,44 +334,4 @@ export default function Header({
     </>
   )
 }
-interface VisionLinkProps {
-  href: string
-  label: string
-  icon: string
-  userVision: string | undefined
-  userRole: string
-  targetVision: string
-}
 
-function VisionLink({ href, label, icon, userVision, userRole, targetVision }: VisionLinkProps) {
-  // Super admins have unrestricted access to all visions
-  const isSuperAdmin = userRole === 'super_admin'
-  const isLocked = !isSuperAdmin && userVision && userVision !== targetVision
-  const isActive = userVision === targetVision
-
-  if (isLocked) {
-    return (
-      <div className="flex items-center justify-between px-4 py-2 text-xs text-gray-400 cursor-not-allowed opacity-60">
-        <div className="flex items-center gap-3">
-          <span>{icon}</span> {label}
-        </div>
-        <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-        </svg>
-      </div>
-    )
-  }
-
-  return (
-    <Link
-      href={href}
-      className={`flex items-center justify-between px-4 py-2 text-xs transition-colors hover:bg-gray-50 dark:hover:bg-[#111111] ${isActive ? 'text-brand-primary font-bold' : 'text-gray-600 dark:text-gray-400 hover:text-black dark:hover:text-white'
-        }`}
-    >
-      <div className="flex items-center gap-3">
-        <span>{icon}</span> {label}
-      </div>
-      {isActive && <div className="w-1 h-1 rounded-full bg-brand-primary"></div>}
-    </Link>
-  )
-}

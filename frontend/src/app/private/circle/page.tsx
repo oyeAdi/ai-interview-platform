@@ -1,49 +1,15 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
-import { useRouter, useParams } from 'next/navigation'
-import { createClient } from '@/utils/supabase/client'
+import { useParams } from 'next/navigation'
 
 export default function PrivateCircleRootPage() {
     const params = useParams()
-    const router = useRouter()
     const tenant = (params?.tenant as string) || 'global'
 
-    useEffect(() => {
-        const checkVision = async () => {
-            const supabase = createClient()
-            const { data: { user } } = await supabase.auth.getUser()
-
-            if (user) {
-                // Fetch user role and preferred_vision from profiles
-                const { data: profile } = await supabase
-                    .from('profiles')
-                    .select('role, preferred_vision')
-                    .eq('id', user.id)
-                    .single()
-
-                // Super admins have unrestricted access
-                if (profile?.role === 'super_admin') {
-                    return
-                }
-
-                // Use preferred_vision from profiles table (source of truth)
-                const userVision = profile?.preferred_vision || user.user_metadata?.preferred_vision
-                console.log('C2C Route Guard - User Vision:', userVision)
-
-                if (userVision === 'B2B') {
-                    console.log('Redirecting B2B user to /dashboard')
-                    router.push('/dashboard')
-                } else if (userVision === 'B2C') {
-                    console.log('Redirecting B2C user to /expert/studio')
-                    router.push('/expert/studio')
-                }
-            }
-        }
-        checkVision()
-    }, [])
+    // Vision-based route guards removed - access is now role-based
 
     const [stats] = useState({
         activeInvites: 2,

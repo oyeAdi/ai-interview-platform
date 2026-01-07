@@ -249,18 +249,18 @@ export default function ResultsHistory() {
 
     const getStatusBadge = (status: FeedbackState) => {
         const badges = {
-            'NOT_GENERATED': { color: 'bg-gray-500', text: 'Pending' },
-            'GENERATING': { color: 'bg-blue-500 animate-pulse', text: 'Generating...' },
-            'GENERATED': { color: 'bg-yellow-500', text: 'Review' },
-            'APPROVING': { color: 'bg-blue-500 animate-pulse', text: 'Approving...' },
-            'APPROVED': { color: 'bg-green-500', text: 'Approved' },
-            'PUBLISHING': { color: 'bg-blue-500 animate-pulse', text: 'Publishing...' },
-            'PUBLISHED': { color: 'bg-[#39FF14]', text: 'Published' },
-            'REJECTED': { color: 'bg-red-500', text: 'Rejected' }
+            'NOT_GENERATED': { color: 'bg-gray-100 text-gray-500', text: 'Pending' },
+            'GENERATING': { color: 'bg-blue-50 text-blue-600 animate-pulse', text: 'Generating...' },
+            'GENERATED': { color: 'bg-yellow-50 text-yellow-600', text: 'Review' },
+            'APPROVING': { color: 'bg-blue-50 text-blue-600 animate-pulse', text: 'Approving...' },
+            'APPROVED': { color: 'bg-green-50 text-green-600', text: 'Approved' },
+            'PUBLISHING': { color: 'bg-blue-50 text-blue-600 animate-pulse', text: 'Publishing...' },
+            'PUBLISHED': { color: 'bg-brand-primary/10 text-brand-primary', text: 'Published' },
+            'REJECTED': { color: 'bg-red-50 text-red-600', text: 'Rejected' }
         }
         const badge = badges[status] || badges['NOT_GENERATED']
         return (
-            <span className={`px-3 py-1 rounded-full text-xs font-medium text-black ${badge.color}`}>
+            <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${badge.color}`}>
                 {badge.text}
             </span>
         )
@@ -275,23 +275,23 @@ export default function ResultsHistory() {
     }
 
     return (
-        <div className="p-6">
-            <h2 className="text-2xl font-bold text-white mb-6">Interview Results</h2>
+        <div className="p-2">
+            <h2 className="text-2xl font-black text-gray-900 mb-8">Interview Results</h2>
 
             {/* Results Table */}
-            <div className="bg-[#141414] border border-[#2A2A2A] rounded-xl overflow-hidden">
+            <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm">
                 <table className="w-full">
-                    <thead className="bg-[#1A1A1A] border-b border-[#2A2A2A]">
+                    <thead className="bg-gray-50 border-b border-gray-100">
                         <tr>
-                            <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase">Candidate</th>
-                            <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase">Position</th>
-                            <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase">Score</th>
-                            <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase">Date</th>
-                            <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase">Status</th>
-                            <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase">Actions</th>
+                            <th className="px-6 py-4 text-left text-[10px] font-black text-gray-400 uppercase tracking-widest">Candidate</th>
+                            <th className="px-6 py-4 text-left text-[10px] font-black text-gray-400 uppercase tracking-widest">Position</th>
+                            <th className="px-6 py-4 text-left text-[10px] font-black text-gray-400 uppercase tracking-widest">Score</th>
+                            <th className="px-6 py-4 text-left text-[10px] font-black text-gray-400 uppercase tracking-widest">Date</th>
+                            <th className="px-6 py-4 text-left text-[10px] font-black text-gray-400 uppercase tracking-widest">Status</th>
+                            <th className="px-6 py-4 text-left text-[10px] font-black text-gray-400 uppercase tracking-widest">Actions</th>
                         </tr>
                     </thead>
-                    <tbody className="divide-y divide-[#2A2A2A]">
+                    <tbody className="divide-y divide-gray-100">
                         {results.length === 0 ? (
                             <tr>
                                 <td colSpan={6} className="px-6 py-8 text-center text-gray-500">
@@ -307,30 +307,30 @@ export default function ResultsHistory() {
                                 const feedbackStatus = result.feedback?.status || 'NOT_GENERATED'
 
                                 return (
-                                    <tr key={result.session_id} className="hover:bg-[#1A1A1A] transition-colors">
-                                        <td className="px-6 py-4 text-white">{candidateName}</td>
-                                        <td className="px-6 py-4 text-gray-300">{positionTitle}</td>
-                                        <td className="px-6 py-4 text-white font-medium">
+                                    <tr key={result.session_id} className="hover:bg-gray-50/50 transition-colors group">
+                                        <td className="px-6 py-4 text-gray-900 font-bold">{candidateName}</td>
+                                        <td className="px-6 py-4 text-gray-600">{positionTitle}</td>
+                                        <td className="px-6 py-4 text-gray-900 font-black">
                                             {score}/10
                                         </td>
-                                        <td className="px-6 py-4 text-gray-400">
+                                        <td className="px-6 py-4 text-gray-400 text-xs">
                                             {new Date(result.date).toLocaleDateString()}
                                         </td>
                                         <td className="px-6 py-4">
                                             {getStatusBadge(feedbackStatus)}
                                         </td>
-                                        <td className="px-6 py-4">
+                                        <td className="px-6 py-4 text-right">
                                             <div className="flex gap-2">
                                                 <button
                                                     onClick={() => handleReview(result)}
-                                                    className="px-4 py-2 bg-[#00E5FF] hover:bg-[#00E5FF]/90 text-black font-medium rounded-lg transition-all"
+                                                    className="px-4 py-2 bg-black hover:bg-gray-800 text-white text-[10px] font-black uppercase tracking-widest rounded-lg transition-all"
                                                 >
                                                     Review
                                                 </button>
                                                 {feedbackStatus === 'PUBLISHED' && (
                                                     <button
                                                         onClick={() => handleShare(result)}
-                                                        className="px-4 py-2 bg-[#39FF14] hover:bg-[#39FF14]/90 text-black font-medium rounded-lg transition-all"
+                                                        className="px-4 py-2 bg-brand-primary hover:bg-brand-primary-dark text-white text-[10px] font-black uppercase tracking-widest rounded-lg transition-all"
                                                     >
                                                         Share
                                                     </button>
@@ -347,21 +347,21 @@ export default function ResultsHistory() {
 
             {/* Feedback Modal */}
             {showModal && selectedResult && (
-                <div className="fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50">
-                    <div className="bg-[#141414] border border-[#2A2A2A] rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+                    <div className="bg-white border border-gray-200 rounded-[2rem] max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
                         {/* Modal Header */}
-                        <div className="sticky top-0 bg-[#141414] border-b border-[#2A2A2A] p-6 flex justify-between items-center">
+                        <div className="sticky top-0 bg-white/80 backdrop-blur-md border-b border-gray-100 p-8 flex justify-between items-center z-10">
                             <div>
-                                <h3 className="text-2xl font-bold text-white">
+                                <h3 className="text-2xl font-black text-gray-900 tracking-tight">
                                     {selectedResult.candidate?.name || (selectedResult as any).candidate_name || 'Candidate'}
                                 </h3>
-                                <p className="text-gray-400">
+                                <p className="text-gray-400 text-xs font-bold uppercase tracking-widest mt-1">
                                     {selectedResult.position?.title || (selectedResult as any).position_title || 'Position'}
                                 </p>
                             </div>
                             <button
                                 onClick={() => setShowModal(false)}
-                                className="text-gray-400 hover:text-white"
+                                className="p-2 hover:bg-gray-100 rounded-xl transition-colors text-gray-400 hover:text-gray-600"
                             >
                                 <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -369,37 +369,49 @@ export default function ResultsHistory() {
                             </button>
                         </div>
 
-                        <div className="p-6">
+                        <div className="p-8">
                             {/* State: NOT_GENERATED or REJECTED */}
                             {(feedbackState === 'NOT_GENERATED' || feedbackState === 'REJECTED') && (
-                                <div className="space-y-6">
+                                <div className="space-y-8">
                                     <div>
-                                        <h4 className="text-lg font-bold text-white mb-4">Select Feedback Type</h4>
-                                        <div className="space-y-3">
-                                            <label className="flex items-start gap-3 p-4 bg-[#1A1A1A] border border-[#2A2A2A] rounded-xl cursor-pointer hover:border-[#00E5FF] transition-colors">
+                                        <h4 className="text-sm font-black text-gray-900 uppercase tracking-widest mb-6">Select Feedback Type</h4>
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <label className={`flex flex-col gap-4 p-6 border-2 rounded-2xl cursor-pointer transition-all ${feedbackType === 'short' ? 'border-brand-primary bg-brand-primary/5' : 'border-gray-100 bg-gray-50 hover:border-gray-200'}`}>
                                                 <input
                                                     type="radio"
                                                     name="feedbackType"
                                                     checked={feedbackType === 'short'}
                                                     onChange={() => setFeedbackType('short')}
-                                                    className="mt-1"
+                                                    className="sr-only"
                                                 />
+                                                <div className="flex items-center justify-between">
+                                                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${feedbackType === 'short' ? 'bg-brand-primary text-white' : 'bg-white text-gray-400'}`}>
+                                                        <span className="text-lg">📄</span>
+                                                    </div>
+                                                    {feedbackType === 'short' && <div className="w-2 h-2 bg-brand-primary rounded-full"></div>}
+                                                </div>
                                                 <div>
-                                                    <div className="text-white font-medium">Short Feedback</div>
-                                                    <div className="text-sm text-gray-400">1-2 paragraphs, key highlights only (~800 chars)</div>
+                                                    <div className="text-gray-900 font-bold">Short Feedback</div>
+                                                    <div className="text-[10px] text-gray-400 font-medium mt-1">1-2 paragraphs, key highlights only</div>
                                                 </div>
                                             </label>
-                                            <label className="flex items-start gap-3 p-4 bg-[#1A1A1A] border border-[#2A2A2A] rounded-xl cursor-pointer hover:border-[#00E5FF] transition-colors">
+                                            <label className={`flex flex-col gap-4 p-6 border-2 rounded-2xl cursor-pointer transition-all ${feedbackType === 'long' ? 'border-brand-primary bg-brand-primary/5' : 'border-gray-100 bg-gray-50 hover:border-gray-200'}`}>
                                                 <input
                                                     type="radio"
                                                     name="feedbackType"
                                                     checked={feedbackType === 'long'}
                                                     onChange={() => setFeedbackType('long')}
-                                                    className="mt-1"
+                                                    className="sr-only"
                                                 />
+                                                <div className="flex items-center justify-between">
+                                                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${feedbackType === 'long' ? 'bg-brand-primary text-white' : 'bg-white text-gray-400'}`}>
+                                                        <span className="text-lg">📚</span>
+                                                    </div>
+                                                    {feedbackType === 'long' && <div className="w-2 h-2 bg-brand-primary rounded-full"></div>}
+                                                </div>
                                                 <div>
-                                                    <div className="text-white font-medium">Long Feedback</div>
-                                                    <div className="text-sm text-gray-400">Detailed analysis, 3-5 paragraphs (~3000 chars)</div>
+                                                    <div className="text-gray-900 font-bold">Long Feedback</div>
+                                                    <div className="text-[10px] text-gray-400 font-medium mt-1">Detailed analysis, comprehensive report</div>
                                                 </div>
                                             </label>
                                         </div>
@@ -407,9 +419,9 @@ export default function ResultsHistory() {
                                     <button
                                         onClick={handleGenerate}
                                         disabled={!feedbackType}
-                                        className="w-full py-4 bg-[#00E5FF] hover:bg-[#00E5FF]/90 disabled:bg-gray-600 disabled:cursor-not-allowed text-black font-bold rounded-xl transition-all"
+                                        className="w-full py-5 bg-black hover:bg-gray-800 disabled:bg-gray-200 disabled:cursor-not-allowed text-white text-xs font-black uppercase tracking-[0.2em] rounded-2xl transition-all shadow-lg"
                                     >
-                                        Generate Feedback
+                                        Generate Intelligence Report
                                     </button>
                                 </div>
                             )}
@@ -425,35 +437,37 @@ export default function ResultsHistory() {
 
                             {/* State: GENERATED */}
                             {feedbackState === 'GENERATED' && (
-                                <div className="space-y-6">
-                                    <div className="flex items-center gap-2 text-[#39FF14]">
-                                        <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                                        </svg>
-                                        <span className="font-bold">Feedback Generated ({feedbackType})</span>
+                                <div className="space-y-8">
+                                    <div className="flex items-center gap-3 text-brand-primary">
+                                        <div className="w-10 h-10 bg-brand-primary/10 rounded-xl flex items-center justify-center">
+                                            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                            </svg>
+                                        </div>
+                                        <span className="font-black uppercase tracking-widest text-xs">Intelligence Report Ready ({feedbackType})</span>
                                     </div>
                                     <textarea
                                         value={feedbackContent}
                                         onChange={(e) => setFeedbackContent(e.target.value)}
-                                        className="w-full h-64 bg-[#1A1A1A] border border-[#2A2A2A] rounded-xl p-4 text-white resize-none focus:outline-none focus:border-[#00E5FF]"
+                                        className="w-full h-80 bg-gray-50 border border-gray-100 rounded-[2rem] p-8 text-gray-700 leading-relaxed resize-none focus:outline-none focus:border-brand-primary/30 transition-all font-medium"
                                         placeholder="Feedback content..."
                                     />
-                                    <div className="flex gap-3">
+                                    <div className="flex gap-4">
                                         <button
                                             onClick={() => setShowModal(false)}
-                                            className="px-6 py-3 bg-[#2A2A2A] hover:bg-[#333] text-white font-medium rounded-xl transition-all"
+                                            className="px-8 py-4 bg-gray-100 hover:bg-gray-200 text-gray-600 text-xs font-black uppercase tracking-widest rounded-2xl transition-all"
                                         >
-                                            Back
+                                            Discard
                                         </button>
                                         <button
                                             onClick={handleRejectClick}
-                                            className="px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-medium rounded-xl transition-all"
+                                            className="px-8 py-4 bg-red-50 hover:bg-red-500 hover:text-white text-red-500 text-xs font-black uppercase tracking-widest border border-red-100 rounded-2xl transition-all"
                                         >
                                             Reject
                                         </button>
                                         <button
                                             onClick={handleApprove}
-                                            className="flex-1 px-6 py-3 bg-[#39FF14] hover:bg-[#39FF14]/90 text-black font-bold rounded-xl transition-all"
+                                            className="flex-1 px-8 py-4 bg-brand-primary hover:bg-brand-primary-dark text-white text-xs font-black uppercase tracking-widest rounded-2xl transition-all shadow-lg shadow-brand-primary/20"
                                         >
                                             Approve & Publish
                                         </button>

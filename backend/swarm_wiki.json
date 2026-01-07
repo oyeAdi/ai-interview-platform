@@ -1,0 +1,26 @@
+{
+  "repo_name": "SwarmHire Platform",
+  "repo_notes": "A multi-agent AI recruitment platform that uses a swarm of specialized agents (Orchestrator, Monitor, etc.) to conduct interviews. It uses FastAPI for the backend and Next.js for the frontend. Key components include 'IntelligenceDispatch' for LLM routing and 'Supabase' for persistence.",
+  "page_structure": {
+    "Overview": [
+      "README.md",
+      "backend/archive/root_doc/ARCHITECTURE.md"
+    ],
+    "Core Engine": [
+      "backend/app/engine/**/*.py",
+      "backend/app/llm/**/*.py"
+    ],
+    "API Layer": [
+      "backend/app/routers/**/*.py"
+    ],
+    "Frontend": [
+      "frontend/src/app/**/*.tsx"
+    ]
+  },
+  "ignore_patterns": [
+    "tests",
+    "migrations",
+    "legacy",
+    "archive"
+  ]
+}

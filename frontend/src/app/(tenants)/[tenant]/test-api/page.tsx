@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
 import { apiUrl, getHeaders, getTenantSlug } from '@/config/api'
+import { createClient } from '@/utils/supabase/client'
 
 export default function TestApiPage() {
     const params = useParams()
@@ -17,10 +18,12 @@ export default function TestApiPage() {
     const testFetch = async () => {
         setLoading(true)
         setError(null)
-        const headers = getHeaders()
-        setHeadersUsed(headers)
 
         try {
+            const { data: { user } } = await createClient().auth.getUser()
+            const headers = getHeaders(user?.id)
+            setHeadersUsed(headers)
+
             const response = await fetch(apiUrl('api/accounts'), {
                 headers: headers
             })

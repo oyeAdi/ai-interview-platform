@@ -32,8 +32,9 @@ export const wsUrl = (path: string) => {
 export const getTenantSlug = () => {
   if (typeof window === 'undefined') return null;
   const hostname = window.location.hostname;
+  const pathname = window.location.pathname;
 
-  // Ignore base domains and reserved subdomains
+  // 1. Check Subdomain
   const baseDomains = ['swarmhire.ai', 'localhost', 'lvh.me', 'vercel.app'];
   const parts = hostname.split('.');
 
@@ -41,24 +42,40 @@ export const getTenantSlug = () => {
     const firstPart = parts[0].toLowerCase();
     const reserved = ['www', 'app', 'api', 'admin'];
 
-    // Simple check: if the hostname ends with a base domain and has a prefix that isn't reserved
     const isBase = baseDomains.some(domain => hostname.endsWith(domain));
     if (isBase && !reserved.includes(firstPart)) {
       return firstPart;
     }
   }
+
+  // 2. Check Path Segment (e.g., /epam/dashboard)
+  const pathParts = pathname.split('/').filter(Boolean);
+  if (pathParts.length > 0) {
+    const firstSegment = pathParts[0];
+    const reservedPaths = ['dashboard', 'select-org', 'wiki', 'docs', 'super-admin', 'api', 'login', 'signup', 'subscription'];
+    if (!reservedPaths.includes(firstSegment)) {
+      return firstSegment;
+    }
+  }
+
   return null;
 };
 
 /**
  * Gets the standard headers for tenant-aware API calls
- * @returns Headers object with X-Tenant-Slug if applicable
+ * @param userId - Optional user ID to include in headers
+ * @param extraHeaders - Additional headers to merge
+ * @returns Headers object with X-Tenant-Slug (and X-User-ID if provided)
  */
-export const getHeaders = (extraHeaders: Record<string, string> = {}) => {
+export const getHeaders = (userId?: string, extraHeaders: Record<string, string> = {}) => {
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
     ...extraHeaders,
   };
+
+  if (userId) {
+    headers['X-User-ID'] = userId;
+  }
 
   const tenant = getTenantSlug();
   if (tenant) {
