@@ -80,12 +80,17 @@ export default function ProfileMenu({ user, userProfile }: ProfileMenuProps) {
                 </div>
 
                 {/* Mobile: Hidden, Desktop: Show name */}
-                <div className="hidden lg:flex flex-col items-start">
-                    <span className="text-xs font-semibold text-gray-700 dark:text-gray-200 group-hover:text-black dark:group-hover:text-white transition-colors">
+                <div className="hidden lg:flex flex-col items-start translate-y-[-1px]">
+                    <span className="text-[11px] font-bold text-slate-800 dark:text-slate-200 group-hover:text-black dark:group-hover:text-white transition-colors leading-none mb-1">
                         {currentProfile?.full_name || 'User'}
                     </span>
-                    <span className="text-[10px] text-gray-500 dark:text-gray-400">
-                        {currentProfile?.is_super_admin ? 'Super Admin' : 'User'}
+                    <span className="text-[9px] text-slate-400 dark:text-slate-500 font-black uppercase tracking-widest leading-none">
+                        {currentProfile?.is_super_admin
+                            ? 'Super Admin'
+                            : currentProfile?.role
+                                ? currentProfile.role.replace(/_/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase())
+                                : 'User'
+                        }
                     </span>
                 </div>
 
