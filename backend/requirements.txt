@@ -12,16 +12,4 @@ huggingface_hub>=0.20.0
 redis==5.0.1
 stripe>=7.0.0
 razorpay>=1.4.0
-
-
-
-
-
-
-
-
-
-
-
-
-
+sendgrid>=6.10.0
