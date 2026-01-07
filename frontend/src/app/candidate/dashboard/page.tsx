@@ -104,7 +104,12 @@ export default function CandidateDashboard() {
                                 </div>
                                 <div className="pr-4">
                                     <div className="text-sm font-bold text-slate-800">{userName}</div>
-                                    <div className="text-[10px] text-slate-400 uppercase tracking-widest font-black leading-none mt-1">Candidate Account</div>
+                                    <div className="text-[10px] text-slate-400 uppercase tracking-widest font-black leading-none mt-1">
+                                        {user?.role
+                                            ? user.role.replace(/_/g, ' ') + ' Account'
+                                            : 'Candidate Account'
+                                        }
+                                    </div>
                                 </div>
                             </div>
                         </div>
