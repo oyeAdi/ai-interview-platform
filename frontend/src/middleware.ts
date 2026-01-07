@@ -89,7 +89,7 @@ export default async function middleware(request: NextRequest) {
         }
     }
 
-    const reservedSubdomains = ['www', 'app', 'api', 'admin'];
+    const reservedSubdomains = ['www', 'app', 'api', 'admin', 'swarmhireai'];
     if (!subdomain || reservedSubdomains.includes(subdomain.toLowerCase())) return response;
 
     const path = request.nextUrl.pathname;
