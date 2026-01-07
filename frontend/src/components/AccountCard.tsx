@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useCallback, useMemo } from 'react'
+import { Info } from 'lucide-react'
 
 interface AccountCardProps {
   id: string
@@ -17,6 +18,7 @@ interface AccountCardProps {
   }
   isSelected: boolean
   onSelect: (id: string) => void
+  onShowDetails?: (id: string) => void
   isLoading?: boolean
 }
 
@@ -28,6 +30,7 @@ const AccountCard: React.FC<AccountCardProps> = React.memo(({
   recentPosition,
   isSelected,
   onSelect,
+  onShowDetails,
   isLoading = false
 }) => {
   const handleClick = useCallback(() => {
@@ -82,10 +85,24 @@ const AccountCard: React.FC<AccountCardProps> = React.memo(({
 
             {/* Name & Description */}
             <div className="flex-1 min-w-0">
-              <h3 className={`font-semibold text-base mb-1 truncate transition-colors ${isSelected ? 'text-[#00E5FF]' : 'text-gray-900 dark:text-white'
-                }`}>
-                {name}
-              </h3>
+              <div className="flex items-center justify-between gap-2">
+                <h3 className={`font-semibold text-base mb-1 truncate transition-colors ${isSelected ? 'text-[#00E5FF]' : 'text-gray-900 dark:text-white'
+                  }`}>
+                  {name}
+                </h3>
+                {onShowDetails && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      onShowDetails(id)
+                    }}
+                    className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-[#1A1A1A] text-gray-400 hover:text-[#00E5FF] transition-all"
+                    title="View details"
+                  >
+                    <Info className="w-4 h-4" />
+                  </button>
+                )}
+              </div>
               {description && (
                 <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2">
                   {description}

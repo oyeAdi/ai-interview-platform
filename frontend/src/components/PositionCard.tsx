@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useCallback, useMemo } from 'react'
+import { Info } from 'lucide-react'
 
 interface Skill {
   skill: string
@@ -30,6 +31,7 @@ interface PositionCardProps {
   position: Position
   isSelected: boolean
   onSelect: (positionId: string) => void
+  onShowDetails?: (positionId: string) => void
   candidateCount?: number
   compact?: boolean
 }
@@ -64,6 +66,7 @@ const PositionCard: React.FC<PositionCardProps> = React.memo(({
   position,
   isSelected,
   onSelect,
+  onShowDetails,
   candidateCount = 0,
   compact = false
 }) => {
@@ -113,10 +116,24 @@ const PositionCard: React.FC<PositionCardProps> = React.memo(({
         <div className="p-5 space-y-4">
           {/* Header - Title & Badges */}
           <div className="space-y-2">
-            <h3 className={`font-semibold text-base line-clamp-2 min-h-[3rem] transition-colors ${isSelected ? 'text-[#00E5FF]' : 'text-gray-900 dark:text-white'
-              }`}>
-              {position.title || 'Untitled Position'}
-            </h3>
+            <div className="flex items-start justify-between gap-1">
+              <h3 className={`font-semibold text-base line-clamp-2 min-h-[3rem] transition-colors ${isSelected ? 'text-[#00E5FF]' : 'text-gray-900 dark:text-white'
+                }`}>
+                {position.title || 'Untitled Position'}
+              </h3>
+              {onShowDetails && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    onShowDetails(position.id)
+                  }}
+                  className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-[#1A1A1A] text-gray-400 hover:text-[#00E5FF] transition-all flex-shrink-0"
+                  title="View details"
+                >
+                  <Info className="w-4 h-4" />
+                </button>
+              )}
+            </div>
 
             {/* Status & Level Badges */}
             <div className="flex items-center gap-2 flex-wrap">
@@ -164,17 +181,14 @@ const PositionCard: React.FC<PositionCardProps> = React.memo(({
 
           {/* Skills Tags */}
           <div className="flex flex-wrap gap-1.5">
-            {topSkills.map((skill, idx) => (
-              <span
-                key={idx}
-                className="px-2 py-0.5 text-[10px] bg-gray-100 dark:bg-[#1A1A1A] text-gray-600 dark:text-gray-400 rounded"
-              >
-                {(skill.skill || 'Unknown').replace('_', ' ')}
+            {data_model.required_skills?.slice(0, compact ? 2 : 4).map((s, i) => (
+              <span key={i} className="px-1.5 py-0.5 text-[9px] bg-gray-100 dark:bg-[#1A1A1A] text-gray-500 dark:text-gray-400 border border-gray-200 dark:border-[#2A2A2A] rounded">
+                {s.skill?.replace('_', ' ')}
               </span>
             ))}
-            {remainingSkills > 0 && (
-              <span className="px-2 py-0.5 text-[10px] text-gray-400">
-                +{remainingSkills}
+            {(data_model.required_skills?.length || 0) > (compact ? 2 : 4) && (
+              <span className="text-[9px] text-gray-400 self-center">
+                +{(data_model.required_skills?.length || 0) - (compact ? 2 : 4)}
               </span>
             )}
           </div>

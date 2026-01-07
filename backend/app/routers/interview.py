@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 class CreateSessionRequest(BaseModel):
     position_id: str
-    candidate_id: str
+    candidate_id: Optional[str] = None
     ttl_minutes: int = 60
     resume_text: Optional[str] = None
     send_email: bool = False
@@ -53,10 +53,10 @@ async def create_session(request: Request, data: CreateSessionRequest = Body(...
         
         # 2. Fetch/Prepare Candidate Details
         candidate_name = "Candidate"
-        if data.candidate_id != 'custom':
+        if data.candidate_id and data.candidate_id != 'custom':
             # Try to fetch from resumes table first (legacy)
             try:
-                candidate_res = supabase_admin.table('resumes').select('*').eq('id', data.candidate_id).execute()
+                candidate_res = supabase_admin.table('resumes').select('*').eq('candidate_id', data.candidate_id).execute()
                 if candidate_res.data:
                     candidate_name = candidate_res.data[0].get('file_name', 'Candidate')
             except:

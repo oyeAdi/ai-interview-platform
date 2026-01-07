@@ -1,9 +1,11 @@
 'use client'
 
 import { useState, useMemo, useEffect } from 'react'
+import { Info, Briefcase, Calendar, FileText, CheckCircle2, Target, Clock, Trophy } from 'lucide-react'
 import SearchBar from './SearchBar'
 import FilterChips from './FilterChips'
 import PositionCard from './PositionCard'
+import DetailModal from './DetailModal'
 import { apiUrl } from '@/config/api'
 
 interface Skill {
@@ -92,6 +94,12 @@ export default function PositionGrid({
   })
   const [visibleCount, setVisibleCount] = useState(INITIAL_DISPLAY)
   const [candidateCounts, setCandidateCounts] = useState<Record<string, number>>({})
+  const [detailPositionId, setDetailPositionId] = useState<string | null>(null)
+
+  const detailPosition = useMemo(() =>
+    positions.find(p => p.id === detailPositionId),
+    [positions, detailPositionId]
+  )
 
   // Reset visible count when filters/search change
   useEffect(() => {
@@ -263,10 +271,79 @@ export default function PositionGrid({
                 position={position}
                 isSelected={selectedPosition === position.id}
                 onSelect={onSelectPosition}
+                onShowDetails={setDetailPositionId}
                 candidateCount={candidateCounts[position.id]}
               />
             ))}
           </div>
+
+          {/* Position Detail Modal */}
+          <DetailModal
+            isOpen={!!detailPositionId}
+            onClose={() => setDetailPositionId(null)}
+            title={detailPosition?.title || 'Position Details'}
+            subtitle="Job Configuration"
+            icon={<Target className="w-5 h-5" />}
+          >
+            <div className="space-y-8">
+              {/* JD Section */}
+              {detailPosition?.jd_text && (
+                <div className="space-y-3">
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-gray-400 flex items-center gap-2">
+                    <FileText className="w-3.5 h-3.5" />
+                    Job Description
+                  </h4>
+                  <div className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed bg-gray-50 dark:bg-[#080808] p-5 rounded-xl border border-gray-100 dark:border-[#1A1A1A] whitespace-pre-wrap max-h-60 overflow-y-auto custom-scrollbar font-medium">
+                    {detailPosition.jd_text?.replace(/\\n/g, '\n')}
+                  </div>
+                </div>
+              )}
+
+              {/* Skills Section */}
+              <div className="space-y-3">
+                <h4 className="text-xs font-bold uppercase tracking-wider text-gray-400 flex items-center gap-2">
+                  <Trophy className="w-3.5 h-3.5" />
+                  Required Expertise
+                </h4>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {detailPosition?.data_model?.required_skills?.map((s, i) => (
+                    <div key={i} className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-[#080808] border border-gray-100 dark:border-[#1A1A1A]">
+                      <span className="text-xs font-semibold text-gray-700 dark:text-gray-300">{s.skill?.replace('_', ' ')}</span>
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-orange-500/10 text-orange-500 uppercase">{s.proficiency}</span>
+                    </div>
+                  ))}
+                  {(!detailPosition?.data_model?.required_skills || detailPosition.data_model.required_skills.length === 0) && (
+                    <p className="text-xs text-gray-500 italic py-2">No skills specified for this position.</p>
+                  )}
+                </div>
+              </div>
+
+              {/* Metadata Section */}
+              <div className="grid grid-cols-3 gap-4 border-t border-gray-100 dark:border-[#1A1A1A] pt-6">
+                <div className="space-y-1">
+                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Duration</p>
+                  <p className="text-sm font-bold text-gray-900 dark:text-white flex items-center gap-1.5">
+                    <Clock className="w-3.5 h-3.5 text-blue-500" />
+                    {detailPosition?.data_model?.duration_minutes || 0}m
+                  </p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Level</p>
+                  <p className="text-sm font-bold text-gray-900 dark:text-white flex items-center gap-1.5 capitalize">
+                    <Briefcase className="w-3.5 h-3.5 text-purple-500" />
+                    {detailPosition?.data_model?.experience_level || 'N/A'}
+                  </p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Created</p>
+                  <p className="text-sm font-bold text-gray-900 dark:text-white flex items-center gap-1.5">
+                    <Calendar className="w-3.5 h-3.5 text-gray-400" />
+                    {detailPosition && new Date(detailPosition.created_at).toLocaleDateString()}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </DetailModal>
 
           {/* Show More Button */}
           {hasMore && (

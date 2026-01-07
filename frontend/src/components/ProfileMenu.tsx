@@ -3,16 +3,16 @@
 import { useState, useRef, useEffect } from 'react'
 import { createClient } from '@/utils/supabase/client'
 import { useRouter } from 'next/navigation'
-import { Shield } from 'lucide-react'
+import { Shield, LayoutDashboard } from 'lucide-react'
 import EditProfileModal from './EditProfileModal'
 
 interface ProfileMenuProps {
     user: any
     userProfile: any
-
+    tenantSlug?: string
 }
 
-export default function ProfileMenu({ user, userProfile }: ProfileMenuProps) {
+export default function ProfileMenu({ user, userProfile, tenantSlug }: ProfileMenuProps) {
     const [isOpen, setIsOpen] = useState(false)
     const [isEditModalOpen, setIsEditModalOpen] = useState(false)
     const [currentProfile, setCurrentProfile] = useState(userProfile)
@@ -132,6 +132,18 @@ export default function ProfileMenu({ user, userProfile }: ProfileMenuProps) {
                             </svg>
                             Edit Profile
                         </button>
+                        {tenantSlug && (
+                            <button
+                                onClick={() => {
+                                    setIsOpen(false)
+                                    router.push(`/${tenantSlug}/dashboard`)
+                                }}
+                                className="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-[#1A1A1A] rounded-lg transition-colors"
+                            >
+                                <LayoutDashboard className="w-4 h-4 text-gray-500" />
+                                Dashboard
+                            </button>
+                        )}
                         {currentProfile?.is_super_admin && (
                             <button
                                 onClick={() => {

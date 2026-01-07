@@ -260,8 +260,9 @@ def require_permission(permission: str, resource_type: Optional[str] = None):
                     detail=f"Forbidden: Missing permission '{permission}'"
                 )
             
-            # Add user to kwargs for endpoint use
-            kwargs['current_user'] = user
+            
+            # Store user in request state for endpoint access
+            request.state.current_user = user
             
             return await func(*args, **kwargs)
         return wrapper

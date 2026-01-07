@@ -1,8 +1,10 @@
 'use client'
 
 import { useState, useMemo, useEffect } from 'react'
+import { Info, Building2, Calendar, FileText, CheckCircle2 } from 'lucide-react'
 import SearchBar from './SearchBar'
 import AccountCard from './AccountCard'
+import DetailModal from './DetailModal'
 
 interface Account {
   id: string
@@ -45,6 +47,7 @@ export default function AccountGrid({
   const [search, setSearch] = useState('')
   const [hasOpenOnly, setHasOpenOnly] = useState(false)
   const [sortBy, setSortBy] = useState('recent')
+  const [detailAccountId, setDetailAccountId] = useState<string | null>(null)
 
   // Calculate position counts for each account
   const accountsWithCounts = useMemo(() => {
@@ -79,6 +82,11 @@ export default function AccountGrid({
       }
     })
   }, [accounts, positions])
+
+  const detailAccount = useMemo(() =>
+    accountsWithCounts.find(a => a.id === detailAccountId),
+    [accountsWithCounts, detailAccountId]
+  )
 
   // Filter and sort accounts
   const filteredAccounts = useMemo(() => {
@@ -250,10 +258,62 @@ export default function AccountGrid({
                 recentPosition={account.recentPosition}
                 isSelected={selectedAccount === account.id}
                 onSelect={onSelectAccount}
+                onShowDetails={setDetailAccountId}
                 isLoading={loading}
               />
             ))}
           </div>
+
+          {/* Account Detail Modal */}
+          <DetailModal
+            isOpen={!!detailAccountId}
+            onClose={() => setDetailAccountId(null)}
+            title={detailAccount?.name || 'Account Details'}
+            subtitle="Account Overview"
+            icon={<Building2 className="w-5 h-5" />}
+          >
+            <div className="space-y-6">
+              {detailAccount?.description && (
+                <div className="space-y-2">
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-gray-400 flex items-center gap-2">
+                    <FileText className="w-3.5 h-3.5" />
+                    Description
+                  </h4>
+                  <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed bg-gray-50 dark:bg-[#080808] p-4 rounded-xl border border-gray-100 dark:border-[#1A1A1A]">
+                    {detailAccount.description}
+                  </p>
+                </div>
+              )}
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="p-4 rounded-xl bg-gray-50 dark:bg-[#080808] border border-gray-100 dark:border-[#1A1A1A]">
+                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Total Positions</p>
+                  <p className="text-2xl font-bold text-gray-900 dark:text-white">{detailAccount?.positionCounts?.total || 0}</p>
+                </div>
+                <div className="p-4 rounded-xl bg-gray-50 dark:bg-[#080808] border border-gray-100 dark:border-[#1A1A1A]">
+                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Open Positions</p>
+                  <p className="text-2xl font-bold text-emerald-500">{detailAccount?.positionCounts?.open || 0}</p>
+                </div>
+              </div>
+
+              {detailAccount?.recentPosition && (
+                <div className="p-4 rounded-xl bg-orange-500/5 border border-orange-500/10 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-lg bg-orange-500/20 flex items-center justify-center text-orange-500">
+                      <CheckCircle2 className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-bold text-orange-500/60 uppercase tracking-widest">Most Recent</p>
+                      <p className="text-sm font-semibold text-gray-900 dark:text-white">{detailAccount.recentPosition.title}</p>
+                    </div>
+                  </div>
+                  <span className="text-xs text-gray-500 font-medium">
+                    {detailAccount.recentPosition.daysAgo === 0 ? 'Today' : `${detailAccount.recentPosition.daysAgo}d ago`}
+                  </span>
+                </div>
+              )}
+            </div>
+          </DetailModal>
 
           {/* Show More Button */}
           {hasMore && (

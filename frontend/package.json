@@ -12,7 +12,10 @@
     "test:coverage": "jest --coverage"
   },
   "dependencies": {
+    "@headlessui/react": "^2.2.9",
     "@monaco-editor/react": "^4.7.0",
+    "@stripe/react-stripe-js": "^2.4.0",
+    "@stripe/stripe-js": "^2.4.0",
     "@supabase/ssr": "^0.8.0",
     "@supabase/supabase-js": "^2.89.0",
     "autoprefixer": "^10.4.16",
@@ -22,13 +25,11 @@
     "postcss": "^8.4.31",
     "qrcode": "^1.5.4",
     "qrcode.react": "^4.2.0",
+    "razorpay": "^1.2.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-markdown": "^10.1.0",
-    "tailwindcss": "^3.3.0",
-    "@stripe/stripe-js": "^2.4.0",
-    "@stripe/react-stripe-js": "^2.4.0",
-    "razorpay": "^1.2.1"
+    "tailwindcss": "^3.3.0"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^6.9.1",
@@ -44,7 +45,3 @@
     "typescript": "^5.2.0"
   }
 }
-
-
-
-

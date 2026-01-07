@@ -11,7 +11,9 @@ import {
     CheckCircle2,
     Rocket,
     ChevronLeft,
-    Mail
+    Mail,
+    Upload,
+    Users
 } from 'lucide-react'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
@@ -27,6 +29,8 @@ import PositionDetail from '@/components/PositionDetail'
 import WikiWidget from '@/components/WikiWidget'
 import InterviewLinksModal from '@/components/InterviewLinksModal'
 import EmailSentModal from '@/components/EmailSentModal'
+import EmailPreviewModal from '@/components/EmailPreviewModal'
+import ATSScoreModal from '@/components/ATSScoreModal'
 import { apiUrl, getHeaders } from '@/config/api'
 import { createClient } from '@/utils/supabase/client'
 
@@ -75,8 +79,10 @@ export default function TenantDashboardPage() {
     const [selectedAccount, setSelectedAccount] = useState('')
     const [selectedPosition, setSelectedPosition] = useState('')
     const [selectedCandidate, setSelectedCandidate] = useState('')
+    const [selectedCandidateName, setSelectedCandidateName] = useState('')
     const [resumeText, setResumeText] = useState('')
     const [resumeFile, setResumeFile] = useState<File | null>(null)
+    const [candidateMode, setCandidateMode] = useState<'new' | 'pool'>('new') // New: upload/paste, Pool: from database
     const [loading, setLoading] = useState(true)
     const [positionsLoading, setPositionsLoading] = useState(false)
     const [startingInterview, setStartingInterview] = useState(false)
@@ -123,6 +129,15 @@ export default function TenantDashboardPage() {
     const [isStrategizing, setIsStrategizing] = useState(false)
     const [auditResults, setAuditResults] = useState<any>(null)
     const [strategyPlan, setStrategyPlan] = useState<any>(null)
+    const [analysisPhase, setAnalysisPhase] = useState<'p0' | 'p1' | 'critique' | 'observer' | 'complete'>('p0')
+    const [isConfigManual, setIsConfigManual] = useState(false)
+    const [showEmailModal, setShowEmailModal] = useState(false)
+
+    // ATS Modal State
+    const [isATSModalOpen, setIsATSModalOpen] = useState(false)
+    const [atsScore, setAtsScore] = useState(0)
+    const [atsExplanation, setAtsExplanation] = useState('')
+    const [isAnalyzingATS, setIsAnalyzingATS] = useState(false)
 
     // Load accounts and all positions on mount
     useEffect(() => {
@@ -202,27 +217,41 @@ export default function TenantDashboardPage() {
         }
     }
 
-    const handleAIAudit = async () => {
+    const handleAIAudit = async (forceSkip: boolean = false) => {
         setIsAuditing(true)
+        setAnalysisPhase('p0')
         try {
-            const hasCandidateData = resumeText.trim() !== '' || !!resumeFile;
+            const hasCandidateData = !forceSkip && (resumeText.trim() !== '' || !!resumeFile);
+
+            // Simulate phase transitions for visual effect
+            setTimeout(() => setAnalysisPhase('p1'), 1500)
+            setTimeout(() => setAnalysisPhase('critique'), 3000)
+            setTimeout(() => setAnalysisPhase('observer'), 4500)
 
             const response = await fetch(apiUrl('api/intelligence/audit'), {
                 method: 'POST',
                 headers: getHeaders(userId || undefined),
                 body: JSON.stringify({
-                    resume_text: resumeText,
+                    resume_text: hasCandidateData ? resumeText : '',
                     jd_text: selectedPositionData?.jd_text || '',
                     skip_candidate: !hasCandidateData
                 })
             })
             const data = await response.json()
             setAuditResults({
-                score: data.score || (hasCandidateData ? 0 : 100),
+                score: hasCandidateData ? (data.overall_match || 0) : 0,
                 observations: [
-                    data.reasoning || (hasCandidateData ? "Analysis complete." : "Position requirements analysis complete. Proceeding with strategy map generation.")
-                ]
+                    data.explanation || (hasCandidateData ? "Analysis complete." : "Position requirements analysis complete. Proceeding with strategy map generation.")
+                ],
+                p0: data.p0_jd_summary,
+                p1: data.p1_resume_summary,
+                p3: data.p3_strengths,
+                p4: data.p4_gaps,
+                metadata: data.metadata,
+                critique: data.critique,
+                observer_notes: data.observer_notes
             })
+            setAnalysisPhase('complete')
         } catch (err) {
             console.error('Error during AI Audit:', err)
             setAuditResults({ score: 0, observations: ["Failed to connect to AI Analyst."] })
@@ -238,15 +267,29 @@ export default function TenantDashboardPage() {
                 method: 'POST',
                 headers: getHeaders(userId || undefined),
                 body: JSON.stringify({
-                    milestones: dataModel?.interview_flow || [],
                     jd_text: selectedPositionData?.jd_text || '',
                     resume_text: resumeText
                 })
             })
             const data = await response.json()
-            setStrategyPlan({
-                milestones: [data.next_milestone || "Technical Deep Dive"]
-            })
+            setStrategyPlan(data)
+
+            // Sync with DataModel if not in manual mode
+            if (!isConfigManual && data.milestones) {
+                const autoSkills = [
+                    ...(auditResults?.p3 || []),
+                    ...(auditResults?.p4 || [])
+                ].map((s: string) => ({ skill: s, proficiency: 'Intermediate', weight: 5 }))
+
+                setDataModel({
+                    duration_minutes: data.estimated_duration || 60,
+                    experience_level: auditResults?.metadata?.interview_level || 'Mid-Level',
+                    expectations: data.strategy_narrative || '',
+                    required_skills: autoSkills.length > 0 ? autoSkills : (dataModel?.required_skills || []),
+                    interview_flow: data.milestones.map((m: any) => m.title)
+                })
+            }
+            handleGenerateEmail() // Generate email once strategy is done
         } catch (err) {
             console.error('Error during AI Strategy:', err)
             setStrategyPlan({ milestones: ["Manual Strategy Required"] })
@@ -292,12 +335,139 @@ export default function TenantDashboardPage() {
         }
     }, [selectedPosition, accountPositions])
 
-    const handleCandidateSelect = (candidateId: string, resumeTextFromCandidate?: string) => {
+    const handleCandidateSelect = (
+        candidateId: string,
+        resumeTextFromCandidate?: string,
+        candidateName?: string,
+        matchScore?: number,
+        matchReasoning?: string
+    ) => {
         setSelectedCandidate(candidateId)
+        if (candidateName) setSelectedCandidateName(candidateName)
+        else setSelectedCandidateName('')
+
         if (resumeTextFromCandidate) {
             setResumeText(resumeTextFromCandidate)
             setResumeFile(null)
         }
+
+        // Update ATS Modal state for the intermediate review step
+        if (matchScore !== undefined) setAtsScore(matchScore)
+        if (matchReasoning) setAtsExplanation(matchReasoning)
+
+        // Show the review modal (ATSScoreModal) only if a candidate is actually selected
+        if (candidateId) {
+            setIsATSModalOpen(true)
+        }
+    }
+
+    const handleCalculateATS = async () => {
+        setIsATSModalOpen(true)
+        setIsAnalyzingATS(true)
+
+        try {
+            let finalText = resumeText
+
+            // 1. Parse File if exists
+            if (resumeFile) {
+                const formData = new FormData()
+                formData.append('file', resumeFile)
+
+                const headers = getHeaders(userId || undefined)
+                // Remove Content-Type for FormData - browser sets it automatically with boundary
+                delete headers['Content-Type']
+
+                const parseRes = await fetch(apiUrl('api/utils/parse_resume'), {
+                    method: 'POST',
+                    headers,
+                    body: formData
+                })
+
+                if (!parseRes.ok) {
+                    const errorData = await parseRes.json().catch(() => ({ detail: 'Failed to parse resume file' }))
+                    throw new Error(errorData.detail || 'Failed to parse resume file')
+                }
+
+                const parseData = await parseRes.json()
+                finalText = parseData.text
+                setResumeText(finalText) // Update state for subsequent steps
+            }
+
+            // 2. Audit (Get Score)
+            const response = await fetch(apiUrl('api/intelligence/audit'), {
+                method: 'POST',
+                headers: getHeaders(userId || undefined),
+                body: JSON.stringify({
+                    resume_text: finalText,
+                    jd_text: selectedPositionData?.jd_text || '',
+                    skip_candidate: !finalText
+                })
+            })
+
+            const data = await response.json()
+
+            setAtsScore(data.overall_match || 0)
+            setAtsExplanation(data.explanation || data.summary || "Analysis complete.")
+
+            // Prepare results for Step 4 (Process Analysis)
+            setAuditResults({
+                score: data.overall_match || 0,
+                observations: (data.explanation || "No detailed observations.").split('\n').filter(Boolean)
+            })
+
+        } catch (error: any) {
+            console.error("ATS Calculation Failed:", error)
+            setAtsScore(0)
+            setAtsExplanation(error.message || String(error) || "Error calculating score. Please try again.")
+        } finally {
+            setIsAnalyzingATS(false)
+        }
+    }
+
+    const handleSaveToPool = async () => {
+        try {
+            // Get org_id from selected account
+            const orgId = selectedAccountData?.id || selectedAccount
+
+            if (!orgId) {
+                alert('Please select an account first')
+                return
+            }
+
+            const response = await fetch(apiUrl('api/candidates'), {
+                method: 'POST',
+                headers: getHeaders(userId || undefined),
+                body: JSON.stringify({
+                    name: selectedCandidateName || resumeFile?.name?.replace(/\.(pdf|docx|txt)$/i, '') || 'Unnamed Candidate',
+                    resume_text: resumeText,
+                    skills: [], // TODO: Extract skills from ATS analysis if available
+                    experience_years: null, // TODO: Extract from resume parsing
+                    file_name: resumeFile?.name,
+                    org_id: orgId
+                })
+            })
+
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({ detail: 'Failed to save candidate' }))
+                throw new Error(errorData.detail || 'Failed to save candidate')
+            }
+
+            const data = await response.json()
+            alert(`✅ Candidate saved to talent pool! ID: ${data.id}`)
+
+        } catch (error: any) {
+            console.error('Error saving to talent pool:', error)
+            alert(`❌ Failed to save: ${error.message}`)
+        }
+    }
+
+    const handleSkipCandidate = () => {
+        setIsATSModalOpen(false)
+        setSelectedCandidate('')
+        setResumeText('')
+        setResumeFile(null)
+        handleAIAudit(true)
+        setCurrentStep(4)
     }
 
     const handleStartInterview = async (expertMode: boolean = false) => {
@@ -512,155 +682,339 @@ export default function TenantDashboardPage() {
                                     <h2 className="text-3xl font-semibold tracking-tight">Select Candidate</h2>
                                     <p className="text-gray-500 text-sm mt-1">Select or import the profile to be evaluated against the established criteria.</p>
                                 </div>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-                                    <CandidateSelector
-                                        positionId={selectedPosition || null}
-                                        selectedCandidate={selectedCandidate}
-                                        onSelectCandidate={handleCandidateSelect}
-                                    />
-                                    <div className="flex flex-col">
-                                        <div className="flex-1">
-                                            <FileUpload
-                                                label="Technical Profile Import"
-                                                text={selectedCandidate ? '' : resumeText}
-                                                onTextChange={(text) => { setResumeText(text); setSelectedCandidate(''); }}
-                                                file={resumeFile}
-                                                onFileChange={(file) => { setResumeFile(file); setSelectedCandidate(''); }}
-                                                disabled={!!selectedCandidate}
-                                            />
-                                        </div>
-                                        <button
-                                            onClick={nextStep}
-                                            className="mt-8 flex items-center justify-center gap-3 bg-black dark:bg-white text-white dark:text-black h-14 rounded-xl text-xs font-bold tracking-[0.2em] uppercase transition-all hover:scale-[1.02] disabled:opacity-30 disabled:hover:scale-100"
-                                        >
-                                            {(!selectedCandidate && !resumeText && !resumeFile) ? 'Continue without Candidate' : 'Process Analysis'} <Target className="w-4 h-4" />
-                                        </button>
-                                    </div>
+
+                                {/* Two-Mode Toggle */}
+                                <div className="flex gap-3 mb-8 p-1 bg-gray-100 dark:bg-zinc-900 rounded-xl w-fit">
+                                    <button
+                                        onClick={() => setCandidateMode('new')}
+                                        className={`flex items-center gap-2 px-6 py-3 rounded-lg text-sm font-semibold transition-all ${candidateMode === 'new'
+                                            ? 'bg-white dark:bg-black text-black dark:text-white shadow-sm'
+                                            : 'text-gray-500 hover:text-gray-900 dark:hover:text-gray-200'
+                                            }`}
+                                    >
+                                        <Upload className="w-4 h-4" />
+                                        New Candidate
+                                    </button>
+                                    <button
+                                        onClick={() => setCandidateMode('pool')}
+                                        className={`flex items-center gap-2 px-6 py-3 rounded-lg text-sm font-semibold transition-all ${candidateMode === 'pool'
+                                            ? 'bg-white dark:bg-black text-black dark:text-white shadow-sm'
+                                            : 'text-gray-500 hover:text-gray-900 dark:hover:text-gray-200'
+                                            }`}
+                                    >
+                                        <Users className="w-4 h-4" />
+                                        From Talent Pool
+                                    </button>
                                 </div>
+
+                                {candidateMode === 'new' ? (
+                                    <>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+                                            <div className="flex flex-col">
+                                                <FileUpload
+                                                    label="Technical Profile Import"
+                                                    text={resumeText}
+                                                    onTextChange={(text) => { setResumeText(text); setSelectedCandidate(''); }}
+                                                    file={resumeFile}
+                                                    onFileChange={(file) => { setResumeFile(file); setSelectedCandidate(''); }}
+                                                />
+                                            </div>
+                                            <div className="flex flex-col justify-between">
+                                                <div className="p-6 rounded-2xl bg-gray-50 dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800">
+                                                    <h3 className="font-semibold mb-2">Upload Resume</h3>
+                                                    <p className="text-sm text-gray-500 mb-4">Upload a PDF, DOCX, or TXT file, or paste the resume text directly.</p>
+                                                    <div className="flex gap-2 text-xs text-gray-400">
+                                                        <span className="px-2 py-1 bg-gray-200 dark:bg-zinc-800 rounded">PDF</span>
+                                                        <span className="px-2 py-1 bg-gray-200 dark:bg-zinc-800 rounded">DOCX</span>
+                                                        <span className="px-2 py-1 bg-gray-200 dark:bg-zinc-800 rounded">TXT</span>
+                                                    </div>
+                                                </div>
+                                                <button
+                                                    onClick={handleCalculateATS}
+                                                    className="mt-8 flex items-center justify-center gap-3 bg-black dark:bg-white text-white dark:text-black h-14 rounded-xl text-xs font-bold tracking-[0.2em] uppercase transition-all hover:scale-[1.02] disabled:opacity-30 disabled:hover:scale-100 shadow-xl shadow-orange-500/10"
+                                                >
+                                                    {(!resumeText && !resumeFile) ? 'Continue without Candidate' : 'Calculate ATS Score'} <Target className="w-4 h-4" />
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </>
+                                ) : (
+                                    <>
+                                        <CandidateSelector
+                                            positionId={selectedPosition || null}
+                                            userId={userId}
+                                            selectedCandidate={selectedCandidate}
+                                            onSelectCandidate={handleCandidateSelect}
+                                        />
+                                    </>
+                                )}
                             </div>
                         )}
 
                         {/* Step 4: Audit */}
                         {currentStep === 4 && (
-                            <div className="animate-in fade-in zoom-in-95 duration-500 flex flex-col items-center justify-center h-full max-w-2xl mx-auto py-12">
-                                <div className="relative mb-12">
-                                    <div className={`w-32 h-32 rounded-full border border-gray-100 dark:border-[#111] flex items-center justify-center bg-gray-50/50 dark:bg-[#080808] ${isAuditing ? 'animate-pulse' : ''}`}>
-                                        <div className="text-4xl font-semibold tracking-tight text-black dark:text-white">{auditResults?.score || '--'}<span className="text-xs text-gray-400 ml-0.5">%</span></div>
-                                    </div>
-                                    {isAuditing && <div className="absolute inset-0 border-t-2 border-orange-500 rounded-full animate-spin" />}
-                                </div>
-                                <div className="text-center space-y-3 mb-12">
-                                    <h2 className="text-3xl font-semibold tracking-tight">AI Analysis</h2>
-                                    <p className="text-gray-500 text-sm max-w-sm mx-auto leading-relaxed">AI Analyst is calculating compatibility between criteria and subject profile.</p>
-                                </div>
-                                {!isAuditing && auditResults && (
-                                    <div className="w-full space-y-8">
-                                        <div className="space-y-3">
-                                            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest pl-1">Key Observations</p>
-                                            <div className="space-y-2">
-                                                {auditResults.observations.map((obs: string, i: number) => (
-                                                    <div key={i} className="text-sm p-4 rounded-xl bg-gray-50 dark:bg-[#080808] border border-gray-100 dark:border-[#111] text-gray-600 dark:text-gray-400 leading-relaxed font-medium">
-                                                        {obs}
-                                                    </div>
-                                                ))}
+                            <div className="animate-in fade-in zoom-in-95 duration-500 flex flex-col items-center h-full max-w-4xl mx-auto py-12">
+                                <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 w-full">
+                                    {/* Left Side: Score & Core metadata */}
+                                    <div className="lg:col-span-5 flex flex-col items-center">
+                                        <div className="relative mb-8">
+                                            <div className={`w-40 h-40 rounded-full border-2 border-gray-100 dark:border-[#111] flex flex-col items-center justify-center bg-white dark:bg-black shadow-2xl ${isAuditing ? 'animate-pulse' : ''}`}>
+                                                <div className="text-5xl font-black tracking-tighter text-black dark:text-white leading-none">
+                                                    {auditResults?.score || '--'}
+                                                </div>
+                                                <div className="text-[10px] font-black uppercase tracking-[0.2em] text-orange-500 mt-1">Match Index</div>
                                             </div>
+                                            {isAuditing && (
+                                                <div className="absolute -inset-2 border-t-2 border-orange-500 rounded-full animate-spin" />
+                                            )}
                                         </div>
-                                        <button onClick={nextStep} className="w-full h-14 rounded-xl bg-black dark:bg-white text-white dark:text-black text-xs font-bold tracking-[0.2em] uppercase transition-all hover:scale-[1.02]">
-                                            Design Blueprint
-                                        </button>
-                                    </div>
-                                )}
-                            </div>
-                        )}
 
-                        {/* Step 5: Blueprint */}
-                        {currentStep === 5 && (
-                            <div className="animate-in fade-in slide-in-from-right-4 duration-500 flex flex-col items-center justify-center h-full max-w-2xl mx-auto py-12">
-                                <div className="w-16 h-16 rounded-2xl bg-gray-50 dark:bg-[#080808] border border-gray-100 dark:border-[#111] flex items-center justify-center mb-10">
-                                    <Target className={`w-8 h-8 ${isStrategizing ? 'text-orange-500 animate-bounce' : 'text-gray-400'}`} />
-                                </div>
-                                <div className="text-center space-y-3 mb-10">
-                                    <h2 className="text-3xl font-semibold tracking-tight">Strategy Map</h2>
-                                    <p className="text-gray-500 text-sm max-w-sm mx-auto">Generating strategic execution plan for the intelligence session.</p>
-                                </div>
-                                {!isStrategizing && strategyPlan && (
-                                    <div className="w-full space-y-8">
-                                        <div className="grid grid-cols-1 gap-3">
-                                            {strategyPlan.milestones.map((m: string, i: number) => (
-                                                <div key={i} className="flex items-center gap-4 bg-gray-50 dark:bg-[#080808] p-5 rounded-xl border border-gray-100 dark:border-[#111]">
-                                                    <div className="w-6 h-6 rounded-full bg-black dark:bg-white text-white dark:text-black flex items-center justify-center text-[10px] font-bold">
-                                                        0{i + 1}
+                                        <div className="text-center space-y-2 mb-10">
+                                            <h2 className="text-2xl font-bold tracking-tight">Intelligence Audit</h2>
+                                            <p className="text-gray-500 text-xs max-w-xs mx-auto leading-relaxed">Multidimensional analysis of operational requirements vs agent profile.</p>
+                                        </div>
+
+                                        {/* Animation Phases */}
+                                        <div className="w-full space-y-3 px-4">
+                                            {[
+                                                { id: 'p0', label: 'JD & Requirement Matrix (P0)', icon: <Target className="w-3.5 h-3.5" /> },
+                                                { id: 'p1', label: 'Subject Profile Decryption (P1)', icon: <User className="w-3.5 h-3.5" /> },
+                                                { id: 'critique', label: 'Critique Agent Peer-Review', icon: <Users className="w-3.5 h-3.5" /> },
+                                                { id: 'observer', label: 'Observer Behavioral Patterning', icon: <Search className="w-3.5 h-3.5" /> }
+                                            ].map((phase, i) => (
+                                                <div key={phase.id} className={`flex items-center gap-3 p-3 rounded-lg border transition-all duration-300 ${analysisPhase === phase.id ? 'bg-orange-500/5 border-orange-500/20 translate-x-1' : 'bg-gray-50/50 dark:bg-white/[0.02] border-transparent'}`}>
+                                                    <div className={`w-6 h-6 rounded-full flex items-center justify-center ${analysisPhase === phase.id ? 'bg-orange-500 text-white animate-bounce' : 'bg-gray-100 dark:bg-[#111] text-gray-400'}`}>
+                                                        {analysisPhase === 'complete' || (i < ['p0', 'p1', 'critique', 'observer'].indexOf(analysisPhase)) ? <CheckCircle2 className="w-3.5 h-3.5" /> : phase.icon}
                                                     </div>
-                                                    <span className="text-sm font-medium tracking-tight text-gray-700 dark:text-gray-300">{m}</span>
+                                                    <span className={`text-[10px] font-bold uppercase tracking-widest ${analysisPhase === phase.id ? 'text-orange-500' : 'text-gray-500'}`}>{phase.label}</span>
+                                                    {analysisPhase === phase.id && <div className="ml-auto w-1 h-1 rounded-full bg-orange-500 animate-ping" />}
                                                 </div>
                                             ))}
                                         </div>
-                                        <button onClick={nextStep} className="w-full h-14 rounded-xl bg-black dark:bg-white text-white dark:text-black text-xs font-bold tracking-[0.2em] uppercase transition-all hover:scale-[1.02]">
-                                            Handshake Review
-                                        </button>
                                     </div>
-                                )}
+
+                                    {/* Right Side: Detailed Metadata Grid */}
+                                    <div className="lg:col-span-7 space-y-6">
+                                        {!isAuditing && auditResults && (
+                                            <div className="grid grid-cols-2 gap-4 animate-in fade-in slide-in-from-right-4 duration-700">
+                                                <div className="p-4 rounded-xl bg-gray-50 dark:bg-[#080808] border border-gray-100 dark:border-[#111]">
+                                                    <p className="text-[9px] font-black uppercase tracking-widest text-gray-400 mb-2">Hiring Domain</p>
+                                                    <p className="text-sm font-bold text-gray-800 dark:text-gray-200">{auditResults.metadata?.domain || 'Technology'}</p>
+                                                </div>
+                                                <div className="p-4 rounded-xl bg-gray-50 dark:bg-[#080808] border border-gray-100 dark:border-[#111]">
+                                                    <p className="text-[9px] font-black uppercase tracking-widest text-gray-400 mb-2">Criticality</p>
+                                                    <p className={`text-sm font-bold ${auditResults.metadata?.criticality === 'High' ? 'text-red-500' : 'text-emerald-500'}`}>
+                                                        {auditResults.metadata?.criticality || 'Medium'}
+                                                    </p>
+                                                </div>
+                                                <div className="p-4 rounded-xl bg-gray-50 dark:bg-[#080808] border border-gray-100 dark:border-[#111]">
+                                                    <p className="text-[9px] font-black uppercase tracking-widest text-gray-400 mb-2">Interview Level</p>
+                                                    <p className="text-sm font-bold text-gray-800 dark:text-gray-200">{auditResults.metadata?.interview_level || 'Medium'}</p>
+                                                </div>
+                                                <div className="p-4 rounded-xl bg-gray-50 dark:bg-[#080808] border border-gray-100 dark:border-[#111]">
+                                                    <p className="text-[9px] font-black uppercase tracking-widest text-gray-400 mb-2">Technical Focus</p>
+                                                    <p className="text-sm font-bold text-gray-800 dark:text-gray-200">{auditResults.metadata?.is_technical ? 'SDE / Engineering' : 'Non-Technical'}</p>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {!isAuditing && auditResults && (
+                                            <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-700">
+                                                <div className="p-8 rounded-2xl bg-gray-50 dark:bg-[#080808] border border-gray-100 dark:border-[#111] shadow-xl overflow-hidden relative group">
+                                                    <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:rotate-12 transition-transform text-gray-400">
+                                                        <Rocket className="w-16 h-16" />
+                                                    </div>
+                                                    <p className="text-[9px] font-black uppercase tracking-[0.2em] mb-6 text-gray-400">Strategic Blueprint Loaded</p>
+                                                    <div className="space-y-6">
+                                                        <div>
+                                                            <p className="text-[10px] font-bold text-orange-500 uppercase tracking-widest mb-2">Requirement</p>
+                                                            <p className="text-sm leading-relaxed text-gray-600 dark:text-gray-400">{auditResults.p0 || "Core architecture and delivery standards identified."}</p>
+                                                        </div>
+                                                        <div className="grid grid-cols-2 gap-8 pt-6 border-t border-gray-100 dark:border-[#111]">
+                                                            <div>
+                                                                <p className="text-[10px] font-bold text-emerald-500 uppercase tracking-widest mb-3">Strengths</p>
+                                                                <div className="flex flex-wrap gap-2">
+                                                                    {(auditResults.p3 || ['System Design', 'Scalability']).slice(0, 4).map((s: string, i: number) => (
+                                                                        <span key={i} className="text-[9px] font-black uppercase tracking-tighter bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 px-2 py-1 rounded-md">{s}</span>
+                                                                    ))}
+                                                                </div>
+                                                            </div>
+                                                            <div>
+                                                                <p className="text-[10px] font-bold text-red-500 uppercase tracking-widest mb-3">Focus Gaps</p>
+                                                                <div className="flex flex-wrap gap-2">
+                                                                    {(auditResults.p4 || ['DevOps', 'E2E Testing']).slice(0, 4).map((g: string, i: number) => (
+                                                                        <span key={i} className="text-[9px] font-black uppercase tracking-tighter bg-red-500/10 text-red-600 dark:text-red-400 px-2 py-1 rounded-md">{g}</span>
+                                                                    ))}
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <button onClick={nextStep} className="w-full h-14 rounded-xl bg-orange-500 text-white text-xs font-black tracking-[0.3em] uppercase transition-all hover:scale-[1.02] hover:shadow-2xl hover:shadow-orange-500/20">
+                                                    Design Blueprint
+                                                </button>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
                             </div>
                         )}
 
-                        {/* Step 6: Handshake */}
-                        {currentStep === 6 && (
-                            <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 max-w-5xl mx-auto w-full">
-                                <div className="flex items-center justify-between mb-10 border-b border-gray-100 dark:border-[#111] pb-8">
-                                    <div>
-                                        <h2 className="text-3xl font-semibold tracking-tight">Expert Review</h2>
-                                        <p className="text-gray-500 text-sm mt-1">Expert validation of AI-proposed configuration before execution.</p>
+                        {/* Step 5: Strategy Map & Configuration */}
+                        {currentStep === 5 && (
+                            <div className="animate-in fade-in zoom-in-95 duration-500 h-full max-w-6xl mx-auto py-12">
+                                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 h-full">
+                                    {/* Left: Strategy Map */}
+                                    <div className="lg:col-span-4 space-y-6">
+                                        <div className="space-y-4">
+                                            <h2 className="text-2xl font-bold tracking-tight">Strategy Blueprint</h2>
+                                            <p className="text-gray-500 text-xs leading-relaxed">AI-generated interview trajectory based on requirement audit.</p>
+                                        </div>
+
+                                        <div className="space-y-3 relative">
+                                            <div className="absolute left-4 top-4 bottom-4 w-px bg-gray-100 dark:bg-[#111]" />
+                                            {strategyPlan?.milestones?.map((milestone: any, i: number) => (
+                                                <div key={i} className="relative pl-10">
+                                                    <div className="absolute left-2.5 top-1.5 w-3 h-3 rounded-full bg-orange-500 border-2 border-white dark:border-black z-10" />
+                                                    <div className="p-4 rounded-xl bg-white dark:bg-[#080808] border border-gray-100 dark:border-[#111] transition-all hover:border-orange-500/30 group">
+                                                        <div className="flex items-center justify-between mb-2">
+                                                            <span className="text-[10px] font-black uppercase tracking-widest text-orange-500">{milestone.title}</span>
+                                                            <span className="text-[8px] font-bold px-1.5 py-0.5 rounded bg-gray-100 dark:bg-white/5 text-gray-500 uppercase">{milestone.difficulty}</span>
+                                                        </div>
+                                                        <ul className="space-y-1">
+                                                            {milestone.focus?.map((f: string, fi: number) => (
+                                                                <li key={fi} className="text-[10px] text-gray-500 flex items-center gap-2">
+                                                                    <div className="w-1 h-1 rounded-full bg-gray-300" />
+                                                                    {f}
+                                                                </li>
+                                                            ))}
+                                                        </ul>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+
+                                        <div className="p-4 rounded-xl bg-orange-50 dark:bg-orange-500/5 border border-orange-100 dark:border-orange-500/10">
+                                            <p className="text-[9px] font-bold text-orange-600 dark:text-orange-400 uppercase tracking-widest mb-2 flex items-center gap-2">
+                                                <Rocket className="w-3 h-3" /> Narrative Approach
+                                            </p>
+                                            <p className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed italic">
+                                                "{strategyPlan?.strategy_narrative || "Evaluating core competencies through progressive technical challenges."}"
+                                            </p>
+                                        </div>
                                     </div>
-                                    <div className="flex gap-4">
-                                        <button onClick={prevStep} className="h-10 px-6 text-xs font-bold tracking-widest uppercase text-gray-400 hover:text-black dark:hover:text-white transition-colors">Edit Blueprint</button>
-                                        <button onClick={nextStep} className="h-10 px-8 rounded-lg bg-emerald-500 text-white text-xs font-bold tracking-widest uppercase transition-all hover:bg-emerald-600">Approve & Proceed</button>
+
+                                    {/* Right: Configuration Panel */}
+                                    <div className="lg:col-span-8 flex flex-col">
+                                        <div className="bg-white dark:bg-[#050505] border border-gray-200 dark:border-[#111] p-1.5 rounded-2xl mb-8 flex items-center shadow-xl shadow-orange-500/5">
+                                            <button
+                                                onClick={() => setIsConfigManual(false)}
+                                                className={`flex-1 h-12 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-3 ${!isConfigManual ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/20' : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300'}`}
+                                            >
+                                                <div className={`w-5 h-5 rounded-lg flex items-center justify-center ${!isConfigManual ? 'bg-white/20' : 'bg-gray-100 dark:bg-white/5'}`}>
+                                                    <span className="text-xs">🤖</span>
+                                                </div>
+                                                AI Auto-Config
+                                            </button>
+                                            <button
+                                                onClick={() => setIsConfigManual(true)}
+                                                className={`flex-1 h-12 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-3 ${isConfigManual ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/20' : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300'}`}
+                                            >
+                                                <div className={`w-5 h-5 rounded-lg flex items-center justify-center ${isConfigManual ? 'bg-white/20' : 'bg-gray-100 dark:bg-white/5'}`}>
+                                                    <span className="text-xs">⚙️</span>
+                                                </div>
+                                                Manual Override
+                                            </button>
+                                        </div>
+
+                                        <div className={`flex-1 overflow-hidden transition-all duration-500`}>
+                                            {dataModel && (
+                                                <DataModelPanel
+                                                    dataModel={dataModel}
+                                                    onUpdate={setDataModel}
+                                                    isEditable={isConfigManual}
+                                                    jdText={selectedPositionData?.jd_text || ''}
+                                                    userId={userId}
+                                                />
+                                            )}
+                                        </div>
+
+                                        <button onClick={nextStep} className="mt-8 w-full h-14 rounded-xl bg-orange-500 text-white text-xs font-black tracking-[0.3em] uppercase transition-all hover:scale-[1.02] hover:shadow-2xl hover:shadow-orange-500/20">
+                                            Proceed to Expert review
+                                        </button>
                                     </div>
                                 </div>
-                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-                                    {dataModel && (
-                                        <DataModelPanel
-                                            dataModel={dataModel}
-                                            onUpdate={handleDataModelUpdate}
-                                            isEditable={true}
-                                            jdText={selectedPositionData?.jd_text || ''}
-                                        />
-                                    )}
-                                    <div className="space-y-10">
-                                        <div className="space-y-4">
-                                            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Inbound Communication</p>
-                                            <div className="p-6 rounded-2xl bg-gray-50 dark:bg-[#080808] border border-gray-100 dark:border-[#111]">
-                                                <div className="flex items-center gap-2 mb-4">
-                                                    <Mail className="w-4 h-4 text-orange-500" />
-                                                    <span className="text-xs font-bold uppercase tracking-widest text-gray-400">Personalized Invitation</span>
-                                                </div>
-                                                <div className="text-sm font-medium leading-relaxed text-gray-600 dark:text-gray-400 h-48 overflow-y-auto pr-4 scrollbar-thin">
-                                                    {isGeneratingEmail ? (
-                                                        <div className="flex flex-col gap-2 animate-pulse">
-                                                            <div className="h-4 bg-gray-200 dark:bg-gray-800 rounded w-3/4" />
-                                                            <div className="h-4 bg-gray-200 dark:bg-gray-800 rounded w-full" />
-                                                            <div className="h-4 bg-gray-200 dark:bg-gray-800 rounded w-5/6" />
-                                                        </div>
-                                                    ) : (
-                                                        <div className="whitespace-pre-wrap">
-                                                            {generatedEmail || "Drafting secure invitation..."}
-                                                        </div>
-                                                    )}
-                                                </div>
+                            </div>
+                        )}
+
+                        {/* Step 6: Final Review */}
+                        {currentStep === 6 && (
+                            <div className="animate-in fade-in zoom-in-95 duration-500 flex flex-col items-center h-full max-w-4xl mx-auto py-12">
+                                <div className="text-center space-y-3 mb-12">
+                                    <h2 className="text-3xl font-bold tracking-tight">Expert Review</h2>
+                                    <p className="text-gray-500 text-sm max-w-sm mx-auto leading-relaxed">Confirm the interview parameters and invitation template before deployment.</p>
+                                </div>
+
+                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 w-full">
+                                    <div className="p-8 rounded-2xl bg-white dark:bg-[#080808] border border-gray-100 dark:border-[#111] shadow-xl">
+                                        <div className="flex items-center gap-3 mb-6">
+                                            <div className="w-10 h-10 rounded-xl bg-orange-500/10 flex items-center justify-center">
+                                                <Target className="w-5 h-5 text-orange-500" />
                                             </div>
+                                            <h3 className="font-bold">Session Integrity</h3>
                                         </div>
-                                        <div className="flex items-start gap-3 p-4 rounded-xl bg-orange-500/5 border border-orange-500/10">
-                                            <input
-                                                type="checkbox"
-                                                checked={sendEmailInvite}
-                                                onChange={(e) => setSendEmailInvite(e.target.checked)}
-                                                className="mt-0.5 w-4 h-4 rounded border-gray-300 text-orange-600 focus:ring-orange-600"
-                                            />
-                                            <div className="space-y-1">
-                                                <label className="text-xs font-bold text-orange-600 uppercase tracking-wider">Automaton Alert</label>
-                                                <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">Dispatch encrypted session link and QR invitation upon approval.</p>
+                                        <div className="space-y-4">
+                                            <div className="flex justify-between py-3 border-b border-gray-50 dark:border-[#111]">
+                                                <span className="text-xs text-gray-400 font-bold uppercase tracking-widest">Duration</span>
+                                                <span className="text-xs font-black">{dataModel?.duration_minutes} Minutes</span>
+                                            </div>
+                                            <div className="flex justify-between py-3 border-b border-gray-50 dark:border-[#111]">
+                                                <span className="text-xs text-gray-400 font-bold uppercase tracking-widest">Level</span>
+                                                <span className="text-xs font-black">{dataModel?.experience_level}</span>
+                                            </div>
+                                            <div className="flex justify-between py-3 border-b border-gray-50 dark:border-[#111]">
+                                                <span className="text-xs text-gray-400 font-bold uppercase tracking-widest">Skills Analyzed</span>
+                                                <span className="text-xs font-black">{dataModel?.required_skills?.length} Entities</span>
                                             </div>
                                         </div>
                                     </div>
+
+                                    <div className="p-8 rounded-2xl bg-black dark:bg-white text-white dark:text-black shadow-2xl relative overflow-hidden group">
+                                        <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:scale-110 transition-transform">
+                                            <Mail className="w-16 h-16" />
+                                        </div>
+                                        <h3 className="font-bold mb-6 text-orange-500 uppercase tracking-widest text-[10px]">Communication Stack</h3>
+                                        <p className="text-xs opacity-70 mb-8 leading-relaxed">
+                                            AI has generated a custom invitation email tailored to the {auditResults?.metadata?.domain} role. Subject will include the position title and company header.
+                                        </p>
+                                        <div className="flex flex-col gap-4">
+                                            <button onClick={() => setShowEmailModal(true)} className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] py-2 px-4 rounded-lg bg-white/10 dark:bg-black/10 hover:bg-orange-500 hover:text-white transition-all w-fit">
+                                                Preview Invitation
+                                            </button>
+                                            <div className="flex items-start gap-3 p-3 rounded-lg bg-white/5 dark:bg-black/5 border border-white/10 dark:border-black/10 mt-2">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={sendEmailInvite}
+                                                    onChange={(e) => setSendEmailInvite(e.target.checked)}
+                                                    className="mt-0.5 w-4 h-4 rounded border-gray-300 text-orange-600 focus:ring-orange-600"
+                                                />
+                                                <div className="space-y-1">
+                                                    <label className="text-[10px] font-bold text-orange-600 uppercase tracking-wider">Send Invitation</label>
+                                                    <p className="text-[9px] text-gray-400 leading-relaxed uppercase font-bold tracking-tighter">Dispatch link upon launch</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="mt-12 w-full max-w-sm">
+                                    <button onClick={nextStep}
+                                        disabled={startingInterview}
+                                        className="w-full h-16 rounded-2xl bg-orange-500 text-white text-sm font-black tracking-[0.4em] uppercase transition-all hover:scale-[1.02] hover:shadow-2xl hover:shadow-orange-500/40 disabled:opacity-50"
+                                    >
+                                        {startingInterview ? 'Initializing Swarm...' : 'Review Complete'}
+                                    </button>
                                 </div>
                             </div>
                         )}
@@ -701,15 +1055,41 @@ export default function TenantDashboardPage() {
                                 </div>
                             </div>
                         )}
-                    </div>
-                </section>
+                    </div >
+                </section >
                 <Footer />
-            </main>
+            </main >
 
             <AddPositionModal isOpen={showAddPosition} onClose={() => setShowAddPosition(false)} accounts={accounts} selectedAccountId={selectedAccount} onPositionCreated={refreshPositions} />
             <AddAccountModal isOpen={showAddAccount} onClose={() => setShowAddAccount(false)} onAccountCreated={refreshAccounts} />
             <InterviewLinksModal isOpen={showInterviewLinks} onClose={() => setShowInterviewLinks(false)} sessionData={interviewSessionData} />
             <EmailSentModal isOpen={showEmailSent} onClose={() => setShowEmailSent(false)} {...emailSentData} />
+            <EmailPreviewModal
+                isOpen={showEmailModal}
+                onClose={() => setShowEmailModal(false)}
+                candidateName={selectedCandidateName || 'Candidate'}
+                positionTitle={selectedPositionData?.title || 'Position'}
+                companyName="SwarmHire"
+                userId={userId || undefined}
+            />
+
+            <ATSScoreModal
+                isOpen={isATSModalOpen}
+                onClose={() => setIsATSModalOpen(false)}
+                onProceed={() => {
+                    setIsATSModalOpen(false)
+                    nextStep()
+                }}
+                candidateName={selectedCandidateName || resumeFile?.name || 'Custom Candidate'}
+                score={atsScore}
+                explanation={atsExplanation}
+                resumeText={resumeText}
+                jdText={selectedPositionData?.jd_text || ''}
+                isAnalyzing={isAnalyzingATS}
+                onSaveToPool={handleSaveToPool}
+                candidateId={selectedCandidate}
+                onSkipCandidate={handleSkipCandidate}
+            />
         </div>
     )
 }

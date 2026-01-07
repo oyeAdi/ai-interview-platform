@@ -25,7 +25,7 @@ export default function Header({
   const router = useRouter()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [user, setUser] = useState<User | null>(null)
-  const [userProfile, setUserProfile] = useState<{ email: string, is_super_admin: boolean, full_name?: string, role?: string } | null>(null)
+  const [userProfile, setUserProfile] = useState<{ email: string, is_super_admin: boolean, full_name?: string, role?: string, tenant_slug?: string } | null>(null)
   const supabase = createClient()
 
   useEffect(() => {
@@ -45,7 +45,12 @@ export default function Header({
       // Fetch organization role
       const { data: roleData } = await supabase
         .from('user_tenant_roles')
-        .select('role')
+        .select(`
+          role,
+          organizations (
+            slug
+          )
+        `)
         .eq('user_id', currentUser.id)
         .limit(1)
         .maybeSingle()
@@ -55,7 +60,8 @@ export default function Header({
           email: currentUser.email || '',
           is_super_admin: profile.is_super_admin || false,
           full_name: profile.full_name,
-          role: roleData?.role || 'candidate' // Default to candidate if no role found
+          role: roleData?.role || 'candidate', // Default to candidate if no role found
+          tenant_slug: (roleData?.organizations as any)?.slug
         })
       }
     }
@@ -231,7 +237,7 @@ export default function Header({
               {/* Auth Section */}
               {/* Auth Section */}
               {user ? (
-                <ProfileMenu user={user} userProfile={userProfile} />
+                <ProfileMenu user={user} userProfile={userProfile} tenantSlug={userProfile?.tenant_slug} />
               ) : (
                 <Link
                   href="/login"

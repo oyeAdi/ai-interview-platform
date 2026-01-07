@@ -25,8 +25,8 @@ def generate_interview_email(
     # Use existing Gemini client
     client = GeminiClient()
     
-    prompt = f"""Generate a professional, personalized, and persuasive interview invitation email in HTML format.
-
+    prompt = f"""Generate a high-quality, professional html email invitation.
+    
 CONTEXT:
 - Candidate Name: {candidate_name}
 - Position: {position_title}
@@ -35,35 +35,34 @@ CONTEXT:
 - Link Expires: {expires_at} ({ttl_minutes} minutes from now)
 - Interviewer: {interviewer_name}
 
-REQUIREMENTS:
-1. Professional but warm and welcoming tone
-2. Personalized to the candidate and position
-3. Persuasive - make them excited about the opportunity
-4. Include clear instructions on how to join
-5. Add anti-cheating disclaimers:
-   - AI monitoring for suspicious activity (tab switching, external assistance)
-   - Session may be recorded for quality and security
-   - Cheating or dishonest behavior results in disqualification
-   - Ensure quiet, private environment
-6. Mention link expiry prominently (use red/orange color for urgency)
-7. Use HTML formatting with inline CSS for better readability
-8. Include a prominent call-to-action button for the interview link
-9. Professional color scheme (use #00E5FF for brand accents)
-10. Mobile-responsive design (max-width: 600px)
+DESIGN SYSTEM (SILICON VALLEY STANDARD):
+1. **Container**: Max-width 600px, centered, white background, subtle border-radius (8px), no borders, soft shadow.
+2. **Typography**: System fonts ('-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', sans-serif).
+   - Headings: Dark gray (#1F2937), semibold.
+   - Body: Medium gray (#4B5563), legible size (16px), 1.6 line-height.
+3. **Colors**:
+   - Primary Accent: #0F172A (Deep Navy) or #2563EB (Subtle Royal Blue). Avoid neon or bright cyan.
+   - Background Page: #F3F4F6 (Light Gray).
+4. **Header**: Minimalist. Simple logo placeholder or clean text branding at the top.
+5. **Call to Action**: 
+   - Button: #000000 (Black) or #2563EB (Royal Blue). White text. Rounded corners (6px). Medium padding.
+   - No gradients on buttons. Flat design.
 
-TONE: Professional, natural, persuasive, encouraging
+CONTENT STRUCTURE:
+1. **Preheader**: "Invitation to interview for {position_title}"
+2. **Greeting**: Warm and professional ("Hi {candidate_name},").
+3. **Opening**: "We were impressed by your background" context.
+4. **The Ask**: Clear details about the interview (Duration, Format).
+5. **The Link**: Distinct section with the CTA button.
+6. **Anti-Cheating / Integrity**: 
+   - styling: Small font (12px), gray text (#6B7280), subtle background (#F9FAFB), rounded box.
+   - content: "This session employs automated integrity monitoring..."
+7. **Footer**: Minimalist signature.
 
-STRUCTURE:
-- Header with gradient background (#00E5FF)
-- Personalized greeting
-- Exciting introduction about the opportunity
-- Prominent interview link button
-- Clear instructions (what to expect, requirements)
-- Anti-cheating disclaimer section (yellow background, warning icon)
-- Warm closing
-- Footer with "do not reply" notice
-
-Generate ONLY the complete HTML email body. No subject line, no markdown code blocks.
+OUTPUT REQUIREMENT:
+- Return ONLY the raw HTML code. 
+- Use inline CSS for all styling (email client compatibility).
+- Ensure specific attention to the "Link Expires" warning (make it tasteful but visible).
 """
     
     try:

@@ -1,4 +1,4 @@
-from fastapi import FastAPI, UploadFile, File, Form, HTTPException, WebSocket, WebSocketDisconnect, Request, Header
+from fastapi import FastAPI, UploadFile, File, Form, HTTPException, WebSocket, WebSocketDisconnect, Request, Header, Body
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from typing import Optional, Dict, Any, List
@@ -38,13 +38,21 @@ import os
 from .routers.wiki import router as wiki_router
 from .routers.super_admin import router as super_admin_router
 from .routers.interview import router as interview_router
+from .routers.utils import router as utils_router
+from .routers.candidates import router as candidates_router
 
 app = FastAPI(title="SwarmHire API")
 
 # CORS Configuration
+# Parse FRONTEND_URL from environment variable (comma-separated), defaulting to localhost for dev
+origins_str = os.getenv("FRONTEND_URL", "")
+origins = [origin.strip().rstrip("/") for origin in origins_str.split(",") if origin.strip()]
+default_origins = ["http://localhost:3000", "http://127.0.0.1:3000", "http://localhost:8000"]
+allow_origins = origins + default_origins
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # In production, specify exact origins
+    allow_origins=allow_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -54,6 +62,8 @@ app.add_middleware(
 app.include_router(wiki_router, prefix="/api")
 app.include_router(super_admin_router, prefix="/api")
 app.include_router(interview_router, prefix="/api")
+app.include_router(utils_router, prefix="/api")
+app.include_router(candidates_router, prefix="/api")
 
 class ConnectionManager:
     def __init__(self):
@@ -241,6 +251,143 @@ def get_jds():
         logger.error(f"Failed to fetch requirements from Supabase: {e}")
         return []
 
+@app.get("/api/positions/{position_id}/candidates")
+@require_permission(Permission.MANAGE_POSITION)
+async def get_position_candidates(request: Request, position_id: str, current_user: dict = None):
+    """
+    Get candidates for a specific position with fast SQL-based domain filtering.
+    """
+    try:
+        # 1. Get Position details (org_id, title)
+        pos_res = supabase_admin.table('requirements').select('org_id, title').eq('id', position_id).single().execute()
+        if not pos_res.data:
+            raise HTTPException(status_code=404, detail="Position not found")
+        
+        org_id = pos_res.data['org_id']
+        pos_title = pos_res.data['title']
+        
+        # 2. Extract domain keywords from title to prevent cross-industry noise
+        # Basic domains: Engineering, HR, Sales, Design
+        keywords = []
+        if any(term in pos_title.lower() for term in ['engineer', 'dev', 'software', 'tech', 'data']):
+            keywords = ['engineer', 'developer', 'software', 'technical']
+        elif any(term in pos_title.lower() for term in ['hr', 'recruiter', 'people', 'talent', 'staffing']):
+            keywords = ['hr', 'recruiter', 'human resources', 'talent']
+        elif any(term in pos_title.lower() for term in ['marketing', 'brand', 'content']):
+            keywords = ['marketing', 'content', 'seo', 'social media']
+        elif any(term in pos_title.lower() for term in ['sales', 'account executive', 'business development']):
+            keywords = ['sales', 'business development', 'account executive']
+
+        # 3. Query Resumes for this ORG
+        # Use simple ILIKE filter on candidate_name or parsed_text if pool is huge
+        # For now, we fetch all in org and do basic keyword filtering in Python for speed
+        resumes_res = supabase_admin.table('resumes').select('*').eq('org_id', org_id).is_('deleted_at', 'null').execute()
+        
+        candidates = []
+        for row in resumes_res.data:
+            parsed_data = row.get('parsed_data') or {}
+            resume_text = parsed_data.get('text', '').lower()
+            candidate_name = row.get('candidate_name', 'Unnamed').lower()
+            
+            # Domain Filter: If keywords exist, check if name or text matches at least one
+            is_relevant = True
+            if keywords:
+                is_relevant = any(k in resume_text or k in candidate_name for k in keywords)
+            
+            # Skip only if definitely irrelevant (Marketing resume for HR role)
+            if not is_relevant:
+                continue
+                
+            match_score = None
+            # Check for existing match score in analyst_output
+            if row.get('analyst_output') and isinstance(row['analyst_output'], dict):
+                 match_score = row['analyst_output'].get('match_score')
+            
+            analyst_output = row.get('analyst_output') or {}
+            
+            candidates.append({
+                "id": row['id'],
+                "name": row.get('candidate_name', 'Unknown'),
+                "experience_level": "senior" if (row.get('experience_years', 0) or 0) > 5 else "mid",
+                "skills": row.get('skills', [])[:5],
+                "language": analyst_output.get('language', 'English'),
+                "match_score": match_score,
+                "status": "ready" if match_score is not None else "pending"
+            })
+            
+        return {"candidates": candidates, "position_title": pos_title}
+    except Exception as e:
+        logger.error(f"Failed to fetch position candidates: {e}")
+        return {"candidates": []}
+
+@app.post("/api/candidates/{candidate_id}/score")
+@require_permission(Permission.START_SESSION)
+async def score_candidate(request: Request, candidate_id: str, data: Dict[str, Any] = Body(...)):
+    """
+    Trigger async AI scoring for a specific candidate vs JD.
+    """
+    try:
+        from .engine.agents.strategy import get_strategy_agent
+        strategy = get_strategy_agent()
+        
+        jd_text = data.get("jd_text")
+        if not jd_text:
+            raise HTTPException(status_code=400, detail="JD text required")
+            
+        # Get resume
+        res = supabase_admin.table('resumes').select('*').eq('id', candidate_id).single().execute()
+        if not res.data:
+            raise HTTPException(status_code=404, detail="Candidate not found")
+        
+        resume_text = res.data.get('parsed_data', {}).get('text', '')
+        
+        # Perform real audit
+        analysis = await strategy.audit_match(resume_text, jd_text)
+        match_score = analysis.get("match_score", 0)
+        
+        # Save score back to DB for future use
+        analyst_output = res.data.get('analyst_output', {})
+        if not analyst_output: analyst_output = {}
+        analyst_output['match_score'] = match_score
+        analyst_output['explanation'] = analysis.get('explanation')
+        
+        supabase_admin.table('resumes').update({"analyst_output": analyst_output}).eq('id', candidate_id).execute()
+        
+        return {
+            "match_score": match_score,
+            "explanation": analysis.get("explanation")
+        }
+    except Exception as e:
+        logger.error(f"Candidate scoring failed: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/resumes/{candidate_id}")
+async def get_resume_details(request: Request, candidate_id: str):
+    """Get specific resume details for a candidate"""
+    try:
+        response = supabase_admin.table('resumes').select('*').eq('id', candidate_id).single().execute()
+        if not response.data:
+             raise HTTPException(status_code=404, detail="Resume not found")
+             
+        row = response.data
+        parsed_data = row.get('parsed_data', {})
+        analyst_output = row.get('analyst_output', {})
+        
+        return {
+            "id": str(row['id']),
+            "candidate_id": row['candidate_id'],
+            "name": row['file_name'],
+            "text": parsed_data.get('text', '') if parsed_data else '',
+            "language": analyst_output.get('language', 'english'),
+            "skills": row.get('skills', []),
+            "experience_years": row.get('experience_years', 0),
+            "match_reasoning": analyst_output.get('critique', ''),
+            "analysis": analyst_output # Expose full analysis
+        }
+    except Exception as e:
+        logger.error(f"Failed to fetch resume: {e}")
+        raise HTTPException(status_code=404, detail="Resume not found")
+
 @app.get("/api/resumes")
 def get_resumes():
     """Get list of available Resumes from Supabase"""
@@ -266,42 +413,152 @@ def get_resumes():
 # Intelligence Endpoints
 @app.post("/api/intelligence/audit")
 @require_permission(Permission.START_SESSION)
-async def intelligence_audit(request: Request, data: Dict[str, Any], current_user: dict = None):
+async def intelligence_audit(request: Request, data: Dict[str, Any] = Body(...)):
     """AI Audit of resume vs JD"""
     try:
         from .engine.agents.strategy import get_strategy_agent
         strategy = get_strategy_agent()
         # In SIMPLIFIED core, Strategy handles the audit
+        # Call Strategy Agent for real analysis
+        resume_text = data.get('resume_text', '')
+        jd_text = data.get('jd_text', '')
+        
+        # If we have texts, perform real audit
+        if resume_text and jd_text:
+            analysis = await strategy.audit_match(resume_text, jd_text)
+            return {
+                "overall_match": analysis.get("match_score", 0),
+                "explanation": analysis.get("explanation", "Analysis complete."),
+                "p0_jd_summary": analysis.get("p0_jd_summary", ""),
+                "p1_resume_summary": analysis.get("p1_resume_summary", ""),
+                "p3_strengths": analysis.get("p3_strengths", []),
+                "p4_gaps": analysis.get("p4_gaps", []),
+                "metadata": analysis.get("metadata", {}),
+                "critique": analysis.get("critique", ""),
+                "observer_notes": analysis.get("observer_notes", ""),
+                "confidence": 0.95
+            }
+        
+        # Default fallback if texts missing
         return {
-            "overall_match": 85,
-            "skills_match": {
-                "python": 0.9,
-                "fastapi": 0.8,
-                "kubernetes": 0.7
-            },
-            "missing_skills": ["terraform"],
-            "confidence": 0.92,
-            "summary": "Candidate is a strong match for the backend role."
+            "overall_match": 0,
+            "explanation": "Missing Resume or Job Description text for analysis.",
+            "analysis": "Please ensure both documents are provided."
         }
     except Exception as e:
         logger.error(f"AI Audit failed: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.post("/api/intelligence/strategy")
+@app.post("/api/intelligence/strategize")
 @require_permission(Permission.START_SESSION)
-async def intelligence_strategy(request: Request, data: Dict[str, Any], current_user: dict = None):
+async def intelligence_strategize(request: Request, data: Dict[str, Any] = Body(...)):
     """Generate interview strategy"""
     try:
         from .engine.agents.strategy import get_strategy_agent
-        strategy = get_strategy_agent()
-        return {
-            "strategy": "depth_first",
-            "focus_areas": ["Architecture", "Concurrency", "Database Design"],
-            "difficulty": "senior"
-        }
+        # Call Strategy Agent for real blueprint generation
+        jd_text = data.get('jd_text', '')
+        resume_text = data.get('resume_text', '')
+        
+        strategy_data = await strategy.generate_strategy_map(jd_text, resume_text)
+        return strategy_data
     except Exception as e:
         logger.error(f"Strategy generation failed: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/extract-skills")
+async def extract_skills(data: Dict[str, Any] = Body(...)):
+    """Extract skills from JD for auto-population"""
+    try:
+        jd_text = data.get("jd_text")
+        if not jd_text:
+            return {"skills": []}
+        from .engine.agents.strategy import get_strategy_agent
+        strategy = get_strategy_agent()
+        analysis = await strategy.audit_match("", jd_text)
+        skills = []
+        for s in analysis.get("p3_strengths", []):
+            skills.append({"name": s.upper(), "proficiency": "comfortable", "type": "must_have"})
+        for s in analysis.get("p4_gaps", []):
+            skills.append({"name": s.upper(), "proficiency": "basic_knowledge", "type": "nice_to_have"})
+        return {"skills": skills[:15]} # Limit to 15 skills
+    except Exception as e:
+        logger.error(f"Skill extraction failed: {e}")
+        return {"skills": []}
+
+@app.post("/api/map-skills")
+async def map_skills(data: Dict[str, Any] = Body(...)):
+    """Map skills to technical categories"""
+    skills = data.get("skills", [])
+    # Simple semantic grouping
+    category_map = {"TECHNICAL_CORE": skills}
+    return {"category_map": category_map}
+
+@app.post("/api/configure-interview")
+async def configure_interview(data: Dict[str, Any] = Body(...)):
+    """Comprehensive AI configuration for an interview"""
+    try:
+        jd_text = data.get("jd_text")
+        from .engine.agents.strategy import get_strategy_agent
+        strategy = get_strategy_agent()
+        strategy_data = await strategy.generate_strategy_map(jd_text, "")
+        
+        # Structure for Frontend Components
+        ai_metadata = {
+            "interview_parameters": {
+                "duration_minutes": strategy_data.get("estimated_duration", 60),
+                "experience_level": strategy_data.get("overall_difficulty", "mid"),
+                "expectations": strategy_data.get("strategy_narrative", ""),
+                "urgency": "medium",
+                "urgency_source": "ai_suggested"
+            },
+            "interview_flow": [
+                {
+                    "category": m.get("title", "Phase"),
+                    "duration": 15, # Default segment duration
+                    "difficulty": m.get("difficulty", "medium").lower()
+                } for m in strategy_data.get("milestones", [])
+            ],
+            "sample_questions": [
+                {
+                    "question": f"How do you approach {m.get('title')}?",
+                    "category": m.get("title"),
+                    "expected_answer": "Demonstrates core competency."
+                } for m in strategy_data.get("milestones", [])
+            ]
+        }
+        
+        # Also return flat keys for the main DataModel sync
+        ai_metadata["duration"] = ai_metadata["interview_parameters"]["duration_minutes"]
+        ai_metadata["level"] = ai_metadata["interview_parameters"]["experience_level"]
+        ai_metadata["flow"] = [m.get("title") for m in strategy_data.get("milestones", [])]
+        ai_metadata["expectations"] = ai_metadata["interview_parameters"]["expectations"]
+        
+        return {"ai_metadata": ai_metadata}
+    except Exception as e:
+        logger.error(f"AI configuration failed: {e}")
+        return {"ai_metadata": None}
+
+@app.post("/api/intelligence/generate-email")
+@require_permission(Permission.START_SESSION)
+async def intelligence_generate_email(request: Request, data: Dict[str, Any] = Body(...)):
+    """Generate interview invitation email template"""
+    try:
+        from .utils.email_generator import generate_interview_email
+        
+        email_body = generate_interview_email(
+            candidate_name=data.get('candidate_name', 'Candidate'),
+            position_title=data.get('position_title', 'Technical Role'),
+            company_name="SwarmHire",
+            interview_link="{{link}}",
+            expires_at="24 hours",
+            ttl_minutes=1440
+        )
+        return {"email_body": email_body}
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        logger.error(f"Email generation failed: {e}")
+        return {"email_body": f"Failed to generate AI email template. Debug Error: {str(e)}"}
 
 @app.post("/api/swarm/init")
 @require_permission(Permission.START_SESSION)

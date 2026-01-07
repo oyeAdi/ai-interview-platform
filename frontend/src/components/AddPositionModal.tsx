@@ -183,7 +183,7 @@ export default function AddPositionModal({
         body: JSON.stringify({
           title,
           data_model: dataModel,
-          jd_text: jdText,
+          jd_text: jdText.replace(/\\n/g, '\n'),
           status: 'open'
         })
       })
