@@ -10,6 +10,7 @@ import {
 } from 'lucide-react'
 import { ManagementTable } from '@/components/admin/ManagementTable'
 import Header from '@/components/Header'
+import { UserAssignmentModal } from '@/components/admin/UserAssignmentModal'
 
 interface SystemStats {
     tenants: number
@@ -34,6 +35,10 @@ export default function SuperAdminDashboard() {
     const [positions, setPositions] = useState<any[]>([])
     const [requests, setRequests] = useState<any[]>([])
     const [searchQuery, setSearchQuery] = useState('')
+
+    // Modal State
+    const [assignmentModalOpen, setAssignmentModalOpen] = useState(false)
+    const [selectedUserForAssignment, setSelectedUserForAssignment] = useState<any>(null)
 
     const supabase = createClient()
 
@@ -83,10 +88,30 @@ export default function SuperAdminDashboard() {
             const data = await res.json()
 
             if (activeTab === 'tenants') setTenants(data.tenants || [])
-            else if (activeTab === 'users') setUsers(data.users || [])
+            else if (activeTab === 'users') {
+                setUsers(data.users || [])
+                // Also fetch reference data for the assignment modal
+                const [tRes, aRes] = await Promise.all([
+                    fetch(`http://localhost:8000/api/super-admin/tenants`, { headers: { 'X-User-ID': user.id } }),
+                    fetch(`http://localhost:8000/api/super-admin/accounts`, { headers: { 'X-User-ID': user.id } })
+                ])
+                const [tData, aData] = await Promise.all([tRes.json(), aRes.json()])
+                setTenants(tData.tenants || [])
+                setAccounts(aData.accounts || [])
+            }
             else if (activeTab === 'accounts') setAccounts(data.accounts || [])
             else if (activeTab === 'positions') setPositions(data.positions || [])
-            else if (activeTab === 'requests') setRequests(data.requests || [])
+            else if (activeTab === 'requests') {
+                setRequests(data.requests || [])
+                // Also fetch reference data
+                const [tRes, aRes] = await Promise.all([
+                    fetch(`http://localhost:8000/api/super-admin/tenants`, { headers: { 'X-User-ID': user.id } }),
+                    fetch(`http://localhost:8000/api/super-admin/accounts`, { headers: { 'X-User-ID': user.id } })
+                ])
+                const [tData, aData] = await Promise.all([tRes.json(), aRes.json()])
+                setTenants(tData.tenants || [])
+                setAccounts(aData.accounts || [])
+            }
 
         } catch (e) {
             console.error('Data error:', e)
@@ -112,6 +137,34 @@ export default function SuperAdminDashboard() {
         })
     }
 
+    const handleAssignUser = async (userId: string, data: any) => {
+        try {
+            const { data: { user } } = await supabase.auth.getUser()
+            if (!user) return
+
+            const res = await fetch(`http://localhost:8000/api/super-admin/users/${userId}/assign`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-User-ID': user.id
+                },
+                body: JSON.stringify(data)
+            })
+
+            if (res.ok) {
+                // Refresh data to show updates
+                fetchData()
+                fetchStats()
+            } else {
+                console.error("Assignment failed")
+                alert("Failed to assign user. Check console.")
+            }
+        } catch (e) {
+            console.error("Assignment error:", e)
+        }
+    }
+
+
     const handleDelete = async (id: string, type: string) => {
         if (!confirm(`Are you sure you want to delete this ${type}?`)) return
         // Implement delete logic if needed
@@ -124,6 +177,7 @@ export default function SuperAdminDashboard() {
             <main className="max-w-7xl mx-auto px-6 py-10">
                 {/* Clean Modern Header */}
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-8 mb-12">
+                    {/* ... (header content remains same) */}
                     <div className="space-y-1">
                         <div className="flex items-center gap-2 mb-2">
                             <div className="p-1.5 bg-orange-100 rounded-lg">
@@ -147,7 +201,10 @@ export default function SuperAdminDashboard() {
                             <span className="text-[10px] font-bold uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity">Refresh Stream</span>
                             <Activity className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
                         </button>
-                        <button className="flex items-center gap-2 px-6 py-3 bg-slate-900 hover:bg-slate-800 text-white rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all shadow-lg active:scale-95">
+                        <button
+                            onClick={() => alert("New Organization Setup - Coming Soon!")}
+                            className="flex items-center gap-2 px-6 py-3 bg-slate-900 hover:bg-slate-800 text-white rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all shadow-lg active:scale-95"
+                        >
                             <Plus className="w-4 h-4" />
                             New Implementation
                         </button>
@@ -179,6 +236,7 @@ export default function SuperAdminDashboard() {
                 <div className="grid grid-cols-1 lg:grid-cols-4 gap-10">
                     {/* Navigation Sidebar */}
                     <div className="lg:col-span-1 space-y-10">
+                        {/* ... (sidebar content remains same) */}
                         {/* Build Group */}
                         <div>
                             <div className="flex items-center gap-2 px-4 mb-4">
@@ -276,18 +334,36 @@ export default function SuperAdminDashboard() {
                                     handleDelete={handleDelete}
                                     supabase={supabase}
                                     fetchData={fetchData}
+                                    tenants={tenants}
+                                    onOpenAssignment={(user: any) => {
+                                        setSelectedUserForAssignment(user)
+                                        setAssignmentModalOpen(true)
+                                    }}
                                 />
                             </div>
                         </div>
                     </div>
                 </div>
             </main>
+
+            <UserAssignmentModal
+                isOpen={assignmentModalOpen}
+                onClose={() => {
+                    setAssignmentModalOpen(false)
+                    setSelectedUserForAssignment(null)
+                }}
+                user={selectedUserForAssignment}
+                tenants={tenants}
+                accounts={accounts}
+                onAssign={handleAssignUser}
+            />
         </div>
     )
 }
 
-function DataRenderer({ type, data, loading, handleDelete, supabase, fetchData }: any) {
+function DataRenderer({ type, data, loading, handleDelete, supabase, fetchData, tenants, onOpenAssignment }: any) {
     if (loading) {
+        // ... (loading state remains)
         return (
             <div className="flex flex-col items-center justify-center h-full py-20 gap-4">
                 <div className="relative">
@@ -300,6 +376,7 @@ function DataRenderer({ type, data, loading, handleDelete, supabase, fetchData }
     }
 
     if (data.length === 0) {
+        // ... (empty state remains)
         return (
             <div className="flex flex-col items-center justify-center h-full py-20 text-center">
                 <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mb-6 relative">
@@ -319,6 +396,7 @@ function DataRenderer({ type, data, loading, handleDelete, supabase, fetchData }
     }
 
     if (type === 'tenants') {
+        // ... (tenants table remains)
         return (
             <ManagementTable
                 loading={loading}
@@ -374,7 +452,7 @@ function DataRenderer({ type, data, loading, handleDelete, supabase, fetchData }
                         )
                     }
                 ]}
-                onAction={(t) => window.open(`/${t.slug}/dashboard`, '_blank')}
+                onAction={(t: any) => window.open(`/${t.slug}/dashboard`, '_blank')}
                 actionLabel="Tenant Portal"
             />
         )
@@ -400,15 +478,26 @@ function DataRenderer({ type, data, loading, handleDelete, supabase, fetchData }
                         )
                     },
                     {
-                        header: 'RBAC Authorization', accessor: (u: any) => (
-                            <div className="flex items-center gap-2">
-                                <span className="px-2.5 py-1 rounded-lg text-[9px] font-black uppercase bg-slate-50 border border-slate-100 text-slate-500 tracking-wider">
-                                    {(u.role || 'Member').replace('_', ' ')}
-                                </span>
+                        header: 'Context', accessor: (u: any) => (
+                            <div className="flex flex-col gap-1">
+                                <div className="text-[10px] font-black text-slate-900 flex flex-col gap-0.5">
+                                    {u.is_super_admin && (!u.tenant_id || u.tenant_id === 'global') ? (
+                                        <span className="text-orange-600">Global Access</span>
+                                    ) : (
+                                        <>
+                                            <span className="truncate max-w-[120px]">
+                                                {tenants.find((t: any) => t.id === u.tenant_id)?.name || u.tenant_id || 'Unassigned'}
+                                            </span>
+                                            {u.role && u.role !== 'Unassigned' && (
+                                                <span className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter">
+                                                    {u.role.replace('_', ' ')}
+                                                </span>
+                                            )}
+                                        </>
+                                    )}
+                                </div>
                                 {u.is_super_admin && (
-                                    <div className="p-1 px-1.5 bg-orange-50 border border-orange-100 rounded-md">
-                                        <Shield className="w-3 h-3 text-orange-500" />
-                                    </div>
+                                    <span className="text-[9px] text-orange-600 font-extrabold uppercase tracking-wider">Super Admin</span>
                                 )}
                             </div>
                         )
@@ -421,6 +510,17 @@ function DataRenderer({ type, data, loading, handleDelete, supabase, fetchData }
                                 <span>{new Date(u.created_at).toLocaleDateString()}</span>
                             </div>
                         )
+                    },
+                    {
+                        header: 'Actions',
+                        accessor: (u: any) => (
+                            <button
+                                onClick={() => onOpenAssignment(u)}
+                                className="px-3 py-1.5 bg-orange-50 hover:bg-orange-100 text-orange-600 text-[10px] font-black uppercase tracking-wider rounded-xl border border-orange-100 transition-all shadow-sm active:scale-95"
+                            >
+                                Manage Access
+                            </button>
+                        )
                     }
                 ]}
             />
@@ -428,6 +528,7 @@ function DataRenderer({ type, data, loading, handleDelete, supabase, fetchData }
     }
 
     if (type === 'accounts') {
+        // ... (accounts table remains)
         return (
             <ManagementTable
                 loading={loading}
@@ -473,6 +574,7 @@ function DataRenderer({ type, data, loading, handleDelete, supabase, fetchData }
     }
 
     if (type === 'positions') {
+        // ... (positions table remains)
         return (
             <ManagementTable
                 loading={loading}
@@ -520,6 +622,7 @@ function DataRenderer({ type, data, loading, handleDelete, supabase, fetchData }
     }
 
     if (type === 'requests') {
+        // ... (requests table remains)
         return (
             <ManagementTable
                 loading={loading}
@@ -557,36 +660,52 @@ function DataRenderer({ type, data, loading, handleDelete, supabase, fetchData }
                         )
                     },
                     {
-                        header: 'Control Actions', accessor: (r: any) => r.status === 'pending' ? (
-                            <div className="flex gap-2">
+                        header: 'Control Actions', accessor: (r: any) => (
+                            <div className="flex items-center gap-3">
+                                {r.status === 'pending' && (
+                                    <>
+                                        <button
+                                            onClick={async () => {
+                                                const { data: { user } } = await supabase.auth.getUser()
+                                                await fetch(`http://localhost:8000/api/super-admin/access-requests/${r.id}/approve`, {
+                                                    method: 'POST',
+                                                    headers: { 'X-User-ID': user?.id || '' }
+                                                })
+                                                fetchData()
+                                            }}
+                                            className="p-2 bg-emerald-50 text-emerald-600 border border-emerald-100 hover:bg-emerald-600 hover:text-white rounded-xl transition-all shadow-sm active:scale-90"
+                                            title="Approve Request"
+                                        >
+                                            <CheckCircle2 className="w-4 h-4" />
+                                        </button>
+                                        <button
+                                            onClick={async () => {
+                                                const { data: { user } } = await supabase.auth.getUser()
+                                                await fetch(`http://localhost:8000/api/super-admin/access-requests/${r.id}/reject`, {
+                                                    method: 'POST',
+                                                    headers: { 'X-User-ID': user?.id || '' }
+                                                })
+                                                fetchData()
+                                            }}
+                                            className="p-2 bg-red-50 text-red-600 border border-red-100 hover:bg-red-600 hover:text-white rounded-xl transition-all shadow-sm active:scale-90"
+                                            title="Reject Request"
+                                        >
+                                            <XCircle className="w-4 h-4" />
+                                        </button>
+                                    </>
+                                )}
                                 <button
-                                    onClick={async () => {
-                                        const { data: { user } } = await supabase.auth.getUser()
-                                        await fetch(`http://localhost:8000/api/super-admin/access-requests/${r.id}/approve`, {
-                                            method: 'POST',
-                                            headers: { 'X-User-ID': user?.id || '' }
-                                        })
-                                        fetchData()
-                                    }}
-                                    className="p-2 bg-emerald-50 text-emerald-600 border border-emerald-100 hover:bg-emerald-600 hover:text-white rounded-xl transition-all shadow-sm active:scale-90"
+                                    onClick={() => onOpenAssignment({
+                                        id: r.user_id,
+                                        full_name: r.full_name,
+                                        email: r.email
+                                    })}
+                                    className="px-3 py-1.5 bg-orange-50 hover:bg-orange-100 text-orange-600 text-[10px] font-black uppercase tracking-wider rounded-xl border border-orange-100 transition-all shadow-sm active:scale-95"
                                 >
-                                    <CheckCircle2 className="w-4 h-4" />
-                                </button>
-                                <button
-                                    onClick={async () => {
-                                        const { data: { user } } = await supabase.auth.getUser()
-                                        await fetch(`http://localhost:8000/api/super-admin/access-requests/${r.id}/reject`, {
-                                            method: 'POST',
-                                            headers: { 'X-User-ID': user?.id || '' }
-                                        })
-                                        fetchData()
-                                    }}
-                                    className="p-2 bg-red-50 text-red-600 border border-red-100 hover:bg-red-600 hover:text-white rounded-xl transition-all shadow-sm active:scale-90"
-                                >
-                                    <XCircle className="w-4 h-4" />
+                                    Manage Access
                                 </button>
                             </div>
-                        ) : null
+                        )
                     }
                 ]}
             />
