@@ -84,7 +84,7 @@ export default function SignupPage() {
     return (
         <div className="space-y-6 max-w-md mx-auto">
             <div className="text-center space-y-2 mb-4">
-                <h1 className="text-3xl font-bold tracking-tight text-black dark:text-white">Create Account</h1>
+                <h1 className="text-3xl font-bold tracking-tight text-black dark:text-white">Start Your Journey</h1>
                 <p className="text-sm text-gray-500 dark:text-gray-400">Join the universal matching platform</p>
             </div>
 
@@ -146,8 +146,8 @@ export default function SignupPage() {
                             type="button"
                             onClick={() => setShowAdminRequest(!showAdminRequest)}
                             className={`w-full py-3 px-4 flex items-center justify-between rounded-xl border transition-all ${showAdminRequest
-                                    ? 'bg-brand-primary/5 border-brand-primary text-brand-primary'
-                                    : 'bg-gray-50 dark:bg-[#111111] border-gray-200 dark:border-[#222] text-gray-600 dark:text-gray-400'
+                                ? 'bg-brand-primary/5 border-brand-primary text-brand-primary'
+                                : 'bg-gray-50 dark:bg-[#111111] border-gray-200 dark:border-[#222] text-gray-600 dark:text-gray-400'
                                 }`}
                         >
                             <div className="flex items-center gap-3">
