@@ -102,6 +102,7 @@ async def get_current_user(request: Request) -> Optional[dict]:
             res = supabase_admin.table('user_tenant_roles').select('tenant_id, role').eq('user_id', user_id).execute()
             if res.data:
                 user_data['tenant_id'] = res.data[0]['tenant_id'] # Use the explicitly bound tenant
+                user_data['org_id'] = res.data[0]['tenant_id']    # Map tenant_id to org_id for backward compatibility
                 user_data['role'] = res.data[0]['role']
                 
                 # If account_admin, fetch managed accounts
