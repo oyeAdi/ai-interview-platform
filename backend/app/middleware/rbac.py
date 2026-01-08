@@ -264,6 +264,12 @@ def require_permission(permission: str, resource_type: Optional[str] = None):
             # Store user in request state for endpoint access
             request.state.current_user = user
             
+            # Inject current_user if the wrapped function expects it
+            import inspect
+            sig = inspect.signature(func)
+            if 'current_user' in sig.parameters:
+                kwargs['current_user'] = user
+                
             return await func(*args, **kwargs)
         return wrapper
     return decorator
