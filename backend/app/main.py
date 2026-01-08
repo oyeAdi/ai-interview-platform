@@ -455,6 +455,7 @@ async def intelligence_strategize(request: Request, data: Dict[str, Any] = Body(
     """Generate interview strategy"""
     try:
         from .engine.agents.strategy import get_strategy_agent
+        strategy = get_strategy_agent()
         # Call Strategy Agent for real blueprint generation
         jd_text = data.get('jd_text', '')
         resume_text = data.get('resume_text', '')
